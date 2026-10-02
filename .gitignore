@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# local test/publish scratch (not part of the app source)
+/publish_mirror*/
+/publish_assets*/
