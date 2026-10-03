@@ -33,6 +33,29 @@ const CARDS = [
     ready: true,
     route: 'Play',
   },
+  // [체험 확장 로드맵] 지금 세 판은 "국악 전공·전래놀이 교육 경력"에서 나온 것이고,
+  // 같은 설계 방식(공통 설계 질문 추출 → WOZ로 검증 → 난이도 단계)을 다른 전통
+  // 소재에도 그대로 적용할 수 있다는 걸 보여주기 위한 다음 판 예고. 아직 구현은
+  // 안 했지만(ready:false → "준비 중" 배지), 무엇을, 왜 다음으로 고를지는 구체적으로
+  // 적어 둔다 — 그냥 "더 많은 체험 예정"이라고만 하면 근거가 안 되기 때문.
+  {
+    id: 'talchum',
+    title: '탈춤 · 가면극',
+    eyebrow: '움직임 · 역할',
+    accent: '#8a4f8a',
+    desc: '하회탈·봉산탈 등 지역별 탈과 마당(과장)마다 정해진 역할·동작 규칙을 몸짓으로 따라 해보는 판',
+    ready: false,
+    route: null,
+  },
+  {
+    id: 'dancheong',
+    title: '단청 · 전통 문양',
+    eyebrow: '색 · 무늬',
+    accent: '#2c7a6b',
+    desc: '오방색 규칙에 맞춰 단청·보자기·규방 문양의 색과 칸을 직접 배치해보는 판',
+    ready: false,
+    route: null,
+  },
 ];
 
 export default function HomeScreen({ navigation }) {
@@ -96,22 +119,45 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.list}>
-        {CARDS.map((c) => (
+        {CARDS.filter((c) => c.ready).map((c) => (
           <Pressable
             key={c.id}
-            disabled={!c.ready}
-            style={[
-              styles.card,
-              { borderLeftColor: c.accent, borderLeftWidth: 5 },
-              !c.ready && styles.cardDisabled,
-            ]}
-            onPress={() => c.ready && navigation.navigate(c.route)}
+            style={[styles.card, { borderLeftColor: c.accent, borderLeftWidth: 5 }]}
+            onPress={() => navigation.navigate(c.route)}
           >
             <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
             <Text style={styles.cardTitle}>{c.title}</Text>
             <Text style={styles.cardDesc}>{c.desc}</Text>
-            {!c.ready && <Text style={styles.soon}>준비 중</Text>}
           </Pressable>
+        ))}
+      </View>
+
+      {/* [체험 확장 근거] "다른 방향의 체험도 할 수 있다"는 말만으로는 근거가 안 되므로,
+          지금 세 판을 만든 같은 방식(전통 소재 → 공통 설계 질문 → 난이도 단계)을 다음에
+          무엇에 적용할지 구체적으로 보여준다. */}
+      <View style={styles.roadmapHeader}>
+        <Text style={styles.roadmapTitle}>다음 체험, 준비 중</Text>
+        <Text style={styles.roadmapHint}>
+          진법·훈민정음·전래놀이를 만든 같은 방식 — 전통 소재에서 공통된 설계 질문을
+          뽑아내고, 난이도 단계를 나누어 직접 해보게 만드는 방식 — 을 다른 전통 영역에도
+          그대로 넓힐 수 있어요. 아래 두 가지가 다음 후보입니다.
+        </Text>
+      </View>
+      <View style={styles.list}>
+        {CARDS.filter((c) => !c.ready).map((c) => (
+          <View
+            key={c.id}
+            style={[
+              styles.card,
+              { borderLeftColor: c.accent, borderLeftWidth: 5 },
+              styles.cardDisabled,
+            ]}
+          >
+            <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
+            <Text style={styles.cardTitle}>{c.title}</Text>
+            <Text style={styles.cardDesc}>{c.desc}</Text>
+            <Text style={styles.soon}>준비 중</Text>
+          </View>
         ))}
       </View>
       </ScrollView>
@@ -160,6 +206,9 @@ const styles = StyleSheet.create({
   },
   makerText: { fontSize: 12.5, color: colors.bg, lineHeight: 19.5 },
   list: { marginTop: 20, gap: 14 },
+  roadmapHeader: { marginTop: 26, marginBottom: 2 },
+  roadmapTitle: { fontSize: 13.5, fontWeight: '800', color: colors.ink },
+  roadmapHint: { fontSize: 12, color: colors.muted, marginTop: 6, lineHeight: 17.5 },
   card: {
     backgroundColor: colors.paper,
     borderRadius: 18,

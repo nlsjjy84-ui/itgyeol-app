@@ -8,21 +8,28 @@ import Animated, {
   withTiming,
   cancelAnimation,
   Easing,
+  interpolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 
 // 손으로 드래그해서 360도 돌려볼 수 있는 입체 뷰어.
 //
-// 이전 버전은 앞면/뒷면 레이어 "각각"에 perspective를 따로 줬다. CSS 3D에서 perspective는
-// 그걸 가진 엘리먼트 자신의 변환에만 적용되는 값이라, 앞/뒷면이 한 몸으로 도는 게 아니라
-// 서로 다른 3D 공간에서 따로 회전하는 꼴이 됐다 — 그래서 입체감 없이 납작한 두 장이
-// 따로 접히듯 보이는("종이 뒤집는 느낌") 문제가 있었다.
+// [네이티브 호환 재작성] 이전 버전은 바깥 래퍼에 perspective를, 안쪽 "카드" 한 장에
+// transformStyle: 'preserve-3d' + rotateY를 주고, 앞/뒷면을 그 카드의 절대 위치 자식으로
+// 겹쳐 backfaceVisibility로 숨기는 방식이었다. 이건 웹(react-native-web이 그대로 CSS
+// perspective/transform-style/backface-visibility로 변환)에서는 그럴듯하게 보이지만,
+// 실제 네이티브(안드로이드·iOS)에서는 "여러 자식이 부모의 3D 공간을 공유한다"는
+// transform-style: preserve-3d 개념 자체가 기본 지원되지 않는다 — 그래서 네이티브에서는
+// 입체감(원근 축소) 없이 앞/뒷면이 납작하게 뒤집히는 "종이 뒤집기"처럼 보였다.
 //
-// 올바른 CSS 3D 카드-플립 구조로 다시 짰다:
-//   1) 바깥 래퍼에 perspective를 한 번만 준다 — 자식들이 공유하는 하나의 3D 공간을 만든다.
-//   2) 그 안의 "카드" 엘리먼트 하나에만 transformStyle: preserve-3d + rotateY를 준다.
-//   3) 앞/뒷면은 그 카드 하나의 자식으로 두고, 뒷면은 애초에 180도 돌려서 붙여놓는다.
-// 이러면 앞/뒷면이 실제로 한 덩어리처럼 함께 돌고, 옆에서 보일 때는 perspective에 의해
-// 실제로 폭이 좁아지는(원근 축소) 진짜 입체 회전처럼 보인다.
+// 지금 방식은 웹·네이티브 모두 동일하게 지원되는 두 가지만 쓴다:
+//   1) perspective는 "따로 떨어진 스타일 값"이 아니라 transform 배열의 원소로 — 각 면
+//      자신의 transform에 [{ perspective }, { rotateY }]를 함께 넣는다. 이건 RN 공식
+//      문서가 권장하는, 네이티브에서도 실제로 원근 축소가 일어나는 방식이다.
+//   2) 앞/뒷면을 "하나의 3D 카드"로 묶지 않고, 각자 자기 각도(뒷면 = 앞면 + 180도)로
+//      독립적으로 돌리면서, 지금 보는 쪽이 어느 면인지는 opacity로 전환한다(90도/270도
+//      경계에서 교차 전환). backfaceVisibility도 보조로 같이 줘서, 그걸 지원하는 플랫폼
+//      에서는 더 깔끔한 경계를 덤으로 얻는다.
 export default function Rotatable3D({ front, back, width, height, autoRotate = true }) {
   const rotation = useSharedValue(0);
 
@@ -55,18 +62,41 @@ export default function Rotatable3D({ front, back, width, height, autoRotate = t
       }
     });
 
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [{ rotateY: `${rotation.value}deg` }],
-  }));
+  // 0~360 범위로 접어넣은 각도에서, 지금 "앞면이 보이는 쪽"인지를 0~1 연속값으로 계산.
+  // 89~91도, 269~271도 사이에서만 짧게 교차 전환해 깜빡임 없이 자연스럽게 넘어간다.
+  const frontStyle = useAnimatedStyle(() => {
+    const deg = ((rotation.value % 360) + 360) % 360;
+    const opacity = interpolate(
+      deg,
+      [0, 89, 91, 269, 271, 360],
+      [1, 1, 0, 0, 1, 1],
+      Extrapolation.CLAMP
+    );
+    return {
+      opacity,
+      transform: [{ perspective: 1100 }, { rotateY: `${rotation.value}deg` }],
+    };
+  });
+
+  const backStyle = useAnimatedStyle(() => {
+    const deg = ((rotation.value % 360) + 360) % 360;
+    const opacity = interpolate(
+      deg,
+      [0, 89, 91, 269, 271, 360],
+      [0, 0, 1, 1, 0, 0],
+      Extrapolation.CLAMP
+    );
+    return {
+      opacity,
+      transform: [{ perspective: 1100 }, { rotateY: `${rotation.value + 180}deg` }],
+    };
+  });
 
   return (
     <GestureDetector gesture={pan}>
-      {/* perspective는 자식들이 공유할 하나의 3D 공간을 만든다 (react-native-web이 그대로 CSS로 전달) */}
-      <View style={[styles.wrap, { width, height, perspective: 1100 }]}>
-        <Animated.View style={[styles.card, cardStyle]}>
-          <View style={[styles.face, styles.front]}>{front}</View>
-          <View style={[styles.face, styles.back]}>{back}</View>
-        </Animated.View>
+      <View style={[styles.wrap, { width, height }]}>
+        <Animated.View style={[styles.face, frontStyle]}>{front}</Animated.View>
+        <Animated.View style={[styles.face, backStyle]}>{back}</Animated.View>
       </View>
     </GestureDetector>
   );
@@ -77,11 +107,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  card: {
-    width: '100%',
-    height: '100%',
-    transformStyle: 'preserve-3d',
-  },
   face: {
     position: 'absolute',
     left: 0,
@@ -91,9 +116,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backfaceVisibility: 'hidden',
-  },
-  front: {},
-  back: {
-    transform: [{ rotateY: '180deg' }],
   },
 });

@@ -29,6 +29,16 @@ const SCENE_LABEL = {
 
 const SCENE_ORDER = ['jinbeop', 'print', 'tbd'];
 
+// 결과물을 담아낼 수 있는 형태. 키링만 실제로 끝까지 구현했고(10가지 모양 +
+// 3D 회전 + 이미지 저장 + QR), 나머지는 "이런 형태로도 나올 수 있다"는 걸
+// 보여주기만 한다 — 전부 다 지금 만들 필요는 없다는 방침.
+const ITEM_FORMATS = [
+  { id: 'keyring', label: '키링', ready: true },
+  { id: 'brooch', label: '브로치', ready: false },
+  { id: 'magnet', label: '마그넷', ready: false },
+  { id: 'sticker', label: '스티커', ready: false },
+];
+
 // 완성한 판들로부터 "가져갈 수 있는 결과물" 선택지를 만든다.
 // - 판 하나만 완성했으면: 그 판의 단독 결과물 1개
 // - 두 판 이상 완성했으면: 각 판의 단독 결과물 + 처음부터 순서대로 연결한 결합 결과물들
@@ -344,6 +354,27 @@ export default function ResultScreen({ navigation }) {
               </Text>
             )}
           </View>
+
+          {/* [결과물 형태 확장 근거] 키링 "하나의 형태"만 끝까지 완성해두고, 그 외
+              형태는 전부 다 모델링해 넣는 대신 "이런 형태로도 나올 수 있다"는 것만
+              보여준다 — 실제 제작(인쇄소·업체 연결)은 이 결과물을 채택하는 쪽의
+              몫이라는 방침과 같은 선상. */}
+          <View style={styles.formatBox}>
+            <Text style={styles.customLabel}>키링 말고 다른 형태로도 가져갈 수 있어요</Text>
+            <View style={styles.formatRow}>
+              {ITEM_FORMATS.map((f) => (
+                <View key={f.id} style={[styles.formatChip, f.ready && styles.formatChipReady]}>
+                  <Text style={styles.formatChipLabel}>{f.label}</Text>
+                  <Text style={styles.formatChipState}>{f.ready ? '지금 가능' : '준비 중'}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.sectionHint}>
+              지금 만든 무늬를 입히는 방식 자체는 형태가 바뀌어도 똑같아서, 키링에서 검증한
+              걸 그대로 브로치·마그넷·스티커 제작으로 넓힐 수 있어요. 실제 인쇄·제작은
+              이 결과물을 쓰는 쪽에서 업체를 연결해 진행하면 됩니다.
+            </Text>
+          </View>
         </View>
 
         <Pressable style={styles.secondaryBtn} onPress={() => navigation.popToTop()}>
@@ -567,6 +598,33 @@ const styles = StyleSheet.create({
     color: colors.accentDeep,
     textAlign: 'center',
   },
+  formatBox: {
+    width: '100%',
+    marginTop: 14,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: colors.paper,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  formatRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
+  formatChip: {
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bg,
+    alignItems: 'center',
+    opacity: 0.6,
+  },
+  formatChipReady: {
+    opacity: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSoft,
+  },
+  formatChipLabel: { fontSize: 12, fontWeight: '700', color: colors.ink },
+  formatChipState: { fontSize: 9.5, color: colors.muted, marginTop: 2 },
   secondaryBtn: {
     marginTop: 26,
     paddingVertical: 12,
