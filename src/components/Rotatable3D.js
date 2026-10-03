@@ -45,7 +45,13 @@ export default function Rotatable3D({ front, back, width, height, autoRotate = t
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // [스크롤과 충돌 방지] 가로 방향으로 뚜렷하게 움직일 때만 이 제스처가 반응하도록
+  // 막아둔다. 이게 없으면 ScrollView 안에서 이 컴포넌트 위를 손가락으로 지나가며
+  // 세로로 스크롤하려던 동작까지 "돌리는 제스처"로 가로채서, onStart에서 자동 회전을
+  // 멈춰놓고 끝나지 않는(또는 어중간한 각도에서 멈춘 것처럼 보이는) 상태를 만들 수 있다.
   const pan = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .failOffsetY([-10, 10])
     .onStart(() => {
       cancelAnimation(rotation);
     })
@@ -63,12 +69,15 @@ export default function Rotatable3D({ front, back, width, height, autoRotate = t
     });
 
   // 0~360 범위로 접어넣은 각도에서, 지금 "앞면이 보이는 쪽"인지를 0~1 연속값으로 계산.
-  // 89~91도, 269~271도 사이에서만 짧게 교차 전환해 깜빡임 없이 자연스럽게 넘어간다.
+  // [더 자연스러운 전환] 89~91도처럼 2도짜리 좁은 구간에서 바뀌면 화면이 순간적으로
+  // "깜빡"하는 것처럼 보이고, 정지 화면(스크린샷)으로 보면 두 면이 모두 투명해지는
+  // 그 찰나를 "멈춰서 가느다란 선만 남은 것"으로 오해하기 쉽다. 전환 구간을
+  // 70~110도/250~290도로 넓혀서 서서히 자연스럽게 겹쳐 넘어가게 한다.
   const frontStyle = useAnimatedStyle(() => {
     const deg = ((rotation.value % 360) + 360) % 360;
     const opacity = interpolate(
       deg,
-      [0, 89, 91, 269, 271, 360],
+      [0, 70, 110, 250, 290, 360],
       [1, 1, 0, 0, 1, 1],
       Extrapolation.CLAMP
     );
@@ -82,7 +91,7 @@ export default function Rotatable3D({ front, back, width, height, autoRotate = t
     const deg = ((rotation.value % 360) + 360) % 360;
     const opacity = interpolate(
       deg,
-      [0, 89, 91, 269, 271, 360],
+      [0, 70, 110, 250, 290, 360],
       [0, 0, 1, 1, 0, 0],
       Extrapolation.CLAMP
     );
