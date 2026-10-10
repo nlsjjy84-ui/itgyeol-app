@@ -1,5 +1,4 @@
-import {
-  THREE, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
+import { lobedShape, getDna, THREE, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
 } from './kit';
 
 // ───────── 노리개 ─────────
@@ -226,12 +225,19 @@ export const mirrorBronze = ({ tex, m }) => {
   // 동경(청동거울): 두꺼운 청동 원판, 가장자리가 솟고 가운데에 끈 꿰는 꼭지(뉴), 안쪽에 조각보
   const face = texMat(tex);
   const g = new THREE.Group();
-  g.add(plaque(0.95, 0.14, m.bronze, m.mirror, m.bronze));
-  g.add(mesh(new THREE.TorusGeometry(0.92, 0.07, 14, 64), m.bronze, [0, 0, 0.07]));
+  const dn = getDna();
+  if (dn.lobes >= 5) {
+    // 꽃잎 모양 테두리(능화형) — 유전자가 꽃잎 수와 깊이를 정한다
+    g.add(extrudeShape(lobedShape(0.95, dn.lobes, dn.lobeAmp), 0.14, m.bronze, m.bronze, 0.02));
+    g.add(mesh(new THREE.CircleGeometry(0.8, 64), m.mirror, [0, 0, -0.092], [0, Math.PI, 0]));
+  } else {
+    g.add(plaque(0.95, 0.14, m.bronze, m.mirror, m.bronze));
+  }
+  g.add(mesh(new THREE.TorusGeometry(dn.lobes >= 5 ? 0.88 : 0.92, 0.07, 14, 64), m.bronze, [0, 0, 0.07]));
   const inset = new THREE.Mesh(new THREE.CircleGeometry(0.8, 64), face);
-  inset.position.set(0, 0, 0.083);
+  inset.position.set(0, 0, dn.lobes >= 5 ? 0.096 : 0.083);
   g.add(inset);
-  g.add(mesh(new THREE.TorusGeometry(0.8, 0.02, 8, 64), m.gold, [0, 0, 0.085]));
+  g.add(mesh(new THREE.TorusGeometry(0.8, 0.02, 8, 64), m.gold, [0, 0, dn.lobes >= 5 ? 0.098 : 0.085]));
   const nub = new THREE.Mesh(new THREE.SphereGeometry(0.12, 18, 12), m.bronze);
   nub.scale.set(1, 1, 0.7);
   nub.position.set(0, 0, 0.12);

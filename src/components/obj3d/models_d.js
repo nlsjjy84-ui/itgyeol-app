@@ -1,5 +1,5 @@
 import {
-  THREE, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
+  THREE, getDna, warpProfile, smoothProfile, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
 } from './kit';
 
 // 우리나라 보물(문화유산) 형태 위에 조각보를 입힌다 — 항아리·병·상자·보따리·갓·소반.
@@ -7,7 +7,13 @@ import {
 
 // 회전체 위에 조각보를 '덧대'는 헬퍼: 프로필 일부 구간(j0~j1)·각도 일부를 다시 그려 천을 붙인 듯 보이게 한다
 function patchOnLathe(prof, j0, j1, phiStart, phiLength, mat, grow = 1.006) {
-  const pts = prof.slice(j0, j1 + 1).map(([x, y]) => new THREE.Vector2(x * grow, y));
+  let base = prof;
+  if (getDna().k) {
+    const ylo = prof[j0][1];
+    const yhi = prof[j1][1];
+    base = smoothProfile(prof).filter(([, y]) => y >= ylo - 1e-6 && y <= yhi + 1e-6);
+  } else base = prof.slice(j0, j1 + 1);
+  const pts = base.map(([x, y]) => new THREE.Vector2(x * grow, y));
   const geo = new THREE.LatheGeometry(pts, 48, phiStart, phiLength);
   const mt = mat.clone();
   mt.side = THREE.DoubleSide;
@@ -16,7 +22,7 @@ function patchOnLathe(prof, j0, j1, phiStart, phiLength, mat, grow = 1.006) {
 
 export const treasureMoonJar = ({ tex, m }) => {
   // 백자 달항아리 (보물 제1438호 같은 둥근 항아리)
-  const prof = [[0.0, 0], [0.5, 0], [0.54, 0.05], [0.62, 0.15], [0.82, 0.38], [1.0, 0.7], [1.08, 1.05], [1.04, 1.4], [0.9, 1.7], [0.68, 1.92], [0.52, 2.02], [0.5, 2.12], [0.56, 2.2], [0.5, 2.26]];
+  const prof = warpProfile([[0.0, 0], [0.5, 0], [0.54, 0.05], [0.62, 0.15], [0.82, 0.38], [1.0, 0.7], [1.08, 1.05], [1.04, 1.4], [0.9, 1.7], [0.68, 1.92], [0.52, 2.02], [0.5, 2.12], [0.56, 2.2], [0.5, 2.26]]);
   const g = new THREE.Group();
   const body = lathe(prof, m.porcelain, 96);
   body.material = m.porcelain.clone();
@@ -24,21 +30,21 @@ export const treasureMoonJar = ({ tex, m }) => {
   g.add(body);
   // 조각보를 앞쪽 배에 붙인다
   g.add(patchOnLathe(prof, 4, 9, -0.95, 1.9, texMat(tex), 1.008));
-  g.add(mesh(new THREE.TorusGeometry(0.52, 0.012, 8, 64), m.gold, [0, 2.2, 0], [Math.PI / 2, 0, 0]));
+  g.add(mesh(new THREE.TorusGeometry(prof[12][0] - 0.04, 0.012, 8, 64), m.gold, [0, 2.2, 0], [Math.PI / 2, 0, 0]));
   g.position.y = -1.1;
   return g;
 };
 
 export const treasureMaebyeong = ({ tex, m }) => {
   // 청자 매병: 어깨가 넓고 허리가 가는 병
-  const prof = [[0.0, 0], [0.46, 0], [0.5, 0.06], [0.46, 0.4], [0.4, 0.9], [0.46, 1.4], [0.64, 1.9], [0.74, 2.3], [0.68, 2.7], [0.46, 2.92], [0.3, 3.04], [0.28, 3.14], [0.34, 3.22], [0.27, 3.27]];
+  const prof = warpProfile([[0.0, 0], [0.46, 0], [0.5, 0.06], [0.46, 0.4], [0.4, 0.9], [0.46, 1.4], [0.64, 1.9], [0.74, 2.3], [0.68, 2.7], [0.46, 2.92], [0.3, 3.04], [0.28, 3.14], [0.34, 3.22], [0.27, 3.27]]);
   const g = new THREE.Group();
   const body = lathe(prof, m.celadon, 96);
   body.material = m.celadon.clone();
   body.material.side = THREE.DoubleSide;
   g.add(body);
   g.add(patchOnLathe(prof, 3, 8, -0.9, 1.8, texMat(tex), 1.01));
-  g.add(mesh(new THREE.TorusGeometry(0.3, 0.012, 8, 56), m.gold, [0, 3.2, 0], [Math.PI / 2, 0, 0]));
+  g.add(mesh(new THREE.TorusGeometry(prof[12][0] - 0.04, 0.012, 8, 56), m.gold, [0, 3.2, 0], [Math.PI / 2, 0, 0]));
   g.position.y = -1.5;
   return g;
 };

@@ -3,7 +3,7 @@ import { View, StyleSheet, PanResponder, Platform, Pressable } from 'react-nativ
 import Text from '../../ui/Text';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { THREE, makeMats, addKeyringHook } from './kit';
+import { THREE, makeMats, addKeyringHook, dnaRef, deformObject } from './kit';
 import { colors } from '../../theme';
 
 // 진짜 3D 물건 뷰어.
@@ -62,7 +62,7 @@ function shadowTexture() {
   return t;
 }
 
-function Scene({ tex, build, hook, ctl, onBuilt, onFail }) {
+function Scene({ tex, build, hook, dna, ctl, onBuilt, onFail }) {
   const root = useRef();
   const { gl, scene } = useThree();
   const [envOk, setEnvOk] = useState(null);
@@ -91,7 +91,9 @@ function Scene({ tex, build, hook, ctl, onBuilt, onFail }) {
     if (envOk === null || !tex) return null;
     try {
       const m = makeMats(envOk ? 1 : 0.35);
-      const obj = build({ tex, m });
+      dnaRef.v = dna;
+      let obj = build({ tex, m, dna });
+      obj = deformObject(obj, dna);
       if (hook) addKeyringHook(obj, m);
       const box = new THREE.Box3().setFromObject(obj);
       const size = box.getSize(new THREE.Vector3());
@@ -107,7 +109,7 @@ function Scene({ tex, build, hook, ctl, onBuilt, onFail }) {
     } catch (e) {
       return { error: e };
     }
-  }, [envOk, tex, build, hook]);
+  }, [envOk, tex, build, hook, dna]);
 
   const shadowTex = useMemo(() => shadowTexture(), []);
 
@@ -160,7 +162,7 @@ const VIEWS = [
   { id: 'bottom', label: '아래', yaw: 0, pitch: -1.15 },
 ];
 
-export default function Obj3DViewer({ art, artSize = 280, build, hook = false, width = 320, height = 340, resetKey }) {
+export default function Obj3DViewer({ art, artSize = 280, build, hook = false, dna, width = 320, height = 340, resetKey }) {
   const shotRef = useRef(null);
   const [tex, setTex] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -248,7 +250,7 @@ export default function Obj3DViewer({ art, artSize = 280, build, hook = false, w
             gl={{ alpha: true, antialias: true }}
             onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
           >
-            <Scene tex={tex} build={build} hook={hook} ctl={ctl} onFail={() => setFailed(true)} />
+            <Scene tex={tex} build={build} hook={hook} dna={dna} ctl={ctl} onFail={() => setFailed(true)} />
           </Canvas>
         ) : (
           <View style={[styles.fallback, { width, height }]}>

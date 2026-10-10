@@ -34,6 +34,11 @@ function ScenePiece({ sceneId, cx, cy, len, width, color }) {
       />
     );
   }
+  if (sceneId === 'hangul') {
+    return (
+      <Rect x={cx - width * 0.7} y={cy - len / 2} width={width * 1.4} height={len} rx={2} fill={color} opacity={0.9} rotation={45} origin={`${cx}, ${cy}`} />
+    );
+  }
   if (sceneId === 'tbd') {
     const w2 = Math.max(4, width * 0.62);
     const points = [

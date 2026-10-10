@@ -24,6 +24,10 @@ import JachigiGame from '../components/minigames/JachigiGame';
 import DdakjiSlamGame from '../components/minigames/DdakjiSlamGame';
 import RhythmJumpGame from '../components/minigames/RhythmJumpGame';
 import KiteFlyGame from '../components/minigames/KiteFlyGame';
+import { SangmoGame, MarbleGame, TopGame } from '../components/minigames/FolkGamesA';
+import { TuhoGame, GomuGame, KiteSteerGame } from '../components/minigames/FolkGamesB';
+import { StoneFlickGame, HoopSpeedGame } from '../components/minigames/FolkGamesC';
+import { TopChaseGame, DdakjiFanGame, TuhoDialGame, JachigiSwipeGame } from '../components/minigames/FolkGamesD';
 
 function speedComment(ms) {
   const sec = ms / 1000;
@@ -44,6 +48,18 @@ const CONTROL_HINTS = {
   jachigi: '먼저 버튼(스페이스바·Z/X 키)을 게이지가 "팝!" 구간에 있을 때 탭해 막대를 띄우고, 공중에 뜨면 곧바로 다시 탭해서 "스윙!" 구간에 맞춰 쳐야 멀리 날아가요.',
   ddakjiSlam: '조준은 필요 없어요. 버튼을 누르고 있다가 힘이 초록 구간일 때 손을 떼서 세게 내리치세요. 충격파가 세야 상대 딱지가 뒤집혀요.',
   rhythmJump: '줄(또는 고무줄)이 발밑을 지나가는 정확한 순간에 버튼(스페이스바·Z/X 키)을 탭해서 뛰어넘으세요. 아무 때나 눌러도 소용없고, 타이밍을 놓치면 걸려 넘어져요.',
+  sangmoCircle: '화면의 동그라미 위에서 손가락(마우스)을 눌러 빙글빙글 돌려요. 빛나는 점을 가까이 따라가면 상모가 돌고, 놓치면 멈춰요. (키보드는 ← →)',
+  marbleSling: '아래쪽 내 구슬을 눌러 뒤로 끌었다가 놓으면 반대쪽으로 튕겨요. 많이 끌수록 세게 가요. 동그라미 밖으로 내보내면 따먹어요.',
+  topChase: '팽이가 여기저기 돌아다녀요. 팽이를 콕 눌러 채로 치면 힘이 붙어요. 힘이 떨어지거나 선 밖으로 나가면 쓰러져요.',
+  ddakjiFan: '화면 위에서 손가락을 좌우로 빠르게 흔들어 바람을 일으켜요. 바람이 빨간 목표선 위로 올라가 잠깐 버티면 딱지가 뒤집혀요. (키보드는 ← → 번갈아)',
+  tuhoDial: '아래 두 줄(각도·힘)을 눌러 끌어 값을 정하고 "던지기"를 눌러요. 지난 화살이 떨어진 빨간 점을 보고 고쳐 봐요. (스페이스바로도 던져요)',
+  jachigiSwipe: '막대가 튀어 오르는 쪽(화살표)으로 손가락을 휙 쓸어 쳐요. 시간 막대가 줄기 전에 쳐야 해요.',
+  topWhip: '팽이가 기우는 쪽 화면을 눌러 채로 쳐서 바로 세워요. 반대쪽을 치면 더 기울어요.',
+  stoneFlick: '아래의 내 돌을 눌러 위쪽으로 쓸어 올리며 놓으면 던져져요. 점선 끝(동그라미)이 돌이 떨어질 자리예요. 세워 둔 비석에 맞히면 쓰러져요.',
+  tuhoSwing: '팔이 좌우로 천천히 흔들려요. 화살이 항아리를 향한 순간(초록 불) "던지기"를 눌러요. (스페이스바도 돼요)',
+  gomuPattern: '불이 켜지는 발 모양 순서를 기억했다가 같은 순서로 눌러요. 줄이 점점 길어져요. (키보드 ← ↓ →)',
+  kiteSteer: '손가락(마우스)을 좌우로 움직여 연을 이끌어요. 푸른 바람 길 안에 있으면 연이 올라가요.',
+  hoopSpeed: '화면을 꾹 누르면 빨라지고 떼면 느려져요. 오르내리는 초록 칸 안에 속도를 맞추면 굴렁쇠가 쓰러지지 않아요. (스페이스바 꾹)',
   kiteFly: '바람 게이지가 계속 움직여요. "쎈 바람" 구간일 때만 버튼(스페이스바·Z/X 키)을 탭해서 얼레를 감으세요. 타이밍이 안 맞으면 연이 오히려 내려와요.',
 };
 
@@ -222,6 +238,30 @@ export default function PlayScreen({ navigation }) {
             gustMax={game.gustMax}
           />
         );
+      case 'sangmoCircle':
+        return <SangmoGame {...common} limitSec={game.limitSec} speedDeg={game.speedDeg} tolerance={game.tolerance} />;
+      case 'marbleSling':
+        return <MarbleGame {...common} targets={game.targets} shots={game.shots} />;
+      case 'topWhip':
+        return <TopGame {...common} targetHits={game.targetHits} lives={game.lives} drift={game.drift} />;
+      case 'stoneFlick':
+        return <StoneFlickGame {...common} stones={game.stones} throws={game.throws} />;
+      case 'tuhoSwing':
+        return <TuhoGame {...common} arrows={game.arrows} need={game.need} periodSec={game.periodSec} zoneDeg={game.zoneDeg} />;
+      case 'gomuPattern':
+        return <GomuGame {...common} rounds={game.rounds} startLen={game.startLen} maxMistakes={game.maxMistakes} />;
+      case 'kiteSteer':
+        return <KiteSteerGame {...common} limitSec={game.limitSec} />;
+      case 'topChase':
+        return <TopChaseGame {...common} targetHits={game.targetHits} lives={game.lives} drift={game.drift} />;
+      case 'ddakjiFan':
+        return <DdakjiFanGame {...common} myIcon={game.myIcon} oppIcon={game.oppIcon} rounds={game.rounds} timeSec={game.timeSec} />;
+      case 'tuhoDial':
+        return <TuhoDialGame {...common} arrows={game.arrows} need={game.need} zoneDeg={game.zoneDeg} />;
+      case 'jachigiSwipe':
+        return <JachigiSwipeGame {...common} targetHits={game.targetHits} maxMiss={game.maxMiss} windowMs={game.windowMs} />;
+      case 'hoopSpeed':
+        return <HoopSpeedGame {...common} targetSec={game.targetSec} lives={game.lives} />;
       default:
         return null;
     }

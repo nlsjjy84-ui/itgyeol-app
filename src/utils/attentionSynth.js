@@ -111,12 +111,12 @@ const SOS_VEC = (() => {
 const PRED = randMatrix(D_MODEL, D_MODEL, mulberry32(SEED ^ hashTag('predict-head')));
 
 // --- attempt(완성한 판 하나) → 벡터 ---
-const SCENE_ORDER = ['jinbeop', 'print', 'tbd'];
+const SCENE_ORDER = ['jinbeop', 'print', 'tbd', 'hangul'];
 const SPEED_SCORE = { fast: 1, mid: 0.55, slow: 0.2 };
 const OHANG_ORDER = ['mok', 'hwa', 'to', 'geum', 'su'];
 
 const SPEED_ORDER = ['fast', 'mid', 'slow'];
-const FREQ_PAIRS = 10; // sin/cos 10쌍 = 20칸 — 서로 다른 주파수라 조금씩만 달라도 패턴이 겹치지 않는다
+const FREQ_PAIRS = 9; // sin/cos 10쌍 = 20칸 — 서로 다른 주파수라 조금씩만 달라도 패턴이 겹치지 않는다
 
 // [임베딩 차원 확장] 오행을 숫자 하나(0~1)로 넣으면 "목이 화보다 작다"처럼 실제로는
 // 없는 순서 관계를 거짓으로 알려주게 된다 — 그래서 장면(3)·오행(5)·속도(3)는 전부
@@ -128,12 +128,12 @@ export function attemptToVector(attempt) {
   const ohangIdx = OHANG_ORDER.indexOf(attempt.ohangKey);
   const speedIdx = SPEED_ORDER.indexOf(attempt.speed);
   const v = new Array(D_MODEL).fill(0);
-  if (sceneIdx >= 0) v[sceneIdx] = 1; // v[0..2] : 장면 원-핫
-  if (ohangIdx >= 0) v[3 + ohangIdx] = 1; // v[3..7] : 오행 원-핫
-  if (speedIdx >= 0) v[8 + speedIdx] = 1; // v[8..10] : 속도 원-핫
+  if (sceneIdx >= 0) v[sceneIdx] = 1; // v[0..3] : 장면 원-핫
+  if (ohangIdx >= 0) v[4 + ohangIdx] = 1; // v[4..8] : 오행 원-핫
+  if (speedIdx >= 0) v[9 + speedIdx] = 1; // v[9..11] : 속도 원-핫
   for (let i = 0; i < FREQ_PAIRS; i++) {
     const freq = attempt.seed * Math.pow(1.7, i) * 0.00005;
-    const base = 11 + i * 2;
+    const base = 12 + i * 2;
     if (base < D_MODEL) v[base] = Math.sin(freq);
     if (base + 1 < D_MODEL) v[base + 1] = Math.cos(freq);
   }

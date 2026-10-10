@@ -1,5 +1,4 @@
-import {
-  THREE, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
+import { getDna, THREE, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
 } from './kit';
 
 // ───────── 붓 ─────────
@@ -120,12 +119,14 @@ function sectorShape(r1, r2, a0, a1) {
 export const fanFolding = ({ tex, m }) => {
   const face = texMat(tex, { side: THREE.DoubleSide });
   const g = new THREE.Group();
-  const a0 = Math.PI / 2 - 1.2;
-  const a1 = Math.PI / 2 + 1.2;
+  const dn = getDna();
+  const spread = dn.k ? dn.spread : 1.2;
+  const a0 = Math.PI / 2 - spread;
+  const a1 = Math.PI / 2 + spread;
   const geo = new THREE.ShapeGeometry(sectorShape(0.75, 2.5, a0, a1), 64);
   planarUV(geo);
   g.add(new THREE.Mesh(geo, face));
-  const ribs = 15;
+  const ribs = dn.k ? dn.ribs : 15;
   for (let i = 0; i < ribs; i += 1) {
     const a = a0 + ((a1 - a0) * i) / (ribs - 1);
     const outer = i === 0 || i === ribs - 1;

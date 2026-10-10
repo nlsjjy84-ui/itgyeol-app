@@ -6,6 +6,7 @@ import ViewShot from 'react-native-view-shot';
 import ResultPattern from '../components/ResultPattern';
 import MascotDuo from '../components/MascotDuo';
 import Obj3DViewer from '../components/obj3d/Obj3DViewer';
+import { makeDna, dnaSummary } from '../utils/shapeDna';
 import { CATALOG, findItem } from '../components/obj3d/catalog';
 import TransformResultShape from '../components/TransformResultShape';
 import Jogakbo, { PatchChip } from '../components/Jogakbo';
@@ -24,9 +25,10 @@ const SCENE_LABEL = {
   jinbeop: '진법',
   print: '훈민정음·인쇄',
   tbd: '전래놀이',
+  hangul: '한글 테트리스',
 };
 
-const SCENE_ORDER = ['jinbeop', 'print', 'tbd'];
+const SCENE_ORDER = ['jinbeop', 'print', 'tbd', 'hangul'];
 
 // 완성한 판들로부터 "가져갈 수 있는 결과물" 선택지를 만든다.
 // - 판 하나만 완성했으면: 그 판의 단독 결과물 1개
@@ -87,6 +89,7 @@ export default function ResultScreen({ navigation }) {
   const selected = options.find((o) => o.key === selectedKey) || options[options.length - 1];
   const selectedAttempts = selected ? selected.attempts : [];
   const code = selected ? resultOptionCode(selectedAttempts) : 'ITGYEOL-----';
+  const dna = useMemo(() => makeDna(selectedAttempts), [selectedAttempts]);
   const bySceneId = Object.fromEntries(attempts.map((a) => [a.sceneId, a]));
   const orderedSolved = SCENE_ORDER.map((id) => bySceneId[id]).filter(Boolean);
   const solvedCount = orderedSolved.length;
@@ -131,7 +134,7 @@ export default function ResultScreen({ navigation }) {
     const playVals = [];
     Object.entries(skills || {}).forEach(([key, v]) => {
       if (key.startsWith('jinbeop:')) jinbeopVals.push(v);
-      else if (key.startsWith('print:')) printVals.push(v);
+      else if (key.startsWith('print:') || key.startsWith('hangul:')) printVals.push(v);
       else playVals.push(v);
     });
     const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
@@ -181,7 +184,7 @@ export default function ResultScreen({ navigation }) {
         <StoryScene
           art="sunset"
           place="마당 · 해 질 녘"
-          lines={RESULT_LINES[Math.min(3, solvedCount)]}
+          lines={RESULT_LINES[Math.min(4, solvedCount)]}
           style={{ marginTop: 4 }}
         />
 
@@ -379,10 +382,16 @@ export default function ResultScreen({ navigation }) {
             artSize={256}
             build={variant.build}
             hook={group.hook && hookOn}
+            dna={dna}
             width={viewerW}
             height={Math.round(viewerW * 1.05)}
-            resetKey={`${patternMode}|${selectedKey || ''}|${selectedAttempts.length}`}
+            resetKey={`${patternMode}|${selectedKey || ''}|${selectedAttempts.length}|${dna.code}`}
           />
+          {dna.k ? (
+            <Text style={styles.dnaLine}>
+              이 작품만의 형태 · #{dna.code} — {dnaSummary(dna)}. 같은 놀이 기록은 같은 모양, 기록이 다르면 모양도 달라져요.
+            </Text>
+          ) : null}
 
           {group.hook ? (
             <Pressable style={[styles.hookBtn, hookOn && styles.hookBtnOn]} onPress={() => setHookOn((v) => !v)}>
@@ -436,6 +445,7 @@ export default function ResultScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  dnaLine: { fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 18, marginTop: 6, paddingHorizontal: 8 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   content: { padding: 22, alignItems: 'center', paddingBottom: 40 },
   title: { fontSize: 22, fontWeight: '700', color: colors.ink, marginBottom: 6 },

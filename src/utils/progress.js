@@ -7,6 +7,7 @@ export const SCENE_TARGET = {
   jinbeop: { name: '진법', total: 7, l2: 3, l3: 6, unit: '가지 진' },
   print: { name: '훈민정음·인쇄', total: 11, l2: 3, l3: 6, unit: '가지 글자·활자' },
   tbd: { name: '전래놀이', total: 12, l2: 4, l3: 8, unit: '가지 놀이' },
+  hangul: { name: '한글 테트리스', total: 4, l2: 2, l3: 3, unit: '단계' },
 };
 
 export const LEVEL_NAME = ['빈 조각', '1단계 · 바탕 조각', '2단계 · 수놓은 조각', '3단계 · 금실 조각'];
@@ -31,7 +32,7 @@ export function computeProgress(solvedIds) {
     levels[sid] = levelFor(sid, n);
     sum += Math.min(1, n / SCENE_TARGET[sid].l3);
   });
-  const percent = Math.round((sum / 3) * 100);
+  const percent = Math.round((sum / Object.keys(SCENE_TARGET).length) * 100);
   return { levels, counts, percent };
 }
 

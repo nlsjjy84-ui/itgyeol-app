@@ -57,7 +57,11 @@ export const SUCCESS = {
   ],
   tbd: [
     { who: 'pung', text: '깃발이 올랐다! 조각이 하나 더 생겼어.' },
-    { who: 'gyeol', text: '이제 세 조각이 이어졌어. 조각보가 거의 다 됐네.' },
+    { who: 'gyeol', text: '조각이 또 이어졌어. 조각보가 점점 커지네.' },
+  ],
+  hangul: [
+    { who: 'gyeol', text: '블록이 차곡차곡 쌓여서 줄이 지워졌어!' },
+    { who: 'pung', text: '이 조각은 글자 블록 모양이야. 조각보에 이어 붙었어.' },
   ],
 };
 
@@ -83,5 +87,9 @@ export const RESULT_LINES = {
   3: [
     { who: 'pung', text: '세 판의 흔적이 한 장의 조각보가 됐어!' },
     { who: 'gyeol', text: '이게 네가 만든 전통 창작물이야. 어떻게 풀었는지에 따라 모양이 달라져.' },
+  ],
+  4: [
+    { who: 'pung', text: '네 판의 흔적이 모여 조각보가 꽉 찼어!' },
+    { who: 'gyeol', text: '진법, 글자, 놀이, 한글 블록까지 — 풀어 간 길에 따라 모양이 달라져.' },
   ],
 };

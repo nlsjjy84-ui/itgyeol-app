@@ -9,8 +9,9 @@ import { Gauge } from './ResultWhy';
 import { explainPatch } from '../utils/explain';
 import { SCENE_TARGET, LEVEL_NAME, nextHint } from '../utils/progress';
 import { colors } from '../theme';
+import { SCENE_ORDER } from './Jogakbo';
 
-const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이' };
+const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이', hangul: '한글 테트리스' };
 
 // 한 판을 마친 순간 — 방금 생긴 조각, 지금까지 이어진 조각보, 풍이·결이의 반응을 보여 준다.
 export default function TraceReward({ sceneId, success }) {
@@ -31,7 +32,7 @@ export default function TraceReward({ sceneId, success }) {
         <Text style={styles.plus}>→</Text>
         <View style={styles.col}>
           <Jogakbo attempts={attempts} size={104} />
-          <Text style={styles.cap}>이어진 조각보 · {n}/3</Text>
+          <Text style={styles.cap}>이어진 조각보 · {n}/{SCENE_ORDER.length}</Text>
         </View>
       </View>
       {why ? (

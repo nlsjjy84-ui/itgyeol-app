@@ -7,6 +7,7 @@ const SCENES = [
   { id: 'Jinbeop', label: '진법 판으로' },
   { id: 'Print', label: '훈민정음·인쇄 판으로' },
   { id: 'Play', label: '전래놀이 판으로' },
+  { id: 'Hangul', label: '한글 테트리스 판으로' },
 ];
 
 // 한 판만 계속 하지 않아도 되도록 — 다른 판으로 바로 건너간다. (현재 판은 빼고 보여 준다.)

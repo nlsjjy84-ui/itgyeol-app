@@ -1,5 +1,4 @@
-import {
-  THREE, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
+import { getDna, THREE, mesh, group, lathe, cyl, torus, sphere, rbox, tube, tassel, knot, plaque, slab, texMat, extrudeShape, planarUV,
 } from './kit';
 
 // 만들어 가져가는 물건(굿즈) 형태: 브로치 · 마그넷 · 스티커. 같은 조각보 그림이 형태만 바뀌어 입혀진다.
@@ -101,7 +100,7 @@ export const broochSquare = ({ tex, m }) => {
 
 export const broochFlower = ({ tex, m }) => {
   const g = new THREE.Group();
-  g.add(extrudeShape(flowerShape(1.0, 8, 0.14), 0.1, texMat(tex), m.gold, 0.035));
+  g.add(extrudeShape(flowerShape(1.0, getDna().k ? getDna().petals : 8, getDna().k ? getDna().petalDepth : 0.14), 0.1, texMat(tex), m.gold, 0.035));
   const pin = pinBack(m, 1.2);
   pin.position.set(0, 0, -0.1);
   g.add(pin);

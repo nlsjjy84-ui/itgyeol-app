@@ -1,6 +1,7 @@
 import { FORMATIONS, ohangByKey } from '../data/formations';
 import { PRINTING_TYPES } from '../data/printing';
 import { PLAY_GAMES } from '../data/playGames';
+import { HANGUL_STAGES } from '../data/hangulGames';
 import { SCENE_TARGET, LEVEL_NAME, nextHint } from './progress';
 
 // 왜 이런 결과물이 나왔는지 — 조각보를 그릴 때 실제로 쓴 값만 그대로 풀어서 말한다.
@@ -27,6 +28,10 @@ export function sceneProblemName(attempt) {
     const t = PRINTING_TYPES.find((q) => q.id === attempt.formationId);
     return t ? t.name : '훈민정음·인쇄';
   }
+  if (attempt.sceneId === 'hangul') {
+    const h = HANGUL_STAGES.find((q) => q.id === attempt.formationId);
+    return h ? `한글 테트리스 ${h.name}` : '한글 테트리스';
+  }
   const g = PLAY_GAMES.find((q) => q.id === attempt.formationId);
   return g ? g.name : '전래놀이';
 }
@@ -41,6 +46,7 @@ const SHAPE_TEXT = {
   jinbeop: '푼 진의 사람 자리가 점으로 찍히고, 점을 이어 그 진의 모양이 조각에 남아요.',
   print: '직접 맞춘 글자가 붉은 낙관(도장)으로 새겨져요.',
   tbd: '푼 놀이를 뜻하는 한자가 인장으로 새겨져요.',
+  hangul: '클리어한 단계를 뜻하는 한글 자모가 블록 네 칸 위에 새겨져요.',
 };
 
 function tiltText(attempt) {

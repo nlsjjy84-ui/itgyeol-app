@@ -48,18 +48,20 @@ const PLAY_HANJA = {
   gullyeongsoe: '輪',
 };
 
-export const SCENE_ORDER = ['jinbeop', 'print', 'tbd'];
+export const SCENE_ORDER = ['jinbeop', 'print', 'tbd', 'hangul'];
 
 // 220×220 판 위에서 각 조각이 놓이는 자리
 const BOXES = {
-  jinbeop: { x: 0, y: 0, w: 120, h: 100 },
-  print: { x: 120, y: 0, w: 100, h: 150 },
-  tbd: { x: 0, y: 100, w: 120, h: 120 },
+  jinbeop: { x: 0, y: 0, w: 120, h: 90 },
+  print: { x: 120, y: 0, w: 100, h: 120 },
+  tbd: { x: 0, y: 90, w: 120, h: 90 },
+  hangul: { x: 120, y: 120, w: 100, h: 60 },
 };
 const FILLERS = [
-  { x: 120, y: 150, w: 50, h: 70 },
-  { x: 170, y: 150, w: 50, h: 70 },
+  { x: 0, y: 180, w: 120, h: 40 },
+  { x: 120, y: 180, w: 100, h: 40 },
 ];
+const HANGUL_GLYPH = { st1: 'ㅣ', st2: 'ㅏ', st3: 'ㅁ', st4: 'ㄷ' };
 
 function ohangColor(key) {
   const o = ohangByKey ? ohangByKey(key) : null;
@@ -135,6 +137,19 @@ export function PatchArt({ attempt, box, empty = false, level = 1 }) {
             {c}
           </SvgText>
         ))}
+      </G>
+    );
+  } else if (attempt.sceneId === 'hangul') {
+    const gch = HANGUL_GLYPH[attempt.formationId] || 'ㅏ';
+    const s = Math.min(w, h) * 0.66;
+    out.push(
+      <G key="hg" rotation={tilt} origin={`${cx}, ${cy}`}>
+        {[[-1, 0], [0, 0], [1, 0], [0, 1]].map(([dx, dy], i) => (
+          <Rect key={i} x={cx + dx * s * 0.42 - s * 0.21} y={cy + (dy - 0.5) * s * 0.42 - s * 0.21} width={s * 0.42} height={s * 0.42} rx={2} fill={base} opacity={0.92} />
+        ))}
+        <SvgText x={cx} y={cy + s * 0.17} fontSize={s * 0.5} fontFamily={fonts.serifHeavy} fill="#fffbf3" textAnchor="middle">
+          {gch}
+        </SvgText>
       </G>
     );
   } else {
@@ -253,27 +268,33 @@ export default function Jogakbo({ attempts, size = 220, shape = 'circle', progre
                   <Circle cx={b.x + b.w / 2} cy={b.y + b.h / 2} r={3} fill={GOLD} />
                 </G>
               ) : null}
-              {[0, 1, 2].map((k) => (
-                <Line key={k} x1={b.x + 8} y1={b.y + 14 + k * 20} x2={b.x + b.w - 8} y2={b.y + 14 + k * 20} stroke={PAPER} strokeWidth={1.2} opacity={0.7} />
+              {[0, 1].map((k) => (
+                <Line key={k} x1={b.x + 8} y1={b.y + 12 + k * 16} x2={b.x + b.w - 8} y2={b.y + 12 + k * 16} stroke={PAPER} strokeWidth={1.2} opacity={0.7} />
               ))}
             </G>
           ))}
           {/* 박음질(바느질) 선 */}
-          <Line x1={0} y1={100} x2={120} y2={100} {...stitch} />
+          <Line x1={0} y1={90} x2={120} y2={90} {...stitch} />
           <Line x1={120} y1={0} x2={120} y2={220} {...stitch} />
-          <Line x1={120} y1={150} x2={220} y2={150} {...stitch} />
-          <Line x1={170} y1={150} x2={170} y2={220} {...stitch} />
+          <Line x1={120} y1={120} x2={220} y2={120} {...stitch} />
+          <Line x1={0} y1={180} x2={220} y2={180} {...stitch} />
           {/* 조각이 이어지는 자리마다 매듭 */}
           {solved.length >= 2 ? (
             <G>
-              <Path d="M120 91 L129 100 L120 109 L111 100 Z" fill={colors.jeok} stroke="#c9a24b" strokeWidth={1.4} />
-              <Circle cx={120} cy={100} r={2} fill="#fffbf3" />
+              <Path d="M120 81 L129 90 L120 99 L111 90 Z" fill={colors.jeok} stroke="#c9a24b" strokeWidth={1.4} />
+              <Circle cx={120} cy={90} r={2} fill="#fffbf3" />
             </G>
           ) : null}
           {solved.length >= 3 ? (
             <G>
-              <Path d="M120 141 L129 150 L120 159 L111 150 Z" fill={colors.cheong} stroke="#c9a24b" strokeWidth={1.4} />
-              <Circle cx={120} cy={150} r={2} fill="#fffbf3" />
+              <Path d="M120 111 L129 120 L120 129 L111 120 Z" fill={colors.cheong} stroke="#c9a24b" strokeWidth={1.4} />
+              <Circle cx={120} cy={120} r={2} fill="#fffbf3" />
+            </G>
+          ) : null}
+          {solved.length >= 4 ? (
+            <G>
+              <Path d="M120 171 L129 180 L120 189 L111 180 Z" fill={colors.hwang} stroke="#c9a24b" strokeWidth={1.4} />
+              <Circle cx={120} cy={180} r={2} fill="#fffbf3" />
             </G>
           ) : null}
         </G>

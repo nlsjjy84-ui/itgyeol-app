@@ -1,4 +1,4 @@
-import { THREE, mesh, lathe, rbox, tube, sphere, plaque, texMat } from './kit';
+import { THREE, getDna, warpProfile, smoothProfile, mesh, lathe, rbox, tube, sphere, plaque, texMat } from './kit';
 
 // 우리나라 보물 2 — 범종 · 금관 · 석탑 · 한옥 · 장독 · 방패연.
 
@@ -13,7 +13,13 @@ function dbl(mat) {
 
 // 회전체 일부(앞쪽 천 조각)
 function patchOnLathe(prof, j0, j1, phiStart, phiLength, mat, grow = 1.008) {
-  const pts = prof.slice(j0, j1 + 1).map(([x, y]) => new THREE.Vector2(x * grow, y));
+  let base = prof;
+  if (getDna().k) {
+    const ylo = prof[j0][1];
+    const yhi = prof[j1][1];
+    base = smoothProfile(prof).filter(([, y]) => y >= ylo - 1e-6 && y <= yhi + 1e-6);
+  } else base = prof.slice(j0, j1 + 1);
+  const pts = base.map(([x, y]) => new THREE.Vector2(x * grow, y));
   const geo = new THREE.LatheGeometry(pts, 48, phiStart, phiLength);
   const mt = mat.clone();
   mt.side = THREE.DoubleSide;
@@ -121,25 +127,33 @@ export const treasurePagoda = ({ tex, m }) => {
   };
   g.add(mesh(new THREE.BoxGeometry(2.4, 0.28, 2.4), stone, [0, 0.14, 0]));
   g.add(mesh(new THREE.BoxGeometry(1.9, 0.26, 1.9), stone, [0, 0.41, 0]));
-  // 1층
-  g.add(mesh(new THREE.BoxGeometry(1.15, 0.95, 1.15), stone, [0, 1.01, 0]));
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(0.78, 0.78), texMat(tex));
-  face.position.set(0, 1.01, 0.577);
-  g.add(face);
-  g.add(mesh(new THREE.BoxGeometry(0.86, 0.86, 0.02), m.gold, [0, 1.01, 0.567]));
-  g.add(roof(1.15, 1.64));
-  // 2층
-  g.add(mesh(new THREE.BoxGeometry(0.85, 0.6, 0.85), stone, [0, 2.1, 0]));
-  g.add(roof(0.88, 2.56));
-  // 3층
-  g.add(mesh(new THREE.BoxGeometry(0.6, 0.45, 0.6), stone, [0, 2.95, 0]));
-  g.add(roof(0.64, 3.33));
+  // 층 수와 층마다 줄어드는 비율은 유전자가 정한다 (2~5층)
+  const dn = getDna();
+  const tiers = dn.k ? dn.tiers : 3;
+  const shrink = dn.k ? 0.72 + (dn.petalDepth - 0.08) * 0.8 : 0.76;
+  let y = 0.54;
+  let w = 1.15;
+  let h = 0.95;
+  for (let i = 0; i < tiers; i += 1) {
+    g.add(mesh(new THREE.BoxGeometry(w, h, w), stone, [0, y + h / 2, 0]));
+    if (i === 0) {
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.68, w * 0.68), texMat(tex));
+      face.position.set(0, y + h / 2, w / 2 + 0.002);
+      g.add(face);
+      g.add(mesh(new THREE.BoxGeometry(w * 0.75, w * 0.75, 0.02), m.gold, [0, y + h / 2, w / 2 - 0.008]));
+    }
+    g.add(roof(w, y + h + 0.16));
+    y += h + 0.32;
+    w *= shrink;
+    h = Math.max(0.3, h * 0.68);
+  }
   // 상륜부: 노반 · 복발 · 보륜 · 보주
-  g.add(mesh(new THREE.BoxGeometry(0.24, 0.1, 0.24), stone, [0, 3.54, 0]));
-  g.add(mesh(new THREE.SphereGeometry(0.16, 16, 12), stone, [0, 3.7, 0]));
-  [0.0, 0.1, 0.2].forEach((dy, i) => g.add(mesh(new THREE.TorusGeometry(0.1 - i * 0.02, 0.02, 8, 24), stone, [0, 3.88 + dy, 0], [Math.PI / 2, 0, 0])));
-  g.add(mesh(new THREE.SphereGeometry(0.05, 12, 10), m.gold, [0, 4.25, 0]));
-  g.position.y = -2.0;
+  const top = y - 0.12;
+  g.add(mesh(new THREE.BoxGeometry(0.24, 0.1, 0.24), stone, [0, top, 0]));
+  g.add(mesh(new THREE.SphereGeometry(0.16, 16, 12), stone, [0, top + 0.16, 0]));
+  [0.0, 0.1, 0.2].forEach((dy, i) => g.add(mesh(new THREE.TorusGeometry(0.1 - i * 0.02, 0.02, 8, 24), stone, [0, top + 0.34 + dy, 0], [Math.PI / 2, 0, 0])));
+  g.add(mesh(new THREE.SphereGeometry(0.05, 12, 10), m.gold, [0, top + 0.71, 0]));
+  g.position.y = -(top + 0.75) / 2;
   return g;
 };
 
@@ -182,12 +196,13 @@ export const treasureOnggi = ({ tex, m }) => {
   // 장독: 짙은 갈색 옹기 항아리 — 배에 조각보를 두르고 뚜껑을 덮는다
   const g = new THREE.Group();
   const clay = new THREE.MeshPhysicalMaterial({ color: 0x6b3d22, roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.35 });
-  const prof = [[0.0, 0], [0.55, 0], [0.62, 0.06], [0.82, 0.3], [0.98, 0.7], [1.02, 1.0], [0.95, 1.35], [0.74, 1.62], [0.62, 1.72], [0.62, 1.84], [0.7, 1.9], [0.66, 1.95]];
+  const prof = warpProfile([[0.0, 0], [0.55, 0], [0.62, 0.06], [0.82, 0.3], [0.98, 0.7], [1.02, 1.0], [0.95, 1.35], [0.74, 1.62], [0.62, 1.72], [0.62, 1.84], [0.7, 1.9], [0.66, 1.95]], 0.8);
   g.add(lathe(prof, dbl(clay), 96));
   g.add(patchOnLathe(prof, 3, 7, -0.95, 1.9, texMat(tex), 1.008));
-  g.add(mesh(new THREE.CylinderGeometry(0.58, 0.64, 0.12, 48), clay, [0, 1.99, 0]));
+  const rimR = prof[9][0];
+  g.add(mesh(new THREE.CylinderGeometry(rimR - 0.04, rimR + 0.02, 0.12, 48), clay, [0, 1.99, 0]));
   g.add(mesh(new THREE.TorusGeometry(0.2, 0.05, 10, 32, Math.PI), clay, [0, 2.05, 0]));
-  g.add(mesh(new THREE.TorusGeometry(0.64, 0.025, 8, 64), m.woodLight, [0, 1.9, 0], [Math.PI / 2, 0, 0]));
+  g.add(mesh(new THREE.TorusGeometry(rimR + 0.02, 0.025, 8, 64), m.woodLight, [0, 1.9, 0], [Math.PI / 2, 0, 0]));
   g.position.y = -1.1;
   return g;
 };

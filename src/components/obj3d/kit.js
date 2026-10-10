@@ -7,6 +7,88 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 
 export { THREE, RoundedBoxGeometry };
 
+// ───── 형태 유전자(dna) ─────
+// Obj3DViewer가 모델을 만들기 직전에 현재 작품의 유전자를 넣어 두면, 모델 도우미(술·항아리 윤곽 등)가
+// getDna()로 읽어 모양을 바꾼다. 값이 없으면 원래 모양(NEUTRAL) 그대로.
+import { NEUTRAL_DNA } from '../../utils/shapeDna';
+export const dnaRef = { v: NEUTRAL_DNA };
+export function getDna() {
+  return dnaRef.v || NEUTRAL_DNA;
+}
+
+// 회전체 윤곽(항아리·병) 흔들기: 배 부풀기·물결·목 굵기를 유전자로 바꾼다
+export function warpProfile(prof, k = 1) {
+  const d = getDna();
+  if (!d.k) return prof;
+  const ys = prof.map((p) => p[1]);
+  const y0 = Math.min(...ys);
+  const y1 = Math.max(...ys);
+  return prof.map(([r, y]) => {
+    if (r === 0) return [0, y];
+    const sN = (y - y0) / (y1 - y0 || 1);
+    const w = Math.sin(Math.PI * sN);
+    let f = 1 + k * (d.pot * 0.2 * w + d.wob * 0.09 * Math.sin(2 * Math.PI * sN + d.ph) * w);
+    const n = Math.max(0, (sN - 0.78) / 0.22);
+    f *= 1 - k * d.neck * 0.22 * n;
+    return [r * f, y];
+  });
+}
+
+// 꽃잎처럼 가장자리가 굴곡진 둥근 도형 (능화형 거울 같은 모양)
+export function lobedShape(R, lobes, amp, seg = 160) {
+  const sh = new THREE.Shape();
+  for (let i = 0; i <= seg; i += 1) {
+    const a = (i / seg) * Math.PI * 2;
+    const rr = R * (1 + amp * Math.cos(lobes * a));
+    const x = Math.cos(a) * rr;
+    const y = Math.sin(a) * rr;
+    if (i === 0) sh.moveTo(x, y);
+    else sh.lineTo(x, y);
+  }
+  return sh;
+}
+
+// 완성된 물건을 유전자대로 "빚는다": 가로·세로·깊이 비율, 위아래 폭 차이, 배 부풀기, 기울기.
+// 모든 정점을 같은 함수로 옮기므로 조각보 판·장식도 몸과 같이 움직인다.
+export function deformObject(obj, d) {
+  if (!d || !d.k) return obj;
+  obj.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(obj.matrixWorld).invert();
+  const box = new THREE.Box3().setFromObject(obj);
+  const cx = (box.min.x + box.max.x) / 2;
+  const cz = (box.min.z + box.max.z) / 2;
+  const y0 = box.min.y;
+  const h = box.max.y - box.min.y || 1;
+  const meshes = [];
+  obj.traverse((o) => { if (o.isMesh) meshes.push(o); });
+  const out = new THREE.Group();
+  const v = new THREE.Vector3();
+  meshes.forEach((mm) => {
+    const geo = mm.geometry.clone();
+    geo.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, mm.matrixWorld));
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i += 1) {
+      v.fromBufferAttribute(pos, i);
+      const t = (v.y - y0) / h;
+      const sc = 1 + d.belly * Math.sin(Math.PI * t) + d.taper * (t - 0.5);
+      const X = (v.x - cx) * sc * d.wide + d.lean * h * (t - 0.5);
+      const Z = (v.z - cz) * sc * d.deep;
+      const Y = y0 + (v.y - y0) * d.tall;
+      pos.setXYZ(i, X + cx, Y, Z + cz);
+    }
+    pos.needsUpdate = true;
+    geo.computeBoundingBox();
+    geo.computeBoundingSphere();
+    mm.geometry = geo;
+    mm.position.set(0, 0, 0);
+    mm.rotation.set(0, 0, 0);
+    mm.scale.set(1, 1, 1);
+    mm.updateMatrix();
+    out.add(mm);
+  });
+  return out;
+}
+
 // 환경 반사가 없는 기기에서는 금속성을 낮춰 검게 보이지 않게 한다 (ctx.metal = 1 또는 0.35)
 export function makeMats(metalK = 1) {
   const std = (color, rough = 0.5, metal = 0, extra = {}) =>
@@ -73,7 +155,21 @@ export function group(...children) {
 }
 
 // 회전체(lathe): pts는 [반지름, 높이] 목록(아래→위). 항아리·북·붓대·주머니에 쓴다.
+// 윤곽선 점들을 부드러운 곡선으로 다시 촘촘히 찍는다 (유전자로 빚은 항아리가 각져 보이지 않게)
+export function smoothProfile(pts, per = 5) {
+  if (pts.length < 4) return pts;
+  const curve = new THREE.CatmullRomCurve3(pts.map(([x, y]) => new THREE.Vector3(x, y, 0)), false, 'centripetal');
+  const n = (pts.length - 1) * per;
+  const out = [];
+  for (let i = 0; i <= n; i += 1) {
+    const p = curve.getPoint(i / n);
+    out.push([Math.max(0, p.x), p.y]);
+  }
+  return out;
+}
+
 export function lathe(pts, mat, seg = 56) {
+  if (getDna().k) pts = smoothProfile(pts);
   const v = pts.map(([x, y]) => new THREE.Vector2(x, y));
   return new THREE.Mesh(new THREE.LatheGeometry(v, seg), mat);
 }
@@ -102,6 +198,12 @@ export function tube(points, r, mat, seg = 40, closed = false) {
 
 // 술(tassel): 위에서 아래로 늘어진 실 다발 + 위쪽 묶음
 export function tassel(len, w, mat, capMat, n = 28) {
+  const dn = getDna();
+  if (dn.k) {
+    len *= dn.tassel;
+    w *= 0.85 + (dn.tassel - 0.65) * 0.3;
+    n += dn.tasselN;
+  }
   const g = new THREE.Group();
   for (let i = 0; i < n; i += 1) {
     const a = (i / n) * Math.PI * 2;

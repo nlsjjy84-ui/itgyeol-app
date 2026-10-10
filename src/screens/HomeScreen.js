@@ -11,7 +11,7 @@ import Frame from '../ui/Frame';
 import { CloudBand, DancheongBand, Taegeuk } from '../ui/Motifs';
 import { play } from '../utils/sound';
 
-const HANJA = { jinbeop: '陣', print: '文', tbd: '遊', talchum: '面', mask: '面', dancheong: '彩', pattern: '彩' };
+const HANJA = { jinbeop: '陣', print: '文', tbd: '遊', hangul: '塊', talchum: '面', mask: '面', dancheong: '彩', pattern: '彩' };
 
 const CARDS = [
   {
@@ -40,6 +40,15 @@ const CARDS = [
     desc: '줄넘기·상모돌리기·구슬치기 같은 전래놀이 열두 가지를 손끝으로 즐기는 판',
     ready: true,
     route: 'Play',
+  },
+  {
+    id: 'hangul',
+    title: '한글 테트리스',
+    eyebrow: '한글 · 자음 모음',
+    accent: '#a23b5c',
+    desc: '자음 ㄱ·ㄴ·ㄷ·ㅁ과 모음 ㅣ·ㅡ·ㅏ·ㅓ·ㅗ·ㅜ 블록을 쌓아 줄을 지우는 테트리스',
+    ready: true,
+    route: 'Hangul',
   },
   // [체험 확장 로드맵] 지금 세 판은 "국악 전공·전래놀이 교육 경력"에서 나온 것이고,
   // 같은 설계 방식(공통 설계 질문 추출 → WOZ로 검증 → 난이도 단계)을 다른 전통
@@ -76,7 +85,7 @@ export default function HomeScreen({ navigation }) {
     const playVals = [];
     Object.entries(skills || {}).forEach(([key, v]) => {
       if (key.startsWith('jinbeop:')) jinbeopVals.push(v);
-      else if (key.startsWith('print:')) printVals.push(v);
+      else if (key.startsWith('print:') || key.startsWith('hangul:')) printVals.push(v);
       else playVals.push(v);
     });
     const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
