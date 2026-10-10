@@ -216,8 +216,10 @@ export function tassel(len, w, mat, capMat, n = 28) {
     ];
     g.add(tube(pts, 0.012, mat, 8));
   }
-  g.add(mesh(new THREE.CylinderGeometry(w * 0.32, w * 0.4, len * 0.14, 16), capMat, [0, -len * 0.04, 0]));
-  g.add(mesh(new THREE.SphereGeometry(w * 0.34, 16, 12), capMat, [0, len * 0.05, 0]));
+  // 술 윗부분: 금속 통(감싼 마디 두 줄) — 실물 노리개의 금속 덮개를 본뜬 모양
+  g.add(mesh(new THREE.CylinderGeometry(w * 0.3, w * 0.4, len * 0.2, 20), capMat, [0, -len * 0.06, 0]));
+  [-0.0, -0.1, -0.16].forEach((f) => g.add(mesh(new THREE.TorusGeometry(w * (0.34 + (f < -0.05 ? 0.045 : 0)), w * 0.035, 8, 20), capMat, [0, len * f * 0.9, 0], [Math.PI / 2, 0, 0])));
+  g.add(mesh(new THREE.SphereGeometry(w * 0.34, 16, 12), capMat, [0, len * 0.06, 0]));
   return g;
 }
 

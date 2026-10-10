@@ -136,6 +136,16 @@ export const fanFolding = ({ tex, m }) => {
     rib.rotation.z = a - Math.PI / 2;
     g.add(rib);
   }
+  // 합죽선: 종이 앞면에도 대살이 비쳐 보인다 — 살마다 가는 선, 부챗살 아래쪽은 맨 대살
+  for (let i = 1; i < ribs - 1; i += 1) {
+    const a = a0 + ((a1 - a0) * i) / (ribs - 1);
+    const line = new THREE.Mesh(new THREE.BoxGeometry(0.014, 1.76, 0.004), m.bamboo);
+    line.position.set(Math.cos(a) * 1.63, Math.sin(a) * 1.63, 0.004);
+    line.rotation.z = a - Math.PI / 2;
+    g.add(line);
+  }
+  // 위 가장자리 테두리(종이 끝을 대는 가는 대)
+  g.add(mesh(new THREE.TorusGeometry(2.49, 0.012, 6, 90, a1 - a0), m.bamboo, [0, 0, 0.004], [0, 0, a0]));
   g.add(mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.14, 24), m.gold, [0, 0, 0], [Math.PI / 2, 0, 0]));
   g.add(mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.2, 12), m.silver, [0, 0, 0], [Math.PI / 2, 0, 0]));
   g.add(mesh(new THREE.TorusGeometry(0.2, 0.025, 8, 24), m.silkRed, [0, -0.2, 0]));
