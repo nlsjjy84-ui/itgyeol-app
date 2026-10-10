@@ -36,7 +36,7 @@ export function MissionCard({ info, onStart, onStartFree, startLabel = '시작�
   }, []);
   return (
     <Frame style={styles.card}>
-      {info.scene ? <StoryScene scene={info.scene} style={{ marginBottom: 12 }} /> : null}
+      {info.scene ? <StoryScene scene={info.scene} lines={info.lines} style={{ marginBottom: 12 }} /> : null}
       <Text style={styles.kicker}>{info.kicker}</Text>
       <Text brush style={styles.title}>
         {info.title}

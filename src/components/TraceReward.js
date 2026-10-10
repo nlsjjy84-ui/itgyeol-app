@@ -4,19 +4,27 @@ import Text from '../ui/Text';
 import Jogakbo, { PatchChip } from './Jogakbo';
 import { Dialogue } from '../ui/StoryScene';
 import { useJourney } from '../context/JourneyContext';
-import { SUCCESS, FAIL } from '../data/story';
+import { afterLines } from '../data/book';
 import { Gauge } from './ResultWhy';
 import { explainPatch } from '../utils/explain';
 import { SCENE_TARGET, LEVEL_NAME, nextHint } from '../utils/progress';
 import { colors } from '../theme';
+import { PLAY_GAMES } from '../data/playGames';
 import { SCENE_ORDER } from './Jogakbo';
 
 const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이', hangul: '한글 테트리스' };
 
 // 한 판을 마친 순간 — 방금 생긴 조각, 지금까지 이어진 조각보, 풍이·결이의 반응을 보여 준다.
-export default function TraceReward({ sceneId, success }) {
-  const { attempts, progress } = useJourney();
-  if (!success) return <Dialogue lines={FAIL} style={{ marginTop: 4 }} />;
+export default function TraceReward({ sceneId, success, gameId, gameName }) {
+  const { attempts, progress, playLog } = useJourney();
+  // 제일 자주 한 놀이(전래놀이만) — 판 뒤 한 줄에 쓰인다
+  let topGameName = null;
+  if (sceneId === 'tbd' && playLog && playLog.byGame) {
+    const top = Object.entries(playLog.byGame).sort((a, b) => b[1] - a[1])[0];
+    if (top && top[1] >= 2) topGameName = (PLAY_GAMES.find((g) => g.id === top[0]) || {}).name || null;
+  }
+  const talk = afterLines({ sceneId, gameId, success, playLog, gameName, topGameName });
+  if (!success) return <Dialogue lines={talk} style={{ marginTop: 4 }} />;
   const mine = attempts.find((a) => a.sceneId === sceneId);
   const n = new Set(attempts.map((a) => a.sceneId)).size;
   const cnt = (progress.counts && progress.counts[sceneId]) || 1;
@@ -48,7 +56,7 @@ export default function TraceReward({ sceneId, success }) {
           <Text style={styles.whyLine}>{nextHint(sceneId, cnt)}</Text>
         </View>
       ) : null}
-      <Dialogue lines={SUCCESS[sceneId] || []} />
+      <Dialogue lines={talk} />
     </View>
   );
 }

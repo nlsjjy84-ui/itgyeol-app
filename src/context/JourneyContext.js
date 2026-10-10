@@ -14,6 +14,9 @@ const OHANG_KEY = 'itgyeol_ohang_v1';
 // 시작 전 질문("전통문화 하면 떠오르는 것")의 답과, 놀이를 몇 번 했는지의 기록.
 const TASTE_KEY = 'itgyeol_taste_v1';
 const PLAYLOG_KEY = 'itgyeol_playlog_v1';
+// 그림책: 프롤로그를 봤는지, 판마다 입구 이야기를 봤는지, 이야기 중에 고른 반응.
+const BOOK_KEY = 'itgyeol_book_v1';
+const BOOK_EMPTY = { prologue: false, gates: {}, choice: {} };
 // 놀이별 숙련도 점수의 범위 — -3(많이 헤맴) ~ +3(많이 능숙함). 7단계면 체감 차이를
 // 주기에 충분하고, 한두 판 실수했다고 극단으로 튀지 않을 만큼 좁다.
 const SKILL_MIN = -3;
@@ -47,6 +50,8 @@ export function JourneyProvider({ children }) {
   const [taste, setTasteState] = useState(null);
   // 놀이별·판별 "몇 번 했는지" — 결과물은 마지막 한 판만 남기지만, 모양은 지금까지 한 횟수가 만든다.
   const [playLog, setPlayLog] = useState({ byGame: {}, byScene: {} });
+  // 그림책 진행 — null이면 아직 읽는 중
+  const [book, setBookState] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -100,6 +105,17 @@ export function JourneyProvider({ children }) {
         // 손상된 값은 무시
       }
     });
+    safeGetItem(BOOK_KEY).then((raw) => {
+      if (!mounted) return;
+      let v = BOOK_EMPTY;
+      try {
+        const p = raw ? JSON.parse(raw) : null;
+        if (p && typeof p === 'object') v = { prologue: !!p.prologue, gates: p.gates || {}, choice: p.choice || {} };
+      } catch (e) {
+        // 손상된 값은 무시
+      }
+      setBookState(v);
+    });
     safeGetItem(OHANG_KEY).then((raw) => {
       if (!mounted) return;
       const valid = raw && OHANG.some((o) => o.key === raw);
@@ -136,6 +152,20 @@ export function JourneyProvider({ children }) {
     AsyncStorage.setItem(TASTE_KEY, JSON.stringify(v)).catch(() => {});
   }, []);
 
+  // 그림책 기록 갱신 — patch: {prologue?, gate?: 부이름, choice?: {key:id}}
+  const markBook = useCallback((patch) => {
+    setBookState((prev) => {
+      const cur = prev || BOOK_EMPTY;
+      const next = {
+        prologue: cur.prologue || !!patch.prologue,
+        gates: patch.gate ? { ...cur.gates, [patch.gate]: true } : cur.gates,
+        choice: patch.choice ? { ...cur.choice, ...patch.choice } : cur.choice,
+      };
+      AsyncStorage.setItem(BOOK_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  }, []);
+
   const addResult = useCallback((attempt) => {
     setPlayLog((prev) => {
       const next = { byGame: { ...prev.byGame }, byScene: { ...prev.byScene } };
@@ -166,7 +196,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, resetJourney, loaded, taste, setTaste, playLog, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds) }}
+      value={{ attempts, addResult, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds) }}
     >
       {children}
     </JourneyContext.Provider>
