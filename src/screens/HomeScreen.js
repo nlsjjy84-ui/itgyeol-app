@@ -1,9 +1,17 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import Text from '../ui/Text';
 import MascotDuo from '../components/MascotDuo';
 import OhangPicker from '../components/OhangPicker';
+import ThemeToggle from '../ui/ThemeToggle';
+import StoryScene from '../ui/StoryScene';
 import { useJourney } from '../context/JourneyContext';
 import { colors } from '../theme';
+import Frame from '../ui/Frame';
+import { CloudBand, DancheongBand, Taegeuk } from '../ui/Motifs';
+import { play } from '../utils/sound';
+
+const HANJA = { jinbeop: '陣', print: '文', tbd: '遊', hangul: '塊', talchum: '面', mask: '面', dancheong: '彩', pattern: '彩' };
 
 const CARDS = [
   {
@@ -32,6 +40,15 @@ const CARDS = [
     desc: '줄넘기·상모돌리기·구슬치기 같은 전래놀이 열두 가지를 손끝으로 즐기는 판',
     ready: true,
     route: 'Play',
+  },
+  {
+    id: 'hangul',
+    title: '한글 테트리스',
+    eyebrow: '한글 · 자음 모음',
+    accent: '#a23b5c',
+    desc: '자음 ㄱ·ㄴ·ㄷ·ㅁ과 모음 ㅣ·ㅡ·ㅏ·ㅓ·ㅗ·ㅜ 블록을 쌓아 줄을 지우는 테트리스',
+    ready: true,
+    route: 'Hangul',
   },
   // [체험 확장 로드맵] 지금 세 판은 "국악 전공·전래놀이 교육 경력"에서 나온 것이고,
   // 같은 설계 방식(공통 설계 질문 추출 → WOZ로 검증 → 난이도 단계)을 다른 전통
@@ -68,7 +85,7 @@ export default function HomeScreen({ navigation }) {
     const playVals = [];
     Object.entries(skills || {}).forEach(([key, v]) => {
       if (key.startsWith('jinbeop:')) jinbeopVals.push(v);
-      else if (key.startsWith('print:')) printVals.push(v);
+      else if (key.startsWith('print:') || key.startsWith('hangul:')) printVals.push(v);
       else playVals.push(v);
     });
     const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
@@ -86,29 +103,40 @@ export default function HomeScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
       <View style={styles.topRow}>
-        <View>
-          <Text style={styles.brand}>잇결</Text>
+        <View style={{ flex: 1 }}>
+          <View style={styles.logoRow}>
+            <Taegeuk size={34} />
+            <Text brush style={styles.logo}>잇결</Text>
+          </View>
           <Text style={styles.title}>대한민국의 보물</Text>
         </View>
         {/* [오늘의 기운 선택 기능] 홈에서도 바로 보고 바꿀 수 있게 — 바꾸면 세 판 전체에 반영된다. */}
-        <OhangPicker />
+        <View style={{ alignItems: 'flex-end', gap: 8 }}>
+          <OhangPicker />
+          <ThemeToggle />
+        </View>
+      </View>
+      <View style={{ alignItems: 'center', marginTop: 6 }}>
+        <CloudBand width={260} />
       </View>
       <Text style={styles.subtitle}>
         손끝으로 만나는 세 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.
       </Text>
 
+      <StoryScene scene="prologue" style={{ marginTop: 16 }} />
+
       <MascotDuo
         leftValue={pungValue}
         rightValue={gyeolValue}
-        caption="안녕! 우리는 풍이와 결이야. 진법·훈민정음·전래놀이, 세 가지 전통을 함께 만들어보자!"
-        size={64}
-        style={{ marginTop: 18 }}
+        caption="판을 놀수록 우리 둘의 모습이 또렷해져."
+        size={52}
+        style={{ marginTop: 14 }}
       />
 
       {/* 이 앱이 왜 만들어졌는지 — 마스코트의 말이 아니라 만든 사람의 실제 이력으로
           직접 말한다. 국악(사물놀이·풍물) 전공, 인천에서 10년 넘게 운영한 국악연구소,
           2015년에 직접 쓴 전래놀이 교육 교재 — 이 세 가지 장면은 그 경험에서 나왔다. */}
-      <View style={styles.makerNote}>
+      <Frame tone="dark" style={{ marginTop: 18 }}>
         <Text style={styles.makerLabel}>만든 사람</Text>
         <Text style={styles.makerText}>
           사물놀이·풍물을 전공하고, 인천에서 10년 넘게 국악연구소를 운영하며 아이들에게
@@ -116,18 +144,42 @@ export default function HomeScreen({ navigation }) {
           강사들을 교육하기도 했어요. 이 앱의 진법과 전래놀이 열두 가지는 그 현장 경험을
           그대로 옮긴 것입니다.
         </Text>
+      </Frame>
+
+      <View style={{ alignItems: 'center', marginTop: 18 }}>
+        <DancheongBand width={320} height={12} />
+      </View>
+
+      <View style={styles.exploreRow}>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
+          <Text style={styles.exploreTxt}>예시 작품 둘러보기</Text>
+        </Pressable>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Taste', { again: true }); }}>
+          <Text style={styles.exploreTxt}>떠오르는 것 다시 고르기</Text>
+        </Pressable>
       </View>
 
       <View style={styles.list}>
         {CARDS.filter((c) => c.ready).map((c) => (
           <Pressable
             key={c.id}
-            style={[styles.card, { borderLeftColor: c.accent, borderLeftWidth: 5 }]}
-            onPress={() => navigation.navigate(c.route)}
+            onPress={() => {
+              play('drum');
+              navigation.navigate(c.route);
+            }}
           >
-            <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
-            <Text style={styles.cardTitle}>{c.title}</Text>
-            <Text style={styles.cardDesc}>{c.desc}</Text>
+            <Frame accent={c.accent} style={styles.cardFrame}>
+              <View style={styles.cardRow}>
+                <View style={[styles.hanja, { backgroundColor: c.accent }]}>
+                  <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
+                  <Text style={styles.cardTitle}>{c.title}</Text>
+                  <Text style={styles.cardDesc}>{c.desc}</Text>
+                </View>
+              </View>
+            </Frame>
           </Pressable>
         ))}
       </View>
@@ -145,18 +197,20 @@ export default function HomeScreen({ navigation }) {
       </View>
       <View style={styles.list}>
         {CARDS.filter((c) => !c.ready).map((c) => (
-          <View
-            key={c.id}
-            style={[
-              styles.card,
-              { borderLeftColor: c.accent, borderLeftWidth: 5 },
-              styles.cardDisabled,
-            ]}
-          >
-            <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
-            <Text style={styles.cardTitle}>{c.title}</Text>
-            <Text style={styles.cardDesc}>{c.desc}</Text>
-            <Text style={styles.soon}>준비 중</Text>
+          <View key={c.id} style={styles.cardDisabled}>
+            <Frame accent={c.accent} style={styles.cardFrame}>
+              <View style={styles.cardRow}>
+                <View style={[styles.hanja, { backgroundColor: c.accent }]}>
+                  <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
+                  <Text style={styles.cardTitle}>{c.title}</Text>
+                  <Text style={styles.cardDesc}>{c.desc}</Text>
+                  <Text style={styles.soon}>준비 중</Text>
+                </View>
+              </View>
+            </Frame>
           </View>
         ))}
       </View>
@@ -166,7 +220,16 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  exploreRow: { flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 10, flexWrap: 'wrap' },
+  exploreBtn: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
+  exploreTxt: { fontSize: 12.5, fontWeight: '700', color: colors.ink },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  logo: { fontSize: 54, color: colors.accent, lineHeight: 60 },
+  cardFrame: { marginBottom: 12 },
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  hanja: { width: 60, height: 60, borderRadius: 4, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.accentDeep, transform: [{ rotate: '-3deg' }] },
+  hanjaText: { color: colors.baek, fontSize: 38, lineHeight: 46 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   scrollContent: { paddingHorizontal: 22, paddingTop: 28, paddingBottom: 32 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   brand: { fontSize: 13, color: colors.accentDeep, fontWeight: '700', letterSpacing: 1 },
@@ -204,7 +267,7 @@ const styles = StyleSheet.create({
     marginBottom: 7,
     textTransform: 'uppercase',
   },
-  makerText: { fontSize: 12.5, color: colors.bg, lineHeight: 19.5 },
+  makerText: { fontSize: 12.5, color: colors.onNight, lineHeight: 19.5 },
   list: { marginTop: 20, gap: 14 },
   roadmapHeader: { marginTop: 26, marginBottom: 2 },
   roadmapTitle: { fontSize: 13.5, fontWeight: '800', color: colors.ink },

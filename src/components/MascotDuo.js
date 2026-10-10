@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import Text from '../ui/Text';
 import Mascot, { MASCOT_NAMES } from './Mascot';
 import { colors } from '../theme';
 

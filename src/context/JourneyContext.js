@@ -1,14 +1,19 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OHANG, pickTodayOhang } from '../data/formations';
+import { computeProgress } from '../utils/progress';
 
-const JourneyContext = createContext(null);
+export const JourneyContext = createContext(null);
 const STORAGE_KEY = 'itgyeol_journey_v1';
 const SKILL_KEY = 'itgyeol_skill_v1';
+const SOLVED_KEY = 'itgyeol_solved_v1';
 // [오늘의 기운 선택 기능] 전에는 화면마다 useRef(pickTodayOhang())로 각자 따로 뽑아서
 // 같은 "오늘의 기운"인데 화면마다 색이 달라 보였다 — 이제 앱 전체가 공유하는 값 하나를
 // 여기서 들고, 사용자가 직접 골라 바꿀 수도 있게 한다(안 고르면 기기별로 하루치 랜덤값).
 const OHANG_KEY = 'itgyeol_ohang_v1';
+// 시작 전 질문("전통문화 하면 떠오르는 것")의 답과, 놀이를 몇 번 했는지의 기록.
+const TASTE_KEY = 'itgyeol_taste_v1';
+const PLAYLOG_KEY = 'itgyeol_playlog_v1';
 // 놀이별 숙련도 점수의 범위 — -3(많이 헤맴) ~ +3(많이 능숙함). 7단계면 체감 차이를
 // 주기에 충분하고, 한두 판 실수했다고 극단으로 튀지 않을 만큼 좁다.
 const SKILL_MIN = -3;
@@ -33,9 +38,15 @@ export function JourneyProvider({ children }) {
   // 세션을 넘어 기억한다 — 다음에 같은 놀이를 열면 그 기억을 반영한 시작 난이도로
   // 열린다. 숫자 하나뿐이라 과하지 않게, 그러나 실제로 사람마다 달라지게 설계했다.
   const [skills, setSkills] = useState({});
+  // 판마다 "서로 다른 문제를 몇 가지 풀었는지" — 많이 풀수록 결과물의 완성도가 올라간다.
+  const [solvedIds, setSolvedIds] = useState({});
   // [오늘의 기운 선택 기능] 처음엔 null — 기기에 저장된 값을 읽어오기 전까지는 아직
   // 모른다는 뜻. 읽어온 뒤(또는 저장된 게 없으면 그날의 랜덤값으로) 채워진다.
   const [ohangKey, setOhangKeyState] = useState(null);
+  // taste: null이면 아직 읽는 중, {done:false}면 한 번도 답하지 않음, {done:true,picks:[...]}이면 답했거나 건너뜀
+  const [taste, setTasteState] = useState(null);
+  // 놀이별·판별 "몇 번 했는지" — 결과물은 마지막 한 판만 남기지만, 모양은 지금까지 한 횟수가 만든다.
+  const [playLog, setPlayLog] = useState({ byGame: {}, byScene: {} });
 
   useEffect(() => {
     let mounted = true;
@@ -56,6 +67,35 @@ export function JourneyProvider({ children }) {
       try {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') setSkills(parsed);
+      } catch (e) {
+        // 손상된 값은 무시
+      }
+    });
+    safeGetItem(SOLVED_KEY).then((raw) => {
+      if (!mounted || !raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') setSolvedIds(parsed);
+      } catch (e) {
+        // 손상된 값은 무시
+      }
+    });
+    safeGetItem(TASTE_KEY).then((raw) => {
+      if (!mounted) return;
+      let v = { done: false, picks: [] };
+      try {
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (parsed && Array.isArray(parsed.picks)) v = { done: !!parsed.done, picks: parsed.picks };
+      } catch (e) {
+        // 손상된 값은 처음부터
+      }
+      setTasteState(v);
+    });
+    safeGetItem(PLAYLOG_KEY).then((raw) => {
+      if (!mounted || !raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.byGame && parsed.byScene) setPlayLog(parsed);
       } catch (e) {
         // 손상된 값은 무시
       }
@@ -90,7 +130,27 @@ export function JourneyProvider({ children }) {
     });
   }, []);
 
+  const setTaste = useCallback((picks) => {
+    const v = { done: true, picks };
+    setTasteState(v);
+    AsyncStorage.setItem(TASTE_KEY, JSON.stringify(v)).catch(() => {});
+  }, []);
+
   const addResult = useCallback((attempt) => {
+    setPlayLog((prev) => {
+      const next = { byGame: { ...prev.byGame }, byScene: { ...prev.byScene } };
+      next.byScene[attempt.sceneId] = (next.byScene[attempt.sceneId] || 0) + 1;
+      if (attempt.sceneId === 'tbd') next.byGame[attempt.formationId] = (next.byGame[attempt.formationId] || 0) + 1;
+      AsyncStorage.setItem(PLAYLOG_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+    setSolvedIds((prev) => {
+      const list = prev[attempt.sceneId] || [];
+      if (list.includes(attempt.formationId)) return prev;
+      const next = { ...prev, [attempt.sceneId]: [...list, attempt.formationId] };
+      AsyncStorage.setItem(SOLVED_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
     setAttempts((prev) => {
       // 같은 판(sceneId)의 결과는 가장 최근 것으로 교체, 다른 판 결과는 유지
       const next = [...prev.filter((a) => a.sceneId !== attempt.sceneId), attempt];
@@ -106,7 +166,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, resetJourney, loaded, skills, recordSkill, ohangKey, setOhangKey }}
+      value={{ attempts, addResult, resetJourney, loaded, taste, setTaste, playLog, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds) }}
     >
       {children}
     </JourneyContext.Provider>

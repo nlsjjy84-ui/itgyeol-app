@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import { View, StyleSheet, Pressable, Animated } from 'react-native';
+import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useHoldKey, useArrowHold } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 18,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   flashMiss: {
     position: 'absolute',
@@ -321,7 +322,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 16,
     fontWeight: '800',
-    color: '#b2482f',
+    color: colors.accent,
   },
   gaugeTrack: {
     width: '100%',

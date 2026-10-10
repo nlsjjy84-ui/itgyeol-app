@@ -1,5 +1,9 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from '../../ui/Text';
+import { useTime } from '../../ui/Mission';
+import SealButton from '../../ui/SealButton';
+import { play } from '../../utils/sound';
 import { colors } from '../../theme';
 
 function shuffleAssignment(n) {
@@ -23,6 +27,7 @@ function timeLimitFor(n, streak) {
 // 원진 — 드래그나 그리기가 아니라 "말을 움직이듯" 한 자리를 짚고 다음 자리를 짚으면
 // 그 두 사람이 자리를 맞바꾸는, 장기·바둑알처럼 한 수 한 수 옮기는 조작 방식.
 export default function PieceMoveGame({ positions, color, streak = 0, onSuccess, onFail }) {
+  const { timed, scaleMs } = useTime();
   const n = positions.length;
   const [assignment, setAssignment] = useState(() => shuffleAssignment(n));
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -46,7 +51,7 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
     setFlash(null);
     sessionStartRef.current = Date.now();
     clearTimer();
-    const limit = timeLimitFor(n, streak);
+    const limit = scaleMs(timeLimitFor(n, streak));
     setLimitMs(limit);
     setRemainingMs(limit);
     setPhase('playing');
@@ -97,7 +102,13 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
 
   const correctCount = assignment.filter((personId, i) => personId === i).length;
   const ratio = limitMs ? remainingMs / limitMs : 1;
-  const timerColor = ratio > 0.5 ? '#4c9a5a' : ratio > 0.2 ? '#c18a2f' : '#b2482f';
+  const timerColor = ratio > 0.5 ? colors.green : ratio > 0.2 ? colors.gold : colors.accent;
+
+  // 미션 안내에서 이미 '시작하기'를 눌렀으므로 바로 시작한다(실패·완료 뒤에만 다시 시작 버튼이 보인다).
+  useEffect(() => {
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <View style={styles.wrap}>
@@ -123,8 +134,8 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
               {
                 left: `${p.x * 100}%`,
                 top: `${p.y * 100}%`,
-                borderColor: selectedSlot === slotIndex ? '#2f8f4e' : color,
-                borderWidth: selectedSlot === slotIndex ? 3 : 1.5,
+                borderColor: selectedSlot === slotIndex ? colors.green : color,
+                borderWidth: selectedSlot === slotIndex ? 4 : 2.5,
               },
             ]}
           >
@@ -136,22 +147,20 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
       </View>
 
       {phase !== 'playing' && (
-        <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'done' ? '다시 섞어보기' : '시작하기'}</Text>
-        </Pressable>
+        <SealButton label={phase === 'done' ? '다시 섞어보기' : '시작하기'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
     </View>
   );
 }
 
-const SLOT_SIZE = 32;
+const SLOT_SIZE = 44;
 
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
   roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 8, textAlign: 'center', paddingHorizontal: 10 },
   timeTrack: {
     width: '100%',
-    maxWidth: 300,
+    maxWidth: 340,
     height: 8,
     borderRadius: 4,
     backgroundColor: 'rgba(0,0,0,0.08)',
@@ -161,25 +170,27 @@ const styles = StyleSheet.create({
   timeFill: { height: '100%' },
   field: {
     width: '100%',
-    maxWidth: 300,
-    height: 260,
+    maxWidth: 340,
+    height: 330,
     position: 'relative',
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 16,
+    backgroundColor: colors.borderSoft,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 4,
     marginBottom: 14,
   },
   slot: {
     position: 'absolute',
     width: SLOT_SIZE,
     height: SLOT_SIZE,
-    borderRadius: SLOT_SIZE / 2,
+    borderRadius: 4,
     marginLeft: -SLOT_SIZE / 2,
     marginTop: -SLOT_SIZE / 2,
     backgroundColor: colors.paper,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  slotText: { fontSize: 12, fontWeight: '800', color: colors.ink },
+  slotText: { fontSize: 18, fontWeight: '800', color: colors.ink },
   flashHit: {
     position: 'absolute',
     top: 8,
@@ -188,7 +199,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   flashMiss: {
     position: 'absolute',
@@ -198,7 +209,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#b2482f',
+    color: colors.accent,
   },
   bigBtn: { paddingHorizontal: 30, paddingVertical: 16, borderRadius: 20 },
   bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },

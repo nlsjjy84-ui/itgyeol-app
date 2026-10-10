@@ -1,13 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform } from 'react-native';
+import Text from '../ui/Text';
 import Dot from '../components/Dot';
 import FormationPreview from '../components/FormationPreview';
 import MascotGuide from '../components/MascotGuide';
@@ -16,6 +9,13 @@ import OhangPicker from '../components/OhangPicker';
 import { PRINTING_TYPES } from '../data/printing';
 import { ohangByKey } from '../data/formations';
 import { colors } from '../theme';
+import ScreenHeader from '../ui/ScreenHeader';
+import MissionGate from '../ui/Mission';
+import OtherScenes from '../components/OtherScenes';
+import PrintPlay from '../components/PrintPlay';
+import TraceReward from '../components/TraceReward';
+import { printMission } from '../data/missions';
+import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 // [전체 판 공통화] 전래놀이에서 먼저 만든 반(tier) 목록과 숙련도 문구를 그대로 가져다 쓴다.
@@ -41,12 +41,15 @@ const JAMO_PALETTE = [
 // 없는 2종(소고·비녀)만, 성인반은 받침·겹모음이 섞인 전체 목록을 돈다.
 // (metaltype=4, woodblock=5, 보물=5, 문화재=7, 한글날=9, 풍물놀이=11)
 const ROUND_ORDER_BY_TIER = {
-  아동반: ['jamo-sogo', 'jamo-binyeo'],
+  아동반: ['jamo-sogo', 'mirror', 'jamo-binyeo', 'shape'],
   성인반: [
     'metaltype',
+    'mirror',
     'woodblock',
     'jamo-bomul',
+    'shape',
     'jamo-munhwajae',
+    'sentence',
     'jamo-hangeulnal',
     'jamo-pungmulnori',
   ],
@@ -147,6 +150,8 @@ export default function PrintScreen({ navigation }) {
   const posRef = useRef([]);
   const attemptStartRef = useRef(Date.now());
   const hasDraggedRef = useRef(false);
+  const gateOpenRef = useRef(false);
+  const timeModeRef = useRef('timed');
   const settledRef = useRef(false);
   const timerIdRef = useRef(null);
   const timeLimitRef = useRef(0);
@@ -185,6 +190,12 @@ export default function PrintScreen({ navigation }) {
 
   const startAttempt = useCallback(
     (size) => {
+      if (type.mode) {
+        // 끌어 놓는 판이 아닌 놀이(거울 활자 등)는 시간 제한·조각 흩뿌리기가 필요 없다.
+        clearTimer();
+        settledRef.current = false;
+        return;
+      }
       const s = size || stageSize;
       if (!s.width || !s.height) return;
       const effectiveStreak = Math.max(0, streak + decoyStreakAdjust(tier, rating));
@@ -202,12 +213,16 @@ export default function PrintScreen({ navigation }) {
       setResetSignal((v) => v + 1);
 
       clearTimer();
-      const limit = Math.round(
+      // 시간은 기본 3배로 넉넉히, '시간 제한 없이'를 고르면 사실상 끝나지 않게 한다.
+      const baseLimit = Math.round(
         timeLimitFor(type.tokens.length, streak) * tierTimeMultiplier(tier) * skillTimeMultiplier(rating)
       );
+      const limit = timeModeRef.current === 'free' ? 3600000 : baseLimit * 3;
       timeLimitRef.current = limit;
       setTimeLimitMs(limit);
       setRemainingMs(limit);
+      // 미션 안내에서 '시작하기'를 누르기 전에는 시간이 흐르지 않는다.
+      if (!gateOpenRef.current) return;
       const startedAt = Date.now();
       timerIdRef.current = setInterval(() => {
         const left = limit - (Date.now() - startedAt);
@@ -244,6 +259,7 @@ export default function PrintScreen({ navigation }) {
     }
     autoAdvanceRef.current = false;
     posRef.current = [];
+    gateOpenRef.current = false;
     startAttempt(stageSize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeIdx]);
@@ -272,6 +288,7 @@ export default function PrintScreen({ navigation }) {
     settledRef.current = true;
     setStreak(0);
     setCompleted(false);
+    play('geomungo');
     setResultComment('시간이 다 됐어요! 콤보가 초기화돼요. 다시 섞어서 도전해보세요.');
     setResultVisible(true);
     // [지능형 난이도] 시간 안에 못 끝낸 것도 "이 방식은 아직 익히는 중"이라는 신호로 반영한다.
@@ -339,6 +356,9 @@ export default function PrintScreen({ navigation }) {
   }
 
   function completeSuccess(result) {
+    play('stamp');
+    setTimeout(() => play('jing'), 200);
+    setTimeout(() => play('piri'), 600);
     if (settledRef.current) return;
     settledRef.current = true;
     clearTimer();
@@ -352,7 +372,9 @@ export default function PrintScreen({ navigation }) {
     // [지능형 난이도] 이 인쇄 방식을 성공할 때마다 숙련도가 쌓여, 다음에 열 때 시작 난이도가 달라진다.
     recordSkill(skillId, true);
 
-    const mapping = Object.fromEntries(type.tokens.map((_, i) => [i, i]));
+    const mapping = type.tokens.length
+      ? Object.fromEntries(type.tokens.map((_, i) => [i, i]))
+      : { 0: Math.min(9, result.mistakes || 0) };
     const attemptResult = buildAttemptResult({
       sceneId: 'print',
       formationId: type.id,
@@ -487,29 +509,19 @@ export default function PrintScreen({ navigation }) {
   }, [moveSelected, snapSelected, cycleSelected]);
 
   const timeRatio = timeLimitMs ? remainingMs / timeLimitMs : 1;
-  const timerColor = timeRatio > 0.5 ? '#4c9a5a' : timeRatio > 0.2 ? '#c18a2f' : '#b2482f';
+  const timerColor = timeRatio > 0.5 ? colors.green : timeRatio > 0.2 ? colors.gold : colors.accent;
 
   return (
     <SafeAreaView style={styles.safe}>
+      <ScreenHeader scene="Print" title="훈민정음 · 인쇄" sub="글자를 짓고, 새기고, 찍어내는 판" onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
-        <View style={styles.brandRow}>
-          <Pressable
-            style={styles.homeBtn}
-            onPress={() => navigation.navigate('Home')}
-            hitSlop={8}
-          >
-            <Text style={styles.homeBtnText}>‹ 홈</Text>
-          </Pressable>
-          <Text style={styles.brand}>잇결 · 훈민정음·인쇄</Text>
-        </View>
         <View style={styles.badgeRow}>
-          {/* [전체 판 공통화] 성인반/아동반 — 전래놀이와 동일한 반 구분을 여기에도 둔다. */}
           <View style={styles.tierRow}>
             {DIFFICULTY_TIERS.map((t) => (
               <Pressable
                 key={t}
                 style={[styles.tierBtn, tier === t && { backgroundColor: ohang.color, borderColor: ohang.color }]}
-                onPress={() => setTier(t)}
+                onPress={() => { play('tap'); setTier(t); }}
               >
                 <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{t}</Text>
               </Pressable>
@@ -521,8 +533,8 @@ export default function PrintScreen({ navigation }) {
 
       <View style={styles.body}>
         <View style={styles.sidebar}>
-          <Text style={styles.sidebarLabel}>인쇄 방식을{'\n'}선택하세요</Text>
           <ScrollView
+            horizontal
             style={styles.sidebarScroll}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.sidebarList}
@@ -531,7 +543,7 @@ export default function PrintScreen({ navigation }) {
               <Pressable
                 key={t.id}
                 style={[styles.tab, idx === typeIdx && styles.tabActive]}
-                onPress={() => chooseType(idx)}
+                onPress={() => { play('tap'); chooseType(idx); }}
               >
                 <Text
                   style={[styles.tabTag, idx === typeIdx && styles.tabTagActive]}
@@ -540,9 +552,9 @@ export default function PrintScreen({ navigation }) {
                 </Text>
                 <Text
                   style={[styles.tabText, idx === typeIdx && styles.tabTextActive]}
-                  numberOfLines={2}
+                  numberOfLines={1}
                 >
-                  {t.name}
+                  {t.name.replace('훈민정음 자모 배열 - ', '')}
                 </Text>
               </Pressable>
             ))}
@@ -557,19 +569,6 @@ export default function PrintScreen({ navigation }) {
             contentContainerStyle={styles.mainScrollContent}
             showsVerticalScrollIndicator={false}
           >
-          <View style={styles.previewRow}>
-            <FormationPreview positions={type.positions} color={ohang.color} size={72} />
-            <View style={styles.previewTextBox}>
-              <Text style={styles.previewLabel}>{type.name} 완성 모습</Text>
-              <Text style={styles.previewHint}>
-                이 작은 그림처럼 되도록 아래 점선 자리에 글자 조각을 맞춰보세요.
-              </Text>
-            </View>
-          </View>
-
-          {/* [전체 판 공통화] 숙련도 문구 — 전래놀이와 같은 문구를 그대로 쓴다. */}
-          <Text style={styles.skillText}>{skillLabel(rating)}</Text>
-
           {/* [전체 판 공통화] 지도사 노트 — 전래놀이와 같은 위치·형태의 펼침 패널. */}
           {type.tip && (
             <View style={styles.noteBox}>
@@ -582,6 +581,35 @@ export default function PrintScreen({ navigation }) {
             </View>
           )}
 
+          <MissionGate
+            resetKey={type.id}
+            info={{ scene: 'print', ...printMission(type), example: type.mode ? null : <FormationPreview positions={type.positions} color={ohang.color} size={130} /> }}
+            onModeSelect={(mode) => {
+              timeModeRef.current = mode;
+              gateOpenRef.current = true;
+              if (stageSize.width && stageSize.height) startAttempt(stageSize);
+            }}
+          >
+          {type.mode ? (
+            <>
+              <PrintPlay
+                mode={type.mode}
+                color={ohang.color}
+                resetKey={`${type.id}-${resetSignal}`}
+                onDone={(r) => {
+                  if (settledRef.current) return;
+                  completeSuccess({ targets: [0], mistakes: r.mistakes });
+                }}
+              />
+              <CompletionEffect nonce={stampNonce} variant="stamp" color={ohang.color} label={`${type.tag} 완성!`} />
+              <View style={styles.actions}>
+                <Pressable style={styles.secondaryBtn} onPress={() => { settledRef.current = false; setResetSignal((v) => v + 1); }}>
+                  <Text style={styles.secondaryBtnText}>처음부터 다시</Text>
+                </Pressable>
+              </View>
+            </>
+          ) : (
+            <>
           <View style={styles.timerRow}>
             <View style={styles.timerTrack}>
               <View
@@ -595,7 +623,7 @@ export default function PrintScreen({ navigation }) {
               />
             </View>
             <Text style={[styles.timerSeconds, { color: timerColor }]}>
-              ⏱ {Math.max(0, Math.ceil(remainingMs / 1000))}초
+              {timeModeRef.current === 'free' ? '시간 제한 없음' : `⏱ ${Math.max(0, Math.ceil(remainingMs / 1000))}초`}
             </Text>
           </View>
 
@@ -605,7 +633,7 @@ export default function PrintScreen({ navigation }) {
                 key={`ghost-${i}`}
                 style={[
                   styles.ghost,
-                  { left: t.x - 18, top: t.y - 18, borderColor: ohang.color },
+                  { left: t.x - 23, top: t.y - 23, borderColor: ohang.color },
                 ]}
               />
             ))}
@@ -630,7 +658,7 @@ export default function PrintScreen({ navigation }) {
                   y={p.y}
                   label={isDecoy ? decoyGlyphs[i - type.tokens.length] : type.tokens[i]}
                   rotateDeg={isDecoy ? 0 : tokenStyles[i]?.rotate || 0}
-                  tintColor={isDecoy ? '#b2482f' : tokenStyles[i]?.color}
+                  tintColor={isDecoy ? colors.accent : tokenStyles[i]?.color}
                   resetSignal={resetSignal}
                   onDragEnd={handleDragEnd}
                   onSelect={setSelectedIdx}
@@ -657,7 +685,7 @@ export default function PrintScreen({ navigation }) {
                   }번 조각이 선택돼 있어요.`
                 : `조각을 드래그하거나, 클릭해서 선택한 뒤 화살표 키로 옮기고 Enter로 제 자리에 쏙 넣어보세요. 지금은 ${
                     selectedIdx + 1
-                  }번 조각이 선택돼 있어요. 시간 안에 ${type.name}을 완성해보세요!`
+                  }번 조각이 선택돼 있어요. ${timeModeRef.current === 'free' ? '천천히' : '시간 안에'} 글자를 완성해보세요!`
             }
             style={styles.mascotHint}
           />
@@ -670,6 +698,9 @@ export default function PrintScreen({ navigation }) {
               <Text style={styles.primaryBtnText}>완성!</Text>
             </Pressable>
           </View>
+            </>
+          )}
+          </MissionGate>
           </ScrollView>
         </View>
       </View>
@@ -684,6 +715,7 @@ export default function PrintScreen({ navigation }) {
               오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
             </Text>
             {completed && <Text style={styles.modalScore}>{skillLabel(rating)}</Text>}
+            <TraceReward sceneId="print" success={completed} />
             <View style={styles.modalActions}>
               <Pressable style={styles.modalClose} onPress={() => setResultVisible(false)}>
                 <Text style={styles.modalCloseText}>닫기</Text>
@@ -711,6 +743,7 @@ export default function PrintScreen({ navigation }) {
                 </>
               )}
             </View>
+            {completed && <OtherScenes current="Print" navigation={navigation} onGo={() => setResultVisible(false)} />}
           </View>
         </View>
       )}
@@ -719,7 +752,7 @@ export default function PrintScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -760,13 +793,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
   },
   ohangText: { fontSize: 11, fontWeight: '600' },
-  body: { flex: 1, flexDirection: 'row' },
-  sidebar: {
-    width: 108,
-    borderRightWidth: 1,
-    borderRightColor: colors.borderSoft,
-    paddingTop: 4,
-  },
+  body: { flex: 1, flexDirection: 'column' },
+  sidebar: { height: 66, borderBottomWidth: 1, borderBottomColor: colors.border, paddingTop: 2 },
   sidebarLabel: {
     fontSize: 11.5,
     fontWeight: '700',
@@ -776,17 +804,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 8,
   },
-  sidebarScroll: { flex: 1, width: '100%' },
-  sidebarList: { paddingHorizontal: 8, paddingBottom: 12, gap: 8 },
+  sidebarScroll: { flexGrow: 0 },
+  sidebarList: { paddingHorizontal: 12, paddingBottom: 6, gap: 8, alignItems: 'center' },
   tab: {
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    borderRadius: 14,
+    minWidth: 96,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
     backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    marginBottom: 0,
   },
   tabActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   tabTag: { fontSize: 9, color: colors.muted, fontWeight: '600', marginBottom: 3 },
@@ -843,20 +872,20 @@ const styles = StyleSheet.create({
   timerSeconds: { fontSize: 12, fontWeight: '800', minWidth: 36, textAlign: 'right' },
   stage: {
     flex: 1,
-    minHeight: 240,
+    minHeight: 330,
     marginHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: 4,
+    backgroundColor: colors.borderSoft,
+    borderWidth: 2,
+    borderColor: colors.ink,
     overflow: 'hidden',
   },
   ghost: {
     position: 'absolute',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1.5,
+    width: 46,
+    height: 46,
+    borderRadius: 4,
+    borderWidth: 2,
     borderStyle: 'dashed',
     opacity: 0.55,
   },
@@ -871,7 +900,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#b2482f',
+    borderColor: colors.accent,
     backgroundColor: 'rgba(178,72,47,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -879,7 +908,7 @@ const styles = StyleSheet.create({
   excludeZoneText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#b2482f',
+    color: colors.accent,
     textAlign: 'center',
     lineHeight: 13,
   },
@@ -948,7 +977,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.night,
     borderRadius: 12,
   },
-  modalCloseText: { color: colors.bg, fontWeight: '600', fontSize: 12 },
+  modalCloseText: { color: colors.onNight, fontWeight: '600', fontSize: 12 },
   modalPrimary: {
     paddingHorizontal: 16,
     paddingVertical: 8,

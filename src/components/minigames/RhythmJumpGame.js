@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Animated, Easing } from 'react-native';
+import { View, StyleSheet, Pressable, Animated, Easing } from 'react-native';
+import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
@@ -272,7 +273,7 @@ export default function RhythmJumpGame({
           <Mascot which={mascot} size={MASCOT_SIZE} />
         </Animated.View>
 
-        {flash === 'hit' && <Text style={[styles.flashText, { color: '#2f8f4e' }]}>넘었다!</Text>}
+        {flash === 'hit' && <Text style={[styles.flashText, { color: colors.green }]}>넘었다!</Text>}
         {flash === 'miss' && (
           <Text style={[styles.flashText, { color: '#b23b3b' }]}>타이밍이 안 맞았어요</Text>
         )}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useHoldKey } from '../../utils/useTapKey';
 

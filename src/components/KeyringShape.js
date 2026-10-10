@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Svg, { Path, Circle, Rect, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
 import ResultPattern from './ResultPattern';
+import { Taegeuk } from '../ui/Motifs';
 import TransformResultShape from './TransformResultShape';
+import Jogakbo from './Jogakbo';
 import { colors } from '../theme';
 
 // 예시로 보여주는 10가지 전통 소재 키링 모양.
@@ -271,7 +273,7 @@ const SHAPE_DEFS = {
 // patternMode='transform'(기본값)이면 3D 모델 예시와 똑같이 실제 어텐션으로 합성한
 // 변형 결과물(TransformResultShape)을 넣는다 — 전에는 여기만 옛 ResultPattern을
 // 그대로 박아 넣고 있어서 키링이 가중치/어텐션과 무관하게 항상 똑같은 무늬였다.
-export default function KeyringShape({ shapeId, attempts, size = 1, blank = false, patternMode = 'transform' }) {
+export default function KeyringShape({ shapeId, attempts, size = 1, blank = false, patternMode = 'jogakbo' }) {
   const def = SHAPE_DEFS[shapeId] || SHAPE_DEFS.circle;
   const { width, height, face, Frame, Overlay } = def;
   const faceLeft = face.left * size;
@@ -308,8 +310,11 @@ export default function KeyringShape({ shapeId, attempts, size = 1, blank = fals
           },
         ]}
       >
+        {blank && <Taegeuk size={Math.min(faceW, faceH) * 0.6} />}
         {!blank &&
-          (patternMode === 'transform' ? (
+          (patternMode === 'jogakbo' ? (
+            <Jogakbo attempts={attempts} size={Math.min(faceW, faceH)} shape={face.shape === 'circle' ? 'circle' : 'square'} />
+          ) : patternMode === 'transform' ? (
             <TransformResultShape attempts={attempts} size={Math.min(faceW, faceH)} />
           ) : (
             <ResultPattern attempts={attempts} size={Math.min(faceW, faceH)} />

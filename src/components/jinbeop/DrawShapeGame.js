@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from '../../ui/Text';
+import { useTime } from '../../ui/Mission';
+import SealButton from '../../ui/SealButton';
+import { play } from '../../utils/sound';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
@@ -7,7 +11,7 @@ import { colors } from '../../theme';
 import { similarityToTemplate } from '../../utils/shapeMatch';
 import { formationTemplate } from '../../data/formations';
 
-const DRAW_MS = 15000;
+const BASE_DRAW_MS = 15000;
 const SUCCESS_THRESHOLD = 62;
 
 // 기와밟기 — "그릴 수도 있잖아, 내가 그렸는데 어떤 거랑 비슷하다고 말할 수도 있잖아"라는
@@ -15,8 +19,10 @@ const SUCCESS_THRESHOLD = 62;
 // 직접 모양을 그려보면 그 궤적을 실제 기와밟기 대형(완만한 아치)과 비교해 "몇 % 닮았는지"로
 // 말해준다 — 드래그로 점을 맞추는 다른 진법들과는 완전히 다른 조작 방식.
 export default function DrawShapeGame({ formationId, closed = false, color, streak = 0, onSuccess, onFail }) {
+  const { timed, scaleMs } = useTime();
   const [phase, setPhase] = useState('ready'); // ready | drawing | result
   const [points, setPoints] = useState([]);
+  const DRAW_MS = scaleMs(BASE_DRAW_MS);
   const [remainingMs, setRemainingMs] = useState(DRAW_MS);
   const [resultPct, setResultPct] = useState(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
@@ -110,14 +116,20 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
   const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
   const success = phase === 'result' && resultPct >= SUCCESS_THRESHOLD;
 
+  // 미션 안내에서 이미 '시작하기'를 눌렀으므로 바로 시작한다(실패·완료 뒤에만 다시 시작 버튼이 보인다).
+  useEffect(() => {
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
         {phase === 'drawing'
-          ? `그리는 중 · ⏱ ${remainingSec}초`
+          ? `그리는 중 · ${timed ? `⏱ ${remainingSec}초` : '시간 제한 없음'}`
           : phase === 'result'
           ? `${resultPct}% 비슷해요`
-          : '제한 시간 15초 동안 이 모양을 손으로 그려보세요'}
+          : timed ? `제한 시간 ${Math.round(DRAW_MS / 1000)}초 동안 이 모양을 손으로 그려보세요` : '시간 제한 없이 이 모양을 손으로 그려보세요'}
       </Text>
 
       <GestureDetector gesture={pan}>
@@ -168,9 +180,7 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
       )}
 
       {phase !== 'drawing' && (
-        <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'result' ? '다시 그려보기' : '그리기 시작'}</Text>
-        </Pressable>
+        <SealButton label={phase === 'result' ? '다시 그려보기' : '그리기 시작'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
       {phase === 'drawing' && (
         <Pressable style={[styles.submitBtn, { borderColor: color }]} onPress={finishDrawing}>
@@ -189,7 +199,9 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     height: 260,
     position: 'relative',
-    backgroundColor: 'rgba(0,0,0,0.04)',
+    backgroundColor: colors.borderSoft,
+    borderWidth: 2,
+    borderColor: colors.ink,
     borderRadius: 16,
     marginBottom: 10,
     overflow: 'hidden',
@@ -220,7 +232,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   flashMiss: {
     position: 'absolute',
@@ -230,7 +242,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#b2482f',
+    color: colors.accent,
   },
   timeTrack: {
     width: '100%',
