@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Pressable, PanResponder } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
+import { t as i18nT } from '../../i18n';
 
 // 새 전래놀이 미니게임들이 함께 쓰는 도구 — 프레임 루프, 손가락 패드, 공통 틀.
 
@@ -76,12 +77,12 @@ export function clamp(v, a, b) {
 export function Shell({ color, phase, onStart, hud, hint, children }) {
   return (
     <View style={styles.wrap}>
-      {hud ? <Text style={styles.hud}>{hud}</Text> : null}
+      {hud ? <Text style={styles.hud}>{i18nT(hud)}</Text> : null}
       {children}
-      {hint ? <Text style={styles.hint}>{hint}</Text> : null}
+      {hint ? <Text style={styles.hint}>{i18nT(hint)}</Text> : null}
       {phase !== 'running' ? (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={onStart}>
-          <Text style={styles.bigBtnText}>{phase === 'ready' ? '시작하기' : '다시 하기'}</Text>
+          <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       ) : null}
     </View>
@@ -98,10 +99,10 @@ export function Bar({ value, color, height = 10, width = STAGE_W }) {
 
 export const styles = StyleSheet.create({
   wrap: { alignItems: 'center', width: '100%', gap: 10, paddingVertical: 4 },
-  hud: { fontSize: 15, fontWeight: '800', color: colors.ink, textAlign: 'center' },
+  hud: { fontSize: 15, fontWeight: '800', color: colors.ink, textAlign: 'center', backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 3, overflow: 'hidden' },
   hint: { fontSize: 12.5, color: colors.muted, textAlign: 'center', lineHeight: 18, paddingHorizontal: 8 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 16, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
-  stage: { width: STAGE_W, height: STAGE_H, borderRadius: 16, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.paper, overflow: 'hidden' },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
+  stage: { width: STAGE_W, height: STAGE_H, borderRadius: 6, borderWidth: 2, borderColor: colors.ink, backgroundColor: colors.paper, overflow: 'hidden' },
   barTrack: { borderRadius: 8, backgroundColor: colors.border, overflow: 'hidden' },
 });

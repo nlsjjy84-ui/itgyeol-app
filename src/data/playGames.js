@@ -1,3 +1,4 @@
+import { t as i18nT } from '../i18n';
 // 세번째 보물 — 전래놀이를 화면 터치/키보드로 즐기는 미니게임 모음.
 // [전면 재설계] 예전에는 5가지 제네릭 엔진(mash/race/rhythm/throw/whip)을 12개 놀이가
 // 돌려써서 다 비슷하게 느껴진다는 피드백을 받았다. 그래서 이번에 놀이마다 실제 규칙에
@@ -349,9 +350,9 @@ export function applySkillAdjustment(game, rating = 0) {
 
 // 숙련도 점수를 사람이 읽는 말로 — 화면에 "지금 왜 이 난이도인지"를 숨기지 않고 보여준다.
 export function skillLabel(rating = 0) {
-  if (rating >= 2) return '많이 능숙함 · 더 빡빡하게 시작';
-  if (rating >= 1) return '능숙한 편 · 살짝 빡빡하게 시작';
-  if (rating <= -2) return '아직 익히는 중 · 더 여유있게 시작';
-  if (rating <= -1) return '아직 익히는 중 · 살짝 여유있게 시작';
-  return '기록 쌓는 중 · 기본값으로 시작';
+  if (rating >= 2) return i18nT('많이 능숙함 · 더 빡빡하게 시작');
+  if (rating >= 1) return i18nT('능숙한 편 · 살짝 빡빡하게 시작');
+  if (rating <= -2) return i18nT('아직 익히는 중 · 더 여유있게 시작');
+  if (rating <= -1) return i18nT('아직 익히는 중 · 살짝 여유있게 시작');
+  return i18nT('기록 쌓는 중 · 기본값으로 시작');
 }

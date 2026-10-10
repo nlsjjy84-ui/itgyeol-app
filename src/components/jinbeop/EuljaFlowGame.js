@@ -7,6 +7,7 @@ import { play } from '../../utils/sound';
 import { colors } from '../../theme';
 import { useArrowHold } from '../../utils/useTapKey';
 import { euljaPathPoint, euljaGuidePoints } from '../../data/formations';
+import { t as i18nT } from '../../i18n';
 
 const GUIDE_POINTS = euljaGuidePoints(28);
 const TRAIL_GAP_TICKS = 5; // 뒷사람 한 명마다 이만큼씩 늦게(몇 틱 전 머리 위치를) 따라간다
@@ -80,7 +81,7 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
         } else {
           setFlash('fail');
           setPhase('ready');
-          onFail && onFail('줄이 많이 끊어졌어요. 머리를 궤적에 더 가깝게 따라가 보자 🐍');
+          onFail && onFail(i18nT('줄이 많이 끊어졌어요. 머리를 궤적에 더 가깝게 따라가 보자 🐍'));
         }
       }
     }, TICK_MS);
@@ -105,8 +106,8 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
         {phase === 'running'
-          ? `흘러가는 중 · ${Math.round(t * 100)}%`
-          : '머리가 되어 을자(乙) 길을 걸어 보자'}
+          ? i18nT('흘러가는 중 · {p0}%', { p0: Math.round(t * 100) })
+          : i18nT('머리가 되어 을자(乙) 길을 걸어 보자')}
       </Text>
       <View style={styles.field}>
         {GUIDE_POINTS.map((p, i) => (
@@ -136,8 +137,8 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
         <View style={[styles.head, { left: `${headX * 100}%`, top: `${headY * 100}%`, backgroundColor: color }]}>
           <Text style={styles.headLabel}>1</Text>
         </View>
-        {flash === 'success' && <Text style={styles.flashHit}>을자진 완성! 줄이 끊어지지 않았어요</Text>}
-        {flash === 'fail' && <Text style={styles.flashMiss}>줄이 너무 많이 끊어졌어요</Text>}
+        {flash === 'success' && <Text style={styles.flashHit}>{i18nT('을자진 완성! 줄이 끊어지지 않았어요')}</Text>}
+        {flash === 'fail' && <Text style={styles.flashMiss}>{i18nT('줄이 너무 많이 끊어졌어요')}</Text>}
       </View>
 
       <View style={styles.aimBtnRow}>
@@ -146,34 +147,34 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
           onPressIn={() => moveHead(-0.05)}
           disabled={phase !== 'running'}
         >
-          <Text style={[styles.aimBtnText, { color }]}>◀ 왼쪽</Text>
+          <Text style={[styles.aimBtnText, { color }]}>{i18nT('◀ 왼쪽')}</Text>
         </Pressable>
         <Text style={styles.aimStatus}>
-          {phase === 'running'
+          {i18nT(phase === 'running'
             ? strayMs > 0
               ? '궤적에서 벗어나는 중!'
               : '잘 따라가고 있어요'
-            : '화살표 키(←→)로도 조종해요'}
+            : '화살표 키(←→)로도 조종해요')}
         </Text>
         <Pressable
           style={[styles.aimBtn, { borderColor: color }]}
           onPressIn={() => moveHead(0.05)}
           disabled={phase !== 'running'}
         >
-          <Text style={[styles.aimBtnText, { color }]}>오른쪽 ▶</Text>
+          <Text style={[styles.aimBtnText, { color }]}>{i18nT('오른쪽 ▶')}</Text>
         </Pressable>
       </View>
 
       {phase !== 'running' && (
-        <SealButton label={phase === 'done' ? '다시 걸어보기' : '걷기 시작'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
+        <SealButton label={phase === 'done' ? i18nT('다시 걸어보기') : i18nT('걷기 시작')} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
-  roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 8 },
+  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'flex-start', paddingTop: 6 },
+  roundText: { fontSize: 14, fontWeight: '800', color: colors.ink, marginBottom: 8, textAlign: 'center', backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 3, overflow: 'hidden' },
   field: {
     width: '100%',
     maxWidth: 340,
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
-    borderRadius: 4,
+    borderRadius: 6,
     marginBottom: 10,
     overflow: 'hidden',
   },
@@ -260,6 +261,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 6,
   },
-  bigBtn: { paddingHorizontal: 30, paddingVertical: 16, borderRadius: 20 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
 });

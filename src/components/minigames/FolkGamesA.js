@@ -5,6 +5,7 @@ import { colors } from '../../theme';
 import { useArrowHold } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { t as i18nT } from '../../i18n';
 
 const PUNG = require('../../../assets/characters/pung_spin.png');
 
@@ -78,8 +79,8 @@ export function SangmoGame({ color, onComplete, limitSec = 20, speedDeg = 60, to
       color={color}
       phase={phase}
       onStart={start}
-      hud={`상모가 도는 정도 ${Math.round(q.progress)}%`}
-      hint="화면의 동그라미 위에서 손가락(마우스)을 눌러 빙글빙글 돌려요. 빛나는 점을 가까이 따라가면 상모가 돌아요. (키보드는 ← →)"
+      hud={i18nT('상모가 도는 정도 {p0}%', { p0: Math.round(q.progress) })}
+      hint={i18nT('화면의 동그라미 위에서 손가락(마우스)을 눌러 빙글빙글 돌려요. 빛나는 점을 가까이 따라가면 상모가 돌아요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { cursor: 'pointer' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -239,8 +240,8 @@ export function MarbleGame({ color, onComplete, targets = 3, shots = 8 }) {
       color={color}
       phase={phase}
       onStart={start}
-      hud={`밖으로 튕겨 낸 구슬 ${q.captured}/${targets} · 남은 기회 ${Math.max(0, shots - q.shots)}번`}
-      hint="아래쪽 내 구슬(색 구슬)을 꾹 눌러 뒤로 끌었다가 놓으면 반대쪽으로 튕겨요. 많이 끌수록 세게 가요. 동그라미 안의 구슬을 밖으로 내보내요."
+      hud={i18nT('밖으로 튕겨 낸 구슬 {p0}/{p1} · 남은 기회 {p2}번', { p0: q.captured, p1: targets, p2: Math.max(0, shots - q.shots) })}
+      hint={i18nT('아래쪽 내 구슬(색 구슬)을 꾹 눌러 뒤로 끌었다가 놓으면 반대쪽으로 튕겨요. 많이 끌수록 세게 가요. 동그라미 안의 구슬을 밖으로 내보내요.')}
     >
       <View ref={pad.ref} {...pad.handlers} style={S.stage}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -337,16 +338,16 @@ export function TopGame({ color, onComplete, targetHits = 12, lives = 3, drift =
       color={color}
       phase={phase}
       onStart={start}
-      hud={`바로 세운 횟수 ${q.hits}/${targetHits} · 남은 기회 ${'♥'.repeat(Math.max(0, q.lives))}`}
-      hint="팽이가 기우는 쪽 화면을 눌러 채로 쳐서 세워요. 반대쪽을 치면 더 기울어요."
+      hud={i18nT('바로 세운 횟수 {p0}/{p1} · 남은 기회 {p2}', { p0: q.hits, p1: targetHits, p2: '♥'.repeat(Math.max(0, q.lives)) })}
+      hint={i18nT('팽이가 기우는 쪽 화면을 눌러 채로 쳐서 세워요. 반대쪽을 치면 더 기울어요.')}
     >
       <View style={S.stage}>
         <View style={st.topFloor} />
         <View style={[st.topZone, { left: 0, backgroundColor: q.lean < -0.12 ? 'rgba(193,89,47,0.16)' : 'transparent' }]}>
-          <Pressable style={st.zonePress} onPress={() => hit(-1)}><Text style={st.zoneTxt}>◀ 왼쪽을 쳐요</Text></Pressable>
+          <Pressable style={st.zonePress} onPress={() => hit(-1)}><Text style={st.zoneTxt}>{i18nT('◀ 왼쪽을 쳐요')}</Text></Pressable>
         </View>
         <View style={[st.topZone, { right: 0, backgroundColor: q.lean > 0.12 ? 'rgba(193,89,47,0.16)' : 'transparent' }]}>
-          <Pressable style={st.zonePress} onPress={() => hit(1)}><Text style={st.zoneTxt}>오른쪽을 쳐요 ▶</Text></Pressable>
+          <Pressable style={st.zonePress} onPress={() => hit(1)}><Text style={st.zoneTxt}>{i18nT('오른쪽을 쳐요 ▶')}</Text></Pressable>
         </View>
         <View pointerEvents="none" style={[st.topWrap, { transform: [{ rotate: `${tilt}deg` }] }]}>
           <View style={[st.topBody, { backgroundColor: color }]}>
@@ -356,7 +357,7 @@ export function TopGame({ color, onComplete, targetHits = 12, lives = 3, drift =
           <View style={st.topTip} />
         </View>
         {Math.abs(q.lean) > 0.12 ? (
-          <Text pointerEvents="none" style={[st.leanTxt, side > 0 ? { right: 30 } : { left: 30 }]}>{side > 0 ? '→ 기울어요!' : '← 기울어요!'}</Text>
+          <Text pointerEvents="none" style={[st.leanTxt, side > 0 ? { right: 30 } : { left: 30 }]}>{i18nT(side > 0 ? '→ 기울어요!' : '← 기울어요!')}</Text>
         ) : null}
       </View>
     </Shell>
@@ -432,15 +433,15 @@ export function StoneBalanceGame({ color, onComplete, holdSec = 4, maxDrops = 6 
       color={color}
       phase={phase}
       onStart={start}
-      hud={`지금 돌을 ${POSES[Math.min(q.stage, 3)]} 위에 올렸어요 (${Math.min(q.stage + 1, 4)}/4) · 떨어뜨린 횟수 ${q.drops}`}
-      hint="화면의 왼쪽을 누르면 돌이 왼쪽으로, 오른쪽을 누르면 오른쪽으로 밀려요. 초록 칸 안에 돌을 두면 게이지가 차요. (키보드는 ← →)"
+      hud={i18nT('지금 돌을 {p0} 위에 올렸어요 ({p1}/4) · 떨어뜨린 횟수 {p2}', { p0: i18nT(POSES[Math.min(q.stage, 3)]), p1: Math.min(q.stage + 1, 4), p2: q.drops })}
+      hint={i18nT('화면의 왼쪽을 누르면 돌이 왼쪽으로, 오른쪽을 누르면 오른쪽으로 밀려요. 초록 칸 안에 돌을 두면 게이지가 차요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={S.stage}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <View style={st.ladder}>
             {POSES.map((p, i) => (
               <View key={p} style={[st.rung, i < q.stage && { backgroundColor: colors.green }, i === q.stage && { backgroundColor: color }]}>
-                <Text style={[st.rungTxt, (i <= q.stage) && { color: '#fff' }]}>{p}</Text>
+                <Text style={[st.rungTxt, (i <= q.stage) && { color: '#fff' }]}>{i18nT(p)}</Text>
               </View>
             ))}
           </View>
@@ -453,7 +454,7 @@ export function StoneBalanceGame({ color, onComplete, holdSec = 4, maxDrops = 6 
           <View style={[st.balProg, { left: 20, width: BW }]}>
             <View style={{ width: `${q.prog * 100}%`, height: '100%', backgroundColor: colors.green, borderRadius: 6 }} />
           </View>
-          <Text style={st.balTxt}>◀ 왼쪽 누르기 · 오른쪽 누르기 ▶</Text>
+          <Text style={st.balTxt}>{i18nT('◀ 왼쪽 누르기 · 오른쪽 누르기 ▶')}</Text>
         </View>
       </View>
     </Shell>

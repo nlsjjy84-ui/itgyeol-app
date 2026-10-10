@@ -8,6 +8,7 @@ import StoryScene from './StoryScene';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
+import { t as i18nT } from '../i18n';
 
 // ── 시간 설정 ─────────────────────────────────────────────
 // 예전에는 판마다 7~16초라 읽고 이해하기도 전에 끝났다. 이제 기본 시간을 3배로 늘리고,
@@ -38,17 +39,17 @@ export function MissionCard({ info, onStart, onStartFree, startLabel }) {
   return (
     <Frame style={styles.card}>
       {info.scene ? <StoryScene scene={info.scene} lines={info.lines} style={{ marginBottom: 12 }} /> : null}
-      <Text style={styles.kicker}>{info.kicker}</Text>
+      <Text style={styles.kicker}>{i18nT(info.kicker)}</Text>
       <Text brush style={styles.title}>
-        {info.title}
+        {i18nT(info.title)}
       </Text>
       <View style={styles.cloud}>
         <CloudBand width={200} color={colors.accent} />
       </View>
-      {info.story ? <Text style={styles.story}>{info.story}</Text> : null}
+      {info.story ? <Text style={styles.story}>{i18nT(info.story)}</Text> : null}
       <View style={styles.missionBox}>
         <Text style={styles.missionLabel}>{t('이번 미션')}</Text>
-        <Text style={styles.mission}>{info.mission}</Text>
+        <Text style={styles.mission}>{i18nT(info.mission)}</Text>
       </View>
       {info.example ? (
         <View style={styles.exampleWrap}>
@@ -63,12 +64,12 @@ export function MissionCard({ info, onStart, onStartFree, startLabel }) {
               <View style={styles.stepNo}>
                 <Text style={styles.stepNoText}>{i + 1}</Text>
               </View>
-              <Text style={styles.stepText}>{s}</Text>
+              <Text style={styles.stepText}>{i18nT(s)}</Text>
             </View>
           ))}
         </View>
       ) : null}
-      {info.tip ? <Text style={styles.tip}>{info.tip}</Text> : null}
+      {info.tip ? <Text style={styles.tip}>{i18nT(info.tip)}</Text> : null}
       <View style={styles.btns}>
         <SealButton label={startLabel || t('시작하기')} onPress={onStart} />
         <Pressable onPress={onStartFree} hitSlop={8} style={styles.free}>

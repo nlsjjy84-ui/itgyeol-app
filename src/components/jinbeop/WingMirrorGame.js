@@ -6,6 +6,7 @@ import SealButton from '../../ui/SealButton';
 import { play } from '../../utils/sound';
 import { colors } from '../../theme';
 import { useArrowHold } from '../../utils/useTapKey';
+import { t as i18nT } from '../../i18n';
 
 const CENTER = { x: 0.5, y: 0.82 };
 const HOLD_MS = 700;
@@ -56,7 +57,7 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
         clearTick();
         setRemainingMs(0);
         setPhase('ready');
-        const msg = '시간 안에 양쪽 날개를 다 펼치지 못했어요. 다시 펼쳐볼까요?';
+        const msg = i18nT('시간 안에 양쪽 날개를 다 펼치지 못했어요. 다시 펼쳐볼까요?');
         setFlash('wrong');
         setFlashMsg(msg);
         onFail && onFail(msg);
@@ -103,8 +104,8 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
         {phase === 'playing'
-          ? `날개 펼침 ${Math.round(spread * 100)}% · 자세 유지 ${Math.round((holdMs / HOLD_MS) * 100)}%`
-          : '한쪽 날개를 벌리면 반대쪽도 거울처럼 같이 벌어져요'}
+          ? i18nT('날개 펼침 {p0}% · 자세 유지 {p1}%', { p0: Math.round(spread * 100), p1: Math.round((holdMs / HOLD_MS) * 100) })
+          : i18nT('한쪽 날개를 벌리면 반대쪽도 거울처럼 같이 벌어져요')}
       </Text>
 
       <View style={styles.field}>
@@ -118,8 +119,8 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
             </View>
           );
         })}
-        {flash === 'success' && <Text style={styles.flashHit}>학익진 완성! 양쪽 날개가 활짝 펼쳐졌어요</Text>}
-        {flash === 'wrong' && <Text style={styles.flashMiss}>{flashMsg}</Text>}
+        {flash === 'success' && <Text style={styles.flashHit}>{i18nT('학익진 완성! 양쪽 날개가 활짝 펼쳐졌어요')}</Text>}
+        {flash === 'wrong' && <Text style={styles.flashMiss}>{i18nT(flashMsg)}</Text>}
       </View>
 
       {phase === 'playing' && (
@@ -139,30 +140,30 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
           onPressIn={() => changeSpread(-0.08)}
           disabled={phase !== 'playing'}
         >
-          <Text style={[styles.aimBtnText, { color }]}>◀ 접기</Text>
+          <Text style={[styles.aimBtnText, { color }]}>{i18nT('◀ 접기')}</Text>
         </Pressable>
         <Text style={styles.aimStatus}>
-          {phase === 'playing' ? '화살표 키(←→)로도 조종해요' : '한산도 대첩처럼 양쪽을 동시에 펼쳐 보자'}
+          {i18nT(phase === 'playing' ? '화살표 키(←→)로도 조종해요' : '한산도 대첩처럼 양쪽을 동시에 펼쳐 보자')}
         </Text>
         <Pressable
           style={[styles.aimBtn, { borderColor: color }]}
           onPressIn={() => changeSpread(0.08)}
           disabled={phase !== 'playing'}
         >
-          <Text style={[styles.aimBtnText, { color }]}>벌리기 ▶</Text>
+          <Text style={[styles.aimBtnText, { color }]}>{i18nT('벌리기 ▶')}</Text>
         </Pressable>
       </View>
 
       {phase !== 'playing' && (
-        <SealButton label={phase === 'done' ? '다시 펼쳐보기' : '날개 펼치기 시작'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
+        <SealButton label={phase === 'done' ? i18nT('다시 펼쳐보기') : i18nT('날개 펼치기 시작')} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
-  roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 8, textAlign: 'center' },
+  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'flex-start', paddingTop: 6 },
+  roundText: { fontSize: 14, fontWeight: '800', color: colors.ink, marginBottom: 8, textAlign: 'center', backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 3, overflow: 'hidden' },
   field: {
     width: '100%',
     maxWidth: 340,
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
-    borderRadius: 4,
+    borderRadius: 6,
     marginBottom: 10,
     overflow: 'hidden',
   },
@@ -251,6 +252,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 6,
   },
-  bigBtn: { paddingHorizontal: 30, paddingVertical: 16, borderRadius: 20 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
 });

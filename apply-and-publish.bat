@@ -19,10 +19,15 @@ git push origin redesign-ui
 if errorlevel 1 (echo PUSH FAILED & pause & exit /b 1)
 echo [5/5] merge into master and push
 git checkout master
-git pull origin master
-git merge redesign-ui -m "Merge redesign-ui into master"
+if errorlevel 1 (echo CHECKOUT MASTER FAILED - tell Claude & pause & exit /b 1)
+rem Merge GitHub master first so PR merges made on GitHub never block the push
+git pull --no-rebase --no-edit origin master
+if errorlevel 1 (echo PULL MASTER FAILED - tell Claude & pause & exit /b 1)
+git merge redesign-ui --no-edit -m "Merge redesign-ui into master"
 if errorlevel 1 (echo MERGE FAILED - tell Claude & pause & exit /b 1)
 git push origin master
+if errorlevel 1 (echo PUSH MASTER FAILED - tell Claude & pause & exit /b 1)
+git checkout redesign-ui
 echo.
 echo DONE. Site updates in 2-3 min: https://nlsjjy84-ui.github.io/itgyeol-app/
 pause

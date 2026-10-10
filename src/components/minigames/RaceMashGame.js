@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable, Animated } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useAlternateKey } from '../../utils/useTapKey';
+import { t as i18nT } from '../../i18n';
 
 // 경쟁형 놀이(줄다리기·굴렁쇠 등) 공통 엔진.
 // 고전 육상 게임(육상 100m 달리기 등)의 기본 조작 방식을 그대로 가져왔다 —
@@ -133,7 +134,7 @@ export default function RaceMashGame({
     <View style={styles.wrap}>
       {burstActive && (
         <Animated.View style={[styles.burstBanner, { transform: [{ scale: burstPulse }] }]}>
-          <Text style={styles.burstBannerText}>영차!! 지금 번갈아 쳐!</Text>
+          <Text style={styles.burstBannerText}>{i18nT('영차!! 지금 번갈아 쳐!')}</Text>
         </Animated.View>
       )}
       <View
@@ -142,21 +143,21 @@ export default function RaceMashGame({
           burstActive && { borderColor: colors.accent, borderWidth: 2, borderRadius: 14 },
         ]}
       >
-        <Text style={styles.sideIcon}>{oppIcon}</Text>
+        <Text style={styles.sideIcon}>{i18nT(oppIcon)}</Text>
         <View style={styles.ropeTrack}>
           <View style={[styles.ropeFillOpp, { width: `${(1 - myPct) * 100}%` }]} />
           <View style={[styles.ropeFillMe, { width: `${myPct * 100}%`, backgroundColor: color }]} />
         </View>
-        <Text style={styles.sideIcon}>{meIcon}</Text>
+        <Text style={styles.sideIcon}>{i18nT(meIcon)}</Text>
       </View>
       <Text style={styles.count}>
-        나 {myScore}  ·  상대 {Math.round(oppScore)}
-        {phase === 'running' ? `  ·  ${(timeLeftMs / 1000).toFixed(1)}초` : ''}
+        {i18nT('나')} {i18nT(myScore)}  {i18nT('·  상대')} {Math.round(oppScore)}
+        {phase === 'running' ? i18nT('  ·  {p0}초', { p0: (timeLeftMs / 1000).toFixed(1) }) : ''}
       </Text>
 
       {phase !== 'running' ? (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'ready' ? '시작하기' : '다시 하기'}</Text>
+          <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       ) : (
         <View style={styles.altRow}>
@@ -169,7 +170,7 @@ export default function RaceMashGame({
             onPress={() => registerAlt('L')}
           >
             <Text style={[styles.altBtnText, lastSide === 'L' ? { color: '#fff' } : { color }]}>
-              ◀ 왼발
+              {i18nT('◀ 왼발')}
             </Text>
           </Pressable>
           <Pressable
@@ -181,7 +182,7 @@ export default function RaceMashGame({
             onPress={() => registerAlt('R')}
           >
             <Text style={[styles.altBtnText, lastSide === 'R' ? { color: '#fff' } : { color }]}>
-              오른발 ▶
+              {i18nT('오른발 ▶')}
             </Text>
           </Pressable>
         </View>
@@ -220,8 +221,8 @@ const styles = StyleSheet.create({
   ropeFillOpp: { height: '100%', backgroundColor: 'rgba(0,0,0,0.18)' },
   ropeFillMe: { height: '100%' },
   count: { fontSize: 16, fontWeight: '700', color: colors.ink, marginBottom: 24 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   altRow: { flexDirection: 'row', gap: 16 },
   altBtn: {
     width: 130,

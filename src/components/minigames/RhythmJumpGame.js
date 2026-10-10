@@ -5,6 +5,7 @@ import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
 import { jangdanForPeriod } from '../../data/jangdan';
+import { t as i18nT } from '../../i18n';
 
 // 줄넘기 / 고무줄놀이 공통 엔진.
 //
@@ -239,16 +240,16 @@ export default function RhythmJumpGame({
   return (
     <View style={styles.wrap}>
       <Text style={styles.title}>
-        {isBand ? '고무줄놀이' : '줄넘기'} — 줄이 발밑을 지나는 순간에 맞춰 탭!
+        {i18nT(isBand ? '고무줄놀이' : '줄넘기')} {i18nT('— 줄이 발밑을 지나는 순간에 맞춰 탭!')}
       </Text>
 
       {phase !== 'ready' && (
         <Text style={styles.jangdanLabel}>
-          지금 장단: {jangdanStage.name} ({jangdanStage.feel})
+          {i18nT('지금 장단:')} {i18nT(jangdanStage.name)} ({i18nT(jangdanStage.feel)})
         </Text>
       )}
       {isBand && phase !== 'ready' && (
-        <Text style={styles.stageLabel}>지금 높이: {BAND_STAGE_LABELS[bandStage]}</Text>
+        <Text style={styles.stageLabel}>{i18nT('지금 높이:')} {i18nT(BAND_STAGE_LABELS[bandStage])}</Text>
       )}
 
       {/* 실제 게임 필드 — 캐릭터가 직접 줄을 넘는 모습이 여기 들어간다 */}
@@ -273,9 +274,9 @@ export default function RhythmJumpGame({
           <Mascot which={mascot} size={MASCOT_SIZE} />
         </Animated.View>
 
-        {flash === 'hit' && <Text style={[styles.flashText, { color: colors.green }]}>넘었다!</Text>}
+        {flash === 'hit' && <Text style={[styles.flashText, { color: colors.green }]}>{i18nT('넘었다!')}</Text>}
         {flash === 'miss' && (
-          <Text style={[styles.flashText, { color: '#b23b3b' }]}>타이밍이 안 맞았어요</Text>
+          <Text style={[styles.flashText, { color: '#b23b3b' }]}>{i18nT('타이밍이 안 맞았어요')}</Text>
         )}
       </View>
 
@@ -286,20 +287,20 @@ export default function RhythmJumpGame({
           style={[styles.sweetZone, { right: 0, width: `${windowPct}%`, backgroundColor: mainColor }]}
         />
         <View style={[styles.cycleCursor, { left: `${cursorPct}%` }]} />
-        <Text style={styles.cycleHint}>여기!</Text>
+        <Text style={styles.cycleHint}>{i18nT('여기!')}</Text>
       </View>
 
       <Text style={styles.count}>
-        {skips} / {targetSkips} 성공 · 놓침 {misses} / {maxMisses}
+        {i18nT(skips)} / {i18nT(targetSkips)} {i18nT('성공 · 놓침')} {i18nT(misses)} / {i18nT(maxMisses)}
       </Text>
 
       {phase !== 'running' ? (
         <Pressable style={[styles.bigBtn, { backgroundColor: mainColor }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'ready' ? '시작하기' : '다시 하기'}</Text>
+          <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       ) : (
         <Pressable style={[styles.tapBtn, { borderColor: mainColor }]} onPress={handleTap}>
-          <Text style={[styles.tapBtnText, { color: mainColor }]}>지금 넘기!</Text>
+          <Text style={[styles.tapBtnText, { color: mainColor }]}>{i18nT('지금 넘기!')}</Text>
         </Pressable>
       )}
     </View>
@@ -331,7 +332,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 360,
     height: FIELD_HEIGHT,
-    borderRadius: 18,
+    borderRadius: 6,
     borderWidth: 3,
     backgroundColor: colors.paper,
     overflow: 'hidden',
@@ -398,8 +399,8 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
   count: { fontSize: 15, fontWeight: '700', color: colors.ink, marginTop: 14, marginBottom: 20 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 220,
     height: 90,

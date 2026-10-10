@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useHoldKey } from '../../utils/useTapKey';
+import { t as i18nT } from '../../i18n';
 
 // 힘 조절형 놀이(구슬치기·팽이치기·자치기·딱지치기 등) 공통 엔진.
 // 누르고 있으면 힘 게이지가 오르내리고, 목표 구간 안에서 손을 떼면 성공.
@@ -52,11 +53,11 @@ export default function HoldChargeGame({ oscSpeedMs, targetMin, targetMax, color
         />
         <View style={[styles.gaugeFill, { width: `${power}%`, backgroundColor: color }]} />
       </View>
-      <Text style={styles.count}>힘 {Math.round(power)}</Text>
+      <Text style={styles.count}>{i18nT('힘')} {Math.round(power)}</Text>
 
       {phase === 'ready' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPressIn={startCharge}>
-          <Text style={styles.bigBtnText}>누르고 있기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('누르고 있기')}</Text>
         </Pressable>
       )}
       {phase === 'charging' && (
@@ -64,12 +65,12 @@ export default function HoldChargeGame({ oscSpeedMs, targetMin, targetMax, color
           style={[styles.tapBtn, { borderColor: color, backgroundColor: color }]}
           onPressOut={release}
         >
-          <Text style={[styles.tapBtnText, { color: '#fff' }]}>손 떼서 치기!</Text>
+          <Text style={[styles.tapBtnText, { color: '#fff' }]}>{i18nT('손 떼서 치기!')}</Text>
         </Pressable>
       )}
       {phase === 'done' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={retry}>
-          <Text style={styles.bigBtnText}>다시 하기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('다시 하기')}</Text>
         </Pressable>
       )}
     </View>
@@ -95,8 +96,8 @@ const styles = StyleSheet.create({
   },
   gaugeFill: { height: '100%' },
   count: { fontSize: 16, fontWeight: '700', color: colors.ink, marginBottom: 24 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 240,
     height: 240,

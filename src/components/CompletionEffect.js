@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, Image } from 'react-native';
 import Text from '../ui/Text';
+import { t as i18nT } from '../i18n';
 
 // 풍물(사물놀이) 계열 진법을 완성했을 때 터지는 연출 한가운데 실제로 등장시키는
 // 상모돌리기 원화 — 포트폴리오 PPT에 있던 일러스트를 그대로 크롭해 쓴 것.
@@ -68,7 +69,7 @@ export default function CompletionEffect({
             { borderColor: color, opacity, transform: [{ scale }, { rotate }] },
           ]}
         >
-          <Text style={[styles.stampText, { color }]}>{label || '완성'}</Text>
+          <Text style={[styles.stampText, { color }]}>{i18nT(label || '완성')}</Text>
         </Animated.View>
       </View>
     );

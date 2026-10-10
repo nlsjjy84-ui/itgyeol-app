@@ -4,6 +4,7 @@ import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useHoldKey } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
+import { t as i18nT } from '../../i18n';
 
 // 딱지치기 — 구슬치기·비석치기·투호·자치기와 달리 "조준"이 아예 없는 놀이다.
 // 실제 딱지치기는 내 딱지를 상대 딱지 옆 바닥에 얼마나 세게, 좋은 타이밍에
@@ -193,7 +194,7 @@ export default function DdakjiSlamGame({
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.roundText}>{round} / {rounds} 라운드</Text>
+      <Text style={styles.roundText}>{i18nT(round)} / {i18nT(rounds)} {i18nT('라운드')}</Text>
 
       {/* 좌우 조준이 없으니 이 게임엔 조준 트랙이 없다 — 오직 위에서 아래로
           내리치는 한 축만 존재한다. */}
@@ -247,8 +248,8 @@ export default function DdakjiSlamGame({
 
         <View style={styles.groundLine} />
 
-        {flash === 'hit' && <Text style={styles.flashHit}>뒤집었다!</Text>}
-        {flash === 'miss' && <Text style={styles.flashMiss}>안 뒤집혔어요</Text>}
+        {flash === 'hit' && <Text style={styles.flashHit}>{i18nT('뒤집었다!')}</Text>}
+        {flash === 'miss' && <Text style={styles.flashMiss}>{i18nT('안 뒤집혔어요')}</Text>}
       </View>
 
       <View style={styles.gaugeTrack}>
@@ -260,11 +261,11 @@ export default function DdakjiSlamGame({
         />
         <View style={[styles.gaugeFill, { width: `${power}%`, backgroundColor: color }]} />
       </View>
-      <Text style={styles.count}>힘 {Math.round(power)}</Text>
+      <Text style={styles.count}>{i18nT('힘')} {Math.round(power)}</Text>
 
       {phase === 'ready' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPressIn={startCharge}>
-          <Text style={styles.bigBtnText}>누르고 있기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('누르고 있기')}</Text>
         </Pressable>
       )}
       {phase === 'charging' && (
@@ -272,12 +273,12 @@ export default function DdakjiSlamGame({
           style={[styles.tapBtn, { borderColor: color, backgroundColor: color }]}
           onPressOut={release}
         >
-          <Text style={[styles.tapBtnText, { color: '#fff' }]}>손 떼서 내리치기!</Text>
+          <Text style={[styles.tapBtnText, { color: '#fff' }]}>{i18nT('손 떼서 내리치기!')}</Text>
         </Pressable>
       )}
       {phase === 'done' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={retry}>
-          <Text style={styles.bigBtnText}>다시 하기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('다시 하기')}</Text>
         </Pressable>
       )}
     </View>
@@ -364,8 +365,8 @@ const styles = StyleSheet.create({
   },
   gaugeFill: { height: '100%' },
   count: { fontSize: 15, fontWeight: '700', color: colors.ink, marginBottom: 20 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 220,
     height: 220,

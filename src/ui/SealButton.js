@@ -3,6 +3,7 @@ import { Pressable, View, StyleSheet } from 'react-native';
 import Text from './Text';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
+import { t as i18nT } from '../i18n';
 
 // 도장 같은 단추 — 네모진 붉은 판에 흰 글씨, 누르면 살짝 눌린다.
 // variant: 'seal'(붉은 도장) | 'ink'(먹) | 'paper'(한지·보조)
@@ -32,7 +33,7 @@ export default function SealButton({ label, onPress, variant = 'seal', style, sm
             { backgroundColor: bg, borderColor: edge, marginBottom: pressed ? 0 : 3 },
           ]}
         >
-          <Text style={[styles.label, small && styles.labelSmall, { color: fg }]}>{label}</Text>
+          <Text style={[styles.label, small && styles.labelSmall, { color: fg }]}>{i18nT(label)}</Text>
         </View>
       )}
     </Pressable>

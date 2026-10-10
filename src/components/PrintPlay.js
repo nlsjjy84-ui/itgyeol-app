@@ -4,6 +4,7 @@ import Text from '../ui/Text';
 import Frame from '../ui/Frame';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
+import { t as i18nT } from '../i18n';
 
 // 인쇄 판의 "자모 맞추기"가 아닌 놀이들 — 글자를 끌어다 놓는 것 말고도 인쇄·훈민정음을 만나는 길이 여럿 있다.
 //  · mirror   : 활자는 거울에 비친 글자로 새긴다 → 찍으면 어떻게 나올까?
@@ -49,28 +50,28 @@ function MirrorPlay({ onDone, color, accent }) {
       play('geomungo');
       setMsg(
         v.id === 'flipx'
-          ? '그건 활자와 똑같은 모양이에요. 찍으면 좌우가 한 번 뒤집혀요.'
-          : '찍으면 좌우만 뒤집혀요. 위아래나 거꾸로 돌아가지는 않아요.'
+          ? i18nT('그건 활자와 똑같은 모양이에요. 찍으면 좌우가 한 번 뒤집혀요.')
+          : i18nT('찍으면 좌우만 뒤집혀요. 위아래나 거꾸로 돌아가지는 않아요.')
       );
     }
   };
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.q}>활자는 글자를 거울에 비친 모양으로 새겨요. 이 활자에 먹을 묻혀 종이에 찍으면 어떤 모양이 나올까요? ({r + 1}/{rounds.length})</Text>
+      <Text style={styles.q}>{i18nT('활자는 글자를 거울에 비친 모양으로 새겨요. 이 활자에 먹을 묻혀 종이에 찍으면 어떤 모양이 나올까요? (')}{r + 1}/{i18nT(rounds.length)})</Text>
       <View style={[styles.typeBlock, { borderColor: color }]}>
-        <Text style={styles.typeCap}>활자(새긴 면)</Text>
-        <Text style={[styles.bigGlyph, { transform: [{ scaleX: -1 }], color: '#7a5a1c' }]}>{glyph}</Text>
+        <Text style={styles.typeCap}>{i18nT('활자(새긴 면)')}</Text>
+        <Text style={[styles.bigGlyph, { transform: [{ scaleX: -1 }], color: '#7a5a1c' }]}>{i18nT(glyph)}</Text>
       </View>
-      <Text style={styles.arrow}>▼ 종이에 꾹 찍으면</Text>
+      <Text style={styles.arrow}>{i18nT('▼ 종이에 꾹 찍으면')}</Text>
       <View style={styles.optRow}>
         {order.map((v) => (
           <Pressable key={v.id} style={[styles.opt, { borderColor: colors.border }]} onPress={() => pick(v)}>
-            <Text style={[styles.optGlyph, { transform: v.tf }]}>{glyph}</Text>
+            <Text style={[styles.optGlyph, { transform: v.tf }]}>{i18nT(glyph)}</Text>
           </Pressable>
         ))}
       </View>
-      {msg ? <Text style={[styles.msg, { color: accent }]}>{msg}</Text> : null}
+      {msg ? <Text style={[styles.msg, { color: accent }]}>{i18nT(msg)}</Text> : null}
     </View>
   );
 }
@@ -110,21 +111,21 @@ function SentencePlay({ onDone, color, accent }) {
     } else {
       mistakes.current += 1;
       play('geomungo');
-      setMsg('글은 왼쪽에서 오른쪽으로 읽어요. 이 활자는 아직 차례가 아니에요.');
+      setMsg(i18nT('글은 왼쪽에서 오른쪽으로 읽어요. 이 활자는 아직 차례가 아니에요.'));
     }
   };
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.q}>훈민정음 서문을 활자로 짜 올려요. 낱말 활자를 읽는 순서대로 눌러 한 줄을 짜 보자. ({s + 1}/{SENTENCES.length}줄)</Text>
+      <Text style={styles.q}>{i18nT('훈민정음 서문을 활자로 짜 올려요. 낱말 활자를 읽는 순서대로 눌러 한 줄을 짜 보자. (')}{s + 1}/{i18nT(SENTENCES.length)}{i18nT('줄)')}</Text>
       <View style={[styles.composing, { borderColor: color }]}>
         {sent.chunks.map((c, i) => (
           <View key={c} style={[styles.slot, i < got && { backgroundColor: color, borderStyle: 'solid' }]}>
-            <Text style={[styles.slotText, i < got && { color: '#fff' }]}>{i < got ? c : i + 1}</Text>
+            <Text style={[styles.slotText, i < got && { color: '#fff' }]}>{i18nT(i < got ? c : i + 1)}</Text>
           </View>
         ))}
       </View>
-      <Text style={styles.gloss}>뜻: {sent.gloss}</Text>
+      <Text style={styles.gloss}>{i18nT('뜻:')} {i18nT(sent.gloss)}</Text>
       <View style={styles.optRow}>
         {pool.map((item) => (
           <Pressable
@@ -133,11 +134,11 @@ function SentencePlay({ onDone, color, accent }) {
             style={[styles.chip, item.i < got && { opacity: 0.25 }]}
             onPress={() => tap(item)}
           >
-            <Text style={styles.chipText}>{item.c}</Text>
+            <Text style={styles.chipText}>{i18nT(item.c)}</Text>
           </Pressable>
         ))}
       </View>
-      {msg ? <Text style={[styles.msg, { color: accent }]}>{msg}</Text> : null}
+      {msg ? <Text style={[styles.msg, { color: accent }]}>{i18nT(msg)}</Text> : null}
     </View>
   );
 }
@@ -173,13 +174,13 @@ function ShapePlay({ onDone, color, accent }) {
     } else {
       mistakes.current += 1;
       play('geomungo');
-      setMsg('아니에요. 소리를 낼 때 그 자리가 어떤 모양인지 입을 움직여 보며 다시 골라 봐요.');
+      setMsg(i18nT('아니에요. 소리를 낼 때 그 자리가 어떤 모양인지 입을 움직여 보며 다시 골라 봐요.'));
     }
   };
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.q}>세종대왕은 소리 낼 때 입과 혀의 모양을 본떠 자음을 만들었어요. 왼쪽 글자를 누르고, 본뜬 모양을 오른쪽에서 짝지어 봐요.</Text>
+      <Text style={styles.q}>{i18nT('세종대왕은 소리 낼 때 입과 혀의 모양을 본떠 자음을 만들었어요. 왼쪽 글자를 누르고, 본뜬 모양을 오른쪽에서 짝지어 봐요.')}</Text>
       <View style={styles.twoCol}>
         <View style={styles.col}>
           {SHAPES.map((it) => {
@@ -191,8 +192,8 @@ function ShapePlay({ onDone, color, accent }) {
                 style={[styles.shapeL, sel === it.k && { borderColor: color, backgroundColor: colors.accentSoft }, ok && { opacity: 0.35 }]}
                 onPress={() => { play('tap'); setSel(it.k); }}
               >
-                <Text style={styles.shapeK}>{it.k}</Text>
-                <Text style={styles.shapeName}>{ok ? it.name : ''}</Text>
+                <Text style={styles.shapeK}>{i18nT(it.k)}</Text>
+                <Text style={styles.shapeName}>{i18nT(ok ? it.name : '')}</Text>
               </Pressable>
             );
           })}
@@ -202,13 +203,13 @@ function ShapePlay({ onDone, color, accent }) {
             const ok = done.includes(it.k);
             return (
               <Pressable key={it.k} disabled={ok} style={[styles.shapeR, ok && { opacity: 0.35 }]} onPress={() => tapRight(it)}>
-                <Text style={styles.shapeD}>{it.d}</Text>
+                <Text style={styles.shapeD}>{i18nT(it.d)}</Text>
               </Pressable>
             );
           })}
         </View>
       </View>
-      {msg ? <Text style={[styles.msg, { color: accent }]}>{msg}</Text> : null}
+      {msg ? <Text style={[styles.msg, { color: accent }]}>{i18nT(msg)}</Text> : null}
     </View>
   );
 }

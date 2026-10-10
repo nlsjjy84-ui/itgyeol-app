@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform, TextInput, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform, TextInput, useWindowDimensions, Image } from 'react-native';
 import Text from '../ui/Text';
 import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
@@ -17,12 +17,16 @@ import { PLAY_GAMES } from '../data/playGames';
 import { useJourney } from '../context/JourneyContext';
 import { resultOptionCode } from '../utils/resultSeed';
 import { synthesizeAttention } from '../utils/attentionSynth';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import { buildFacts, baseCommentary, polishCommentary, polishEnabled } from '../utils/commentary';
 import ScreenHeader from '../ui/ScreenHeader';
 import ArtFrame from '../components/ArtFrame';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
+import { REAL_PHOTOS } from '../data/realPhotos';
+import { getLang } from '../i18n';
+import { linkedArchive } from '../data/archiveLinks';
+import { ArchiveDetail, entryName } from './ArchiveScreen';
 
 const SCENE_LABEL = {
   jinbeop: '진법',
@@ -81,6 +85,7 @@ export default function ResultScreen({ navigation }) {
   const { attempts, skills, progress, playLog } = useJourney();
   const shotRef = useRef(null);
   const [saveStatus, setSaveStatus] = useState('');
+  const [archOpen, setArchOpen] = useState(null);
   useEffect(() => {
     play('stamp');
     const t = setTimeout(() => play('daegeumCalm'), 300);
@@ -435,6 +440,35 @@ export default function ResultScreen({ navigation }) {
             </Text>
           </View>
 
+          {(() => {
+            const r = REAL_PHOTOS[item.id];
+            const en = getLang() !== 'ko';
+            const linked = linkedArchive(item.id, 10);
+            return (
+              <View style={styles.aboutBox}>
+                <Text style={styles.aboutTitle}>{t('닿아 있는 전통')}</Text>
+                <Text style={styles.commentNote}>{t('내 작품은 이런 실제 전통을 본뜬 모양에 놀이 기록이 더해진 거예요. 눌러서 크게 보세요.')}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.linkRow}>
+                  {r ? (
+                    <Pressable style={styles.linkCard} onPress={() => setArchOpen({ key: 'real', img: r.img, ko: r.ko, en: r.en, zh: r.zh, ja: r.ja, date: '', des: '', by: getLang() === 'ko' ? r.by : r.byEn, lic: r.licEn === 'KOGL Type 1' ? 'KOGL1' : r.licEn, page: r.page, mat: [], mot: [] })}>
+                      <Image source={r.img} style={styles.linkImg} resizeMode="contain" />
+                      <Text style={styles.linkName} numberOfLines={2}>{({ ko: r.ko, en: r.en, zh: r.zh || r.en, ja: r.ja || r.en })[getLang()] || r.en}</Text>
+                    </Pressable>
+                  ) : null}
+                  {linked.map((e) => (
+                    <Pressable key={e.key} style={styles.linkCard} onPress={() => setArchOpen(e)}>
+                      <Image source={e.img} style={styles.linkImg} resizeMode="contain" />
+                      <Text style={styles.linkName} numberOfLines={2}>{entryName(e)}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+                <Pressable onPress={() => navigation.navigate('Archive')}>
+                  <Text style={styles.linkMore}>{t('전통 자료실 전체 보기 ›')}</Text>
+                </Pressable>
+              </View>
+            );
+          })()}
+
           <View style={styles.aboutBox}>
             <Text style={styles.aboutTitle}>
               {item.label} · {variant.label}
@@ -468,6 +502,7 @@ export default function ResultScreen({ navigation }) {
           </View>
         </View>
 
+        <ArchiveDetail entry={archOpen} onClose={() => setArchOpen(null)} />
         <Pressable style={styles.secondaryBtn} onPress={() => navigation.popToTop()}>
           <Text style={styles.secondaryBtnText}>{t('홈으로')}</Text>
         </Pressable>
@@ -562,7 +597,7 @@ const styles = StyleSheet.create({
   modeChipTextActive: { color: '#fff' },
   card: {
     backgroundColor: colors.paper,
-    borderRadius: 20,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -572,7 +607,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     width: '100%',
     backgroundColor: colors.accent,
-    borderRadius: 16,
+    borderRadius: 6,
     paddingVertical: 14,
     alignItems: 'center',
   },
@@ -583,7 +618,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 14,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 6,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.borderSoft,
@@ -610,12 +645,12 @@ const styles = StyleSheet.create({
     borderTopColor: colors.borderSoft,
     paddingTop: 20,
   },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: colors.ink, marginBottom: 10 },
+  sectionTitle: { fontSize: 16, fontFamily: fonts.serifBold, color: colors.ink, marginBottom: 10 },
   sectionHint: { fontSize: 11, color: colors.muted, marginTop: 8, textAlign: 'center' },
   qrBox: {
     padding: 14,
     backgroundColor: colors.paper,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -687,7 +722,13 @@ const styles = StyleSheet.create({
   hookBtnOn: { borderColor: colors.accent },
   hookBtnText: { fontSize: 11.5, color: colors.muted, fontWeight: '700' },
   hookBtnTextOn: { color: colors.accent },
-  aboutBox: { marginTop: 12, width: '100%', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper, gap: 4 },
+  linkRow: { gap: 8, paddingVertical: 6 },
+  linkCard: { width: 112 },
+  linkImg: { width: 112, height: 112, borderRadius: 8, backgroundColor: '#ffffff', borderWidth: 1, borderColor: colors.borderSoft },
+  linkName: { fontSize: 11, color: colors.ink, marginTop: 3, lineHeight: 14 },
+  linkMore: { fontSize: 12, color: colors.accent, fontWeight: '700', marginTop: 4 },
+  realImg: { width: '100%', height: 220, marginVertical: 8, borderRadius: 8, backgroundColor: '#ffffff' },
+  aboutBox: { marginTop: 12, width: '100%', padding: 12, borderRadius: 6, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper, gap: 4 },
   aboutTitle: { fontSize: 13.5, fontWeight: '800', color: colors.ink },
   aboutText: { fontSize: 12, color: colors.ink, lineHeight: 18 },
   commentNote: { fontSize: 10.5, color: colors.muted, lineHeight: 15, marginTop: 2 },
@@ -695,7 +736,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 18,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 6,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.borderSoft,
@@ -712,7 +753,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 12,
     paddingVertical: 9,
-    borderRadius: 12,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.bg,
@@ -722,7 +763,7 @@ const styles = StyleSheet.create({
   customBtn: {
     paddingHorizontal: 14,
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: colors.accent,
   },
   customBtnText: { color: '#fff', fontWeight: '700', fontSize: 12 },
@@ -737,7 +778,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 14,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: 6,
     backgroundColor: colors.paper,
     borderWidth: 1,
     borderColor: colors.borderSoft,
@@ -764,7 +805,7 @@ const styles = StyleSheet.create({
     marginTop: 26,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.border,
   },

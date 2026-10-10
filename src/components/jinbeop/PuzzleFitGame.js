@@ -5,6 +5,7 @@ import { useTime } from '../../ui/Mission';
 import { play } from '../../utils/sound';
 import Dot from '../Dot';
 import { colors } from '../../theme';
+import { t as i18nT } from '../../i18n';
 
 const SNAP_THRESHOLD = 34;
 
@@ -83,7 +84,7 @@ export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess,
         if (!settledRef.current) {
           settledRef.current = true;
           setFlash('wrong');
-          onFail && onFail('시간이 다 됐어요! 다시 맞춰볼까요?');
+          onFail && onFail(i18nT('시간이 다 됐어요! 다시 맞춰볼까요?'));
         }
       } else {
         setRemainingMs(left);
@@ -144,13 +145,13 @@ export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess,
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.roundText}>조각을 점선 자리로 끌어다(또는 짚은 뒤 자리를 짚어) 퍼즐을 맞춰보세요</Text>
+      <Text style={styles.roundText}>{i18nT('조각을 점선 자리로 끌어다(또는 짚은 뒤 자리를 짚어) 퍼즐을 맞춰보세요')}</Text>
 
       <View style={styles.timerRow}>
         <View style={styles.timerTrack}>
           <View style={[styles.timerFill, { width: `${Math.max(0, Math.min(100, ratio * 100))}%`, backgroundColor: timerColor }]} />
         </View>
-        <Text style={[styles.timerSeconds, { color: timerColor }]}>{timed ? `⏱ ${Math.max(0, Math.ceil(remainingMs / 1000))}초` : '시간 제한 없음'}</Text>
+        <Text style={[styles.timerSeconds, { color: timerColor }]}>{timed ? i18nT('⏱ {p0}초', { p0: Math.max(0, Math.ceil(remainingMs / 1000)) }) : i18nT('시간 제한 없음')}</Text>
       </View>
 
       <View style={styles.stage} onLayout={onStageLayout}>
@@ -180,27 +181,20 @@ export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess,
             forceSignal={keyboardMove.id === i ? keyboardMove.nonce : undefined}
           />
         ))}
-        {flash === 'success' && <Text style={styles.flashHit}>완성! 퍼즐이 꼭 맞았어요</Text>}
-        {flash === 'wrong' && <Text style={styles.flashMiss}>시간이 다 됐어요</Text>}
+        {flash === 'success' && <Text style={styles.flashHit}>{i18nT('완성! 퍼즐이 꼭 맞았어요')}</Text>}
+        {flash === 'wrong' && <Text style={styles.flashMiss}>{i18nT('시간이 다 됐어요')}</Text>}
       </View>
 
       <Pressable style={[styles.secondaryBtn, { borderColor: color }]} onPress={() => start(stageSize)}>
-        <Text style={[styles.secondaryBtnText, { color }]}>다시 섞기</Text>
+        <Text style={[styles.secondaryBtnText, { color }]}>{i18nT('다시 섞기')}</Text>
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
-  roundText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: colors.accentDeep,
-    marginBottom: 8,
-    textAlign: 'center',
-    paddingHorizontal: 10,
-  },
+  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'flex-start', paddingTop: 6 },
+  roundText: { fontSize: 14, fontWeight: '800', color: colors.ink, marginBottom: 8, textAlign: 'center', backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 3, overflow: 'hidden' },
   timerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -226,7 +220,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
-    borderRadius: 4,
+    borderRadius: 6,
     marginBottom: 14,
     overflow: 'hidden',
   },

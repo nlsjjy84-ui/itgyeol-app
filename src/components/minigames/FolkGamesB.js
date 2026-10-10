@@ -5,6 +5,7 @@ import { colors } from '../../theme';
 import { useArrowHold, useTapKey } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { t as i18nT } from '../../i18n';
 
 // ───────── 투호 — 팔이 천천히 흔들릴 때, 항아리 쪽으로 향한 순간 놓는다 ─────────
 export function TuhoGame({ color, onComplete, arrows = 6, need = 3, periodSec = 3.4, zoneDeg = 14 }) {
@@ -76,8 +77,8 @@ export function TuhoGame({ color, onComplete, arrows = 6, need = 3, periodSec = 
       color={color}
       phase={phase}
       onStart={start}
-      hud={`항아리에 넣은 화살 ${q.hit}/${need} · 던진 화살 ${q.shot}/${arrows}`}
-      hint="팔이 좌우로 천천히 흔들려요. 화살이 항아리를 향한 순간(초록 불이 켜질 때) '던지기'를 눌러요. (스페이스바도 돼요)"
+      hud={i18nT('항아리에 넣은 화살 {p0}/{p1} · 던진 화살 {p2}/{p3}', { p0: q.hit, p1: need, p2: q.shot, p3: arrows })}
+      hint={i18nT('팔이 좌우로 천천히 흔들려요. 화살이 항아리를 향한 순간(초록 불이 켜질 때) \'던지기\'를 눌러요. (스페이스바도 돼요)')}
     >
       <View style={S.stage}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -87,14 +88,14 @@ export function TuhoGame({ color, onComplete, arrows = 6, need = 3, periodSec = 
           <View style={[st.arm, { left: STAGE_W / 2 - 3, top: THROW_Y - 70, transform: [{ translateY: 35 }, { rotate: `${deg}deg` }, { translateY: -35 }] }]} />
           <View style={[st.arrow, { left: fx - 3, top: fy - 14, backgroundColor: q.fly ? colors.ink : color }]} />
           <View style={[st.lamp, { backgroundColor: inZone ? colors.green : colors.border }]}>
-            <Text style={st.lampTxt}>{inZone ? '지금!' : '기다려요'}</Text>
+            <Text style={st.lampTxt}>{i18nT(inZone ? '지금!' : '기다려요')}</Text>
           </View>
-          {q.last ? <Text style={[st.result, { color: q.last === 'in' ? colors.green : colors.accent }]}>{q.last === 'in' ? '쏙 들어갔어요!' : '아깝게 빗나갔어요'}</Text> : null}
+          {q.last ? <Text style={[st.result, { color: q.last === 'in' ? colors.green : colors.accent }]}>{i18nT(q.last === 'in' ? '쏙 들어갔어요!' : '아깝게 빗나갔어요')}</Text> : null}
         </View>
       </View>
       {phase === 'running' ? (
         <Pressable style={[S.bigBtn, { backgroundColor: color, paddingHorizontal: 60 }]} onPress={release}>
-          <Text style={S.bigBtnText}>던지기</Text>
+          <Text style={S.bigBtnText}>{i18nT('던지기')}</Text>
         </Pressable>
       ) : null}
     </Shell>
@@ -128,12 +129,12 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
     clear();
     setMode('show');
     setPos(0);
-    setMsg('잘 봐 👀');
+    setMsg(i18nT('잘 봐 👀'));
     s.forEach((p, i) => {
       later(() => { setLit(p); play('tap'); }, 900 + i * 900);
       later(() => setLit(-1), 900 + i * 900 + 560);
     });
-    later(() => { setMode('input'); setMsg('이제 따라 해 볼까?'); }, 900 + s.length * 900 + 200);
+    later(() => { setMode('input'); setMsg(i18nT('이제 따라 해 볼까?')); }, 900 + s.length * 900 + 200);
   };
 
   const newRound = (r) => {
@@ -170,7 +171,7 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
           setPhase('done');
           onComplete({ success: true, score: mistakes, elapsedMs: Date.now() - startRef.current });
         } else {
-          setMsg('어, 한 줄 더 길어졌네요');
+          setMsg(i18nT('어, 한 줄 더 길어졌네요'));
           setMode('show');
           later(() => newRound(round + 1), 900);
         }
@@ -183,7 +184,7 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
         setPhase('done');
         onComplete({ success: false, score: round, elapsedMs: Date.now() - startRef.current });
       } else {
-        setMsg('아깝게 틀렸어요. 같은 순서를 다시 보여 줄게요');
+        setMsg(i18nT('아깝게 틀렸어요. 같은 순서를 다시 보여 줄게요'));
         setMode('show');
         later(() => showSeq(seq), 900);
       }
@@ -207,16 +208,16 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
       color={color}
       phase={phase}
       onStart={start}
-      hud={`${round + 1}번째 노래 (${seq.length || startLen}걸음) · 틀린 횟수 ${mistakes}/${maxMistakes}`}
-      hint="고무줄 넘는 발 모양이 불빛 순서대로 켜져요. 순서를 잘 기억했다가 같은 순서로 눌러요. 줄이 점점 길어져요."
+      hud={i18nT('{p0}번째 노래 ({p1}걸음) · 틀린 횟수 {p2}/{p3}', { p0: round + 1, p1: seq.length || startLen, p2: mistakes, p3: maxMistakes })}
+      hint={i18nT('고무줄 넘는 발 모양이 불빛 순서대로 켜져요. 순서를 잘 기억했다가 같은 순서로 눌러요. 줄이 점점 길어져요.')}
     >
       <View style={[S.stage, { alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
         <View style={st.songRow}>
           {seq.map((p, i) => (
-            <Text key={i} style={[st.syl, mode === 'input' && i < pos && { color: colors.green }]}>{SYL[i]}</Text>
+            <Text key={i} style={[st.syl, mode === 'input' && i < pos && { color: colors.green }]}>{i18nT(SYL[i])}</Text>
           ))}
         </View>
-        <Text style={[st.msg, { color }]}>{msg || '시작을 눌러요'}</Text>
+        <Text style={[st.msg, { color }]}>{i18nT(msg || '시작을 눌러요')}</Text>
         <View style={st.padRow}>
           {PADS.map((p) => (
             <Pressable
@@ -224,8 +225,8 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
               style={[st.gpad, lit === p.id && { backgroundColor: color, transform: [{ scale: 1.1 }] }]}
               onPress={() => press(p.id)}
             >
-              <Text style={[st.gIcon, lit === p.id && { color: '#fff' }]}>{p.icon}</Text>
-              <Text style={[st.gLabel, lit === p.id && { color: '#fff' }]}>{p.label}</Text>
+              <Text style={[st.gIcon, lit === p.id && { color: '#fff' }]}>{i18nT(p.icon)}</Text>
+              <Text style={[st.gLabel, lit === p.id && { color: '#fff' }]}>{i18nT(p.label)}</Text>
             </Pressable>
           ))}
         </View>
@@ -282,8 +283,8 @@ export function KiteSteerGame({ color, onComplete, limitSec = 25 }) {
       color={color}
       phase={phase}
       onStart={start}
-      hud={`연 높이 ${Math.round(q.h)}%${phase === 'running' ? ` · 남은 시간 ${Math.max(0, Math.ceil(limitSec - q.t))}초` : ''}`}
-      hint="손가락(마우스)을 좌우로 움직여 연을 이끌어요. 바람이 부는 푸른 길 안에 있으면 연이 올라가요. 바람 길은 천천히 움직여요. (키보드는 ← →)"
+      hud={i18nT('연 높이 {p0}%{p1}', { p0: Math.round(q.h), p1: phase === 'running' ? i18nT(' · 남은 시간 {p0}초', { p0: Math.max(0, Math.ceil(limitSec - q.t)) }) : '' })}
+      hint={i18nT('손가락(마우스)을 좌우로 움직여 연을 이끌어요. 바람이 부는 푸른 길 안에 있으면 연이 올라가요. 바람 길은 천천히 움직여요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#dcecf5' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -378,16 +379,16 @@ export function HoopGame({ color, onComplete, targetSec = 25, lives = 3, speed =
       color={color}
       phase={phase}
       onStart={start}
-      hud={`달린 거리 ${Math.round((q.t / targetSec) * 100)}% · 기회 ${'♥'.repeat(Math.max(0, q.lives))}`}
-      hint="화면의 왼쪽을 누르면 한 칸 왼쪽 길로, 오른쪽을 누르면 오른쪽 길로 가요. 돌부리와 풀덤불을 피해 끝까지 굴려요. (키보드는 ← →)"
+      hud={i18nT('달린 거리 {p0}% · 기회 {p1}', { p0: Math.round((q.t / targetSec) * 100), p1: '♥'.repeat(Math.max(0, q.lives)) })}
+      hint={i18nT('화면의 왼쪽을 누르면 한 칸 왼쪽 길로, 오른쪽을 누르면 오른쪽 길로 가요. 돌부리와 풀덤불을 피해 끝까지 굴려요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#efe3c8' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           {[1, 2].map((i) => <View key={i} style={[st.laneLine, { left: i * LANE_W }]} />)}
-          {q.obs.map((o, i) => <Text key={i} style={[st.obs, { left: o.lane * LANE_W + LANE_W / 2 - 16, top: o.y - 16 }]}>{o.icon}</Text>)}
+          {q.obs.map((o, i) => <Text key={i} style={[st.obs, { left: o.lane * LANE_W + LANE_W / 2 - 16, top: o.y - 16 }]}>{i18nT(o.icon)}</Text>)}
           <View style={[st.hoop, { left: q.x * LANE_W + LANE_W / 2 - 22, top: RING_Y - 22, borderColor: color, opacity: q.hurt > 0 && Math.floor(q.hurt * 10) % 2 ? 0.3 : 1 }]} />
           <Text style={[st.stick, { left: q.x * LANE_W + LANE_W / 2 + 18, top: RING_Y - 6 }]}>｜</Text>
-          <Text style={st.laneHint}>◀ 왼쪽 누르기        오른쪽 누르기 ▶</Text>
+          <Text style={st.laneHint}>{i18nT('◀ 왼쪽 누르기        오른쪽 누르기 ▶')}</Text>
         </View>
       </View>
       <Bar value={(q.t / targetSec) * 100} color={color} />

@@ -10,6 +10,7 @@ import Svg, { Polyline } from 'react-native-svg';
 import { colors } from '../../theme';
 import { similarityToTemplate } from '../../utils/shapeMatch';
 import { formationTemplate } from '../../data/formations';
+import { t as i18nT } from '../../i18n';
 
 const BASE_DRAW_MS = 15000;
 const SUCCESS_THRESHOLD = 62;
@@ -45,7 +46,7 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
     if (raw.length < 2 || !sizeNow.width || !sizeNow.height) {
       phaseRef.current = 'ready';
       setPhase('ready');
-      onFail && onFail('그림을 거의 그리지 못했어요. 다시 한 번 그려볼까요?');
+      onFail && onFail(i18nT('그림을 거의 그리지 못했어요. 다시 한 번 그려볼까요?'));
       return;
     }
     const normalized = raw.map((p) => ({ x: p.x / sizeNow.width, y: p.y / sizeNow.height }));
@@ -57,7 +58,7 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
     if (pct >= SUCCESS_THRESHOLD) {
       onSuccess && onSuccess(elapsed);
     } else {
-      onFail && onFail(`이번엔 ${pct}% 비슷했어요. 조금 더 비슷하게 그려볼까요?`);
+      onFail && onFail(i18nT('이번엔 {p0}% 비슷했어요. 조금 더 비슷하게 그려볼까요?', { p0: pct }));
     }
   };
   const finishRef = useRef(finishDrawing);
@@ -126,10 +127,10 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
         {phase === 'drawing'
-          ? `그리는 중 · ${timed ? `⏱ ${remainingSec}초` : '시간 제한 없음'}`
+          ? i18nT('그리는 중 · {p0}', { p0: timed ? i18nT('⏱ {p0}초', { p0: remainingSec }) : i18nT('시간 제한 없음') })
           : phase === 'result'
-          ? `${resultPct}% 비슷해요`
-          : timed ? `제한 시간 ${Math.round(DRAW_MS / 1000)}초 동안 이 모양을 손으로 그려 보자` : '시간 제한 없이 이 모양을 손으로 그려 보자'}
+          ? i18nT('{p0}% 비슷해요', { p0: resultPct })
+          : timed ? i18nT('제한 시간 {p0}초 동안 이 모양을 손으로 그려 보자', { p0: Math.round(DRAW_MS / 1000) }) : i18nT('시간 제한 없이 이 모양을 손으로 그려 보자')}
       </Text>
 
       <GestureDetector gesture={pan}>
@@ -158,11 +159,11 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
             </Svg>
           )}
           {phase === 'drawing' && points.length === 0 && (
-            <Text style={styles.canvasHint}>여기를 손가락(또는 마우스)으로 눌러서 그려보세요</Text>
+            <Text style={styles.canvasHint}>{i18nT('여기를 손가락(또는 마우스)으로 눌러서 그려보세요')}</Text>
           )}
           {phase === 'result' && (
             <Text style={success ? styles.flashHit : styles.flashMiss}>
-              {success ? '많이 닮았어요!' : `${resultPct}% 비슷해요 — 조금 더 가까이 그려볼까요?`}
+              {success ? i18nT('많이 닮았어요!') : i18nT('{p0}% 비슷해요 — 조금 더 가까이 그려볼까요?', { p0: resultPct })}
             </Text>
           )}
         </View>
@@ -180,11 +181,11 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
       )}
 
       {phase !== 'drawing' && (
-        <SealButton label={phase === 'result' ? '다시 그려보기' : '그리기 시작'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
+        <SealButton label={phase === 'result' ? i18nT('다시 그려보기') : i18nT('그리기 시작')} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
       {phase === 'drawing' && (
         <Pressable style={[styles.submitBtn, { borderColor: color }]} onPress={finishDrawing}>
-          <Text style={[styles.submitBtnText, { color }]}>다 그렸어요</Text>
+          <Text style={[styles.submitBtnText, { color }]}>{i18nT('다 그렸어요')}</Text>
         </Pressable>
       )}
     </View>
@@ -192,8 +193,8 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
-  roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 8, textAlign: 'center' },
+  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'flex-start', paddingTop: 6 },
+  roundText: { fontSize: 14, fontWeight: '800', color: colors.ink, marginBottom: 8, textAlign: 'center', backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 3, overflow: 'hidden' },
   canvas: {
     width: '100%',
     maxWidth: 320,
@@ -254,8 +255,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   timeFill: { height: '100%' },
-  bigBtn: { paddingHorizontal: 30, paddingVertical: 16, borderRadius: 20 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   submitBtn: {
     paddingHorizontal: 24,
     paddingVertical: 12,

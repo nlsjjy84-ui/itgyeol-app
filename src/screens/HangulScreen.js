@@ -4,6 +4,7 @@ import Text from '../ui/Text';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import GamePicker from '../ui/GamePicker';
 import OhangPicker from '../components/OhangPicker';
 import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
@@ -14,12 +15,13 @@ import { ohangByKey } from '../data/formations';
 import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
+import { t as i18nT } from '../i18n';
 
 function speedComment(ms) {
   const sec = ms / 1000;
-  if (sec < 40) return '순식간에 쌓아 올렸어요.';
-  if (sec < 100) return '리듬을 타며 차곡차곡 쌓았어요.';
-  return '끈기 있게 끝까지 해냈어요.';
+  if (sec < 40) return i18nT('순식간에 쌓아 올렸어요.');
+  if (sec < 100) return i18nT('리듬을 타며 차곡차곡 쌓았어요.');
+  return i18nT('끈기 있게 끝까지 해냈어요.');
 }
 
 export default function HangulScreen({ navigation }) {
@@ -28,6 +30,7 @@ export default function HangulScreen({ navigation }) {
   const [visible, setVisible] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [comment, setComment] = useState('');
+  const [picking, setPicking] = useState(true); // 놀이를 시작하면 고르기 판을 한 줄로 접는다
   const [noteOpen, setNoteOpen] = useState(false);
   const { addResult, recordSkill, ohangKey } = useJourney();
   const ohang = ohangByKey(ohangKey);
@@ -66,44 +69,42 @@ export default function HangulScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScreenHeader scene="Hangul" title="한글 테트리스" sub="자음·모음 블록을 쌓아 줄을 지워요" onBack={() => navigation.navigate('Home')} />
+      <ScreenHeader scene="Hangul" title={i18nT('한글 테트리스')} sub={i18nT('자음·모음 블록을 쌓아 줄을 지워요')} onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
         <OhangPicker />
       </View>
-      <View style={styles.sidebar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sidebarList}>
-          {HANGUL_STAGES.map((s, i) => (
-            <Pressable key={s.id} style={[styles.tab, i === idx && styles.tabActive]} onPress={() => choose(i)}>
-              <Text style={[styles.tabTag, i === idx && styles.tabTagActive]}>{s.tag}</Text>
-              <Text style={[styles.tabText, i === idx && styles.tabTextActive]} numberOfLines={1}>{s.name}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <GamePicker
+          items={HANGUL_STAGES.map((st) => ({ key: st.id, tag: st.tag, name: st.name }))}
+          active={idx}
+          onPick={(i) => { setPicking(true); choose(i); }}
+          collapsed={!picking}
+          onExpand={() => setPicking(true)}
+          cols={2}
+        />
         <View style={styles.noteBox}>
           <Pressable onPress={() => setNoteOpen((v) => !v)}>
-            <Text style={styles.noteToggle}>{noteOpen ? '▾' : '▸'} 지도사 노트</Text>
+            <Text style={styles.noteToggle}>{i18nT(noteOpen ? '▾' : '▸')} {i18nT('지도사 노트')}</Text>
           </Pressable>
-          {noteOpen ? <Text style={styles.noteText}>{stage.tip}</Text> : null}
+          {noteOpen ? <Text style={styles.noteText}>{i18nT(stage.tip)}</Text> : null}
         </View>
-        <MissionGate resetKey={stage.id} info={{ scene: 'hangul', ...hangulMission(stage) }} onModeSelect={() => {}}>
-          <MascotGuide which="gyeol" message="블록을 돌릴 때마다 90도씩 돌아가요. ㅗ → ㅏ → ㅜ → ㅓ 순서로 모음 글자도 바뀌어요!" style={{ marginBottom: 8 }} />
+        <MissionGate resetKey={stage.id} info={{ scene: 'hangul', ...hangulMission(stage) }} onModeSelect={() => setPicking(false)}>
+          <MascotGuide which="gyeol" message={i18nT('블록을 돌릴 때마다 90도씩 돌아가요. ㅗ → ㅏ → ㅜ → ㅓ 순서로 모음 글자도 바뀌어요!')} style={{ marginBottom: 8 }} />
           <HangulTetris key={key} resetKey={key} color={ohang.color} targetLines={stage.lines} dropMs={stage.dropMs} onDone={onDone} />
         </MissionGate>
       </ScrollView>
       {visible ? (
         <View style={styles.backdrop}>
           <View style={styles.card}>
-            <Text style={styles.title}>한글 테트리스 · {stage.name}</Text>
-            <Text style={styles.comment}>오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {comment}</Text>
+            <Text style={styles.title}>{i18nT('한글 테트리스 ·')} {i18nT(stage.name)}</Text>
+            <Text style={styles.comment}>{i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(comment)}</Text>
             <TraceReward sceneId="hangul" success={completed} />
             <View style={styles.actions}>
-              <Pressable style={styles.closeBtn} onPress={() => setVisible(false)}><Text style={styles.closeTxt}>닫기</Text></Pressable>
+              <Pressable style={styles.closeBtn} onPress={() => setVisible(false)}><Text style={styles.closeTxt}>{i18nT('닫기')}</Text></Pressable>
               {idx < HANGUL_STAGES.length - 1 ? (
-                <Pressable style={styles.primary} onPress={() => choose(idx + 1)}><Text style={styles.primaryTxt}>다음 단계 도전!</Text></Pressable>
+                <Pressable style={styles.primary} onPress={() => choose(idx + 1)}><Text style={styles.primaryTxt}>{i18nT('다음 단계 도전!')}</Text></Pressable>
               ) : null}
-              <Pressable style={styles.secondary} onPress={() => { setVisible(false); navigation.navigate('Result'); }}><Text style={styles.secondaryTxt}>결과물 보기</Text></Pressable>
+              <Pressable style={styles.secondary} onPress={() => { setVisible(false); navigation.navigate('Result'); }}><Text style={styles.secondaryTxt}>{i18nT('결과물 보기')}</Text></Pressable>
             </View>
             <OtherScenes current="Hangul" navigation={navigation} onGo={() => setVisible(false)} />
           </View>

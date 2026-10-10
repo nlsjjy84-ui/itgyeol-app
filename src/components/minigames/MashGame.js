@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable, Animated } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
+import { t as i18nT } from '../../i18n';
 
 // 연타형 놀이(줄넘기·고무줄놀이·연날리기 등) 공통 엔진.
 // 제한 시간 안에 목표 횟수만큼 두드리면 성공.
@@ -87,17 +88,17 @@ export default function MashGame({
         <View style={[styles.gaugeFill, { width: `${pct * 100}%`, backgroundColor: color }]} />
       </View>
       <Text style={styles.count}>
-        {taps} / {targetTaps}
-        {phase === 'running' ? `  ·  ${(timeLeftMs / 1000).toFixed(1)}초` : ''}
+        {i18nT(taps)} / {i18nT(targetTaps)}
+        {phase === 'running' ? i18nT('  ·  {p0}초', { p0: (timeLeftMs / 1000).toFixed(1) }) : ''}
       </Text>
 
       {phase !== 'running' ? (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'ready' ? '시작하기' : '다시 하기'}</Text>
+          <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       ) : (
         <Pressable style={[styles.tapBtn, { borderColor: color }]} onPress={handleTap}>
-          <Text style={[styles.tapBtnText, { color }]}>두드리기!</Text>
+          <Text style={[styles.tapBtnText, { color }]}>{i18nT('두드리기!')}</Text>
         </Pressable>
       )}
     </View>
@@ -119,8 +120,8 @@ const styles = StyleSheet.create({
   },
   gaugeFill: { height: '100%', borderRadius: 11 },
   count: { fontSize: 16, fontWeight: '700', color: colors.ink, marginBottom: 24 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 240,
     height: 240,

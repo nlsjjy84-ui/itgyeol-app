@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable, Image } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
+import { t as i18nT } from '../../i18n';
 
 // 포폴에 있던 실제 상모돌리기 원화 — 가운데서 각도에 맞춰 같이 돌아가며
 // "진짜로 상모를 돌리고 있는" 느낌을 준다 (이모지 사람 아이콘 대신).
@@ -112,7 +113,7 @@ export default function RhythmClickGame({
           style={[styles.sweetSpot, { backgroundColor: color }]}
           onPress={handleTap}
         >
-          <Text style={styles.sweetSpotLabel}>여기! (클릭)</Text>
+          <Text style={styles.sweetSpotLabel}>{i18nT('여기! (클릭)')}</Text>
         </Pressable>
         <Image
           source={PUNG_SPIN_IMAGE}
@@ -122,17 +123,17 @@ export default function RhythmClickGame({
         <View style={[styles.movingDot, { left: dotX, top: dotY, backgroundColor: color }]} />
       </View>
       <Text style={styles.count}>
-        {hits} / {targetHits} 성공
-        {phase === 'running' ? `  ·  ${attempts}/${maxAttempts}번 시도` : ''}
+        {i18nT(hits)} / {i18nT(targetHits)} {i18nT('성공')}
+        {phase === 'running' ? i18nT('  ·  {p0}/{p1}번 시도', { p0: attempts, p1: maxAttempts }) : ''}
       </Text>
 
       {phase !== 'running' ? (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'ready' ? '시작하기' : '다시 하기'}</Text>
+          <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       ) : (
         <Pressable style={[styles.tapBtn, { borderColor: color }]} onPress={handleTap}>
-          <Text style={[styles.tapBtnText, { color }]}>맞춰 탭!</Text>
+          <Text style={[styles.tapBtnText, { color }]}>{i18nT('맞춰 탭!')}</Text>
         </Pressable>
       )}
     </View>
@@ -180,8 +181,8 @@ const styles = StyleSheet.create({
     borderRadius: DOT / 2,
   },
   count: { fontSize: 16, fontWeight: '700', color: colors.ink, marginBottom: 24 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 240,
     height: 90,
