@@ -150,6 +150,15 @@ export default function HomeScreen({ navigation }) {
         <DancheongBand width={320} height={12} />
       </View>
 
+      <View style={styles.exploreRow}>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
+          <Text style={styles.exploreTxt}>예시 작품 둘러보기</Text>
+        </Pressable>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Taste', { again: true }); }}>
+          <Text style={styles.exploreTxt}>떠오르는 것 다시 고르기</Text>
+        </Pressable>
+      </View>
+
       <View style={styles.list}>
         {CARDS.filter((c) => c.ready).map((c) => (
           <Pressable
@@ -211,6 +220,9 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  exploreRow: { flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 10, flexWrap: 'wrap' },
+  exploreBtn: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
+  exploreTxt: { fontSize: 12.5, fontWeight: '700', color: colors.ink },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   logo: { fontSize: 54, color: colors.accent, lineHeight: 60 },
   cardFrame: { marginBottom: 12 },

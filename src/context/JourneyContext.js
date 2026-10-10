@@ -11,6 +11,9 @@ const SOLVED_KEY = 'itgyeol_solved_v1';
 // 같은 "오늘의 기운"인데 화면마다 색이 달라 보였다 — 이제 앱 전체가 공유하는 값 하나를
 // 여기서 들고, 사용자가 직접 골라 바꿀 수도 있게 한다(안 고르면 기기별로 하루치 랜덤값).
 const OHANG_KEY = 'itgyeol_ohang_v1';
+// 시작 전 질문("전통문화 하면 떠오르는 것")의 답과, 놀이를 몇 번 했는지의 기록.
+const TASTE_KEY = 'itgyeol_taste_v1';
+const PLAYLOG_KEY = 'itgyeol_playlog_v1';
 // 놀이별 숙련도 점수의 범위 — -3(많이 헤맴) ~ +3(많이 능숙함). 7단계면 체감 차이를
 // 주기에 충분하고, 한두 판 실수했다고 극단으로 튀지 않을 만큼 좁다.
 const SKILL_MIN = -3;
@@ -40,6 +43,10 @@ export function JourneyProvider({ children }) {
   // [오늘의 기운 선택 기능] 처음엔 null — 기기에 저장된 값을 읽어오기 전까지는 아직
   // 모른다는 뜻. 읽어온 뒤(또는 저장된 게 없으면 그날의 랜덤값으로) 채워진다.
   const [ohangKey, setOhangKeyState] = useState(null);
+  // taste: null이면 아직 읽는 중, {done:false}면 한 번도 답하지 않음, {done:true,picks:[...]}이면 답했거나 건너뜀
+  const [taste, setTasteState] = useState(null);
+  // 놀이별·판별 "몇 번 했는지" — 결과물은 마지막 한 판만 남기지만, 모양은 지금까지 한 횟수가 만든다.
+  const [playLog, setPlayLog] = useState({ byGame: {}, byScene: {} });
 
   useEffect(() => {
     let mounted = true;
@@ -69,6 +76,26 @@ export function JourneyProvider({ children }) {
       try {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') setSolvedIds(parsed);
+      } catch (e) {
+        // 손상된 값은 무시
+      }
+    });
+    safeGetItem(TASTE_KEY).then((raw) => {
+      if (!mounted) return;
+      let v = { done: false, picks: [] };
+      try {
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (parsed && Array.isArray(parsed.picks)) v = { done: !!parsed.done, picks: parsed.picks };
+      } catch (e) {
+        // 손상된 값은 처음부터
+      }
+      setTasteState(v);
+    });
+    safeGetItem(PLAYLOG_KEY).then((raw) => {
+      if (!mounted || !raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.byGame && parsed.byScene) setPlayLog(parsed);
       } catch (e) {
         // 손상된 값은 무시
       }
@@ -103,7 +130,20 @@ export function JourneyProvider({ children }) {
     });
   }, []);
 
+  const setTaste = useCallback((picks) => {
+    const v = { done: true, picks };
+    setTasteState(v);
+    AsyncStorage.setItem(TASTE_KEY, JSON.stringify(v)).catch(() => {});
+  }, []);
+
   const addResult = useCallback((attempt) => {
+    setPlayLog((prev) => {
+      const next = { byGame: { ...prev.byGame }, byScene: { ...prev.byScene } };
+      next.byScene[attempt.sceneId] = (next.byScene[attempt.sceneId] || 0) + 1;
+      if (attempt.sceneId === 'tbd') next.byGame[attempt.formationId] = (next.byGame[attempt.formationId] || 0) + 1;
+      AsyncStorage.setItem(PLAYLOG_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
     setSolvedIds((prev) => {
       const list = prev[attempt.sceneId] || [];
       if (list.includes(attempt.formationId)) return prev;
@@ -126,7 +166,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, resetJourney, loaded, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds) }}
+      value={{ attempts, addResult, resetJourney, loaded, taste, setTaste, playLog, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds) }}
     >
       {children}
     </JourneyContext.Provider>

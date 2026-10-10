@@ -75,7 +75,7 @@ function TextureArt({ mode, attempts, size }) {
 }
 
 export default function ResultScreen({ navigation }) {
-  const { attempts, skills, progress } = useJourney();
+  const { attempts, skills, progress, playLog } = useJourney();
   const shotRef = useRef(null);
   const [saveStatus, setSaveStatus] = useState('');
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function ResultScreen({ navigation }) {
   const selected = options.find((o) => o.key === selectedKey) || options[options.length - 1];
   const selectedAttempts = selected ? selected.attempts : [];
   const code = selected ? resultOptionCode(selectedAttempts) : 'ITGYEOL-----';
-  const dna = useMemo(() => makeDna(selectedAttempts), [selectedAttempts]);
+  const dna = useMemo(() => makeDna(selectedAttempts, playLog), [selectedAttempts, playLog]);
   const bySceneId = Object.fromEntries(attempts.map((a) => [a.sceneId, a]));
   const orderedSolved = SCENE_ORDER.map((id) => bySceneId[id]).filter(Boolean);
   const solvedCount = orderedSolved.length;
@@ -388,9 +388,17 @@ export default function ResultScreen({ navigation }) {
             resetKey={`${patternMode}|${selectedKey || ''}|${selectedAttempts.length}|${dna.code}`}
           />
           {dna.k ? (
-            <Text style={styles.dnaLine}>
-              이 작품만의 형태 · #{dna.code} — {dnaSummary(dna)}. 같은 놀이 기록은 같은 모양, 기록이 다르면 모양도 달라져요.
-            </Text>
+            <View style={styles.dnaBox}>
+              <Text style={styles.dnaLine}>이 작품만의 형태 · #{dna.code} — {dnaSummary(dna)}</Text>
+              {dna.traits && dna.traits.length > 0 ? (
+                <View style={styles.dnaList}>
+                  {dna.traits.slice(0, 8).map((t) => (
+                    <Text key={t} style={styles.dnaTrait}>· {t}</Text>
+                  ))}
+                </View>
+              ) : null}
+              <Text style={styles.dnaLine}>어떤 놀이를 몇 번 했는지에 따라 모양이 달라져요. 같은 기록이어야 같은 모양이 나와요.</Text>
+            </View>
           ) : null}
 
           {group.hook ? (
@@ -445,6 +453,9 @@ export default function ResultScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  dnaBox: { marginTop: 6, gap: 4 },
+  dnaList: { alignSelf: 'center', gap: 2, paddingVertical: 2 },
+  dnaTrait: { fontSize: 12.5, color: colors.ink, lineHeight: 18 },
   dnaLine: { fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 18, marginTop: 6, paddingHorizontal: 8 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   content: { padding: 22, alignItems: 'center', paddingBottom: 40 },

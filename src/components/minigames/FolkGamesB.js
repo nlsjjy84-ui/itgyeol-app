@@ -170,7 +170,7 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
           setPhase('done');
           onComplete({ success: true, score: mistakes, elapsedMs: Date.now() - startRef.current });
         } else {
-          setMsg('잘했어요! 한 줄 더 길어져요');
+          setMsg('어, 한 줄 더 길어졌네요');
           setMode('show');
           later(() => newRound(round + 1), 900);
         }
