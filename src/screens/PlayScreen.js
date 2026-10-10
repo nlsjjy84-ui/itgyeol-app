@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import Text from '../ui/Text';
 import { PLAY_GAMES, DIFFICULTY_TIERS, scaleGameForTier, applySkillAdjustment, skillLabel } from '../data/playGames';
 import MascotGuide from '../components/MascotGuide';
 import { ohangByKey } from '../data/formations';
 import OhangPicker from '../components/OhangPicker';
 import { colors } from '../theme';
+import ScreenHeader from '../ui/ScreenHeader';
+import MissionGate from '../ui/Mission';
+import { playMission } from '../data/missions';
+import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 import RaceMashGame from '../components/minigames/RaceMashGame';
@@ -48,6 +53,7 @@ export default function PlayScreen({ navigation }) {
   const [resultComment, setResultComment] = useState('');
   const [completed, setCompleted] = useState(false);
   const [gameKey, setGameKey] = useState(0);
+  const [timeMode, setTimeMode] = useState('timed');
   // [기능화 2] 성인 아마추어반 / 초중고 레슨반 — 실제 수업에서 쓰던 두 반 구분을
   // 그대로 난이도 선택으로 가져왔다. 성인반이 설계된 기본값(표준), 아동반이 완화판.
   const [tier, setTier] = useState('성인반');
@@ -61,7 +67,12 @@ export default function PlayScreen({ navigation }) {
 
   const rawGame = PLAY_GAMES[gameIdx];
   const rating = skills[rawGame.id] || 0;
-  const game = applySkillAdjustment(scaleGameForTier(rawGame, tier), rating);
+  const baseGame = applySkillAdjustment(scaleGameForTier(rawGame, tier), rating);
+  // 시간은 기본 3배로 넉넉히, '시간 제한 없이'를 고르면 사실상 끝나지 않게 한다.
+  const timeMul = timeMode === 'free' ? null : 3;
+  const game = { ...baseGame };
+  if (game.durationMs) game.durationMs = timeMul ? game.durationMs * timeMul : 3600000;
+  if (game.limitSec) game.limitSec = timeMul ? game.limitSec * timeMul : 3600;
 
   const chooseGame = (idx) => {
     setGameIdx(idx);
@@ -74,7 +85,9 @@ export default function PlayScreen({ navigation }) {
     // [지능형 난이도] 성공/실패를 이 놀이(rawGame.id)의 숙련도 점수에 바로 반영 —
     // 다음에 이 놀이를 열 때 시작 난이도가 달라진다.
     recordSkill(rawGame.id, success);
+    play(success ? 'gayageum' : 'geomungo');
     if (success) {
+      setTimeout(() => play('haegeum'), 700);
       setResultComment(speedComment(elapsedMs));
       setCompleted(true);
       const mapping = { 0: score };
@@ -214,25 +227,16 @@ export default function PlayScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <ScreenHeader title="전래놀이" sub="손끝으로 즐기는 열두 가지 놀이" onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
-        <View style={styles.brandRow}>
-          <Pressable
-            style={styles.homeBtn}
-            onPress={() => navigation.navigate('Home')}
-            hitSlop={8}
-          >
-            <Text style={styles.homeBtnText}>‹ 홈</Text>
-          </Pressable>
-          <Text style={styles.brand}>잇결 · 전래놀이</Text>
-        </View>
         <View style={styles.headerRight}>
-          {/* [기능화 2] 난이도(반) 선택 — 실제 수업에서 쓰던 성인반/아동반 구분 */}
           <View style={styles.tierRow}>
             {DIFFICULTY_TIERS.map((t) => (
               <Pressable
                 key={t}
                 style={[styles.tierBtn, tier === t && { backgroundColor: ohang.color, borderColor: ohang.color }]}
                 onPress={() => {
+                  play('tap');
                   setTier(t);
                   setGameKey((k) => k + 1);
                   setResultVisible(false);
@@ -248,8 +252,8 @@ export default function PlayScreen({ navigation }) {
 
       <View style={styles.body}>
         <View style={styles.sidebar}>
-          <Text style={styles.sidebarLabel}>놀이를{'\n'}선택하세요</Text>
           <ScrollView
+            horizontal
             style={styles.sidebarScroll}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.sidebarList}
@@ -258,14 +262,14 @@ export default function PlayScreen({ navigation }) {
               <Pressable
                 key={g.id}
                 style={[styles.tab, idx === gameIdx && styles.tabActive]}
-                onPress={() => chooseGame(idx)}
+                onPress={() => { play('tap'); chooseGame(idx); }}
               >
                 <Text style={[styles.tabTag, idx === gameIdx && styles.tabTagActive]}>
                   {g.tag}
                 </Text>
                 <Text
                   style={[styles.tabText, idx === gameIdx && styles.tabTextActive]}
-                  numberOfLines={2}
+                  numberOfLines={1}
                 >
                   {g.name}
                 </Text>
@@ -283,19 +287,6 @@ export default function PlayScreen({ navigation }) {
             contentContainerStyle={styles.mainScrollContent}
             showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.gameTitle}>{game.name}</Text>
-            <Text style={styles.gameDesc}>{game.description}</Text>
-            {/* [지능형 난이도] 기기에 쌓인 숙련도를 그대로 보여준다 — 뒤에서 몰래
-                난이도를 조정하면 "되는지 안 되는지" 확인할 길이 없으니, 지금 이
-                놀이가 나에게 맞춰졌는지 숫자가 아니라 말로 알려준다. */}
-            <View style={styles.skillRow}>
-              <Text style={styles.skillText}>{skillLabel(rating)}</Text>
-            </View>
-            <MascotGuide
-              which="pung"
-              message={CONTROL_HINTS[game.mechanic]}
-              style={styles.controlBox}
-            />
             {/* [기능화 2] 지도사 노트 — 교재를 쓰고 강사를 교육했던 실제 현장 경험에서
                 나온 지도 팁. 평소엔 접어두고, 필요할 때만 펼쳐 본다. */}
             {game.tip && (
@@ -308,7 +299,14 @@ export default function PlayScreen({ navigation }) {
                 {noteOpen && <Text style={styles.noteText}>{game.tip}</Text>}
               </View>
             )}
-            <View style={styles.gameArea}>{renderGame()}</View>
+            <MissionGate
+              resetKey={`${game.id}-${tier}`}
+              info={playMission(game)}
+              onModeSelect={setTimeMode}
+            >
+              <MascotGuide which="pung" message={CONTROL_HINTS[game.mechanic]} style={styles.controlBox} />
+              <View style={styles.gameArea}>{renderGame()}</View>
+            </MissionGate>
           </ScrollView>
         </View>
       </View>
@@ -344,7 +342,7 @@ export default function PlayScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -385,13 +383,8 @@ const styles = StyleSheet.create({
   ohangText: { fontSize: 11, fontWeight: '600' },
   skillRow: { marginBottom: 6 },
   skillText: { fontSize: 11.5, fontWeight: '700', color: colors.accent },
-  body: { flex: 1, flexDirection: 'row' },
-  sidebar: {
-    width: 108,
-    borderRightWidth: 1,
-    borderRightColor: colors.borderSoft,
-    paddingTop: 4,
-  },
+  body: { flex: 1, flexDirection: 'column' },
+  sidebar: { height: 66, borderBottomWidth: 1, borderBottomColor: colors.border, paddingTop: 2 },
   sidebarLabel: {
     fontSize: 11.5,
     fontWeight: '700',
@@ -401,17 +394,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 8,
   },
-  sidebarScroll: { flex: 1, width: '100%' },
-  sidebarList: { paddingHorizontal: 8, paddingBottom: 12, gap: 8 },
+  sidebarScroll: { flexGrow: 0 },
+  sidebarList: { paddingHorizontal: 12, paddingBottom: 6, gap: 8, alignItems: 'center' },
   tab: {
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    borderRadius: 14,
+    minWidth: 96,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
     backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    marginBottom: 0,
   },
   tabActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   tabTag: { fontSize: 9, color: colors.muted, fontWeight: '600', marginBottom: 3 },

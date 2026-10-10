@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from '../../ui/Text';
+import { useTime } from '../../ui/Mission';
+import SealButton from '../../ui/SealButton';
+import { play } from '../../utils/sound';
 import { colors } from '../../theme';
 import { useArrowHold } from '../../utils/useTapKey';
 
@@ -11,6 +15,7 @@ const SUCCESS_MIN = 0.92;
 // 완성된다는 특징을, 한쪽만 조작해도 되는 조작 방식 자체로 보여준다. 플레이어는 날개를
 // 얼마나 벌릴지(spread) 하나만 조종하고, 반대쪽 날개는 거울처럼 똑같이 따라 벌어진다.
 export default function WingMirrorGame({ peopleCount = 10, targetPositions, color, streak = 0, onSuccess, onFail }) {
+  const { timed, scaleMs } = useTime();
   const [phase, setPhase] = useState('ready'); // ready | playing | done
   const [spread, setSpread] = useState(0);
   const [holdMs, setHoldMs] = useState(0);
@@ -25,7 +30,7 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
   const deadlineRef = useRef(0);
 
   // 연속 성공(streak)이 쌓일수록 양쪽 날개를 다 펼쳐야 하는 시간이 짧아진다.
-  const durationMs = Math.max(5200, 9000 - streak * 500);
+  const durationMs = scaleMs(Math.max(5200, 9000 - streak * 500));
 
   useEffect(() => () => tickRef.current && clearInterval(tickRef.current), []);
 
@@ -88,6 +93,12 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
 
   const positions = targetPositions || [];
 
+  // 미션 안내에서 이미 '시작하기'를 눌렀으므로 바로 시작한다(실패·완료 뒤에만 다시 시작 버튼이 보인다).
+  useEffect(() => {
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
@@ -143,9 +154,7 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
       </View>
 
       {phase !== 'playing' && (
-        <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'done' ? '다시 펼쳐보기' : '날개 펼치기 시작'}</Text>
-        </Pressable>
+        <SealButton label={phase === 'done' ? '다시 펼쳐보기' : '날개 펼치기 시작'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
     </View>
   );
@@ -156,11 +165,13 @@ const styles = StyleSheet.create({
   roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 8, textAlign: 'center' },
   field: {
     width: '100%',
-    maxWidth: 320,
-    height: 260,
+    maxWidth: 340,
+    height: 330,
     position: 'relative',
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 16,
+    backgroundColor: '#e6d8b6',
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 4,
     marginBottom: 10,
     overflow: 'hidden',
   },
@@ -208,7 +219,7 @@ const styles = StyleSheet.create({
   },
   timeTrack: {
     width: '100%',
-    maxWidth: 300,
+    maxWidth: 340,
     height: 8,
     borderRadius: 4,
     backgroundColor: 'rgba(0,0,0,0.08)',

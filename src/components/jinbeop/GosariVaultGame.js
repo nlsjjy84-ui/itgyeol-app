@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from '../../ui/Text';
+import { useTime } from '../../ui/Mission';
+import SealButton from '../../ui/SealButton';
+import { play } from '../../utils/sound';
 import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
 
@@ -11,6 +15,7 @@ const TURN_MS_BASE = 2400;
 // 한 명씩 순서대로 넘기는 놀이로 만든다 — 순서를 틀리거나 제 박자 안에 못 넘기면
 // 처음부터 다시 시작한다(실제 놀이에서 줄이 끊어지는 것과 같은 느낌).
 export default function GosariVaultGame({ peopleCount = 10, targetPositions, color, streak = 0, onSuccess, onFail }) {
+  const { timed, scaleMs } = useTime();
   const initialOrder = Array.from({ length: peopleCount }, (_, i) => i);
   const [order, setOrder] = useState(initialOrder);
   const [vaulted, setVaulted] = useState([]);
@@ -26,7 +31,7 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
   const turnDeadlineRef = useRef(0);
   const flashTimeoutRef = useRef(null);
 
-  const turnLimit = Math.max(1100, TURN_MS_BASE - streak * 140);
+  const turnLimit = scaleMs(Math.max(1100, TURN_MS_BASE - streak * 140));
 
   useEffect(
     () => () => {
@@ -113,6 +118,12 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
   const turnRatio = Math.max(0, Math.min(1, turnMs / turnLimit));
   const positions = targetPositions || [];
 
+  // 미션 안내에서 이미 '시작하기'를 눌렀으므로 바로 시작한다(실패·완료 뒤에만 다시 시작 버튼이 보인다).
+  useEffect(() => {
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
@@ -160,9 +171,7 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
       {flash === 'wrong' && <Text style={styles.flashMiss}>{flashMsg}</Text>}
 
       {phase !== 'playing' && (
-        <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'done' ? '다시 꺾어보기' : '시작하기'}</Text>
-        </Pressable>
+        <SealButton label={phase === 'done' ? '다시 꺾어보기' : '시작하기'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
       {phase === 'playing' && (
         <Text style={styles.hint}>스페이스바(또는 맨 앞사람 클릭)로 지금 차례인 사람을 넘기세요</Text>
@@ -188,7 +197,7 @@ const styles = StyleSheet.create({
   person: {
     width: PERSON_SIZE,
     height: PERSON_SIZE,
-    borderRadius: PERSON_SIZE / 2,
+    borderRadius: 4,
     backgroundColor: colors.paper,
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -211,8 +220,10 @@ const styles = StyleSheet.create({
     maxWidth: 260,
     height: 170,
     position: 'relative',
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 16,
+    backgroundColor: '#e6d8b6',
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 4,
     marginBottom: 10,
   },
   spiralDot: {

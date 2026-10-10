@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
+import Text from '../ui/Text';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -8,8 +9,9 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { colors } from '../theme';
+import Piece from '../ui/Piece';
 
-const SIZE = 36;
+const SIZE = 46;
 const TAP_SLOP = 6; // 이보다 적게 움직였다면 드래그가 아니라 "선택"으로 처리한다
 
 export default function Dot({
@@ -90,46 +92,19 @@ export default function Dot({
 
   return (
     <GestureDetector gesture={pan}>
-      <Animated.View
-        style={[
-          styles.dot,
-          tintColor && { borderColor: tintColor },
-          selected && styles.dotSelected,
-          style,
-        ]}
-      >
-        <Text style={[styles.label, tintColor && { color: tintColor }]}>
-          {label !== undefined ? label : id + 1}
-        </Text>
+      <Animated.View style={[styles.dot, style]}>
+        <Piece
+          shape="seal"
+          size={SIZE}
+          label={label !== undefined ? label : id + 1}
+          color={tintColor || colors.accent}
+          selected={selected}
+        />
       </Animated.View>
     </GestureDetector>
   );
 }
 
 const styles = StyleSheet.create({
-  dot: {
-    position: 'absolute',
-    width: SIZE,
-    height: SIZE,
-    borderRadius: SIZE / 2,
-    backgroundColor: colors.paper,
-    borderWidth: 1.5,
-    borderColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.accentDeep,
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  dotSelected: {
-    borderWidth: 3,
-    borderColor: '#2f8f4e',
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.accentDeep,
-  },
+  dot: { position: 'absolute', width: SIZE, height: SIZE },
 });

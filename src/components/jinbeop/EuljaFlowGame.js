@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from '../../ui/Text';
+import { useTime } from '../../ui/Mission';
+import SealButton from '../../ui/SealButton';
+import { play } from '../../utils/sound';
 import { colors } from '../../theme';
 import { useArrowHold } from '../../utils/useTapKey';
 import { euljaPathPoint, euljaGuidePoints } from '../../data/formations';
@@ -15,6 +19,7 @@ const TRAIL_LEN = 300;
 // 뒷사람들이 몇 박자 늦게 그 발자취를 그대로 따라오게 만든다 — "앞사람 뒤꿈치를
 // 보고 따라간다"는 원래 지도 팁 문구를 실제 동작으로 옮긴 것.
 export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSuccess, onFail }) {
+  const { timed, scaleMs } = useTime();
   const [phase, setPhase] = useState('ready'); // ready | running | done
   const [t, setT] = useState(0);
   const [headX, setHeadX] = useState(GUIDE_POINTS[0].x);
@@ -30,7 +35,7 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
   const tickRef = useRef(null);
 
   // 연속 성공(streak)이 쌓일수록 더 빨리 지나가고, 허용 범위도 좁아진다.
-  const durationMs = Math.max(4200, 8000 - streak * 450);
+  const durationMs = scaleMs(Math.max(4200, 8000 - streak * 450));
   const tolerance = Math.max(0.05, 0.11 - streak * 0.008);
   const errorBudgetMs = Math.max(500, 1400 - streak * 80);
 
@@ -89,6 +94,12 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
 
   const headY = euljaPathPoint(t).y;
   const followerCount = Math.max(1, peopleCount - 1);
+
+  // 미션 안내에서 이미 '시작하기'를 눌렀으므로 바로 시작한다(실패·완료 뒤에만 다시 시작 버튼이 보인다).
+  useEffect(() => {
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <View style={styles.wrap}>
@@ -154,9 +165,7 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
       </View>
 
       {phase !== 'running' && (
-        <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'done' ? '다시 걸어보기' : '걷기 시작'}</Text>
-        </Pressable>
+        <SealButton label={phase === 'done' ? '다시 걸어보기' : '걷기 시작'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
     </View>
   );
@@ -167,11 +176,13 @@ const styles = StyleSheet.create({
   roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 8 },
   field: {
     width: '100%',
-    maxWidth: 320,
-    height: 260,
+    maxWidth: 340,
+    height: 330,
     position: 'relative',
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 16,
+    backgroundColor: '#e6d8b6',
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 4,
     marginBottom: 10,
     overflow: 'hidden',
   },

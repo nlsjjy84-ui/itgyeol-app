@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView } from 'react-native';
+import Text from '../ui/Text';
 import { colors } from '../theme';
 
 export default function ConsentScreen({ onAgree }) {
@@ -25,7 +26,7 @@ export default function ConsentScreen({ onAgree }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,

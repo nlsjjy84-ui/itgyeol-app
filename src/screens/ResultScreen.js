@@ -1,14 +1,6 @@
-import React, { useMemo, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  Platform,
-  TextInput,
-} from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform, TextInput } from 'react-native';
+import Text from '../ui/Text';
 import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
 import ResultPattern from '../components/ResultPattern';
@@ -20,6 +12,9 @@ import { useJourney } from '../context/JourneyContext';
 import { resultOptionCode } from '../utils/resultSeed';
 import { synthesizeAttention } from '../utils/attentionSynth';
 import { colors } from '../theme';
+import ScreenHeader from '../ui/ScreenHeader';
+import ArtFrame from '../components/ArtFrame';
+import { play } from '../utils/sound';
 
 const SCENE_LABEL = {
   jinbeop: '진법',
@@ -73,6 +68,11 @@ export default function ResultScreen({ navigation }) {
   const { attempts, skills } = useJourney();
   const shotRef = useRef(null);
   const [saveStatus, setSaveStatus] = useState('');
+  useEffect(() => {
+    play('stamp');
+    const t = setTimeout(() => play('daegeumCalm'), 300);
+    return () => clearTimeout(t);
+  }, []);
 
   const options = useMemo(() => buildOptions(attempts), [attempts]);
   const [selectedKey, setSelectedKey] = useState(null);
@@ -147,7 +147,7 @@ export default function ResultScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>나만의 결과물</Text>
+        <ScreenHeader title="나만의 결과물" sub="완성한 판이 하나의 작품이 돼요" onBack={() => navigation.navigate('Home')} />
         <MascotDuo
           leftValue={pungValue}
           rightValue={gyeolValue}
@@ -206,11 +206,13 @@ export default function ResultScreen({ navigation }) {
 
         <ViewShot ref={shotRef} style={styles.card} options={{ format: 'png', quality: 1 }}>
           <View style={styles.cardInner}>
-            {patternMode === 'transform' ? (
-              <TransformResultShape attempts={selectedAttempts} size={220} />
-            ) : (
-              <ResultPattern attempts={selectedAttempts} size={220} />
-            )}
+            <ArtFrame size={220}>
+              {patternMode === 'transform' ? (
+                <TransformResultShape attempts={selectedAttempts} size={220} />
+              ) : (
+                <ResultPattern attempts={selectedAttempts} size={220} />
+              )}
+            </ArtFrame>
             <Text style={styles.code}>{code}</Text>
           </View>
         </ViewShot>
@@ -386,7 +388,7 @@ export default function ResultScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   content: { padding: 22, alignItems: 'center', paddingBottom: 40 },
   title: { fontSize: 22, fontWeight: '700', color: colors.ink, marginBottom: 6 },
   mascotIntro: {

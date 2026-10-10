@@ -1,12 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-} from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import Text from '../ui/Text';
 import FormationPreview from '../components/FormationPreview';
 import CompletionEffect from '../components/CompletionEffect';
 import { FORMATIONS, ohangByKey, JINBEOP_INTRO } from '../data/formations';
@@ -18,6 +12,11 @@ import PuzzleFitGame from '../components/jinbeop/PuzzleFitGame';
 import DrawShapeGame from '../components/jinbeop/DrawShapeGame';
 import WingMirrorGame from '../components/jinbeop/WingMirrorGame';
 import { colors } from '../theme';
+import ScreenHeader from '../ui/ScreenHeader';
+import MissionGate from '../ui/Mission';
+import Board from '../ui/Board';
+import { JINBEOP_MISSIONS } from '../data/missions';
+import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 // [전체 판 공통화] 전래놀이에서 먼저 만든 "성인반/아동반" 구분과 숙련도 문구를
@@ -72,7 +71,7 @@ export default function JinbeopScreen({ navigation }) {
   const [tier, setTier] = useState('성인반');
   const [noteOpen, setNoteOpen] = useState(false);
   // [진법이란?] 처음 들어온 사람도 알 수 있게, 기본으로 펼쳐서 보여준다.
-  const [introOpen, setIntroOpen] = useState(true);
+  const [introOpen, setIntroOpen] = useState(false);
 
   const autoAdvanceRef = useRef(false);
   const mountedRef = useRef(false);
@@ -142,6 +141,8 @@ export default function JinbeopScreen({ navigation }) {
   function completeSuccessSpecial(elapsed) {
     // (각 놀이 컴포넌트가 자기 phase로 중복 호출을 막아주므로, 여기서는 그냥
     // streak·결과 모달 상태만 공통으로 갱신한다.)
+    play('gong');
+    setTimeout(() => play('piri'), 350);
     setStreak((s) => s + 1);
     setBurstNonce((n) => n + 1);
     setCompleted(true);
@@ -161,6 +162,7 @@ export default function JinbeopScreen({ navigation }) {
   }
 
   function failSpecial(message) {
+    play('geomungo');
     setStreak(0);
     setCompleted(false);
     setResultComment(message);
@@ -170,25 +172,16 @@ export default function JinbeopScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <ScreenHeader title="진법" sub="풍물 · 강강술래 · 역사 속 대형 만들기" onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
-        <View style={styles.brandRow}>
-          <Pressable
-            style={styles.homeBtn}
-            onPress={() => navigation.navigate('Home')}
-            hitSlop={8}
-          >
-            <Text style={styles.homeBtnText}>‹ 홈</Text>
-          </Pressable>
-          <Text style={styles.brand}>잇결 · 진법</Text>
-        </View>
         <View style={styles.badgeRow}>
-          {/* [전체 판 공통화] 성인반/아동반 — 전래놀이와 동일한 반 구분을 여기에도 둔다. */}
+          {/* 성인반/아동반 — 전래놀이와 동일한 반 구분 */}
           <View style={styles.tierRow}>
             {DIFFICULTY_TIERS.map((t) => (
               <Pressable
                 key={t}
                 style={[styles.tierBtn, tier === t && { backgroundColor: ohang.color, borderColor: ohang.color }]}
-                onPress={() => setTier(t)}
+                onPress={() => { play('tap'); setTier(t); }}
               >
                 <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{t}</Text>
               </Pressable>
@@ -200,8 +193,8 @@ export default function JinbeopScreen({ navigation }) {
 
       <View style={styles.body}>
         <View style={styles.sidebar}>
-          <Text style={styles.sidebarLabel}>진법을{'\n'}선택하세요</Text>
           <ScrollView
+            horizontal
             style={styles.sidebarScroll}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.sidebarList}
@@ -210,7 +203,7 @@ export default function JinbeopScreen({ navigation }) {
               <Pressable
                 key={f.id}
                 style={[styles.tab, idx === formationIdx && styles.tabActive]}
-                onPress={() => chooseFormation(idx)}
+                onPress={() => { play('tap'); chooseFormation(idx); }}
               >
                 <Text
                   style={[
@@ -225,7 +218,7 @@ export default function JinbeopScreen({ navigation }) {
                     styles.tabText,
                     idx === formationIdx && styles.tabTextActive,
                   ]}
-                  numberOfLines={2}
+                  numberOfLines={1}
                 >
                   {f.name}
                 </Text>
@@ -246,33 +239,6 @@ export default function JinbeopScreen({ navigation }) {
           {/* [진법이란?] "진법이라고 하면 사람이 모르잖아 — 설명이 먼저 있어야지"라는
               요청대로, 놀이에 들어가기 전에 먼저 보이는 자리에 둔다. 기본으로 펼쳐두고,
               한 번 읽고 나면 접어둘 수 있게 한다. */}
-          <View style={styles.introBox}>
-            <Pressable style={styles.introToggle} onPress={() => setIntroOpen((v) => !v)}>
-              <Text style={styles.introToggleText}>
-                {introOpen ? '▾' : '▸'} {JINBEOP_INTRO.title}
-              </Text>
-            </Pressable>
-            {introOpen && (
-              <>
-                <Text style={styles.introText}>{JINBEOP_INTRO.body}</Text>
-                <Text style={[styles.introText, styles.introExample]}>{JINBEOP_INTRO.example}</Text>
-              </>
-            )}
-          </View>
-
-          <View style={styles.previewRow}>
-            <FormationPreview positions={formation.positions} color={ohang.color} size={72} />
-            <View style={styles.previewTextBox}>
-              <Text style={styles.previewLabel}>{formation.name} 완성 모습</Text>
-              <Text style={styles.previewHint}>
-                {MECHANIC_HINT[formation.mechanic] || '이 작은 그림처럼 되도록 맞춰보세요.'}
-              </Text>
-            </View>
-          </View>
-
-          {/* [전체 판 공통화] 숙련도 문구 — 전래놀이와 같은 문구를 그대로 쓴다. */}
-          <Text style={styles.skillText}>{skillLabel(rating)}</Text>
-
           {/* [전체 판 공통화] 지도사 노트 — 전래놀이와 같은 위치·형태의 펼침 패널. */}
           {formation.tip && (
             <View style={styles.noteBox}>
@@ -285,6 +251,13 @@ export default function JinbeopScreen({ navigation }) {
             </View>
           )}
 
+          <MissionGate
+            resetKey={`${formation.id}-${restartNonce}`}
+            info={{
+              ...(JINBEOP_MISSIONS[formation.id] || { kicker: formation.tag, title: formation.name, story: formation.description, mission: MECHANIC_HINT[formation.mechanic] || '모양을 맞춰 보세요.', steps: [] }),
+              example: <FormationPreview positions={formation.positions} color={ohang.color} size={130} />,
+            }}
+          >
           {(() => {
             // [놀이 방식 다양화] 진법 7개가 전부 서로 다른 조작 방식(mechanic)을 쓴다.
             // 같은 "자리 맞추기"라도 흐름형(flowSnake)·순서형(sequentialVault)·
@@ -398,6 +371,7 @@ export default function JinbeopScreen({ navigation }) {
                 );
             }
           })()}
+          </MissionGate>
           </ScrollView>
         </View>
       </View>
@@ -450,7 +424,7 @@ export default function JinbeopScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -491,13 +465,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
   },
   ohangText: { fontSize: 11, fontWeight: '600' },
-  body: { flex: 1, flexDirection: 'row' },
-  sidebar: {
-    width: 108,
-    borderRightWidth: 1,
-    borderRightColor: colors.borderSoft,
-    paddingTop: 4,
-  },
+  body: { flex: 1, flexDirection: 'column' },
+  sidebar: { height: 66, borderBottomWidth: 1, borderBottomColor: colors.border, paddingTop: 2 },
   sidebarLabel: {
     fontSize: 11.5,
     fontWeight: '700',
@@ -507,17 +476,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 8,
   },
-  sidebarScroll: { flex: 1, width: '100%' },
-  sidebarList: { paddingHorizontal: 8, paddingBottom: 12, gap: 8 },
+  sidebarScroll: { flexGrow: 0 },
+  sidebarList: { paddingHorizontal: 12, paddingBottom: 6, gap: 8, alignItems: 'center' },
   tab: {
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    borderRadius: 14,
+    minWidth: 112,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
     backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    marginBottom: 0,
   },
   tabActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   tabTag: { fontSize: 9, color: colors.muted, fontWeight: '600', marginBottom: 3 },

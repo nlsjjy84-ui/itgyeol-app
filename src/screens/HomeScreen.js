@@ -1,9 +1,15 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import Text from '../ui/Text';
 import MascotDuo from '../components/MascotDuo';
 import OhangPicker from '../components/OhangPicker';
 import { useJourney } from '../context/JourneyContext';
 import { colors } from '../theme';
+import Frame from '../ui/Frame';
+import { CloudBand, DancheongBand, Taegeuk } from '../ui/Motifs';
+import { play } from '../utils/sound';
+
+const HANJA = { jinbeop: '陣', print: '文', tbd: '遊', talchum: '面', mask: '面', dancheong: '彩', pattern: '彩' };
 
 const CARDS = [
   {
@@ -86,12 +92,18 @@ export default function HomeScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
       <View style={styles.topRow}>
-        <View>
-          <Text style={styles.brand}>잇결</Text>
+        <View style={{ flex: 1 }}>
+          <View style={styles.logoRow}>
+            <Taegeuk size={34} />
+            <Text brush style={styles.logo}>잇결</Text>
+          </View>
           <Text style={styles.title}>대한민국의 보물</Text>
         </View>
         {/* [오늘의 기운 선택 기능] 홈에서도 바로 보고 바꿀 수 있게 — 바꾸면 세 판 전체에 반영된다. */}
         <OhangPicker />
+      </View>
+      <View style={{ alignItems: 'center', marginTop: 6 }}>
+        <CloudBand width={260} />
       </View>
       <Text style={styles.subtitle}>
         손끝으로 만나는 세 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.
@@ -108,7 +120,7 @@ export default function HomeScreen({ navigation }) {
       {/* 이 앱이 왜 만들어졌는지 — 마스코트의 말이 아니라 만든 사람의 실제 이력으로
           직접 말한다. 국악(사물놀이·풍물) 전공, 인천에서 10년 넘게 운영한 국악연구소,
           2015년에 직접 쓴 전래놀이 교육 교재 — 이 세 가지 장면은 그 경험에서 나왔다. */}
-      <View style={styles.makerNote}>
+      <Frame tone="dark" style={{ marginTop: 18 }}>
         <Text style={styles.makerLabel}>만든 사람</Text>
         <Text style={styles.makerText}>
           사물놀이·풍물을 전공하고, 인천에서 10년 넘게 국악연구소를 운영하며 아이들에게
@@ -116,18 +128,33 @@ export default function HomeScreen({ navigation }) {
           강사들을 교육하기도 했어요. 이 앱의 진법과 전래놀이 열두 가지는 그 현장 경험을
           그대로 옮긴 것입니다.
         </Text>
+      </Frame>
+
+      <View style={{ alignItems: 'center', marginTop: 18 }}>
+        <DancheongBand width={320} height={12} />
       </View>
 
       <View style={styles.list}>
         {CARDS.filter((c) => c.ready).map((c) => (
           <Pressable
             key={c.id}
-            style={[styles.card, { borderLeftColor: c.accent, borderLeftWidth: 5 }]}
-            onPress={() => navigation.navigate(c.route)}
+            onPress={() => {
+              play('drum');
+              navigation.navigate(c.route);
+            }}
           >
-            <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
-            <Text style={styles.cardTitle}>{c.title}</Text>
-            <Text style={styles.cardDesc}>{c.desc}</Text>
+            <Frame accent={c.accent} style={styles.cardFrame}>
+              <View style={styles.cardRow}>
+                <View style={[styles.hanja, { backgroundColor: c.accent }]}>
+                  <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
+                  <Text style={styles.cardTitle}>{c.title}</Text>
+                  <Text style={styles.cardDesc}>{c.desc}</Text>
+                </View>
+              </View>
+            </Frame>
           </Pressable>
         ))}
       </View>
@@ -145,18 +172,20 @@ export default function HomeScreen({ navigation }) {
       </View>
       <View style={styles.list}>
         {CARDS.filter((c) => !c.ready).map((c) => (
-          <View
-            key={c.id}
-            style={[
-              styles.card,
-              { borderLeftColor: c.accent, borderLeftWidth: 5 },
-              styles.cardDisabled,
-            ]}
-          >
-            <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
-            <Text style={styles.cardTitle}>{c.title}</Text>
-            <Text style={styles.cardDesc}>{c.desc}</Text>
-            <Text style={styles.soon}>준비 중</Text>
+          <View key={c.id} style={styles.cardDisabled}>
+            <Frame accent={c.accent} style={styles.cardFrame}>
+              <View style={styles.cardRow}>
+                <View style={[styles.hanja, { backgroundColor: c.accent }]}>
+                  <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
+                  <Text style={styles.cardTitle}>{c.title}</Text>
+                  <Text style={styles.cardDesc}>{c.desc}</Text>
+                  <Text style={styles.soon}>준비 중</Text>
+                </View>
+              </View>
+            </Frame>
           </View>
         ))}
       </View>
@@ -166,7 +195,13 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  logo: { fontSize: 54, color: colors.accent, lineHeight: 60 },
+  cardFrame: { marginBottom: 12 },
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  hanja: { width: 60, height: 60, borderRadius: 4, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.accentDeep, transform: [{ rotate: '-3deg' }] },
+  hanjaText: { color: colors.baek, fontSize: 38, lineHeight: 46 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   scrollContent: { paddingHorizontal: 22, paddingTop: 28, paddingBottom: 32 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   brand: { fontSize: 13, color: colors.accentDeep, fontWeight: '700', letterSpacing: 1 },

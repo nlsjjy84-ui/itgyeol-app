@@ -1,5 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import Text from '../../ui/Text';
+import { useTime } from '../../ui/Mission';
+import { play } from '../../utils/sound';
 import Dot from '../Dot';
 import { colors } from '../../theme';
 
@@ -27,6 +30,7 @@ function timeLimitFor(n, streak) {
 // "멈춘 모양을 그대로 채워 넣는" 감각이 자연스러워서 퍼즐 비유를 그대로 쓴다.
 // 드래그뿐 아니라 조각을 짚은 뒤(선택) 빈 자리를 짚어도(클릭만으로도) 맞출 수 있다.
 export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess, onFail }) {
+  const { timed, scaleMs } = useTime();
   const n = positions.length;
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const [pieces, setPieces] = useState([]);
@@ -67,7 +71,7 @@ export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess,
     setFlash(null);
     sessionStartRef.current = Date.now();
     clearTimer();
-    const limit = timeLimitFor(n, streak);
+    const limit = scaleMs(timeLimitFor(n, streak));
     setLimitMs(limit);
     setRemainingMs(limit);
     const deadline = Date.now() + limit;
@@ -146,7 +150,7 @@ export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess,
         <View style={styles.timerTrack}>
           <View style={[styles.timerFill, { width: `${Math.max(0, Math.min(100, ratio * 100))}%`, backgroundColor: timerColor }]} />
         </View>
-        <Text style={[styles.timerSeconds, { color: timerColor }]}>⏱ {Math.max(0, Math.ceil(remainingMs / 1000))}초</Text>
+        <Text style={[styles.timerSeconds, { color: timerColor }]}>{timed ? `⏱ ${Math.max(0, Math.ceil(remainingMs / 1000))}초` : '시간 제한 없음'}</Text>
       </View>
 
       <View style={styles.stage} onLayout={onStageLayout}>
@@ -202,7 +206,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     width: '100%',
-    maxWidth: 320,
+    maxWidth: 340,
     marginBottom: 10,
   },
   timerTrack: {
@@ -219,8 +223,10 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 240,
     position: 'relative',
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 16,
+    backgroundColor: '#e6d8b6',
+    borderWidth: 2,
+    borderColor: colors.ink,
+    borderRadius: 4,
     marginBottom: 14,
     overflow: 'hidden',
   },
