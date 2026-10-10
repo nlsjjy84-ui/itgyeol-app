@@ -8,13 +8,15 @@ import StoryScene from '../ui/StoryScene';
 import { useJourney } from '../context/JourneyContext';
 import { colors } from '../theme';
 import Frame from '../ui/Frame';
+import SealIcon from '../ui/SealIcon';
 import { CloudBand, DancheongBand, Taegeuk } from '../ui/Motifs';
 import { play } from '../utils/sound';
 import { PART_OF_CARD } from '../data/book';
 import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
 
-const HANJA = { jinbeop: '陣', print: '文', tbd: '遊', hangul: '塊', talchum: '面', mask: '面', dancheong: '彩', pattern: '彩' };
+// 판 도장 — 그림(누구나 알아봄) + 우리말 한 글자(도장 귀퉁이)
+const SEAL = { jinbeop: ['circle', '진'], print: ['type', '글'], tbd: ['top', '놀'], hangul: ['blocks', '쌓'], talchum: ['mask', '탈'], mask: ['mask', '탈'], dancheong: ['colors', '색'], pattern: ['colors', '색'] };
 
 const CARDS = [
   {
@@ -152,9 +154,7 @@ export default function HomeScreen({ navigation }) {
           >
             <Frame accent={c.accent} style={styles.cardFrame}>
               <View style={styles.cardRow}>
-                <View style={[styles.hanja, { backgroundColor: c.accent }]}>
-                  <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
-                </View>
+                <SealIcon kind={(SEAL[c.id] || [])[0]} letter={(SEAL[c.id] || [null, '전'])[1]} size={64} bg={c.accent} />
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.cardEyebrow, { color: c.accent }]}>{t(c.eyebrow)}</Text>
                   <Text style={styles.cardTitle}>{t(c.title)}</Text>
@@ -183,19 +183,19 @@ export default function HomeScreen({ navigation }) {
 
       <View style={styles.exploreRow}>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Book', { part: 'prologue', then: 'Home' }); }}>
-          <Text brush style={styles.exploreIcon}>書</Text>
+          <SealIcon kind="book" letter="책" size={48} tilt={false} />
           <Text style={styles.exploreTxt}>{t('그림책 다시 읽기')}</Text>
         </Pressable>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Archive'); }}>
-          <Text brush style={styles.exploreIcon}>藏</Text>
+          <SealIcon kind="jar" letter="보" size={48} tilt={false} />
           <Text style={styles.exploreTxt}>{t('전통 자료실')}</Text>
         </Pressable>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
-          <Text brush style={styles.exploreIcon}>作</Text>
+          <SealIcon kind="quilt" letter="작" size={48} tilt={false} />
           <Text style={styles.exploreTxt}>{t('예시 작품 둘러보기')}</Text>
         </Pressable>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Taste', { again: true }); }}>
-          <Text brush style={styles.exploreIcon}>選</Text>
+          <SealIcon kind="idea" letter="고" size={48} tilt={false} />
           <Text style={styles.exploreTxt}>{t('떠오르는 것 다시 고르기')}</Text>
         </Pressable>
       </View>
@@ -214,9 +214,7 @@ export default function HomeScreen({ navigation }) {
           <View key={c.id} style={styles.cardDisabled}>
             <Frame accent={c.accent} style={styles.cardFrame}>
               <View style={styles.cardRow}>
-                <View style={[styles.hanja, { backgroundColor: c.accent }]}>
-                  <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
-                </View>
+                <SealIcon kind={(SEAL[c.id] || [])[0]} letter={(SEAL[c.id] || [null, '전'])[1]} size={64} bg={c.accent} />
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.cardEyebrow, { color: c.accent }]}>{t(c.eyebrow)}</Text>
                   <Text style={styles.cardTitle}>{t(c.title)}</Text>

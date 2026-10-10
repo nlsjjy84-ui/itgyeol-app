@@ -21,7 +21,7 @@ function shuffle(arr) {
 }
 
 // ── 거울 활자 ──
-const MIRROR_GLYPHS = ['한', '글', '판', '활', '印'];
+const MIRROR_GLYPHS = ['한', '글', '판', '활', '찍'];
 const VARIANTS = [
   { id: 'normal', tf: [] },
   { id: 'flipx', tf: [{ scaleX: -1 }] },
