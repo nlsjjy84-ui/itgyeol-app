@@ -13,16 +13,16 @@ echo [3/5] commit on redesign-ui
 git checkout redesign-ui
 if errorlevel 1 (echo CHECKOUT FAILED & pause & exit /b 1)
 git add -A
-git commit -m "Add work commentary from fixed facts (optional sentence polish)"
+git commit -m "Update from _apply zip (%DATE% %TIME%)"
 echo [4/5] push redesign-ui
 git push origin redesign-ui
 if errorlevel 1 (echo PUSH FAILED & pause & exit /b 1)
 echo [5/5] merge into master and push
 git checkout master
 git pull origin master
-git merge redesign-ui -m "Merge redesign-ui: work commentary"
+git merge redesign-ui -m "Merge redesign-ui into master"
 if errorlevel 1 (echo MERGE FAILED - tell Claude & pause & exit /b 1)
 git push origin master
 echo.
-echo DONE. Preview: npx expo start --web -c
+echo DONE. Site updates in 2-3 min: https://nlsjjy84-ui.github.io/itgyeol-app/
 pause
