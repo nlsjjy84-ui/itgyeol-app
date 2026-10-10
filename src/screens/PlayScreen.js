@@ -10,6 +10,7 @@ import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
 import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
+import { GAME_LINES } from '../data/book';
 import { playMission } from '../data/missions';
 import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
@@ -343,7 +344,7 @@ export default function PlayScreen({ navigation }) {
             )}
             <MissionGate
               resetKey={`${game.id}-${tier}`}
-              info={{ scene: 'play', ...playMission(game) }}
+              info={{ scene: 'play', lines: GAME_LINES[game.id] ? [GAME_LINES[game.id].start] : undefined, ...playMission(game) }}
               onModeSelect={setTimeMode}
             >
               <MascotGuide which="pung" message={CONTROL_HINTS[game.mechanic]} style={styles.controlBox} />
@@ -360,7 +361,7 @@ export default function PlayScreen({ navigation }) {
             <Text style={styles.modalComment}>
               오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
             </Text>
-            <TraceReward sceneId="tbd" success={completed} />
+            <TraceReward sceneId="tbd" success={completed} gameId={rawGame.id} gameName={rawGame.name} />
             <View style={styles.modalActions}>
               <Pressable style={styles.modalClose} onPress={() => setResultVisible(false)}>
                 <Text style={styles.modalCloseText}>닫기</Text>

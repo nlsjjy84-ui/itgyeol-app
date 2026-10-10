@@ -13,6 +13,7 @@ import ResultScreen from './screens/ResultScreen';
 import HangulScreen from './screens/HangulScreen';
 import TasteScreen from './screens/TasteScreen';
 import GalleryScreen from './screens/GalleryScreen';
+import BookScreen from './screens/BookScreen';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { colors, getThemeMode } from './theme';
 
@@ -35,15 +36,19 @@ const ResultH = withHanji(ResultScreen);
 const HangulH = withHanji(HangulScreen);
 const TasteH = withHanji(TasteScreen);
 const GalleryH = withHanji(GalleryScreen);
+const BookH = withHanji(BookScreen);
 
 // 처음 열면 "전통문화 하면 떠오르는 것" 질문부터, 한 번 답하거나 건너뛰었으면 바로 홈으로.
 function Nav() {
-  const { taste } = useJourney();
-  if (taste === null) return null;
+  const { taste, book } = useJourney();
+  if (taste === null || book === null) return null;
+  // 처음이면 질문 → 그림책 프롤로그 → 홈. 질문만 끝낸 사람은 바로 프롤로그부터.
+  const first = !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={taste.done ? 'Home' : 'Taste'} screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName={first} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Taste" component={TasteH} />
+        <Stack.Screen name="Book" component={BookH} initialParams={{ part: 'prologue', then: 'Home' }} />
         <Stack.Screen name="Gallery" component={GalleryH} />
         <Stack.Screen name="Home" component={HomeH} />
         <Stack.Screen name="Jinbeop" component={JinbeopH} />

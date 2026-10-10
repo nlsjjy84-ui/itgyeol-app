@@ -10,6 +10,7 @@ import { colors } from '../theme';
 import Frame from '../ui/Frame';
 import { CloudBand, DancheongBand, Taegeuk } from '../ui/Motifs';
 import { play } from '../utils/sound';
+import { PART_OF_CARD } from '../data/book';
 
 const HANJA = { jinbeop: '陣', print: '文', tbd: '遊', hangul: '塊', talchum: '面', mask: '面', dancheong: '彩', pattern: '彩' };
 
@@ -76,7 +77,7 @@ const CARDS = [
 ];
 
 export default function HomeScreen({ navigation }) {
-  const { skills } = useJourney();
+  const { skills, book } = useJourney();
   // [1,2,3에 적용한 걸 결과물에도] 와 같은 논리 — 홈 화면의 두 캐릭터도 지금까지
   // 실제로 쌓인 숙련도(skills)를 시그모이드로 눌러 존재감(링 밝기)으로 드러낸다.
   const { pungValue, gyeolValue } = useMemo(() => {
@@ -151,6 +152,9 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.exploreRow}>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Book', { part: 'prologue', then: 'Home' }); }}>
+          <Text style={styles.exploreTxt}>그림책 다시 읽기</Text>
+        </Pressable>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
           <Text style={styles.exploreTxt}>예시 작품 둘러보기</Text>
         </Pressable>
@@ -165,7 +169,10 @@ export default function HomeScreen({ navigation }) {
             key={c.id}
             onPress={() => {
               play('drum');
-              navigation.navigate(c.route);
+              // 처음 들어가는 판이면 그림책 입구 이야기를 먼저 보여 준다.
+              const part = PART_OF_CARD[c.id];
+              if (part && book && !book.gates[part]) navigation.navigate('Book', { part, then: c.route });
+              else navigation.navigate(c.route);
             }}
           >
             <Frame accent={c.accent} style={styles.cardFrame}>

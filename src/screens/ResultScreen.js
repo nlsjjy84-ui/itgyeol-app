@@ -12,7 +12,8 @@ import TransformResultShape from '../components/TransformResultShape';
 import Jogakbo, { PatchChip } from '../components/Jogakbo';
 import StoryScene from '../ui/StoryScene';
 import ResultWhy from '../components/ResultWhy';
-import { RESULT_LINES } from '../data/story';
+import { epilogueLines } from '../data/book';
+import { PLAY_GAMES } from '../data/playGames';
 import { useJourney } from '../context/JourneyContext';
 import { resultOptionCode } from '../utils/resultSeed';
 import { synthesizeAttention } from '../utils/attentionSynth';
@@ -94,6 +95,12 @@ export default function ResultScreen({ navigation }) {
   const bySceneId = Object.fromEntries(attempts.map((a) => [a.sceneId, a]));
   const orderedSolved = SCENE_ORDER.map((id) => bySceneId[id]).filter(Boolean);
   const solvedCount = orderedSolved.length;
+  // 제일 자주 한 전래놀이 — 에필로그 한 줄에 쓴다
+  const topGameName = useMemo(() => {
+    const top = Object.entries((playLog && playLog.byGame) || {}).sort((x, y) => y[1] - x[1])[0];
+    if (!top || top[1] < 2) return null;
+    return (PLAY_GAMES.find((g) => g.id === top[0]) || {}).name || null;
+  }, [playLog]);
   // 조각보가 빈 천 색을 정할 때 쓰는 것과 같은 시드(Jogakbo와 동일한 계산)
   const jogakSeed = orderedSolved.reduce((h, a) => Math.imul(h ^ (a.seed >>> 0), 16777619) >>> 0, 2166136261);
   const steps = orderedSolved.map((_, i) => ({
@@ -196,7 +203,7 @@ export default function ResultScreen({ navigation }) {
         <StoryScene
           art="sunset"
           place="마당 · 해 질 녘"
-          lines={RESULT_LINES[Math.min(4, solvedCount)]}
+          lines={epilogueLines({ solvedCount, topGameName })}
           style={{ marginTop: 4 }}
         />
 

@@ -12,7 +12,7 @@ import { play } from '../utils/sound';
 // 사전지식이 없어도 들어올 수 있게: 하나도 안 골라도 되고, 건너뛸 수 있다.
 // 이 답은 결과의 모양을 정하지 않는다(결과는 놀이 행동의 흔적으로만). 비슷한 예시를 미리 보여 주는 데에만 쓴다.
 export default function TasteScreen({ navigation, route }) {
-  const { taste, setTaste } = useJourney();
+  const { taste, setTaste, book } = useJourney();
   const again = route && route.params && route.params.again;
   const [picks, setPicks] = useState(taste && taste.picks ? taste.picks : []);
   // 단계는 화면 주소(params)에 둔다 — 예시 전체 보기에 갔다 돌아와도 같은 자리에 있게
@@ -26,7 +26,7 @@ export default function TasteScreen({ navigation, route }) {
     play('tap');
     setPicks((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
   };
-  const goHome = () => navigation.replace('Home');
+  const goHome = () => (book && !book.prologue ? navigation.replace('Book', { part: 'prologue', then: 'Home' }) : navigation.replace('Home'));
 
   if (step === 2) {
     return (
