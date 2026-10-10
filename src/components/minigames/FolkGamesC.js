@@ -173,7 +173,7 @@ export function HoopSpeedGame({ color, onComplete, targetSec = 14, lives = 3 }) 
       phase={phase}
       onStart={start}
       hud={`굴러간 길 ${Math.round(q.prog * 100)}% · 기회 ${'♥'.repeat(Math.max(0, q.lives))}`}
-      hint="화면을 꾹 누르면 굴렁쇠가 빨라지고, 떼면 느려져요. 오른쪽 초록 칸(오르내려요) 안에 속도를 맞춰 주세요. 벗어나면 비틀거려요. (스페이스바 꾹)"
+      hint="화면을 꾹 누르면 굴렁쇠가 빨라지고, 떼면 느려져요. 오른쪽 초록 칸(오르내려요) 안에 속도를 맞춰요. 벗어나면 비틀거려요. (스페이스바 꾹)"
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#e8efe0' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>

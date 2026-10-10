@@ -22,6 +22,7 @@ import { buildFacts, baseCommentary, polishCommentary, polishEnabled } from '../
 import ScreenHeader from '../ui/ScreenHeader';
 import ArtFrame from '../components/ArtFrame';
 import { play } from '../utils/sound';
+import { t } from '../i18n';
 
 const SCENE_LABEL = {
   jinbeop: '진법',
@@ -45,7 +46,7 @@ function buildOptions(attempts) {
   ordered.forEach((a) => {
     options.push({
       key: `solo-${a.sceneId}`,
-      label: `${SCENE_LABEL[a.sceneId] || a.sceneId} 단독 결과`,
+      label: t('{scene} 단독 결과', { scene: t(SCENE_LABEL[a.sceneId] || a.sceneId) }),
       attempts: [a],
     });
   });
@@ -54,7 +55,7 @@ function buildOptions(attempts) {
       const slice = ordered.slice(0, n);
       options.push({
         key: `combo-${n}`,
-        label: `${slice.map((a) => SCENE_LABEL[a.sceneId] || a.sceneId).join(' + ')} 연결 결과`,
+        label: t('{scenes} 연결 결과', { scenes: slice.map((a) => t(SCENE_LABEL[a.sceneId] || a.sceneId)).join(' + ') }),
         attempts: slice,
       });
     }
@@ -106,7 +107,7 @@ export default function ResultScreen({ navigation }) {
   const steps = orderedSolved.map((_, i) => ({
     key: `step-${i}`,
     attempts: orderedSolved.slice(0, i + 1),
-    label: i === 0 ? '첫 조각' : i === 1 ? '1+2 이어붙임' : '1+2+3 완성',
+    label: i === 0 ? t('첫 조각') : i === 1 ? t('1+2 이어붙임') : t('1+2+3 완성'),
   }));
   const { width: winW } = useWindowDimensions();
   const viewerW = Math.min(360, Math.max(260, winW - 44));
@@ -169,7 +170,7 @@ export default function ResultScreen({ navigation }) {
   };
 
   const handleSaveImage = async () => {
-    setSaveStatus('저장 중...');
+    setSaveStatus(t('저장 중...'));
     try {
       if (Platform.OS === 'web') {
         const uri = await shotRef.current.capture();
@@ -179,20 +180,20 @@ export default function ResultScreen({ navigation }) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        setSaveStatus('다운로드 되었습니다.');
+        setSaveStatus(t('다운로드 되었습니다.'));
       } else {
         const MediaLibrary = require('expo-media-library');
         const uri = await shotRef.current.capture();
         const perm = await MediaLibrary.requestPermissionsAsync();
         if (perm.status === 'granted') {
           await MediaLibrary.saveToLibraryAsync(uri);
-          setSaveStatus('사진 앱에 저장되었습니다.');
+          setSaveStatus(t('사진 앱에 저장되었습니다.'));
         } else {
-          setSaveStatus('저장 권한이 필요해요.');
+          setSaveStatus(t('저장 권한이 필요해요.'));
         }
       }
     } catch (e) {
-      setSaveStatus('이 환경에서는 저장을 미리 볼 수 없어요. (실제 기기에서는 저장돼요)');
+      setSaveStatus(t('이 환경에서는 저장을 미리 볼 수 없어요. (실제 기기에서는 저장돼요)'));
     }
   };
 
@@ -202,23 +203,23 @@ export default function ResultScreen({ navigation }) {
         <ScreenHeader title="나만의 결과물" sub="완성한 판이 하나의 작품이 돼요" onBack={() => navigation.navigate('Home')} />
         <StoryScene
           art="sunset"
-          place="마당 · 해 질 녘"
+          place={t('마당 · 해 질 녘')}
           lines={epilogueLines({ solvedCount, topGameName })}
           style={{ marginTop: 4 }}
         />
 
         <View style={styles.stackBox}>
-          <Text style={styles.stackTitle}>내가 모은 조각</Text>
+          <Text style={styles.stackTitle}>{t('내가 모은 조각')}</Text>
           <View style={styles.stackRow}>
             {SCENE_ORDER.map((id) => (
               <View key={id} style={styles.stackCol}>
                 <PatchChip attempt={bySceneId[id]} empty={!bySceneId[id]} size={82} level={Math.max(1, progress.levels[id] || 1)} />
-                <Text style={styles.stackLabel}>{SCENE_LABEL[id]}</Text>
-                <Text style={styles.stackState}>{bySceneId[id] ? '조각 생김' : '아직 비어 있음'}</Text>
+                <Text style={styles.stackLabel}>{t(SCENE_LABEL[id])}</Text>
+                <Text style={styles.stackState}>{bySceneId[id] ? t('조각 생김') : t('아직 비어 있음')}</Text>
               </View>
             ))}
           </View>
-          <Text style={[styles.stackTitle, { marginTop: 16 }]}>이어 붙일수록 달라져요</Text>
+          <Text style={[styles.stackTitle, { marginTop: 16 }]}>{t('이어 붙일수록 달라져요')}</Text>
           <View style={styles.stackRow}>
             {steps.map((st) => (
               <View key={st.key} style={styles.stackCol}>
@@ -229,22 +230,21 @@ export default function ResultScreen({ navigation }) {
             {steps.length < 3 ? (
               <View style={styles.stackCol}>
                 <View style={styles.nextBox}>
-                  <Text style={styles.nextText}>다음 판{'\n'}이 옆에{'\n'}이어져요</Text>
+                  <Text style={styles.nextText}>{t('다음 판\n이 옆에\n이어져요')}</Text>
                 </View>
-                <Text style={styles.stackLabel}>{steps.length === 0 ? '첫 조각' : steps.length === 1 ? '1+2' : '1+2+3'}</Text>
+                <Text style={styles.stackLabel}>{steps.length === 0 ? t('첫 조각') : steps.length === 1 ? '1+2' : '1+2+3'}</Text>
               </View>
             ) : null}
           </View>
           <Text style={styles.sectionHint}>
-            판마다 만든 모양·글자·놀이가 조각 하나로 남고, 조각을 이어 붙이면 한 장의 조각보가 돼요.
-            어떤 문제를 어떻게 풀었느냐에 따라 조각보의 모양과 색이 달라지고, 많이 풀수록 더 정교해져요.
+            {t('판마다 만든 모양·글자·놀이가 조각 하나로 남고, 조각을 이어 붙이면 한 장의 조각보가 돼요. 어떤 문제를 어떻게 풀었느냐에 따라 조각보의 모양과 색이 달라지고, 많이 풀수록 더 정교해져요.')}
           </Text>
         </View>
 
         <ResultWhy attempts={orderedSolved} seed={jogakSeed} />
 
         {options.length === 0 ? (
-          <Text style={styles.empty}>아직 완성한 판이 없어요. 판을 완성하면 여기 쌓여요.</Text>
+          <Text style={styles.empty}>{t('아직 완성한 판이 없어요. 판을 완성하면 여기 쌓여요.')}</Text>
         ) : (
           <View style={styles.optionRow}>
             {options.map((o) => (
@@ -273,7 +273,7 @@ export default function ResultScreen({ navigation }) {
               onPress={() => setPatternMode('jogakbo')}
             >
               <Text style={[styles.modeChipText, patternMode === 'jogakbo' && styles.modeChipTextActive]}>
-                조각보
+                {t('조각보')}
               </Text>
             </Pressable>
             <Pressable
@@ -281,7 +281,7 @@ export default function ResultScreen({ navigation }) {
               onPress={() => setPatternMode('transform')}
             >
               <Text style={[styles.modeChipText, patternMode === 'transform' && styles.modeChipTextActive]}>
-                변형 (어텐션 합성)
+                {t('변형 (어텐션 합성)')}
               </Text>
             </Pressable>
             <Pressable
@@ -289,7 +289,7 @@ export default function ResultScreen({ navigation }) {
               onPress={() => setPatternMode('pattern')}
             >
               <Text style={[styles.modeChipText, patternMode === 'pattern' && styles.modeChipTextActive]}>
-                기존 문양
+                {t('기존 문양')}
               </Text>
             </Pressable>
           </View>
@@ -307,14 +307,14 @@ export default function ResultScreen({ navigation }) {
         {patternMode === 'transform' && synth && (
           <View style={styles.attentionBox}>
             <Text style={styles.attentionTitle}>
-              부채→날개 · 붓→칼 · 자모→도형 — 어떤 판을 얼마나 반영했는지
+              {t('부채→날개 · 붓→칼 · 자모→도형 — 어떤 판을 얼마나 반영했는지')}
             </Text>
             <View style={styles.attentionBars}>
               {SCENE_ORDER.filter((id) => synth.attentionBySceneId[id] !== undefined).map((id) => {
                 const pct = Math.round((synth.attentionBySceneId[id] || 0) * 100);
                 return (
                   <View key={id} style={styles.attentionRow}>
-                    <Text style={styles.attentionLabel}>{SCENE_LABEL[id]}</Text>
+                    <Text style={styles.attentionLabel}>{t(SCENE_LABEL[id])}</Text>
                     <View style={styles.attentionTrack}>
                       <View style={[styles.attentionFill, { width: `${pct}%` }]} />
                     </View>
@@ -324,10 +324,7 @@ export default function ResultScreen({ navigation }) {
               })}
             </View>
             <Text style={styles.attentionHint}>
-              각 판을 완성한 속도·방식에서 나온 실제 숫자를 인코더-디코더 어텐션(6개 층)으로
-              섞어요. 아직 완성하지 않았거나 나중에 끝낸 판은 마스킹으로 가려서, 먼저 끝낸
-              판의 결과가 나중 판 때문에 거꾸로 바뀌지 않게 했어요. 그 결과가 위 모양의
-              날개 폭·칼날 길이·글자 정돈 정도를 직접 결정해요.
+              {t('각 판을 완성한 속도·방식에서 나온 실제 숫자를 인코더-디코더 어텐션(6개 층)으로 섞어요. 아직 완성하지 않았거나 나중에 끝낸 판은 마스킹으로 가려서, 먼저 끝낸 판의 결과가 나중 판 때문에 거꾸로 바뀌지 않게 했어요. 그 결과가 위 모양의 날개 폭·칼날 길이·글자 정돈 정도를 직접 결정해요.')}
             </Text>
           </View>
         )}
@@ -337,20 +334,20 @@ export default function ResultScreen({ navigation }) {
           onPress={handleSaveImage}
           disabled={!selected}
         >
-          <Text style={styles.primaryBtnText}>이미지로 저장하기</Text>
+          <Text style={styles.primaryBtnText}>{t('이미지로 저장하기')}</Text>
         </Pressable>
         {!!saveStatus && <Text style={styles.status}>{saveStatus}</Text>}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>QR코드로 가져가기</Text>
+          <Text style={styles.sectionTitle}>{t('QR코드로 가져가기')}</Text>
           <View style={styles.qrBox}>
             <QRCode value={code} size={120} color={colors.ink} backgroundColor={colors.paper} />
           </View>
-          <Text style={styles.sectionHint}>이 QR을 찍으면 내가 고른 결과 코드를 확인할 수 있어요.</Text>
+          <Text style={styles.sectionHint}>{t('이 QR을 찍으면 내가 고른 결과 코드를 확인할 수 있어요.')}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>내 결과물을 이 물건에 입혀 가져가요</Text>
+          <Text style={styles.sectionTitle}>{t('내 결과물을 이 물건에 입혀 가져가요')}</Text>
           <View style={styles.groupRow}>
             {CATALOG.map((g) => (
               <Pressable
@@ -383,7 +380,7 @@ export default function ResultScreen({ navigation }) {
 
           {item.variants.length > 1 ? (
             <View style={styles.variantRow}>
-              <Text style={styles.variantLabel}>모양</Text>
+              <Text style={styles.variantLabel}>{t('모양')}</Text>
               {item.variants.map((v) => (
                 <Pressable
                   key={v.id}
@@ -408,7 +405,7 @@ export default function ResultScreen({ navigation }) {
           />
           {dna.k ? (
             <View style={styles.dnaBox}>
-              <Text style={styles.dnaLine}>이 작품만의 형태 · #{dna.code} — {dnaSummary(dna)}</Text>
+              <Text style={styles.dnaLine}>{t('이 작품만의 형태')} · #{dna.code} — {dnaSummary(dna)}</Text>
               {dna.traits && dna.traits.length > 0 ? (
                 <View style={styles.dnaList}>
                   {dna.traits.slice(0, 8).map((t) => (
@@ -416,25 +413,25 @@ export default function ResultScreen({ navigation }) {
                   ))}
                 </View>
               ) : null}
-              <Text style={styles.dnaLine}>어떤 놀이를 몇 번 했는지에 따라 모양이 달라져요. 같은 기록이어야 같은 모양이 나와요.</Text>
+              <Text style={styles.dnaLine}>{t('어떤 놀이를 몇 번 했는지에 따라 모양이 달라져요. 같은 기록이어야 같은 모양이 나와요.')}</Text>
             </View>
           ) : null}
 
           {group.hook ? (
             <Pressable style={[styles.hookBtn, hookOn && styles.hookBtnOn]} onPress={() => setHookOn((v) => !v)}>
               <Text style={[styles.hookBtnText, hookOn && styles.hookBtnTextOn]}>
-                키링 고리 {hookOn ? '달려 있어요' : '빼고 보기'}
+                {hookOn ? t('키링 고리 달려 있어요') : t('키링 고리 빼고 보기')}
               </Text>
             </Pressable>
           ) : null}
 
           <View style={styles.aboutBox}>
-            <Text style={styles.aboutTitle}>작품 해설</Text>
+            <Text style={styles.aboutTitle}>{t('작품 해설')}</Text>
             <Text style={styles.aboutText}>{polished || baseText}</Text>
             <Text style={styles.commentNote}>
               {polished
-                ? '내용은 고정 자료에서 가져왔고, AI는 문장만 다듬었어요. 개인 정보는 보내지 않아요.'
-                : '내용은 고정 자료에서 가져왔어요.'}
+                ? t('내용은 고정 자료에서 가져왔고, AI는 문장만 다듬었어요. 개인 정보는 보내지 않아요.')
+                : t('내용은 고정 자료에서 가져왔어요.')}
             </Text>
           </View>
 
@@ -443,36 +440,36 @@ export default function ResultScreen({ navigation }) {
               {item.label} · {variant.label}
             </Text>
             <Text style={styles.aboutText}>
-              끌어서 돌리거나 아래 버튼으로 앞·뒤·옆·위·아래를 바로 볼 수 있어요. 물건의 앞뒤 모두 그 물건의 실제 모양이에요.
+              {t('끌어서 돌리거나 아래 버튼으로 앞·뒤·옆·위·아래를 바로 볼 수 있어요. 물건의 앞뒤 모두 그 물건의 실제 모양이에요.')}
             </Text>
           </View>
 
           <View style={styles.customBox}>
-            <Text style={styles.customLabel}>그 외 다른 전통 물건에 입히고 싶나요?</Text>
+            <Text style={styles.customLabel}>{t('그 외 다른 전통 물건에 입히고 싶나요?')}</Text>
             <View style={styles.customRow}>
               <TextInput
                 style={styles.customInput}
                 value={customShapeText}
                 onChangeText={setCustomShapeText}
-                placeholder="예: 갓끈, 향낭, 베개..."
+                placeholder={t('예: 갓끈, 향낭, 베개...')}
                 placeholderTextColor={colors.muted}
                 onSubmitEditing={handleRequestShape}
                 returnKeyType="done"
               />
               <Pressable style={styles.customBtn} onPress={handleRequestShape}>
-                <Text style={styles.customBtnText}>요청하기</Text>
+                <Text style={styles.customBtnText}>{t('요청하기')}</Text>
               </Pressable>
             </View>
             {customRequests.length > 0 && (
               <Text style={styles.customAck}>
-                '{customRequests[customRequests.length - 1]}' 요청을 받았어요! 새 물건은 같은 방식으로 계속 추가할 수 있어요.
+                {t("'{req}' 요청을 받았어요! 새 물건은 같은 방식으로 계속 추가할 수 있어요.", { req: customRequests[customRequests.length - 1] })}
               </Text>
             )}
           </View>
         </View>
 
         <Pressable style={styles.secondaryBtn} onPress={() => navigation.popToTop()}>
-          <Text style={styles.secondaryBtnText}>홈으로</Text>
+          <Text style={styles.secondaryBtnText}>{t('홈으로')}</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

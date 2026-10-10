@@ -142,7 +142,7 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
           <Text style={[styles.aimBtnText, { color }]}>◀ 접기</Text>
         </Pressable>
         <Text style={styles.aimStatus}>
-          {phase === 'playing' ? '화살표 키(←→)로도 조종해요' : '한산도 대첩처럼 양쪽을 동시에 펼쳐보세요'}
+          {phase === 'playing' ? '화살표 키(←→)로도 조종해요' : '한산도 대첩처럼 양쪽을 동시에 펼쳐 보자'}
         </Text>
         <Pressable
           style={[styles.aimBtn, { borderColor: color }]}

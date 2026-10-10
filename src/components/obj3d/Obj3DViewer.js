@@ -5,6 +5,7 @@ import ViewShot, { captureRef } from 'react-native-view-shot';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { THREE, makeMats, addKeyringHook, dnaRef, deformObject } from './kit';
 import { colors } from '../../theme';
+import { t } from '../../i18n';
 
 // 진짜 3D 물건 뷰어.
 // 결과 그림(조각보)을 한 장 찍어 texture로 만들고, 물건마다 따로 만든 3D 모델에 입힌다.
@@ -254,14 +255,14 @@ export default function Obj3DViewer({ art, artSize = 280, build, hook = false, d
           </Canvas>
         ) : (
           <View style={[styles.fallback, { width, height }]}>
-            <Text style={styles.loading}>3D 모델을 만드는 중…</Text>
+            <Text style={styles.loading}>{t('3D 모델을 만드는 중…')}</Text>
           </View>
         )}
       </View>
       <View style={styles.viewRow}>
         {VIEWS.map((v) => (
           <Pressable key={v.id} onPress={() => goView(v)} style={[styles.viewBtn, activeView === v.id && styles.viewBtnOn]}>
-            <Text style={[styles.viewTxt, activeView === v.id && styles.viewTxtOn]}>{v.label}</Text>
+            <Text style={[styles.viewTxt, activeView === v.id && styles.viewTxtOn]}>{t(v.label)}</Text>
           </Pressable>
         ))}
         <Pressable
@@ -272,7 +273,7 @@ export default function Obj3DViewer({ art, artSize = 280, build, hook = false, d
           }}
           style={[styles.viewBtn, auto && styles.viewBtnOn]}
         >
-          <Text style={[styles.viewTxt, auto && styles.viewTxtOn]}>{auto ? '돌리는 중' : '자동 회전'}</Text>
+          <Text style={[styles.viewTxt, auto && styles.viewTxtOn]}>{auto ? t('돌리는 중') : t('자동 회전')}</Text>
         </Pressable>
       </View>
     </View>

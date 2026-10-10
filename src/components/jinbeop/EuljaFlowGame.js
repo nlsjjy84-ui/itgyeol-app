@@ -80,7 +80,7 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
         } else {
           setFlash('fail');
           setPhase('ready');
-          onFail && onFail('줄이 많이 끊어졌어요. 머리를 궤적에 더 가깝게 따라가보세요.');
+          onFail && onFail('줄이 많이 끊어졌어요. 머리를 궤적에 더 가깝게 따라가 보자 🐍');
         }
       }
     }, TICK_MS);
@@ -106,7 +106,7 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
       <Text style={styles.roundText}>
         {phase === 'running'
           ? `흘러가는 중 · ${Math.round(t * 100)}%`
-          : '머리가 되어 을자(乙) 길을 걸어보세요'}
+          : '머리가 되어 을자(乙) 길을 걸어 보자'}
       </Text>
       <View style={styles.field}>
         {GUIDE_POINTS.map((p, i) => (

@@ -129,7 +129,7 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
           ? `그리는 중 · ${timed ? `⏱ ${remainingSec}초` : '시간 제한 없음'}`
           : phase === 'result'
           ? `${resultPct}% 비슷해요`
-          : timed ? `제한 시간 ${Math.round(DRAW_MS / 1000)}초 동안 이 모양을 손으로 그려보세요` : '시간 제한 없이 이 모양을 손으로 그려보세요'}
+          : timed ? `제한 시간 ${Math.round(DRAW_MS / 1000)}초 동안 이 모양을 손으로 그려 보자` : '시간 제한 없이 이 모양을 손으로 그려 보자'}
       </Text>
 
       <GestureDetector gesture={pan}>

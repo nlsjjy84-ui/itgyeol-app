@@ -109,7 +109,7 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
     if (id === orderRef.current[0]) {
       vaultFront();
     } else {
-      failTurn(`아직 ${orderRef.current[0] + 1}번 차례예요. 순서를 지켜주세요.`);
+      failTurn(`아직 ${orderRef.current[0] + 1}번 차례예요. 순서대로 가 보자 😉`);
     }
   };
 
@@ -129,7 +129,7 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
       <Text style={styles.roundText}>
         {phase === 'playing'
           ? `넘어간 ${vaulted.length} / ${peopleCount}명 · 지금 차례: ${order[0] + 1}번`
-          : '맨 앞사람부터 차례로 옆 사람 팔 위를 넘어가 보세요'}
+          : '맨 앞사람부터 차례로 옆 사람 팔 위를 넘어가 보자'}
       </Text>
 
       <View style={styles.line}>

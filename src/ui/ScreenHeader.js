@@ -5,6 +5,7 @@ import { DancheongBand } from './Motifs';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
+import { t } from '../i18n';
 
 // 화면 맨 위 — 뒤로가기(도장 같은 네모) + 붓글씨 제목 + 단청 띠
 const SCENES = [
@@ -29,7 +30,7 @@ function SceneSwitch({ current }) {
             nav.navigate(s.id);
           }}
         >
-          <Text style={[styles.pillText, s.id === current && styles.pillTextOn]}>{s.label}</Text>
+          <Text style={[styles.pillText, s.id === current && styles.pillTextOn]}>{t(s.label)}</Text>
         </Pressable>
       ))}
     </View>
@@ -49,14 +50,14 @@ export default function ScreenHeader({ title, sub, onBack, right, scene }) {
             style={styles.back}
             hitSlop={8}
           >
-            <Text style={styles.backText}>‹ 홈</Text>
+            <Text style={styles.backText}>{t('‹ 홈')}</Text>
           </Pressable>
         ) : null}
         <View style={{ flex: 1 }}>
           <Text brush style={styles.title}>
-            {title}
+            {t(title)}
           </Text>
-          {sub ? <Text style={styles.sub}>{sub}</Text> : null}
+          {sub ? <Text style={styles.sub}>{t(sub)}</Text> : null}
         </View>
         {right || null}
       </View>

@@ -114,8 +114,8 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
         {phase === 'playing'
-          ? `제자리 ${correctCount} / ${n}명 · 한 명을 짚고 바꿀 자리를 짚어보세요`
-          : '말을 옮기듯, 한 사람을 짚고 바꿀 자리를 짚어 자리를 바꿔보세요'}
+          ? `제자리 ${correctCount} / ${n}명 · 한 명을 짚고 바꿀 자리를 짚어 봐`
+          : '말을 옮기듯, 한 사람을 짚고 바꿀 자리를 짚어 자리를 바꿔 보자'}
       </Text>
 
       {phase === 'playing' && (

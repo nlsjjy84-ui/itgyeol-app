@@ -180,7 +180,7 @@ export default function ThrowGame({
         <Pressable style={[styles.aimBtn, { borderColor: color }]} onPress={() => moveAim(-6)}>
           <Text style={[styles.aimBtnText, { color }]}>◀ 조준</Text>
         </Pressable>
-        <Text style={styles.aimStatus}>{aimed ? '조준 완료!' : '좌우로 조준하세요'}</Text>
+        <Text style={styles.aimStatus}>{aimed ? '조준 완료!' : '좌우로 조준해 봐'}</Text>
         <Pressable style={[styles.aimBtn, { borderColor: color }]} onPress={() => moveAim(6)}>
           <Text style={[styles.aimBtnText, { color }]}>조준 ▶</Text>
         </Pressable>

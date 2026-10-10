@@ -7,6 +7,7 @@ import { SCENE_ORDER } from './Jogakbo';
 import { SCENE_TARGET, LEVEL_NAME } from '../utils/progress';
 import { explainPatch, explainWhole } from '../utils/explain';
 import { colors } from '../theme';
+import { t as tr } from '../i18n';
 
 const GOLD = '#c9a24b';
 
@@ -21,9 +22,9 @@ export function Gauge({ percent, height = 10 }) {
         ))}
       </View>
       <View style={styles.tickRow}>
-        <Text style={[styles.tickLabel, { right: '50%', paddingRight: 3 }]}>꽃수 50%</Text>
-        <Text style={[styles.tickLabel, { left: '60%', paddingLeft: 3 }]}>금테 60%</Text>
-        <Text style={[styles.tickLabel, { right: 0 }]}>이중 금테 100%</Text>
+        <Text style={[styles.tickLabel, { right: '50%', paddingRight: 3 }]}>{tr('꽃수')} 50%</Text>
+        <Text style={[styles.tickLabel, { left: '60%', paddingLeft: 3 }]}>{tr('금테')} 60%</Text>
+        <Text style={[styles.tickLabel, { right: 0 }]}>{tr('이중 금테')} 100%</Text>
       </View>
     </View>
   );
@@ -37,11 +38,11 @@ export default function ResultWhy({ attempts, seed }) {
   const whole = explainWhole(patches, seed, progress.percent);
   return (
     <View style={styles.box}>
-      <Text style={styles.title}>왜 이런 결과물이 나왔을까요?</Text>
+      <Text style={styles.title}>{tr('왜 이런 결과물이 나왔을까요?')}</Text>
 
       <View style={styles.gaugeCard}>
         <View style={styles.gaugeHead}>
-          <Text style={styles.gaugeTitle}>작품 완성도</Text>
+          <Text style={styles.gaugeTitle}>{tr('작품 완성도')}</Text>
           <Text style={styles.gaugePct}>{progress.percent}%</Text>
         </View>
         <Gauge percent={progress.percent} />
@@ -50,21 +51,21 @@ export default function ResultWhy({ attempts, seed }) {
           const n = progress.counts[id] || 0;
           return (
             <View key={id} style={styles.sceneRow}>
-              <Text style={styles.sceneName}>{t.name}</Text>
+              <Text style={styles.sceneName}>{tr(t.name)}</Text>
               <View style={styles.miniTrack}>
                 <View style={[styles.miniFill, { width: `${Math.min(100, (n / t.l3) * 100)}%` }]} />
               </View>
-              <Text style={styles.sceneLevel}>{n}/{t.l3} · {LEVEL_NAME[progress.levels[id]]}</Text>
+              <Text style={styles.sceneLevel}>{n}/{t.l3} · {tr(LEVEL_NAME[progress.levels[id]])}</Text>
             </View>
           );
         })}
         <Text style={styles.note}>
-          같은 판을 되풀이하는 것보다 서로 다른 문제를 풀수록 완성도가 올라가요. 판마다 풀어야 하는 문제 수가 달라서, 많이 푼 판의 조각부터 먼저 정교해져요.
+          {tr('같은 판을 되풀이하는 것보다 서로 다른 문제를 풀수록 완성도가 올라가요. 판마다 풀어야 하는 문제 수가 달라서, 많이 푼 판의 조각부터 먼저 정교해져요.')}
         </Text>
       </View>
 
       {patches.length === 0 ? (
-        <Text style={styles.empty}>판을 하나 풀면 그 조각이 왜 그런 모양인지 여기에 풀어 드릴게요.</Text>
+        <Text style={styles.empty}>{tr('판을 하나 풀면 그 조각이 왜 그런 모양인지 여기에 풀어 드릴게요.')}</Text>
       ) : (
         patches.map((a) => (
           <View key={a.sceneId} style={styles.patchCard}>
@@ -83,7 +84,7 @@ export default function ResultWhy({ attempts, seed }) {
 
       <View style={styles.patchCard}>
         <View style={styles.patchText}>
-          <Text style={[styles.key, { marginBottom: 2 }]}>조각보 전체</Text>
+          <Text style={[styles.key, { marginBottom: 2 }]}>{tr('조각보 전체')}</Text>
           {whole.map((r) => (
             <Text key={r.k} style={styles.line}>
               <Text style={styles.key}>{r.k}  </Text>

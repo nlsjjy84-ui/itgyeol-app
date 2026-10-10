@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
@@ -16,6 +16,9 @@ import GalleryScreen from './screens/GalleryScreen';
 import BookScreen from './screens/BookScreen';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { colors, getThemeMode } from './theme';
+import { loadLang, setLang } from './i18n';
+import { LangContext } from './i18n/LangContext';
+import './i18n/register';
 
 const Stack = createNativeStackNavigator();
 
@@ -63,18 +66,27 @@ function Nav() {
 }
 
 // 화면 파일들은 이 파일이 불러와질 때 처음 읽힌다 — 그 전에 App.js가 테마(라이트/다크)를 정해 둔다.
+// 언어를 바꾸면 key가 바뀌어 화면 트리를 새 언어로 다시 그린다(저장된 놀이 기록은 그대로).
 export default function AppRoot({ agreed, onAgree }) {
+  const [lang, setLangState] = useState(null);
+  useEffect(() => {
+    loadLang().then(setLangState);
+  }, []);
+  if (lang === null) return null;
+  const change = (id) => setLangState(setLang(id));
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {agreed ? (
-        <JourneyProvider>
-          <Nav />
-        </JourneyProvider>
-      ) : (
-        <Hanji>
-          <ConsentScreen onAgree={onAgree} />
-        </Hanji>
-      )}
+      <LangContext.Provider value={{ lang, change }}>
+        {agreed ? (
+          <JourneyProvider>
+            <Nav key={lang} />
+          </JourneyProvider>
+        ) : (
+          <Hanji key={lang}>
+            <ConsentScreen onAgree={onAgree} />
+          </Hanji>
+        )}
+      </LangContext.Provider>
     </GestureHandlerRootView>
   );
 }

@@ -4,6 +4,7 @@ import Text from '../ui/Text';
 import { OHANG, ohangByKey } from '../data/formations';
 import { useJourney } from '../context/JourneyContext';
 import { colors } from '../theme';
+import { t } from '../i18n';
 
 // [오늘의 기운 선택 기능] 예전엔 화면마다 pickTodayOhang()을 따로 불러서 같은 "오늘의
 // 기운"인데 화면마다 색이 달라 보였다 — 이제 JourneyContext가 들고 있는 값 하나를
@@ -21,7 +22,7 @@ export default function OhangPicker({ style }) {
         hitSlop={6}
       >
         <Text style={[styles.badgeText, { color: ohang.color }]}>
-          오늘의 기운 · {ohang.label} {open ? '▾' : '▸'}
+          {t('오늘의 기운')} · {ohang.label} {open ? '▾' : '▸'}
         </Text>
       </Pressable>
       {open && (

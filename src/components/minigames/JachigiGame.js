@@ -247,10 +247,10 @@ export default function JachigiGame({
   const flightY = flightAnim.interpolate({ inputRange: [0, 1], outputRange: [-70, -6] });
 
   let instruction = '';
-  if (phase === 'pop') instruction = '지금 탭해서 튀어오르게 하세요!';
-  else if (phase === 'swing') instruction = '지금 스윙하세요!';
+  if (phase === 'pop') instruction = '지금 탭해서 튀어 오르게 톡!';
+  else if (phase === 'swing') instruction = '지금 휘둘러!';
   else if (phase === 'flying') instruction = '날아가는 중...';
-  else if (phase === 'ready') instruction = '버튼을 눌러 시작하세요';
+  else if (phase === 'ready') instruction = '버튼을 누르면 시작해요';
   else if (phase === 'done') instruction = '완성!';
 
   return (

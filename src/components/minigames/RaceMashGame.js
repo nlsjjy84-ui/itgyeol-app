@@ -133,7 +133,7 @@ export default function RaceMashGame({
     <View style={styles.wrap}>
       {burstActive && (
         <Animated.View style={[styles.burstBanner, { transform: [{ scale: burstPulse }] }]}>
-          <Text style={styles.burstBannerText}>영차!! 지금 번갈아치세요!</Text>
+          <Text style={styles.burstBannerText}>영차!! 지금 번갈아 쳐!</Text>
         </Animated.View>
       )}
       <View

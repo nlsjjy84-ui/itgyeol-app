@@ -3,7 +3,9 @@ import { View, Image, StyleSheet } from 'react-native';
 import Text from './Text';
 import Mascot from '../components/Mascot';
 import { colors } from '../theme';
-import { WHO, SCENES } from '../data/story';
+import { WHO } from '../data/story';
+import { getScenes } from '../data/book';
+import { t } from '../i18n';
 
 // 포트폴리오에 그려진 장면 그림 — 미션·결과 화면 위에 깔아 이야기의 자리를 보여 준다.
 const ART = {
@@ -38,7 +40,7 @@ export function Dialogue({ lines, style }) {
 
 // 장면 그림 + 장소 이름 (+ 첫 대사)
 export default function StoryScene({ scene, art, place, lines, hideLines, style }) {
-  const def = SCENES[scene] || {};
+  const def = getScenes()[scene] || {};
   const img = ART[art || def.art] || ART.gate;
   const where = place || def.place;
   const talk = lines || def.lines || [];
@@ -48,7 +50,7 @@ export default function StoryScene({ scene, art, place, lines, hideLines, style 
         <Image source={img} style={styles.art} resizeMode="cover" />
         {where ? (
           <View style={styles.place}>
-            <Text style={styles.placeText}>{where}</Text>
+            <Text style={styles.placeText}>{t(where)}</Text>
           </View>
         ) : null}
       </View>

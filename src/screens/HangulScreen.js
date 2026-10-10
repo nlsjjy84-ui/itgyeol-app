@@ -87,7 +87,7 @@ export default function HangulScreen({ navigation }) {
           </Pressable>
           {noteOpen ? <Text style={styles.noteText}>{stage.tip}</Text> : null}
         </View>
-        <MissionGate resetKey={stage.id} info={{ scene: 'print', ...hangulMission(stage) }} onModeSelect={() => {}}>
+        <MissionGate resetKey={stage.id} info={{ scene: 'hangul', ...hangulMission(stage) }} onModeSelect={() => {}}>
           <MascotGuide which="gyeol" message="블록을 돌릴 때마다 90도씩 돌아가요. ㅗ → ㅏ → ㅜ → ㅓ 순서로 모음 글자도 바뀌어요!" style={{ marginBottom: 8 }} />
           <HangulTetris key={key} resetKey={key} color={ohang.color} targetLines={stage.lines} dropMs={stage.dropMs} onDone={onDone} />
         </MissionGate>

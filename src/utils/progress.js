@@ -1,3 +1,4 @@
+import { t as tr } from '../i18n';
 // 완성도 — 서로 다른 문제를 많이 풀수록 조각보가 더 정교해진다.
 // "같은 판을 반복"하는 것보다 "다른 문제를 푸는 것"이 완성도를 올리도록, 푼 문제의 "종류 수"를 센다.
 // (판마다 푼 문제 종류는 기기에 저장돼 앱을 껐다 켜도 이어진다.)
@@ -40,7 +41,7 @@ export function computeProgress(solvedIds) {
 export function nextHint(sceneId, solvedCount) {
   const t = SCENE_TARGET[sceneId];
   const lv = levelFor(sceneId, solvedCount);
-  if (lv >= 3) return `${t.name}은 가장 높은 단계예요.`;
+  if (lv >= 3) return tr('{scene}은 가장 높은 단계예요.', { scene: tr(t.name) });
   const need = (lv === 0 ? 1 : lv === 1 ? t.l2 : t.l3) - solvedCount;
-  return `${t.name} 다른 문제 ${need}개를 더 풀면 ${lv + 1}단계가 돼요.`;
+  return tr('{scene} 다른 문제 {need}개를 더 풀면 {lv}단계가 돼요.', { scene: tr(t.name), need, lv: lv + 1 });
 }

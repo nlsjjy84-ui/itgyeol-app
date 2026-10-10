@@ -14,33 +14,40 @@ export const SCENES = {
     art: 'gate',
     place: '마당 어귀',
     lines: [
-      { who: 'pung', text: '어? 저기 누가 들어왔어!' },
-      { who: 'gyeol', text: '방금 마당 문이 열린 거 봤어? 같이 가 보자.' },
-      { who: 'pung', text: '마당 세 곳에서 판이 기다리고 있대. 네가 손을 대면 뭔가 움직일지도 몰라.' },
+      { who: 'pung', text: '왔다왔다! 오늘은 어디부터 갈래? 😆' },
+      { who: 'gyeol', text: '판은 네 곳이야. 끌리는 데부터 가면 돼. 순서 없어 🚪' },
     ],
   },
   jinbeop: {
     art: 'madang',
     place: '첫째 판 · 진법 마당',
     lines: [
-      { who: 'pung', text: '어? 마당에 사람들이 서 있는데… 줄이 다 흐트러졌어.' },
-      { who: 'gyeol', text: '누가 자리를 바꿨나 봐. 네가 서 보면 어때?' },
+      { who: 'pung', text: '어? 줄이 또 흐트러졌어! 누가 자꾸 장난치는 거야 😤' },
+      { who: 'gyeol', text: '네가 서면 딱 맞을 것 같은데? 우린 옆에서 "얼쑤!" 할게 🥁' },
     ],
   },
   print: {
     art: 'byeongpung',
     place: '둘째 판 · 병풍 앞 글방',
     lines: [
-      { who: 'gyeol', text: '병풍 앞 먹이 아직 안 말랐어. 누가 글자를 쓰다 말았나 봐.' },
-      { who: 'pung', text: '어? 글자 조각이 흩어졌네. 잠깐, 맞추면 도장이 찍힐 것 같은데?' },
+      { who: 'gyeol', text: '먹 냄새 솔솔~ 글자 조각이 또 흩어졌네 🖌️' },
+      { who: 'pung', text: '맞추기만 하면 도장이 쾅! 글씨 못 써도 괜찮아 😆' },
     ],
   },
   play: {
     art: 'banner',
     place: '셋째 판 · 놀이 마당',
     lines: [
-      { who: 'pung', text: '저기 깃발 좀 봐! 바람이 불면 소리가 날 것 같아.' },
-      { who: 'gyeol', text: '잠깐, 움직였는데? 같이 해 보자.' },
+      { who: 'pung', text: '깃발 펄럭펄럭~ 오늘은 뭐 하고 놀까? 🎏' },
+      { who: 'gyeol', text: '끌리는 거 아무거나! 우린 구경하면서 응원할게 🥳' },
+    ],
+  },
+  hangul: {
+    art: 'sunset',
+    place: '넷째 판 · 한글 블록',
+    lines: [
+      { who: 'pung', text: '또 떨어진다! ㄱ? ㅏ?? 이번엔 몇 줄 지울까? ☄️' },
+      { who: 'gyeol', text: '"으악" 해도 괜찮아. 우리도 맨날 으악이야 🙈' },
     ],
   },
 };

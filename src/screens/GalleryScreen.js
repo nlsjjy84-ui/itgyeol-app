@@ -7,6 +7,7 @@ import { TASTE_GROUPS } from '../data/taste';
 import { MOCK_WORKS, matchWorks } from '../data/mockWorks';
 import { MockCard, MockDetail } from '../components/MockWorks';
 import ScreenHeader from '../ui/ScreenHeader';
+import { t } from '../i18n';
 
 // 예시 작품 둘러보기 — 갈래별로 모아 본다. 순위도 점수도 없고, 그저 이런 모양들이 나올 수 있다는 구경이다.
 export default function GalleryScreen({ navigation }) {
@@ -25,9 +26,9 @@ export default function GalleryScreen({ navigation }) {
 
   return (
     <SafeAreaView style={st.safe}>
-      <ScreenHeader title="예시 둘러보기" sub={`가상의 놀이 기록으로 빚은 예시 ${MOCK_WORKS.length}점`} onBack={() => navigation.goBack()} />
+      <ScreenHeader title="예시 둘러보기" sub={t('가상의 놀이 기록으로 빚은 예시 {n}점', { n: MOCK_WORKS.length })} onBack={() => navigation.goBack()} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.tabs}>
-        {[{ id: 'all', label: '전체' }, ...(hasMine ? [{ id: 'mine', label: '내가 떠올린 것' }] : []), ...TASTE_GROUPS.map((g) => ({ id: g.id, label: g.label }))].map((t) => (
+        {[{ id: 'all', label: t('전체') }, ...(hasMine ? [{ id: 'mine', label: t('내가 떠올린 것') }] : []), ...TASTE_GROUPS.map((g) => ({ id: g.id, label: g.label }))].map((t) => (
           <Pressable key={t.id} style={[st.tab, groupId === t.id && st.tabOn]} onPress={() => { setGroupId(t.id); setKwId(null); }}>
             <Text style={[st.tabTxt, groupId === t.id && { color: '#fff' }]}>{t.label}</Text>
           </Pressable>
@@ -46,7 +47,7 @@ export default function GalleryScreen({ navigation }) {
         {list.map((w) => (
           <MockCard key={w.id} work={w} size={104} onPress={setOpen} />
         ))}
-        {list.length === 0 ? <Text style={st.empty}>아직 이 갈래의 예시가 없어요.</Text> : null}
+        {list.length === 0 ? <Text style={st.empty}>{t('아직 이 갈래의 예시가 없어요.')}</Text> : null}
       </ScrollView>
       <MockDetail work={open} onClose={() => setOpen(null)} />
     </SafeAreaView>

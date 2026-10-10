@@ -289,7 +289,7 @@ export default function PrintScreen({ navigation }) {
     setStreak(0);
     setCompleted(false);
     play('geomungo');
-    setResultComment('시간이 다 됐어요! 콤보가 초기화돼요. 다시 섞어서 도전해보세요.');
+    setResultComment('시간이 다 됐어요! 콤보가 초기화돼요. 다시 섞어서 한 번 더 해 보자 💪');
     setResultVisible(true);
     // [지능형 난이도] 시간 안에 못 끝낸 것도 "이 방식은 아직 익히는 중"이라는 신호로 반영한다.
     recordSkill(skillId, false);
@@ -412,7 +412,7 @@ export default function PrintScreen({ navigation }) {
       if (missing > 0) parts.push(`아직 ${missing}개의 조각이 제자리를 못 찾았어요`);
       if (result.decoysRemaining > 0)
         parts.push(`오타 활자 ${result.decoysRemaining}개를 오른쪽 아래 제외 구역으로 보내야 해요`);
-      setResultComment((parts.length ? parts.join(' · ') : '') + ' 점선 표시를 참고해보세요.');
+      setResultComment((parts.length ? parts.join(' · ') : '') + ' 점선 표시가 힌트야 👀');
       setResultVisible(true);
     }
   }
@@ -683,9 +683,9 @@ export default function PrintScreen({ navigation }) {
                 ? `이번엔 오타 활자가 ${decoyGlyphs.length}개 섞여 있어요! 진짜 조각은 제 자리로, 가짜는 오른쪽 아래 제외 구역(✕)으로 보내야 글자가 완성돼요. 지금은 ${
                     selectedIdx + 1
                   }번 조각이 선택돼 있어요.`
-                : `조각을 드래그하거나, 클릭해서 선택한 뒤 화살표 키로 옮기고 Enter로 제 자리에 쏙 넣어보세요. 지금은 ${
+                : `조각을 드래그하거나, 클릭해서 선택한 뒤 화살표 키로 옮기고 Enter로 제자리에 쏙 넣으면 돼요. 지금은 ${
                     selectedIdx + 1
-                  }번 조각이 선택돼 있어요. ${timeModeRef.current === 'free' ? '천천히' : '시간 안에'} 글자를 완성해보세요!`
+                  }번 조각이 선택돼 있어요. ${timeModeRef.current === 'free' ? '천천히' : '시간 안에'} 글자를 완성해 보자!`
             }
             style={styles.mascotHint}
           />
