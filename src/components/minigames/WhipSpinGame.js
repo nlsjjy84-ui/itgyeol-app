@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable, Animated, Easing } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
+import { t as i18nT } from '../../i18n';
 
 // 팽이치기 — 채찍(탭)으로 팽이를 계속 쳐서 회전 속도를 유지하는 놀이.
 // 치지 않으면 속도가 점점 줄어들고, 목표 속도 이상을 일정 시간 동안 유지하면 성공한다.
@@ -110,14 +111,14 @@ export default function WhipSpinGame({
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>
-        속도 {threshold} 이상을 {holdSec}초 동안 유지하면 성공!
+        {i18nT('속도')} {i18nT(threshold)} {i18nT('이상을')} {i18nT(holdSec)}{i18nT('초 동안 유지하면 성공!')}
       </Text>
 
       <Pressable style={styles.field} onPress={whip} disabled={phase !== 'running'}>
         <Animated.Text style={[styles.topIcon, { transform: [{ rotate: spinDeg }] }]}>
           {icon}
         </Animated.Text>
-        {flash === 'hit' && <Text style={styles.whipFlash}>착!</Text>}
+        {flash === 'hit' && <Text style={styles.whipFlash}>{i18nT('착!')}</Text>}
       </Pressable>
 
       <View style={styles.gaugeTrack}>
@@ -129,22 +130,22 @@ export default function WhipSpinGame({
           ]}
         />
       </View>
-      <Text style={styles.count}>속도 {Math.round(speed)}</Text>
+      <Text style={styles.count}>{i18nT('속도')} {Math.round(speed)}</Text>
 
       <View style={styles.holdTrack}>
         <View style={[styles.holdFill, { width: `${heldPct * 100}%`, backgroundColor: color }]} />
       </View>
       <Text style={styles.holdLabel}>
-        유지 {(heldMs / 1000).toFixed(1)} / {holdSec}초
+        {i18nT('유지')} {(heldMs / 1000).toFixed(1)} / {i18nT(holdSec)}{i18nT('초')}
       </Text>
 
       {phase !== 'running' ? (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'ready' ? '시작하기' : '다시 하기'}</Text>
+          <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       ) : (
         <Pressable style={[styles.tapBtn, { borderColor: color }]} onPress={whip}>
-          <Text style={[styles.tapBtnText, { color }]}>채찍질!</Text>
+          <Text style={[styles.tapBtnText, { color }]}>{i18nT('채찍질!')}</Text>
         </Pressable>
       )}
     </View>
@@ -193,8 +194,8 @@ const styles = StyleSheet.create({
   },
   holdFill: { height: '100%' },
   holdLabel: { fontSize: 12, color: colors.muted, fontWeight: '600', marginBottom: 22 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 220,
     height: 220,

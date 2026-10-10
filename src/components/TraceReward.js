@@ -11,6 +11,7 @@ import { SCENE_TARGET, LEVEL_NAME, nextHint } from '../utils/progress';
 import { colors } from '../theme';
 import { PLAY_GAMES } from '../data/playGames';
 import { SCENE_ORDER } from './Jogakbo';
+import { t as i18nT } from '../i18n';
 
 const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이', hangul: '한글 테트리스' };
 
@@ -35,22 +36,22 @@ export default function TraceReward({ sceneId, success, gameId, gameName }) {
       <View style={styles.row}>
         <View style={styles.col}>
           <PatchChip attempt={mine} size={64} level={lv} />
-          <Text style={styles.cap}>방금 생긴 {SCENE_NAME[sceneId]} 조각</Text>
+          <Text style={styles.cap}>{i18nT('방금 생긴')} {i18nT(SCENE_NAME[sceneId])} {i18nT('조각')}</Text>
         </View>
         <Text style={styles.plus}>→</Text>
         <View style={styles.col}>
           <Jogakbo attempts={attempts} size={104} />
-          <Text style={styles.cap}>이어진 조각보 · {n}/{SCENE_ORDER.length}</Text>
+          <Text style={styles.cap}>{i18nT('이어진 조각보 ·')} {i18nT(n)}/{i18nT(SCENE_ORDER.length)}</Text>
         </View>
       </View>
       {why ? (
         <View style={styles.why}>
-          <Text style={styles.whyTitle}>왜 이런 조각이 나왔을까요?</Text>
-          <Text style={styles.whyLine}>{why[0].v}</Text>
-          <Text style={styles.whyLine}>{why[1].v}</Text>
+          <Text style={styles.whyTitle}>{i18nT('왜 이런 조각이 나왔을까요?')}</Text>
+          <Text style={styles.whyLine}>{i18nT(why[0].v)}</Text>
+          <Text style={styles.whyLine}>{i18nT(why[1].v)}</Text>
           <View style={styles.gaugeHead}>
-            <Text style={styles.whyTitle}>작품 완성도 {progress.percent}%</Text>
-            <Text style={styles.cap}>{SCENE_TARGET[sceneId].name} · {LEVEL_NAME[lv]}</Text>
+            <Text style={styles.whyTitle}>{i18nT('작품 완성도')} {i18nT(progress.percent)}%</Text>
+            <Text style={styles.cap}>{i18nT(SCENE_TARGET[sceneId].name)} · {i18nT(LEVEL_NAME[lv])}</Text>
           </View>
           <Gauge percent={progress.percent} height={8} />
           <Text style={styles.whyLine}>{nextHint(sceneId, cnt)}</Text>

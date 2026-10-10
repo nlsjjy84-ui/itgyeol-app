@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import Text from './Text';
 import { colors } from '../theme';
+import { t as i18nT } from '../i18n';
 
 // 놀이 말(조각) — 동그라미 대신 전통 소품 모양을 쓴다.
 // shape: 'seal'(네모 도장) | 'flag'(깃발) | 'tile'(활자 조각) | 'coin'(엽전)
@@ -49,7 +50,7 @@ export default function Piece({ shape = 'seal', size = 40, label, color = colors
             marginTop: shape === 'flag' ? -size * 0.2 : 0,
           }}
         >
-          {label}
+          {i18nT(label)}
         </Text>
       ) : null}
     </View>

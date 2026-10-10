@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import Text from '../ui/Text';
 import Mascot, { MASCOT_NAMES } from './Mascot';
 import { colors } from '../theme';
+import { t as i18nT } from '../i18n';
 
 // 마스코트 캐릭터가 말풍선으로 설명해주는 안내 바. 어느 화면에나 끼워 넣을 수 있다.
 export default function MascotGuide({ which = 'pung', message, style }) {
@@ -10,8 +11,8 @@ export default function MascotGuide({ which = 'pung', message, style }) {
     <View style={[styles.row, style]}>
       <Mascot which={which} size={46} />
       <View style={styles.bubble}>
-        <Text style={styles.name}>{MASCOT_NAMES[which]}</Text>
-        <Text style={styles.message}>{message}</Text>
+        <Text style={styles.name}>{i18nT(MASCOT_NAMES[which])}</Text>
+        <Text style={styles.message}>{i18nT(message)}</Text>
       </View>
     </View>
   );

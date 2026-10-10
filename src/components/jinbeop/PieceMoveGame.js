@@ -5,6 +5,7 @@ import { useTime } from '../../ui/Mission';
 import SealButton from '../../ui/SealButton';
 import { play } from '../../utils/sound';
 import { colors } from '../../theme';
+import { t as i18nT } from '../../i18n';
 
 function shuffleAssignment(n) {
   const arr = Array.from({ length: n }, (_, i) => i);
@@ -62,7 +63,7 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
         clearTimer();
         setRemainingMs(0);
         setPhase('ready');
-        const msg = '시간이 다 됐어요. 다시 자리를 옮겨볼까요?';
+        const msg = i18nT('시간이 다 됐어요. 다시 자리를 옮겨볼까요?');
         setFlash('wrong');
         setFlashMsg(msg);
         onFail && onFail(msg);
@@ -114,8 +115,8 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
         {phase === 'playing'
-          ? `제자리 ${correctCount} / ${n}명 · 한 명을 짚고 바꿀 자리를 짚어 봐`
-          : '말을 옮기듯, 한 사람을 짚고 바꿀 자리를 짚어 자리를 바꿔 보자'}
+          ? i18nT('제자리 {p0} / {p1}명 · 한 명을 짚고 바꿀 자리를 짚어 봐', { p0: correctCount, p1: n })
+          : i18nT('말을 옮기듯, 한 사람을 짚고 바꿀 자리를 짚어 자리를 바꿔 보자')}
       </Text>
 
       {phase === 'playing' && (
@@ -142,12 +143,12 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
             <Text style={styles.slotText}>{assignment[slotIndex] + 1}</Text>
           </Pressable>
         ))}
-        {flash === 'success' && <Text style={styles.flashHit}>원진 완성! 모두 제자리를 찾았어요</Text>}
-        {flash === 'wrong' && <Text style={styles.flashMiss}>{flashMsg}</Text>}
+        {flash === 'success' && <Text style={styles.flashHit}>{i18nT('원진 완성! 모두 제자리를 찾았어요')}</Text>}
+        {flash === 'wrong' && <Text style={styles.flashMiss}>{i18nT(flashMsg)}</Text>}
       </View>
 
       {phase !== 'playing' && (
-        <SealButton label={phase === 'done' ? '다시 섞어보기' : '시작하기'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
+        <SealButton label={phase === 'done' ? i18nT('다시 섞어보기') : i18nT('시작하기')} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
     </View>
   );
@@ -156,8 +157,8 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
 const SLOT_SIZE = 44;
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
-  roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 8, textAlign: 'center', paddingHorizontal: 10 },
+  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'flex-start', paddingTop: 6 },
+  roundText: { fontSize: 14, fontWeight: '800', color: colors.ink, marginBottom: 8, textAlign: 'center', backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 3, overflow: 'hidden' },
   timeTrack: {
     width: '100%',
     maxWidth: 340,
@@ -173,17 +174,17 @@ const styles = StyleSheet.create({
     maxWidth: 340,
     height: 330,
     position: 'relative',
-    backgroundColor: colors.borderSoft,
+    backgroundColor: colors.paper,
     borderWidth: 2,
     borderColor: colors.ink,
-    borderRadius: 4,
+    borderRadius: 6,
     marginBottom: 14,
   },
   slot: {
     position: 'absolute',
     width: SLOT_SIZE,
     height: SLOT_SIZE,
-    borderRadius: 4,
+    borderRadius: SLOT_SIZE / 2,
     marginLeft: -SLOT_SIZE / 2,
     marginTop: -SLOT_SIZE / 2,
     backgroundColor: colors.paper,
@@ -211,6 +212,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.accent,
   },
-  bigBtn: { paddingHorizontal: 30, paddingVertical: 16, borderRadius: 20 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
 });

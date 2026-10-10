@@ -5,6 +5,7 @@ import { colors } from '../../theme';
 import { useHoldKey } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { t as i18nT } from '../../i18n';
 
 // ───────── 비석치기 — 손가락으로 쓸어 던져 세워 둔 비석을 쓰러뜨린다 ─────────
 export function StoneFlickGame({ color, onComplete, stones = 3, throws = 8 }) {
@@ -35,7 +36,7 @@ export function StoneFlickGame({ color, onComplete, stones = 3, throws = 8 }) {
       const dy = y - q.drag.y0;
       const len = Math.hypot(dx, dy);
       q.drag = null;
-      if (len < 20 || dy > -8) { q.note = '위쪽으로 쓸어 올려야 던져져요'; return; }
+      if (len < 20 || dy > -8) { q.note = i18nT('위쪽으로 쓸어 올려야 던져져요'); return; }
       const r = range(len);
       q.fly = { p: 0, from: { ...HOME }, to: { x: HOME.x + (dx / len) * r, y: HOME.y + (dy / len) * r } };
       q.threw += 1;
@@ -54,7 +55,7 @@ export function StoneFlickGame({ color, onComplete, stones = 3, throws = 8 }) {
         q.stand.forEach((s) => {
           if (!s.fallen && Math.hypot(s.x - t.x, s.y - t.y) < 30) { s.fallen = true; hit = true; q.down += 1; }
         });
-        q.note = hit ? '맞았어요! 비석이 쓰러졌어요' : '아깝게 빗나갔어요';
+        q.note = hit ? i18nT('맞았어요! 비석이 쓰러졌어요') : i18nT('아깝게 빗나갔어요');
         play(hit ? 'stamp' : 'geomungo');
         q.fly = null;
         if (q.down >= stones) {
@@ -97,8 +98,8 @@ export function StoneFlickGame({ color, onComplete, stones = 3, throws = 8 }) {
       color={color}
       phase={phase}
       onStart={start}
-      hud={`쓰러뜨린 비석 ${q.down}/${stones} · 남은 돌 ${Math.max(0, throws - q.threw)}개`}
-      hint="아래의 내 돌을 눌러 위쪽으로 쓸어 올리며 놓으면 던져져요. 멀리 쓸수록 멀리 날아가요. 점선 끝이 떨어질 자리예요."
+      hud={i18nT('쓰러뜨린 비석 {p0}/{p1} · 남은 돌 {p2}개', { p0: q.down, p1: stones, p2: Math.max(0, throws - q.threw) })}
+      hint={i18nT('아래의 내 돌을 눌러 위쪽으로 쓸어 올리며 놓으면 던져져요. 멀리 쓸수록 멀리 날아가요. 점선 끝이 떨어질 자리예요.')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#efe6cf' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -112,7 +113,7 @@ export function StoneFlickGame({ color, onComplete, stones = 3, throws = 8 }) {
             </>
           ) : null}
           <View style={[st.myStone, { left: sx - 14, top: sy - 10, backgroundColor: color, transform: [{ scale: sc }] }]} />
-          <Text style={st.note}>{q.note}</Text>
+          <Text style={st.note}>{i18nT(q.note)}</Text>
         </View>
       </View>
     </Shell>
@@ -172,8 +173,8 @@ export function HoopSpeedGame({ color, onComplete, targetSec = 14, lives = 3 }) 
       color={color}
       phase={phase}
       onStart={start}
-      hud={`굴러간 길 ${Math.round(q.prog * 100)}% · 기회 ${'♥'.repeat(Math.max(0, q.lives))}`}
-      hint="화면을 꾹 누르면 굴렁쇠가 빨라지고, 떼면 느려져요. 오른쪽 초록 칸(오르내려요) 안에 속도를 맞춰요. 벗어나면 비틀거려요. (스페이스바 꾹)"
+      hud={i18nT('굴러간 길 {p0}% · 기회 {p1}', { p0: Math.round(q.prog * 100), p1: '♥'.repeat(Math.max(0, q.lives)) })}
+      hint={i18nT('화면을 꾹 누르면 굴렁쇠가 빨라지고, 떼면 느려져요. 오른쪽 초록 칸(오르내려요) 안에 속도를 맞춰요. 벗어나면 비틀거려요. (스페이스바 꾹)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#e8efe0' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -187,16 +188,16 @@ export function HoopSpeedGame({ color, onComplete, targetSec = 14, lives = 3 }) 
             <View style={[st.band, { top: yOf(q.bandC + 15), height: (30 / 100) * GAUGE_H, backgroundColor: q.inBand ? 'rgba(107,143,60,0.7)' : 'rgba(107,143,60,0.35)' }]} />
             <View style={[st.needle, { top: yOf(q.v) - 3, backgroundColor: color }]} />
           </View>
-          <Text style={st.gLabel}>속도</Text>
+          <Text style={st.gLabel}>{i18nT('속도')}</Text>
           <View style={st.stabTrack}><View style={{ width: `${q.stab}%`, height: '100%', backgroundColor: q.stab > 40 ? colors.green : colors.accent, borderRadius: 5 }} /></View>
-          <Text style={st.stabTxt}>균형</Text>
+          <Text style={st.stabTxt}>{i18nT('균형')}</Text>
         </View>
       </View>
       {phase === 'running' ? (
         <View
           style={[S.bigBtn, { backgroundColor: q.push ? colors.accentDeep : color, paddingHorizontal: 60 }]}
         >
-          <Text style={S.bigBtnText}>{q.push ? '굴리는 중!' : '꾹 눌러서 굴려요'}</Text>
+          <Text style={S.bigBtnText}>{i18nT(q.push ? '굴리는 중!' : '꾹 눌러서 굴려요')}</Text>
         </View>
       ) : null}
     </Shell>

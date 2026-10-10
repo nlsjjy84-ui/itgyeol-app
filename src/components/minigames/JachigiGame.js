@@ -5,6 +5,7 @@ import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
 import { jangdanForPeriod } from '../../data/jangdan';
+import { t as i18nT } from '../../i18n';
 
 // 자치기 — 다른 투척형 놀이(ThrowGame: 조준+파워)와 달리 "연속 2단계 타이밍"으로 완전히
 // 다른 조작감을 준다. 실제 자치기 동작 그대로:
@@ -247,18 +248,18 @@ export default function JachigiGame({
   const flightY = flightAnim.interpolate({ inputRange: [0, 1], outputRange: [-70, -6] });
 
   let instruction = '';
-  if (phase === 'pop') instruction = '지금 탭해서 튀어 오르게 톡!';
-  else if (phase === 'swing') instruction = '지금 휘둘러!';
-  else if (phase === 'flying') instruction = '날아가는 중...';
-  else if (phase === 'ready') instruction = '버튼을 누르면 시작해요';
-  else if (phase === 'done') instruction = '완성!';
+  if (phase === 'pop') instruction = i18nT('지금 탭해서 튀어 오르게 톡!');
+  else if (phase === 'swing') instruction = i18nT('지금 휘둘러!');
+  else if (phase === 'flying') instruction = i18nT('날아가는 중...');
+  else if (phase === 'ready') instruction = i18nT('버튼을 누르면 시작해요');
+  else if (phase === 'done') instruction = i18nT('완성!');
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.roundText}>{round} / {rounds} 라운드 (목표 {required}m)</Text>
+      <Text style={styles.roundText}>{i18nT(round)} / {i18nT(rounds)} {i18nT('라운드 (목표')} {i18nT(required)}m)</Text>
       {(phase === 'pop' || phase === 'swing') && (
         <Text style={styles.jangdanLabel}>
-          지금 장단: {jangdanStage.name} ({jangdanStage.feel})
+          {i18nT('지금 장단:')} {i18nT(jangdanStage.name)} ({i18nT(jangdanStage.feel)})
         </Text>
       )}
 
@@ -287,12 +288,12 @@ export default function JachigiGame({
           </Animated.Text>
         )}
 
-        {flash === 'success' && <Text style={styles.flashHit}>성공! {distance}m</Text>}
-        {flash === 'short' && <Text style={styles.flashMiss}>거리가 부족해요 ({distance}m)</Text>}
-        {flash === 'whiff' && <Text style={styles.flashMiss}>헛스윙!</Text>}
+        {flash === 'success' && <Text style={styles.flashHit}>{i18nT('성공!')} {i18nT(distance)}m</Text>}
+        {flash === 'short' && <Text style={styles.flashMiss}>{i18nT('거리가 부족해요 (')}{i18nT(distance)}m)</Text>}
+        {flash === 'whiff' && <Text style={styles.flashMiss}>{i18nT('헛스윙!')}</Text>}
       </View>
 
-      <Text style={styles.instruction}>{instruction}</Text>
+      <Text style={styles.instruction}>{i18nT(instruction)}</Text>
 
       <View style={styles.gaugeTrack}>
         <View
@@ -304,12 +305,12 @@ export default function JachigiGame({
         <View style={[styles.gaugeFill, { width: `${gaugeDisplay}%`, backgroundColor: color }]} />
       </View>
       <Text style={styles.count}>
-        {phase === 'swing' ? '스윙' : '타이밍'} {Math.round(gaugeDisplay)}
+        {i18nT(phase === 'swing' ? '스윙' : '타이밍')} {Math.round(gaugeDisplay)}
       </Text>
 
       {phase === 'ready' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={startSession}>
-          <Text style={styles.bigBtnText}>시작하기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('시작하기')}</Text>
         </Pressable>
       )}
       {(phase === 'pop' || phase === 'swing') && (
@@ -317,12 +318,12 @@ export default function JachigiGame({
           style={[styles.tapBtn, { borderColor: color, backgroundColor: color }]}
           onPress={handleTap}
         >
-          <Text style={[styles.tapBtnText, { color: '#fff' }]}>탁!</Text>
+          <Text style={[styles.tapBtnText, { color: '#fff' }]}>{i18nT('탁!')}</Text>
         </Pressable>
       )}
       {phase === 'done' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={startSession}>
-          <Text style={styles.bigBtnText}>다시 하기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('다시 하기')}</Text>
         </Pressable>
       )}
     </View>
@@ -377,8 +378,8 @@ const styles = StyleSheet.create({
   },
   gaugeFill: { height: '100%' },
   count: { fontSize: 15, fontWeight: '700', color: colors.ink, marginBottom: 20 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 220,
     height: 220,

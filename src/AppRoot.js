@@ -14,6 +14,7 @@ import HangulScreen from './screens/HangulScreen';
 import TasteScreen from './screens/TasteScreen';
 import GalleryScreen from './screens/GalleryScreen';
 import BookScreen from './screens/BookScreen';
+import ArchiveScreen from './screens/ArchiveScreen';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { colors, getThemeMode } from './theme';
 import { loadLang, setLang } from './i18n';
@@ -40,6 +41,7 @@ const HangulH = withHanji(HangulScreen);
 const TasteH = withHanji(TasteScreen);
 const GalleryH = withHanji(GalleryScreen);
 const BookH = withHanji(BookScreen);
+const ArchiveH = withHanji(ArchiveScreen);
 
 // 처음 열면 "전통문화 하면 떠오르는 것" 질문부터, 한 번 답하거나 건너뛰었으면 바로 홈으로.
 function Nav() {
@@ -53,6 +55,7 @@ function Nav() {
         <Stack.Screen name="Taste" component={TasteH} />
         <Stack.Screen name="Book" component={BookH} initialParams={{ part: 'prologue', then: 'Home' }} />
         <Stack.Screen name="Gallery" component={GalleryH} />
+        <Stack.Screen name="Archive" component={ArchiveH} />
         <Stack.Screen name="Home" component={HomeH} />
         <Stack.Screen name="Jinbeop" component={JinbeopH} />
         <Stack.Screen name="Print" component={PrintH} />

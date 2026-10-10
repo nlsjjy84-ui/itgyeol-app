@@ -4,6 +4,7 @@ import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
+import { t as i18nT } from '../../i18n';
 
 // 연날리기 — "빨리 많이 누르기"(마시 게임)가 아니라 "타이밍에 맞춰 누르기" 게임으로 새로 짰다.
 // 바람은 게임이 끝날 때까지 계속 세졌다 약해졌다 하는 사인파로, ThrowGame의 파워 게이지처럼
@@ -157,8 +158,8 @@ export default function KiteFlyGame({
   return (
     <View style={styles.wrap}>
       <Text style={styles.heightText}>
-        높이 {Math.round(height)} / {targetHeight}
-        {phase === 'running' ? `  ·  ${seconds}초` : ''}
+        {i18nT('높이')} {Math.round(height)} / {i18nT(targetHeight)}
+        {phase === 'running' ? i18nT('  ·  {p0}초', { p0: seconds }) : ''}
       </Text>
 
       <View style={styles.field}>
@@ -191,8 +192,8 @@ export default function KiteFlyGame({
           ✨
         </Animated.Text>
 
-        {flash === 'gain' && <Text style={styles.flashGain}>쭉!</Text>}
-        {flash === 'lose' && <Text style={styles.flashLose}>바람이 약해요</Text>}
+        {flash === 'gain' && <Text style={styles.flashGain}>{i18nT('쭉!')}</Text>}
+        {flash === 'lose' && <Text style={styles.flashLose}>{i18nT('바람이 약해요')}</Text>}
       </View>
 
       {/* 바람 게이지 — 계속 오르내리며, 돌풍 구간(gustMin~gustMax)이 강조되어 있다 */}
@@ -205,7 +206,7 @@ export default function KiteFlyGame({
         />
         <View style={[styles.gaugeFill, { width: `${windPct}%`, backgroundColor: color }]} />
       </View>
-      <Text style={styles.windLabel}>바람 {Math.round(wind)}</Text>
+      <Text style={styles.windLabel}>{i18nT('바람')} {Math.round(wind)}</Text>
 
       {/* 높이 진행도 */}
       <View style={styles.heightTrack}>
@@ -214,17 +215,17 @@ export default function KiteFlyGame({
 
       {phase === 'ready' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>시작하기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('시작하기')}</Text>
         </Pressable>
       )}
       {phase === 'running' && (
         <Pressable style={[styles.tapBtn, { borderColor: color }]} onPress={handleTap}>
-          <Text style={[styles.tapBtnText, { color }]}>얼레 감기!</Text>
+          <Text style={[styles.tapBtnText, { color }]}>{i18nT('얼레 감기!')}</Text>
         </Pressable>
       )}
       {phase === 'done' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={retry}>
-          <Text style={styles.bigBtnText}>다시 하기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('다시 하기')}</Text>
         </Pressable>
       )}
     </View>
@@ -288,8 +289,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   heightFill: { height: '100%', borderRadius: 5 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 220,
     height: 220,

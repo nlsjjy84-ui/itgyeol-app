@@ -137,32 +137,7 @@ export default function HomeScreen({ navigation }) {
         style={{ marginTop: 14 }}
       />
 
-      {/* 이 앱이 왜 만들어졌는지 — 마스코트의 말이 아니라 만든 사람의 실제 이력으로
-          직접 말한다. 국악(사물놀이·풍물) 전공, 인천에서 10년 넘게 운영한 국악연구소,
-          2015년에 직접 쓴 전래놀이 교육 교재 — 이 세 가지 장면은 그 경험에서 나왔다. */}
-      <Frame tone="dark" style={{ marginTop: 18 }}>
-        <Text style={styles.makerLabel}>{t('만든 사람')}</Text>
-        <Text style={styles.makerText}>
-          {t('사물놀이·풍물을 전공하고, 인천에서 10년 넘게 국악연구소를 운영하며 아이들에게 국악과 전래놀이를 가르쳤습니다. 2015년에는 전래놀이 교육 교재를 직접 써서 강사들을 교육하기도 했어요. 이 앱의 진법과 전래놀이 열두 가지는 그 현장 경험을 그대로 옮긴 것입니다.')}
-        </Text>
-      </Frame>
-
-      <View style={{ alignItems: 'center', marginTop: 18 }}>
-        <DancheongBand width={320} height={12} />
-      </View>
-
-      <View style={styles.exploreRow}>
-        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Book', { part: 'prologue', then: 'Home' }); }}>
-          <Text style={styles.exploreTxt}>{t('그림책 다시 읽기')}</Text>
-        </Pressable>
-        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
-          <Text style={styles.exploreTxt}>{t('예시 작품 둘러보기')}</Text>
-        </Pressable>
-        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Taste', { again: true }); }}>
-          <Text style={styles.exploreTxt}>{t('떠오르는 것 다시 고르기')}</Text>
-        </Pressable>
-      </View>
-
+      <Text style={styles.sectionLabel}>{t('네 개의 판 — 어디부터 가도 돼요')}</Text>
       <View style={styles.list}>
         {CARDS.filter((c) => c.ready).map((c) => (
           <Pressable
@@ -189,6 +164,40 @@ export default function HomeScreen({ navigation }) {
             </Frame>
           </Pressable>
         ))}
+      </View>
+
+
+      {/* 이 앱이 왜 만들어졌는지 — 마스코트의 말이 아니라 만든 사람의 실제 이력으로
+          직접 말한다. 국악(사물놀이·풍물) 전공, 인천에서 10년 넘게 운영한 국악연구소,
+          2015년에 직접 쓴 전래놀이 교육 교재 — 이 세 가지 장면은 그 경험에서 나왔다. */}
+      <Frame tone="dark" style={{ marginTop: 18 }}>
+        <Text style={styles.makerLabel}>{t('만든 사람')}</Text>
+        <Text style={styles.makerText}>
+          {t('사물놀이·풍물을 전공하고, 인천에서 10년 넘게 국악연구소를 운영하며 아이들에게 국악과 전래놀이를 가르쳤습니다. 2015년에는 전래놀이 교육 교재를 직접 써서 강사들을 교육하기도 했어요. 이 앱의 진법과 전래놀이 열두 가지는 그 현장 경험을 그대로 옮긴 것입니다.')}
+        </Text>
+      </Frame>
+
+      <View style={{ alignItems: 'center', marginTop: 18 }}>
+        <DancheongBand width={320} height={12} />
+      </View>
+
+      <View style={styles.exploreRow}>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Book', { part: 'prologue', then: 'Home' }); }}>
+          <Text brush style={styles.exploreIcon}>書</Text>
+          <Text style={styles.exploreTxt}>{t('그림책 다시 읽기')}</Text>
+        </Pressable>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Archive'); }}>
+          <Text brush style={styles.exploreIcon}>藏</Text>
+          <Text style={styles.exploreTxt}>{t('전통 자료실')}</Text>
+        </Pressable>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
+          <Text brush style={styles.exploreIcon}>作</Text>
+          <Text style={styles.exploreTxt}>{t('예시 작품 둘러보기')}</Text>
+        </Pressable>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Taste', { again: true }); }}>
+          <Text brush style={styles.exploreIcon}>選</Text>
+          <Text style={styles.exploreTxt}>{t('떠오르는 것 다시 고르기')}</Text>
+        </Pressable>
       </View>
 
       {/* [체험 확장 근거] "다른 방향의 체험도 할 수 있다"는 말만으로는 근거가 안 되므로,
@@ -225,9 +234,11 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  exploreRow: { flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 10, flexWrap: 'wrap' },
-  exploreBtn: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
-  exploreTxt: { fontSize: 12.5, fontWeight: '700', color: colors.ink },
+  exploreRow: { flexDirection: 'row', gap: 8, justifyContent: 'space-between', marginTop: 4, marginBottom: 10, flexWrap: 'wrap' },
+  exploreBtn: { width: '48.5%', flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderBottomWidth: 3, borderColor: colors.ink, backgroundColor: colors.paper },
+  exploreIcon: { fontSize: 24, color: colors.accent, lineHeight: 28, width: 26, textAlign: 'center' },
+  exploreTxt: { flex: 1, fontSize: 13, fontWeight: '700', color: colors.ink, lineHeight: 18 },
+  sectionLabel: { marginTop: 22, fontSize: 13.5, fontWeight: '800', color: colors.ink, letterSpacing: 0.5 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   logo: { fontSize: 54, color: colors.accent, lineHeight: 60 },
   cardFrame: { marginBottom: 12 },
@@ -273,7 +284,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   makerText: { fontSize: 12.5, color: colors.onNight, lineHeight: 19.5 },
-  list: { marginTop: 20, gap: 14 },
+  list: { marginTop: 10, gap: 14 },
   roadmapHeader: { marginTop: 26, marginBottom: 2 },
   roadmapTitle: { fontSize: 13.5, fontWeight: '800', color: colors.ink },
   roadmapHint: { fontSize: 12, color: colors.muted, marginTop: 6, lineHeight: 17.5 },

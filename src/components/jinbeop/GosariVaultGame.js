@@ -6,6 +6,7 @@ import SealButton from '../../ui/SealButton';
 import { play } from '../../utils/sound';
 import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
+import { t as i18nT } from '../../i18n';
 
 const TURN_MS_BASE = 2400;
 
@@ -54,7 +55,7 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
       const left = turnDeadlineRef.current - Date.now();
       if (left <= 0) {
         clearInterval(turnTimerRef.current);
-        failTurn('박자를 놓쳤어요! 처음부터 다시 넘어가볼까요.');
+        failTurn(i18nT('박자를 놓쳤어요! 처음부터 다시 넘어가볼까요.'));
       } else {
         setTurnMs(left);
       }
@@ -109,7 +110,7 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
     if (id === orderRef.current[0]) {
       vaultFront();
     } else {
-      failTurn(`아직 ${orderRef.current[0] + 1}번 차례예요. 순서대로 가 보자 😉`);
+      failTurn(i18nT('아직 {p0}번 차례예요. 순서대로 가 보자 😉', { p0: orderRef.current[0] + 1 }));
     }
   };
 
@@ -128,8 +129,8 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
     <View style={styles.wrap}>
       <Text style={styles.roundText}>
         {phase === 'playing'
-          ? `넘어간 ${vaulted.length} / ${peopleCount}명 · 지금 차례: ${order[0] + 1}번`
-          : '맨 앞사람부터 차례로 옆 사람 팔 위를 넘어가 보자'}
+          ? i18nT('넘어간 {p0} / {p1}명 · 지금 차례: {p2}번', { p0: vaulted.length, p1: peopleCount, p2: order[0] + 1 })
+          : i18nT('맨 앞사람부터 차례로 옆 사람 팔 위를 넘어가 보자')}
       </Text>
 
       <View style={styles.line}>
@@ -165,16 +166,16 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
             </View>
           );
         })}
-        {flash === 'success' && <Text style={styles.flashHit}>고사리꺾기 완성! 줄이 다 말려들었어요</Text>}
+        {flash === 'success' && <Text style={styles.flashHit}>{i18nT('고사리꺾기 완성! 줄이 다 말려들었어요')}</Text>}
       </View>
 
-      {flash === 'wrong' && <Text style={styles.flashMiss}>{flashMsg}</Text>}
+      {flash === 'wrong' && <Text style={styles.flashMiss}>{i18nT(flashMsg)}</Text>}
 
       {phase !== 'playing' && (
-        <SealButton label={phase === 'done' ? '다시 꺾어보기' : '시작하기'} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
+        <SealButton label={phase === 'done' ? i18nT('다시 꺾어보기') : i18nT('시작하기')} onPress={start} sound="drum" style={{ marginTop: 6, minWidth: 200 }} />
       )}
       {phase === 'playing' && (
-        <Text style={styles.hint}>스페이스바(또는 맨 앞사람 클릭)로 지금 차례인 사람을 넘기세요</Text>
+        <Text style={styles.hint}>{i18nT('스페이스바(또는 맨 앞사람 클릭)로 지금 차례인 사람을 넘기세요')}</Text>
       )}
     </View>
   );
@@ -184,8 +185,8 @@ const PERSON_SIZE = 28;
 const SPIRAL_DOT_SIZE = 20;
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
-  roundText: { fontSize: 12.5, fontWeight: '700', color: colors.accentDeep, marginBottom: 10, textAlign: 'center' },
+  wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'flex-start', paddingTop: 6 },
+  roundText: { fontSize: 14, fontWeight: '800', color: colors.ink, marginBottom: 10, textAlign: 'center', backgroundColor: colors.accentSoft, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 3, overflow: 'hidden' },
   line: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -250,6 +251,6 @@ const styles = StyleSheet.create({
   },
   flashMiss: { fontSize: 12.5, fontWeight: '800', color: colors.accent, marginBottom: 8, textAlign: 'center' },
   hint: { fontSize: 11, color: colors.muted, fontWeight: '600', textAlign: 'center' },
-  bigBtn: { paddingHorizontal: 30, paddingVertical: 16, borderRadius: 20 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
 });

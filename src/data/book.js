@@ -14,6 +14,8 @@
 
 import { getLang } from '../i18n';
 import EN from '../i18n/book_en';
+import ZH from '../i18n/book_zh';
+import JA from '../i18n/book_ja';
 import { SCENES } from './story';
 
 const P = (text) => ({ who: 'pung', text });
@@ -320,7 +322,7 @@ const T = {
 };
 
 const KO = { BOOK, GAME_LINES, SCENE_WIN, SCENE_LOSE, EPI_BY_COUNT, T, SCENES };
-const PACKS = { en: EN };
+const PACKS = { en: EN, zh: ZH, ja: JA };
 // 지금 언어의 그림책 묶음(없으면 한국어)
 const pack = () => PACKS[getLang()] || KO;
 

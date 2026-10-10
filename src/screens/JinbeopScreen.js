@@ -14,6 +14,7 @@ import WingMirrorGame from '../components/jinbeop/WingMirrorGame';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import GamePicker from '../ui/GamePicker';
 import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
 import Board from '../ui/Board';
@@ -24,12 +25,13 @@ import { buildAttemptResult } from '../utils/resultSeed';
 // [전체 판 공통화] 전래놀이에서 먼저 만든 "성인반/아동반" 구분과 숙련도 문구를
 // 그대로 가져다 쓴다 — 반(tier) 목록과 라벨 문구는 하나로 통일해서 관리한다.
 import { DIFFICULTY_TIERS, skillLabel } from '../data/playGames';
+import { t as i18nT } from '../i18n';
 
 function speedComment(ms) {
   const sec = ms / 1000;
-  if (sec < 12) return '빠르고 거침없이 움직였어요.';
-  if (sec < 28) return '하나씩 신중하게 맞춰나갔어요.';
-  return '차분하고 꼼꼼하게 완성했어요.';
+  if (sec < 12) return i18nT('빠르고 거침없이 움직였어요.');
+  if (sec < 28) return i18nT('하나씩 신중하게 맞춰나갔어요.');
+  return i18nT('차분하고 꼼꼼하게 완성했어요.');
 }
 
 // 진법 종류(태그)마다 완성 연출에 쓰이는 아이콘을 다르게 줘서,
@@ -72,6 +74,7 @@ export default function JinbeopScreen({ navigation }) {
   // [전체 판 공통화] 성인반/아동반 선택과 지도사 노트 펼침 상태 — 전래놀이와 동일한 구조.
   const [tier, setTier] = useState('성인반');
   const [noteOpen, setNoteOpen] = useState(false);
+  const [picking, setPicking] = useState(true); // 놀이를 시작하면 고르기 판을 한 줄로 접는다
   // [진법이란?] 처음 들어온 사람도 알 수 있게, 기본으로 펼쳐서 보여준다.
   const [introOpen, setIntroOpen] = useState(false);
 
@@ -120,6 +123,7 @@ export default function JinbeopScreen({ navigation }) {
 
   const chooseFormation = (idx) => {
     setNoteOpen(false);
+    setPicking(true);
     if (idx === formationIdx) {
       // 같은 진법을 다시 눌러도 그 진법의 놀이 컴포넌트를 처음부터 다시 시작한다.
       setRestartNonce((v) => v + 1);
@@ -174,7 +178,7 @@ export default function JinbeopScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScreenHeader scene="Jinbeop" title="진법" sub="풍물 · 강강술래 · 역사 속 대형 만들기" onBack={() => navigation.navigate('Home')} />
+      <ScreenHeader scene="Jinbeop" title={i18nT('진법')} sub={i18nT('풍물 · 강강술래 · 역사 속 대형 만들기')} onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           {/* 성인반/아동반 — 전래놀이와 동일한 반 구분 */}
@@ -185,7 +189,7 @@ export default function JinbeopScreen({ navigation }) {
                 style={[styles.tierBtn, tier === t && { backgroundColor: ohang.color, borderColor: ohang.color }]}
                 onPress={() => { play('tap'); setTier(t); }}
               >
-                <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{t}</Text>
+                <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{i18nT(t)}</Text>
               </Pressable>
             ))}
           </View>
@@ -194,41 +198,6 @@ export default function JinbeopScreen({ navigation }) {
       </View>
 
       <View style={styles.body}>
-        <View style={styles.sidebar}>
-          <ScrollView
-            horizontal
-            style={styles.sidebarScroll}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.sidebarList}
-          >
-            {availableFormations.map((f, idx) => (
-              <Pressable
-                key={f.id}
-                style={[styles.tab, idx === formationIdx && styles.tabActive]}
-                onPress={() => { play('tap'); chooseFormation(idx); }}
-              >
-                <Text
-                  style={[
-                    styles.tabTag,
-                    idx === formationIdx && styles.tabTagActive,
-                  ]}
-                >
-                  {f.tag}
-                </Text>
-                <Text
-                  style={[
-                    styles.tabText,
-                    idx === formationIdx && styles.tabTextActive,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {f.name}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
         <View style={styles.main}>
           {/* [스크롤 안 되던 문제 수정] 전에는 main이 ScrollView 없이 flex:1 View라서,
               지도사 노트를 펼치거나 화면이 낮으면 아래쪽(완성! 버튼 등)이 잘린 채
@@ -242,22 +211,30 @@ export default function JinbeopScreen({ navigation }) {
               요청대로, 놀이에 들어가기 전에 먼저 보이는 자리에 둔다. 기본으로 펼쳐두고,
               한 번 읽고 나면 접어둘 수 있게 한다. */}
           {/* [전체 판 공통화] 지도사 노트 — 전래놀이와 같은 위치·형태의 펼침 패널. */}
+          <GamePicker
+            items={availableFormations.map((f) => ({ key: f.id, tag: f.tag, name: f.name }))}
+            active={formationIdx}
+            onPick={chooseFormation}
+            collapsed={!picking}
+            onExpand={() => setPicking(true)}
+          />
           {formation.tip && (
             <View style={styles.noteBox}>
               <Pressable style={styles.noteToggle} onPress={() => setNoteOpen((v) => !v)}>
                 <Text style={styles.noteToggleText}>
-                  {noteOpen ? '▾' : '▸'} 지도사 노트
+                  {i18nT(noteOpen ? '▾' : '▸')} {i18nT('지도사 노트')}
                 </Text>
               </Pressable>
-              {noteOpen && <Text style={styles.noteText}>{formation.tip}</Text>}
+              {noteOpen && <Text style={styles.noteText}>{i18nT(formation.tip)}</Text>}
             </View>
           )}
 
           <MissionGate
             resetKey={`${formation.id}-${restartNonce}`}
+            onModeSelect={() => setPicking(false)}
             info={{
               scene: 'jinbeop',
-              ...(JINBEOP_MISSIONS[formation.id] || { kicker: formation.tag, title: formation.name, story: formation.description, mission: MECHANIC_HINT[formation.mechanic] || '모양을 맞춰 보자 🧩', steps: [] }),
+              ...(JINBEOP_MISSIONS[formation.id] || { kicker: formation.tag, title: formation.name, story: formation.description, mission: MECHANIC_HINT[formation.mechanic] || i18nT('모양을 맞춰 보자 🧩'), steps: [] }),
               example: <FormationPreview positions={formation.positions} color={ohang.color} size={130} />,
             }}
           >
@@ -273,7 +250,7 @@ export default function JinbeopScreen({ navigation }) {
                 nonce={burstNonce}
                 variant="burst"
                 color={ohang.color}
-                label={`${formation.name} 완성!`}
+                label={i18nT('{p0} 완성!', { p0: i18nT(formation.name) })}
                 icons={BURST_ICONS_BY_TAG[formation.tag]}
                 showPerformer={showPerformer}
               />
@@ -369,7 +346,7 @@ export default function JinbeopScreen({ navigation }) {
               default:
                 return (
                   <View style={styles.specialArea}>
-                    <Text style={styles.hint}>이 진법의 놀이는 곧 추가될 예정이에요.</Text>
+                    <Text style={styles.hint}>{i18nT('이 진법의 놀이는 곧 추가될 예정이에요.')}</Text>
                   </View>
                 );
             }
@@ -382,11 +359,11 @@ export default function JinbeopScreen({ navigation }) {
       {resultVisible && (
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{formation.name}</Text>
-            <Text style={styles.modalBody}>{formation.description}</Text>
+            <Text style={styles.modalTitle}>{i18nT(formation.name)}</Text>
+            <Text style={styles.modalBody}>{i18nT(formation.description)}</Text>
             <View style={styles.modalDivider} />
             <Text style={styles.modalComment}>
-              오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
+              {i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(resultComment)}
             </Text>
             {completed && <Text style={styles.modalScore}>{skillLabel(rating)}</Text>}
             <TraceReward sceneId="jinbeop" success={completed} />
@@ -395,7 +372,7 @@ export default function JinbeopScreen({ navigation }) {
                 style={styles.modalClose}
                 onPress={() => setResultVisible(false)}
               >
-                <Text style={styles.modalCloseText}>닫기</Text>
+                <Text style={styles.modalCloseText}>{i18nT('닫기')}</Text>
               </Pressable>
               {completed && (
                 <>
@@ -406,7 +383,7 @@ export default function JinbeopScreen({ navigation }) {
                       advanceRound();
                     }}
                   >
-                    <Text style={styles.modalPrimaryText}>다음 진법 도전!</Text>
+                    <Text style={styles.modalPrimaryText}>{i18nT('다음 진법 도전!')}</Text>
                   </Pressable>
                   <Pressable
                     style={styles.modalSecondary}
@@ -415,7 +392,7 @@ export default function JinbeopScreen({ navigation }) {
                       navigation.navigate('Result');
                     }}
                   >
-                    <Text style={styles.modalSecondaryText}>결과물 보기</Text>
+                    <Text style={styles.modalSecondaryText}>{i18nT('결과물 보기')}</Text>
                   </Pressable>
                 </>
               )}
@@ -545,7 +522,6 @@ const styles = StyleSheet.create({
   noteToggleText: { fontSize: 12, fontWeight: '700', color: colors.ink },
   noteText: { fontSize: 11.5, color: colors.muted, lineHeight: 17, marginTop: 6 },
   specialArea: {
-    flex: 1,
     minHeight: 420,
     marginHorizontal: 16,
     position: 'relative',

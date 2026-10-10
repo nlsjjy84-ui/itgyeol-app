@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
 import Text from '../ui/Text';
 import { colors } from '../theme';
+import { t as i18nT } from '../i18n';
 
 const SCENES = [
   { id: 'Jinbeop', label: '진법 판으로' },
@@ -14,7 +15,7 @@ const SCENES = [
 export default function OtherScenes({ current, navigation, onGo }) {
   return (
     <View style={styles.wrap}>
-      <Text style={styles.cap}>다른 판도 해 볼까요?</Text>
+      <Text style={styles.cap}>{i18nT('다른 판도 해 볼까요?')}</Text>
       <View style={styles.row}>
         {SCENES.filter((s) => s.id !== current).map((s) => (
           <Pressable
@@ -25,7 +26,7 @@ export default function OtherScenes({ current, navigation, onGo }) {
               navigation.navigate(s.id);
             }}
           >
-            <Text style={styles.txt}>{s.label}</Text>
+            <Text style={styles.txt}>{i18nT(s.label)}</Text>
           </Pressable>
         ))}
       </View>

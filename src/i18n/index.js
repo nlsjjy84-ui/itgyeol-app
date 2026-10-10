@@ -9,8 +9,8 @@ import ja from './ja';
 export const LANGS = [
   { id: 'ko', label: '한국어', ready: true },
   { id: 'en', label: 'English', ready: true },
-  { id: 'zh', label: '中文', ready: false },  // 자리만 마련 — 내용이 확정되면 zh.js를 채운다
-  { id: 'ja', label: '日本語', ready: false },
+  { id: 'zh', label: '中文', ready: true },
+  { id: 'ja', label: '日本語', ready: true },
 ];
 const PACKS = { en, zh, ja };
 const KEY = 'itgyeol_lang_v1';

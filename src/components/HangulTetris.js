@@ -4,6 +4,7 @@ import Text from '../ui/Text';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { useRaf } from './minigames/common';
+import { t as i18nT } from '../i18n';
 
 // 한글 테트리스 — 규칙은 일반 테트리스와 똑같다.
 // 블록은 한글 자모 모양: ㄱ ㄴ ㅁ(4칸), ㄷ(5칸 특수 블록), 모음 ㅣ ㅡ(막대)와 ㅏ ㅓ ㅗ ㅜ(T 블록을 돌린 모양).
@@ -206,9 +207,9 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
   return (
     <View style={styles.wrap}>
       <Text style={styles.hud}>
-        지운 줄 {s.lines} / {targetLines}
-        {phase === 'over' ? '  ·  쌓였어요! 다시 해 봐요' : ''}
-        {phase === 'won' ? '  ·  성공!' : ''}
+        {i18nT('지운 줄')} {i18nT(s.lines)} / {i18nT(targetLines)}
+        {i18nT(phase === 'over' ? '  ·  쌓였어요! 다시 해 봐요' : '')}
+        {i18nT(phase === 'won' ? '  ·  성공!' : '')}
       </Text>
       <View style={styles.row}>
         <View style={[styles.board, { width: COLS * CELL + 4, height: ROWS * CELL + 4, borderColor: color }]}>
@@ -228,7 +229,7 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
                   ]}
                 >
                   {!c.ghost ? (
-                    <Text style={[styles.cellText, !BASE[c.kind].glyphs && { transform: [{ rotate: `${(c.rot || 0) * 90}deg` }] }]}>{c.g}</Text>
+                    <Text style={[styles.cellText, !BASE[c.kind].glyphs && { transform: [{ rotate: `${(c.rot || 0) * 90}deg` }] }]}>{i18nT(c.g)}</Text>
                   ) : null}
                 </View>
               );
@@ -236,31 +237,31 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
           )}
         </View>
         <View style={styles.side}>
-          <Text style={styles.sideCap}>다음 글자 블록</Text>
+          <Text style={styles.sideCap}>{i18nT('다음 글자 블록')}</Text>
           <View style={styles.nextBox}>
             {s.next ? (
-              <Text style={[styles.nextGlyph, { color: BASE[s.next].color }]}>{BASE[s.next].glyph}</Text>
+              <Text style={[styles.nextGlyph, { color: BASE[s.next].color }]}>{i18nT(BASE[s.next].glyph)}</Text>
             ) : (
               <Text style={styles.nextGlyph}>·</Text>
             )}
           </View>
-          <Text style={styles.sideNote}>ㅗ를 돌리면{'\n'}ㅏ → ㅜ → ㅓ{'\n'}ㅣ를 돌리면 ㅡ</Text>
+          <Text style={styles.sideNote}>{i18nT('ㅗ를 돌리면')}{'\n'}ㅏ → ㅜ → ㅓ{'\n'}{i18nT('ㅣ를 돌리면 ㅡ')}</Text>
         </View>
       </View>
       {phase === 'running' ? (
         <View style={styles.pad}>
           <Pressable style={styles.padBtn} onPress={() => move(-1)}><Text style={styles.padTxt}>◀</Text></Pressable>
-          <Pressable style={[styles.padBtn, { backgroundColor: color }]} onPress={rotate}><Text style={[styles.padTxt, { color: '#fff' }]}>돌리기</Text></Pressable>
+          <Pressable style={[styles.padBtn, { backgroundColor: color }]} onPress={rotate}><Text style={[styles.padTxt, { color: '#fff' }]}>{i18nT('돌리기')}</Text></Pressable>
           <Pressable style={styles.padBtn} onPress={() => move(1)}><Text style={styles.padTxt}>▶</Text></Pressable>
           <Pressable style={styles.padBtn} onPress={soft}><Text style={styles.padTxt}>▼</Text></Pressable>
-          <Pressable style={styles.padBtn} onPress={hard}><Text style={styles.padTxt}>쭉</Text></Pressable>
+          <Pressable style={styles.padBtn} onPress={hard}><Text style={styles.padTxt}>{i18nT('쭉')}</Text></Pressable>
         </View>
       ) : (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
-          <Text style={styles.bigBtnText}>{phase === 'ready' ? '시작하기' : '다시 하기'}</Text>
+          <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       )}
-      <Text style={styles.hint}>키보드: ← → 이동 · ↑ 돌리기 · ↓ 한 칸 · 스페이스 쭉 내리기</Text>
+      <Text style={styles.hint}>{i18nT('키보드: ← → 이동 · ↑ 돌리기 · ↓ 한 칸 · 스페이스 쭉 내리기')}</Text>
     </View>
   );
 }
@@ -280,7 +281,7 @@ const styles = StyleSheet.create({
   pad: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
   padBtn: { minWidth: 50, paddingHorizontal: 12, height: 46, borderRadius: 12, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.paper, alignItems: 'center', justifyContent: 'center' },
   padTxt: { fontSize: 14, fontWeight: '800', color: colors.ink },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 14, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   hint: { fontSize: 11, color: colors.muted, textAlign: 'center' },
 });

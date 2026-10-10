@@ -11,6 +11,7 @@ import { ohangByKey } from '../data/formations';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import GamePicker from '../ui/GamePicker';
 import OtherScenes from '../components/OtherScenes';
 import PrintPlay from '../components/PrintPlay';
 import TraceReward from '../components/TraceReward';
@@ -20,6 +21,7 @@ import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 // [전체 판 공통화] 전래놀이에서 먼저 만든 반(tier) 목록과 숙련도 문구를 그대로 가져다 쓴다.
 import { DIFFICULTY_TIERS, skillLabel } from '../data/playGames';
+import { t as i18nT } from '../i18n';
 
 const MATCH_THRESHOLD = 34; // px
 
@@ -76,9 +78,9 @@ function randomScatter(width, height, n) {
 
 function speedComment(ms) {
   const sec = ms / 1000;
-  if (sec < 12) return '빠르고 거침없이 움직였어요.';
-  if (sec < 28) return '하나씩 신중하게 맞춰나갔어요.';
-  return '차분하고 꼼꼼하게 완성했어요.';
+  if (sec < 12) return i18nT('빠르고 거침없이 움직였어요.');
+  if (sec < 28) return i18nT('하나씩 신중하게 맞춰나갔어요.');
+  return i18nT('차분하고 꼼꼼하게 완성했어요.');
 }
 
 // 라운드(연속 성공 횟수)가 오를수록 제한시간이 최대 45%까지 줄어든다.
@@ -146,6 +148,7 @@ export default function PrintScreen({ navigation }) {
   // [전체 판 공통화] 성인반/아동반 선택과 지도사 노트 펼침 상태 — 전래놀이와 동일한 구조.
   const [tier, setTier] = useState('성인반');
   const [noteOpen, setNoteOpen] = useState(false);
+  const [picking, setPicking] = useState(true); // 놀이를 시작하면 고르기 판을 한 줄로 접는다
 
   const posRef = useRef([]);
   const attemptStartRef = useRef(Date.now());
@@ -289,7 +292,7 @@ export default function PrintScreen({ navigation }) {
     setStreak(0);
     setCompleted(false);
     play('geomungo');
-    setResultComment('시간이 다 됐어요! 콤보가 초기화돼요. 다시 섞어서 한 번 더 해 보자 💪');
+    setResultComment(i18nT('시간이 다 됐어요! 콤보가 초기화돼요. 다시 섞어서 한 번 더 해 보자 💪'));
     setResultVisible(true);
     // [지능형 난이도] 시간 안에 못 끝낸 것도 "이 방식은 아직 익히는 중"이라는 신호로 반영한다.
     recordSkill(skillId, false);
@@ -304,6 +307,7 @@ export default function PrintScreen({ navigation }) {
   };
 
   const chooseType = (idx) => {
+    setPicking(true);
     setNoteOpen(false);
     if (idx === typeIdx) {
       startAttempt(stageSize);
@@ -409,9 +413,9 @@ export default function PrintScreen({ navigation }) {
       setCompleted(false);
       const missing = result.targets.length - result.matchedCount;
       const parts = [];
-      if (missing > 0) parts.push(`아직 ${missing}개의 조각이 제자리를 못 찾았어요`);
+      if (missing > 0) parts.push(i18nT('아직 {p0}개의 조각이 제자리를 못 찾았어요', { p0: missing }));
       if (result.decoysRemaining > 0)
-        parts.push(`오타 활자 ${result.decoysRemaining}개를 오른쪽 아래 제외 구역으로 보내야 해요`);
+        parts.push(i18nT('오타 활자 {p0}개를 오른쪽 아래 제외 구역으로 보내야 해요', { p0: result.decoysRemaining }));
       setResultComment((parts.length ? parts.join(' · ') : '') + ' 점선 표시가 힌트야 👀');
       setResultVisible(true);
     }
@@ -513,7 +517,7 @@ export default function PrintScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScreenHeader scene="Print" title="훈민정음 · 인쇄" sub="글자를 짓고, 새기고, 찍어내는 판" onBack={() => navigation.navigate('Home')} />
+      <ScreenHeader scene="Print" title={i18nT('훈민정음 · 인쇄')} sub={i18nT('글자를 짓고, 새기고, 찍어내는 판')} onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           <View style={styles.tierRow}>
@@ -523,7 +527,7 @@ export default function PrintScreen({ navigation }) {
                 style={[styles.tierBtn, tier === t && { backgroundColor: ohang.color, borderColor: ohang.color }]}
                 onPress={() => { play('tap'); setTier(t); }}
               >
-                <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{t}</Text>
+                <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{i18nT(t)}</Text>
               </Pressable>
             ))}
           </View>
@@ -532,35 +536,6 @@ export default function PrintScreen({ navigation }) {
       </View>
 
       <View style={styles.body}>
-        <View style={styles.sidebar}>
-          <ScrollView
-            horizontal
-            style={styles.sidebarScroll}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.sidebarList}
-          >
-            {availableTypes.map((t, idx) => (
-              <Pressable
-                key={t.id}
-                style={[styles.tab, idx === typeIdx && styles.tabActive]}
-                onPress={() => { play('tap'); chooseType(idx); }}
-              >
-                <Text
-                  style={[styles.tabTag, idx === typeIdx && styles.tabTagActive]}
-                >
-                  {t.tag}
-                </Text>
-                <Text
-                  style={[styles.tabText, idx === typeIdx && styles.tabTextActive]}
-                  numberOfLines={1}
-                >
-                  {t.name.replace('훈민정음 자모 배열 - ', '')}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
         <View style={styles.main}>
           {/* [스크롤 안 되던 문제 수정] 진법 화면과 동일한 원인·동일한 수정 —
               main에 ScrollView가 없어서 아래쪽이 잘리면 스크롤할 방법이 없었다. */}
@@ -570,14 +545,21 @@ export default function PrintScreen({ navigation }) {
             showsVerticalScrollIndicator={false}
           >
           {/* [전체 판 공통화] 지도사 노트 — 전래놀이와 같은 위치·형태의 펼침 패널. */}
+          <GamePicker
+            items={availableTypes.map((t) => ({ key: t.id, tag: t.tag, name: t.name.replace('훈민정음 자모 배열 - ', '') }))}
+            active={typeIdx}
+            onPick={chooseType}
+            collapsed={!picking}
+            onExpand={() => setPicking(true)}
+          />
           {type.tip && (
             <View style={styles.noteBox}>
               <Pressable style={styles.noteToggle} onPress={() => setNoteOpen((v) => !v)}>
                 <Text style={styles.noteToggleText}>
-                  {noteOpen ? '▾' : '▸'} 지도사 노트
+                  {i18nT(noteOpen ? '▾' : '▸')} {i18nT('지도사 노트')}
                 </Text>
               </Pressable>
-              {noteOpen && <Text style={styles.noteText}>{type.tip}</Text>}
+              {noteOpen && <Text style={styles.noteText}>{i18nT(type.tip)}</Text>}
             </View>
           )}
 
@@ -585,6 +567,7 @@ export default function PrintScreen({ navigation }) {
             resetKey={type.id}
             info={{ scene: 'print', ...printMission(type), example: type.mode ? null : <FormationPreview positions={type.positions} color={ohang.color} size={130} /> }}
             onModeSelect={(mode) => {
+              setPicking(false);
               timeModeRef.current = mode;
               gateOpenRef.current = true;
               if (stageSize.width && stageSize.height) startAttempt(stageSize);
@@ -601,10 +584,10 @@ export default function PrintScreen({ navigation }) {
                   completeSuccess({ targets: [0], mistakes: r.mistakes });
                 }}
               />
-              <CompletionEffect nonce={stampNonce} variant="stamp" color={ohang.color} label={`${type.tag} 완성!`} />
+              <CompletionEffect nonce={stampNonce} variant="stamp" color={ohang.color} label={i18nT('{p0} 완성!', { p0: type.tag })} />
               <View style={styles.actions}>
                 <Pressable style={styles.secondaryBtn} onPress={() => { settledRef.current = false; setResetSignal((v) => v + 1); }}>
-                  <Text style={styles.secondaryBtnText}>처음부터 다시</Text>
+                  <Text style={styles.secondaryBtnText}>{i18nT('처음부터 다시')}</Text>
                 </Pressable>
               </View>
             </>
@@ -623,7 +606,7 @@ export default function PrintScreen({ navigation }) {
               />
             </View>
             <Text style={[styles.timerSeconds, { color: timerColor }]}>
-              {timeModeRef.current === 'free' ? '시간 제한 없음' : `⏱ ${Math.max(0, Math.ceil(remainingMs / 1000))}초`}
+              {timeModeRef.current === 'free' ? i18nT('시간 제한 없음') : i18nT('⏱ {p0}초', { p0: Math.max(0, Math.ceil(remainingMs / 1000)) })}
             </Text>
           </View>
 
@@ -645,7 +628,7 @@ export default function PrintScreen({ navigation }) {
                   { right: 20, bottom: 20, width: EXCLUDE_ZONE_R * 2, height: EXCLUDE_ZONE_R * 2 },
                 ]}
               >
-                <Text style={styles.excludeZoneText}>제외{'\n'}구역</Text>
+                <Text style={styles.excludeZoneText}>{i18nT('제외')}{'\n'}{i18nT('구역')}</Text>
               </View>
             )}
             {positions.map((p, i) => {
@@ -672,7 +655,7 @@ export default function PrintScreen({ navigation }) {
               nonce={stampNonce}
               variant="stamp"
               color={ohang.color}
-              label={`${type.tag} 완성!`}
+              label={i18nT('{p0} 완성!', { p0: type.tag })}
             />
           </View>
 
@@ -680,22 +663,18 @@ export default function PrintScreen({ navigation }) {
             which="gyeol"
             message={
               decoyGlyphs.length > 0
-                ? `이번엔 오타 활자가 ${decoyGlyphs.length}개 섞여 있어요! 진짜 조각은 제 자리로, 가짜는 오른쪽 아래 제외 구역(✕)으로 보내야 글자가 완성돼요. 지금은 ${
-                    selectedIdx + 1
-                  }번 조각이 선택돼 있어요.`
-                : `조각을 드래그하거나, 클릭해서 선택한 뒤 화살표 키로 옮기고 Enter로 제자리에 쏙 넣으면 돼요. 지금은 ${
-                    selectedIdx + 1
-                  }번 조각이 선택돼 있어요. ${timeModeRef.current === 'free' ? '천천히' : '시간 안에'} 글자를 완성해 보자!`
+                ? i18nT('이번엔 오타 활자가 {p0}개 섞여 있어요! 진짜 조각은 제 자리로, 가짜는 오른쪽 아래 제외 구역(✕)으로 보내야 글자가 완성돼요. 지금은 {p1}번 조각이 선택돼 있어요.', { p0: decoyGlyphs.length, p1: selectedIdx + 1 })
+                : i18nT('조각을 드래그하거나, 클릭해서 선택한 뒤 화살표 키로 옮기고 Enter로 제자리에 쏙 넣으면 돼요. 지금은 {p0}번 조각이 선택돼 있어요. {p1} 글자를 완성해 보자!', { p0: selectedIdx + 1, p1: i18nT(timeModeRef.current === 'free' ? '천천히' : '시간 안에') })
             }
             style={styles.mascotHint}
           />
 
           <View style={styles.actions}>
             <Pressable style={styles.secondaryBtn} onPress={() => startAttempt(stageSize)}>
-              <Text style={styles.secondaryBtnText}>다시 섞기</Text>
+              <Text style={styles.secondaryBtnText}>{i18nT('다시 섞기')}</Text>
             </Pressable>
             <Pressable style={styles.primaryBtn} onPress={checkMatch}>
-              <Text style={styles.primaryBtnText}>완성!</Text>
+              <Text style={styles.primaryBtnText}>{i18nT('완성!')}</Text>
             </Pressable>
           </View>
             </>
@@ -708,17 +687,17 @@ export default function PrintScreen({ navigation }) {
       {resultVisible && (
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{type.name}</Text>
-            <Text style={styles.modalBody}>{type.description}</Text>
+            <Text style={styles.modalTitle}>{i18nT(type.name)}</Text>
+            <Text style={styles.modalBody}>{i18nT(type.description)}</Text>
             <View style={styles.modalDivider} />
             <Text style={styles.modalComment}>
-              오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
+              {i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(resultComment)}
             </Text>
             {completed && <Text style={styles.modalScore}>{skillLabel(rating)}</Text>}
             <TraceReward sceneId="print" success={completed} />
             <View style={styles.modalActions}>
               <Pressable style={styles.modalClose} onPress={() => setResultVisible(false)}>
-                <Text style={styles.modalCloseText}>닫기</Text>
+                <Text style={styles.modalCloseText}>{i18nT('닫기')}</Text>
               </Pressable>
               {completed && (
                 <>
@@ -729,7 +708,7 @@ export default function PrintScreen({ navigation }) {
                       advanceRound();
                     }}
                   >
-                    <Text style={styles.modalPrimaryText}>다음 글자 도전!</Text>
+                    <Text style={styles.modalPrimaryText}>{i18nT('다음 글자 도전!')}</Text>
                   </Pressable>
                   <Pressable
                     style={styles.modalSecondary}
@@ -738,7 +717,7 @@ export default function PrintScreen({ navigation }) {
                       navigation.navigate('Result');
                     }}
                   >
-                    <Text style={styles.modalSecondaryText}>결과물 보기</Text>
+                    <Text style={styles.modalSecondaryText}>{i18nT('결과물 보기')}</Text>
                   </Pressable>
                 </>
               )}

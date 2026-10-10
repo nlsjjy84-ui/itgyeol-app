@@ -5,6 +5,7 @@ import { colors } from '../../theme';
 import { useTapKey } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { t as i18nT } from '../../i18n';
 
 // 놀이마다 "조작 동작"이 전부 달라야 한다는 피드백으로 새로 만든 4개.
 //   팽이치기 — 돌아다니는 팽이를 "찾아서 콕" 눌러 채로 친다 (목표물 누르기)
@@ -36,7 +37,7 @@ export function TopChaseGame({ color, onComplete, targetHits = 14, lives = 3, dr
         q.vx = (dx / l) * 60 + rand(-25, 25);
         q.vy = (dy / l) * 60 + rand(-25, 25);
         q.flash = 0.25;
-        q.note = '착!';
+        q.note = i18nT('착!');
         play('tap');
         if (q.hits >= targetHits) {
           setPhase('done');
@@ -44,7 +45,7 @@ export function TopChaseGame({ color, onComplete, targetHits = 14, lives = 3, dr
         }
       } else {
         q.spin = clamp(q.spin - 6, 0, 100);
-        q.note = '헛쳤어요';
+        q.note = i18nT('헛쳤어요');
       }
     },
   });
@@ -68,7 +69,7 @@ export function TopChaseGame({ color, onComplete, targetHits = 14, lives = 3, dr
     if (q.spin <= 0 || out) {
       q.lives -= 1;
       play('geomungo');
-      q.note = out ? '선 밖으로 나갔어요' : '팽이가 쓰러졌어요';
+      q.note = out ? i18nT('선 밖으로 나갔어요') : i18nT('팽이가 쓰러졌어요');
       if (q.lives <= 0) {
         setPhase('done');
         onComplete({ success: false, score: q.hits, elapsedMs: Date.now() - q.start });
@@ -86,8 +87,8 @@ export function TopChaseGame({ color, onComplete, targetHits = 14, lives = 3, dr
       color={color}
       phase={phase}
       onStart={start}
-      hud={`친 횟수 ${q.hits}/${targetHits} · 기회 ${'♥'.repeat(Math.max(0, q.lives))}`}
-      hint="팽이가 여기저기 돌아다녀요. 팽이를 콕 눌러 채로 치면 힘이 붙어요. 힘이 떨어지거나 선 밖으로 나가면 쓰러져요."
+      hud={i18nT('친 횟수 {p0}/{p1} · 기회 {p2}', { p0: q.hits, p1: targetHits, p2: '♥'.repeat(Math.max(0, q.lives)) })}
+      hint={i18nT('팽이가 여기저기 돌아다녀요. 팽이를 콕 눌러 채로 치면 힘이 붙어요. 힘이 떨어지거나 선 밖으로 나가면 쓰러져요.')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#efe6cf' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -98,7 +99,7 @@ export function TopChaseGame({ color, onComplete, targetHits = 14, lives = 3, dr
             <View style={[st.topStripe, { transform: [{ rotate: '90deg' }] }]} />
           </View>
           <View style={st.spinWrap}><Bar value={q.spin} color={q.spin < 25 ? '#b3382c' : color} width={120} height={8} /></View>
-          <Text style={st.note}>{q.note}</Text>
+          <Text style={st.note}>{i18nT(q.note)}</Text>
         </View>
       </View>
     </Shell>
@@ -116,7 +117,7 @@ export function DdakjiFanGame({ color, onComplete, rounds = 3, timeSec = 9, myIc
   const win = (q) => {
     q.flipped += 1;
     q.flip = 1;
-    q.note = '뒤집었다!';
+    q.note = i18nT('뒤집었다!');
     play('stamp');
     q.round += 1;
     q.wind = 0; q.hold = 0; q.left = timeSec;
@@ -178,13 +179,13 @@ export function DdakjiFanGame({ color, onComplete, rounds = 3, timeSec = 9, myIc
       color={color}
       phase={phase}
       onStart={start}
-      hud={`뒤집은 딱지 ${q.flipped}/${rounds} · 남은 시간 ${Math.max(0, Math.ceil(q.left))}초`}
-      hint="화면 위에서 손가락을 좌우로 빠르게 휙휙 흔들어 바람을 일으켜요. 바람이 선(목표) 위로 올라가 잠깐 버티면 상대 딱지가 뒤집혀요. (키보드는 ← → 번갈아)"
+      hud={i18nT('뒤집은 딱지 {p0}/{p1} · 남은 시간 {p2}초', { p0: q.flipped, p1: rounds, p2: Math.max(0, Math.ceil(q.left)) })}
+      hint={i18nT('화면 위에서 손가락을 좌우로 빠르게 휙휙 흔들어 바람을 일으켜요. 바람이 선(목표) 위로 올라가 잠깐 버티면 상대 딱지가 뒤집혀요. (키보드는 ← → 번갈아)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#e9e0cb' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-          <Text style={[st.card, { left: 150 - 36, top: 140, transform: [{ rotate: `${-lift * 18}deg` }, { scaleY: q.flip > 0 ? 1 - q.flip * 0.9 : 1 }] }]}>{oppIcon}</Text>
-          <Text style={[st.card, { left: 70, top: 60, fontSize: 40, opacity: 0.9 }]}>{myIcon}</Text>
+          <Text style={[st.card, { left: 150 - 36, top: 140, transform: [{ rotate: `${-lift * 18}deg` }, { scaleY: q.flip > 0 ? 1 - q.flip * 0.9 : 1 }] }]}>{i18nT(oppIcon)}</Text>
+          <Text style={[st.card, { left: 70, top: 60, fontSize: 40, opacity: 0.9 }]}>{i18nT(myIcon)}</Text>
           {[0, 1, 2].map((i) => (
             <View key={i} style={[st.gust, { top: 190 + i * 22, left: 40 + lift * 160 * (i + 1) * 0.5, opacity: 0.15 + lift * 0.6, width: 50 + lift * 90 }]} />
           ))}
@@ -192,7 +193,7 @@ export function DdakjiFanGame({ color, onComplete, rounds = 3, timeSec = 9, myIc
             <View style={[st.windFill, { height: `${q.wind}%`, backgroundColor: q.wind >= need ? '#3f8a4f' : color }]} />
             <View style={[st.windLine, { bottom: `${need}%` }]} />
           </View>
-          <Text style={st.note}>{q.note}</Text>
+          <Text style={st.note}>{i18nT(q.note)}</Text>
         </View>
       </View>
     </Shell>
@@ -247,7 +248,7 @@ export function TuhoDialGame({ color, onComplete, arrows = 7, need = 4, zoneDeg 
         const diff = Math.abs(q.fly.r - q.jar);
         q.last = q.fly.r;
         const hit = diff <= TOL;
-        if (hit) { q.hits += 1; q.note = '쏙! 들어갔다 🏺'; play('stamp'); } else { q.note = q.fly.r < q.jar ? '짧았어 — 힘이나 각도를 키워 보자' : '길었어 — 조금 줄여 보자'; play('geomungo'); }
+        if (hit) { q.hits += 1; q.note = i18nT('쏙! 들어갔다 🏺'); play('stamp'); } else { q.note = q.fly.r < q.jar ? i18nT('짧았어 — 힘이나 각도를 키워 보자') : i18nT('길었어 — 조금 줄여 보자'); play('geomungo'); }
         q.fly = null;
         q.jar = newJar();
         if (q.hits >= need) { setPhase('done'); onComplete({ success: true, score: q.thrown, elapsedMs: Date.now() - q.start }); return; }
@@ -267,7 +268,7 @@ export function TuhoDialGame({ color, onComplete, arrows = 7, need = 4, zoneDeg 
   }
   const slider = (label, val, lo, hi, x) => (
     <View style={[st.dial, { left: x }]}>
-      <Text style={st.dialLabel}>{label} {val}{label === '각도' ? '°' : ''}</Text>
+      <Text style={st.dialLabel}>{i18nT(label)} {i18nT(val)}{i18nT(label === '각도' ? '°' : '')}</Text>
       <View style={st.dialTrack}><View style={[st.dialKnob, { left: `${((val - lo) / (hi - lo)) * 100}%`, backgroundColor: color }]} /></View>
     </View>
   );
@@ -276,8 +277,8 @@ export function TuhoDialGame({ color, onComplete, arrows = 7, need = 4, zoneDeg 
       color={color}
       phase={phase}
       onStart={start}
-      hud={`들어간 화살 ${q.hits}/${need} · 남은 화살 ${Math.max(0, arrows - q.thrown)}개`}
-      hint="아래 두 줄을 눌러 끌어 각도와 힘을 정하고 '던지기'를 눌러요. 항아리는 던질 때마다 다른 거리에 놓여요. 지난 화살이 떨어진 자리(점)를 보고 고쳐 보자."
+      hud={i18nT('들어간 화살 {p0}/{p1} · 남은 화살 {p2}개', { p0: q.hits, p1: need, p2: Math.max(0, arrows - q.thrown) })}
+      hint={i18nT('아래 두 줄을 눌러 끌어 각도와 힘을 정하고 \'던지기\'를 눌러요. 항아리는 던질 때마다 다른 거리에 놓여요. 지난 화살이 떨어진 자리(점)를 보고 고쳐 보자.')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#ece6d6' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -287,12 +288,12 @@ export function TuhoDialGame({ color, onComplete, arrows = 7, need = 4, zoneDeg 
           {q.last != null ? <View style={[st.lastDot, { left: X0 + q.last * RMAX - 4, top: GY - 4 }]} /> : null}
           <View style={[st.arrow, { left: ax - 12, top: ay - 2, backgroundColor: color }]} />
           {slider('각도', q.ang, 5, 85, 14)}
-          {slider('힘', q.pow, 5, 100, 166)}
-          <Text style={st.note}>{q.note}</Text>
+          {slider(i18nT('힘'), q.pow, 5, 100, 166)}
+          <Text style={st.note}>{i18nT(q.note)}</Text>
         </View>
       </View>
       <Pressable style={[st.throwBtn, { backgroundColor: color }]} onPress={throwIt}>
-        <Text style={st.throwTxt}>던지기</Text>
+        <Text style={st.throwTxt}>{i18nT('던지기')}</Text>
       </Pressable>
     </Shell>
   );
@@ -343,7 +344,7 @@ export function JachigiSwipeGame({ color, onComplete, targetHits = 10, maxMiss =
       const got = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
       if (got === q.dir.key) {
         q.hits += 1;
-        q.note = '딱! 멀리 날아갔어요';
+        q.note = i18nT('딱! 멀리 날아갔어요');
         q.flash = 0.3;
         play('stamp');
         if (q.hits >= targetHits) {
@@ -353,7 +354,7 @@ export function JachigiSwipeGame({ color, onComplete, targetHits = 10, maxMiss =
         }
         next(q);
       } else {
-        failOne(q, `${DIRS.find((d) => d.key === got).label}이 아니에요`);
+        failOne(q, i18nT('{p0}이 아니에요', { p0: i18nT(DIRS.find((d) => d.key === got).label) }));
       }
     },
   });
@@ -362,7 +363,7 @@ export function JachigiSwipeGame({ color, onComplete, targetHits = 10, maxMiss =
     const q = g.current;
     q.t += dt;
     q.flash = Math.max(0, q.flash - dt);
-    if (q.t >= q.win) { if (failOne(q, '늦었어요')) return; }
+    if (q.t >= q.win) { if (failOne(q, i18nT('늦었어요'))) return; }
     force((n) => n + 1);
   }, phase === 'running');
 
@@ -376,16 +377,16 @@ export function JachigiSwipeGame({ color, onComplete, targetHits = 10, maxMiss =
       color={color}
       phase={phase}
       onStart={start}
-      hud={`멀리 보낸 횟수 ${q.hits}/${targetHits} · 실수 ${q.miss}/${maxMiss}`}
-      hint="막대(새끼)가 튀어 오르는 쪽으로 손가락을 휙 쓸어 쳐요. 시간이 지나면 막대가 떨어져요. 갈수록 빨라져요."
+      hud={i18nT('멀리 보낸 횟수 {p0}/{p1} · 실수 {p2}/{p3}', { p0: q.hits, p1: targetHits, p2: q.miss, p3: maxMiss })}
+      hint={i18nT('막대(새끼)가 튀어 오르는 쪽으로 손가락을 휙 쓸어 쳐요. 시간이 지나면 막대가 떨어져요. 갈수록 빨라져요.')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#e8e1c8' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <View style={[st.hole, { left: 150 - 24, top: 150 - 24 }]} />
-          <Text style={[st.glyph, { color, opacity: 0.25 + left * 0.75, left: 150 - 30, top: 150 - 46 }]}>{q.dir.glyph}</Text>
+          <Text style={[st.glyph, { color, opacity: 0.25 + left * 0.75, left: 150 - 30, top: 150 - 46 }]}>{i18nT(q.dir.glyph)}</Text>
           <View style={[st.stick, { left: stickX - 22, top: stickY - 4, transform: [{ rotate: q.dir.dy ? '90deg' : '0deg' }], backgroundColor: q.flash > 0 ? '#fff' : '#8a5a2b' }]} />
           <View style={st.timerTrack}><View style={[st.timerFill, { width: `${left * 100}%`, backgroundColor: left < 0.3 ? '#b3382c' : color }]} /></View>
-          <Text style={st.note}>{q.note}</Text>
+          <Text style={st.note}>{i18nT(q.note)}</Text>
         </View>
       </View>
     </Shell>
@@ -414,7 +415,7 @@ const st = StyleSheet.create({
   dialLabel: { fontSize: 12, fontWeight: '800', color: colors.ink, marginBottom: 4 },
   dialTrack: { height: 10, borderRadius: 5, backgroundColor: 'rgba(0,0,0,0.15)', justifyContent: 'center' },
   dialKnob: { position: 'absolute', width: 18, height: 18, borderRadius: 9, marginLeft: -9, top: -4 },
-  throwBtn: { paddingHorizontal: 40, paddingVertical: 12, borderRadius: 18 },
+  throwBtn: { minWidth: 160, alignItems: 'center', paddingHorizontal: 40, paddingVertical: 12, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
   throwTxt: { color: '#fff', fontWeight: '800', fontSize: 16 },
   hole: { position: 'absolute', width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(0,0,0,0.12)' },
   glyph: { position: 'absolute', width: 60, textAlign: 'center', fontSize: 52, fontWeight: '900' },

@@ -26,6 +26,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Check translations (언어팩 점검)
+        run: npm run i18n:check
       - name: Export web
         run: npx expo export -p web --output-dir dist
         env:

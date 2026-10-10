@@ -8,6 +8,7 @@ import OhangPicker from '../components/OhangPicker';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import GamePicker from '../ui/GamePicker';
 import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
 import { getGameLines } from '../data/book';
@@ -29,12 +30,13 @@ import { SangmoGame, MarbleGame, TopGame } from '../components/minigames/FolkGam
 import { TuhoGame, GomuGame, KiteSteerGame } from '../components/minigames/FolkGamesB';
 import { StoneFlickGame, HoopSpeedGame } from '../components/minigames/FolkGamesC';
 import { TopChaseGame, DdakjiFanGame, TuhoDialGame, JachigiSwipeGame } from '../components/minigames/FolkGamesD';
+import { t as i18nT } from '../i18n';
 
 function speedComment(ms) {
   const sec = ms / 1000;
-  if (sec < 5) return '순식간에 해냈어요.';
-  if (sec < 10) return '리듬을 잘 타며 해냈어요.';
-  return '끈기 있게 해냈어요.';
+  if (sec < 5) return i18nT('순식간에 해냈어요.');
+  if (sec < 10) return i18nT('리듬을 잘 타며 해냈어요.');
+  return i18nT('끈기 있게 해냈어요.');
 }
 
 // 놀이 방식(mechanic)마다 조작 방법을 정확히 알려주는 안내 문구.
@@ -79,6 +81,7 @@ export default function PlayScreen({ navigation }) {
   // [기능화 2] 지도사 노트 — 교재를 직접 쓰고 강사들을 가르쳤던 경험에서 나온
   // 실제 지도 팁을 놀이마다 붙여둔다. 기본은 접힌 상태.
   const [noteOpen, setNoteOpen] = useState(false);
+  const [picking, setPicking] = useState(true); // 놀이를 시작하면 고르기 판을 한 줄로 접는다
 
   // [오늘의 기운 선택 기능] 화면마다 따로 뽑지 않고 앱 전체가 공유하는 값을 쓴다.
   const { addResult, skills, recordSkill, ohangKey } = useJourney();
@@ -98,6 +101,7 @@ export default function PlayScreen({ navigation }) {
     setGameKey((k) => k + 1);
     setResultVisible(false);
     setNoteOpen(false);
+    setPicking(true);
   };
 
   const handleComplete = ({ success, score, elapsedMs }) => {
@@ -121,7 +125,7 @@ export default function PlayScreen({ navigation }) {
       addResult(attemptResult);
     } else {
       setCompleted(false);
-      setResultComment('아깝다! 창을 닫으면 바로 한 번 더 할 수 있어 😉');
+      setResultComment(i18nT('아깝다! 창을 닫으면 바로 한 번 더 할 수 있어 😉'));
     }
     setResultVisible(true);
   };
@@ -270,7 +274,7 @@ export default function PlayScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScreenHeader scene="Play" title="전래놀이" sub="손끝으로 즐기는 열두 가지 놀이" onBack={() => navigation.navigate('Home')} />
+      <ScreenHeader scene="Play" title={i18nT('전래놀이')} sub={i18nT('손끝으로 즐기는 열두 가지 놀이')} onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
         <View style={styles.headerRight}>
           <View style={styles.tierRow}>
@@ -285,7 +289,7 @@ export default function PlayScreen({ navigation }) {
                   setResultVisible(false);
                 }}
               >
-                <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{t}</Text>
+                <Text style={[styles.tierBtnText, tier === t && { color: '#fff' }]}>{i18nT(t)}</Text>
               </Pressable>
             ))}
           </View>
@@ -294,33 +298,6 @@ export default function PlayScreen({ navigation }) {
       </View>
 
       <View style={styles.body}>
-        <View style={styles.sidebar}>
-          <ScrollView
-            horizontal
-            style={styles.sidebarScroll}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.sidebarList}
-          >
-            {PLAY_GAMES.map((g, idx) => (
-              <Pressable
-                key={g.id}
-                style={[styles.tab, idx === gameIdx && styles.tabActive]}
-                onPress={() => { play('tap'); chooseGame(idx); }}
-              >
-                <Text style={[styles.tabTag, idx === gameIdx && styles.tabTagActive]}>
-                  {g.tag}
-                </Text>
-                <Text
-                  style={[styles.tabText, idx === gameIdx && styles.tabTextActive]}
-                  numberOfLines={1}
-                >
-                  {g.name}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
         <View style={styles.main}>
           {/* [스크롤 안 되던 문제 수정] 전에는 main이 ScrollView 없이 flex:1 View라서,
               안내 문구가 길거나 지도사 노트를 펼치면 아래쪽(놀이 버튼 등)이 화면 밖으로
@@ -332,20 +309,27 @@ export default function PlayScreen({ navigation }) {
           >
             {/* [기능화 2] 지도사 노트 — 교재를 쓰고 강사를 교육했던 실제 현장 경험에서
                 나온 지도 팁. 평소엔 접어두고, 필요할 때만 펼쳐 본다. */}
+            <GamePicker
+              items={PLAY_GAMES.map((g) => ({ key: g.id, tag: g.tag, name: g.name }))}
+              active={gameIdx}
+              onPick={chooseGame}
+              collapsed={!picking}
+              onExpand={() => setPicking(true)}
+            />
             {game.tip && (
               <View style={styles.noteBox}>
                 <Pressable style={styles.noteToggle} onPress={() => setNoteOpen((v) => !v)}>
                   <Text style={styles.noteToggleText}>
-                    {noteOpen ? '▾' : '▸'} 지도사 노트
+                    {i18nT(noteOpen ? '▾' : '▸')} {i18nT('지도사 노트')}
                   </Text>
                 </Pressable>
-                {noteOpen && <Text style={styles.noteText}>{game.tip}</Text>}
+                {noteOpen && <Text style={styles.noteText}>{i18nT(game.tip)}</Text>}
               </View>
             )}
             <MissionGate
               resetKey={`${game.id}-${tier}`}
               info={{ scene: 'play', lines: getGameLines()[game.id] ? [getGameLines()[game.id].start] : undefined, ...playMission(game) }}
-              onModeSelect={setTimeMode}
+              onModeSelect={(m) => { setTimeMode(m); setPicking(false); }}
             >
               <MascotGuide which="pung" message={CONTROL_HINTS[game.mechanic]} style={styles.controlBox} />
               <View style={styles.gameArea}>{renderGame()}</View>
@@ -357,14 +341,14 @@ export default function PlayScreen({ navigation }) {
       {resultVisible && (
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{game.name}</Text>
+            <Text style={styles.modalTitle}>{i18nT(game.name)}</Text>
             <Text style={styles.modalComment}>
-              오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
+              {i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(resultComment)}
             </Text>
             <TraceReward sceneId="tbd" success={completed} gameId={rawGame.id} gameName={rawGame.name} />
             <View style={styles.modalActions}>
               <Pressable style={styles.modalClose} onPress={() => setResultVisible(false)}>
-                <Text style={styles.modalCloseText}>닫기</Text>
+                <Text style={styles.modalCloseText}>{i18nT('닫기')}</Text>
               </Pressable>
               {completed && (
                 <Pressable
@@ -374,7 +358,7 @@ export default function PlayScreen({ navigation }) {
                     navigation.navigate('Result');
                   }}
                 >
-                  <Text style={styles.modalPrimaryText}>결과물 보기</Text>
+                  <Text style={styles.modalPrimaryText}>{i18nT('결과물 보기')}</Text>
                 </Pressable>
               )}
             </View>
@@ -492,7 +476,7 @@ const styles = StyleSheet.create({
   noteToggle: { flexDirection: 'row', alignItems: 'center' },
   noteToggleText: { fontSize: 12, fontWeight: '800', color: colors.accentDeep },
   noteText: { fontSize: 12, color: colors.ink, lineHeight: 17, marginTop: 6 },
-  gameArea: { flex: 1, width: '100%', minHeight: 260, alignItems: 'center', justifyContent: 'center' },
+  gameArea: { flex: 1, width: '100%', minHeight: 260, alignItems: 'center', justifyContent: 'flex-start', paddingTop: 4 },
   modalBackdrop: {
     position: 'absolute',
     left: 0,

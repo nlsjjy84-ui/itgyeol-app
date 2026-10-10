@@ -4,6 +4,7 @@ import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { useHoldKey, useArrowHold } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
+import { t as i18nT } from '../../i18n';
 
 function randomTargetX() {
   return 24 + Math.random() * 52; // 24~76% 사이에서 매번 새로 등장
@@ -161,7 +162,7 @@ export default function ThrowGame({
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.roundText}>{round} / {rounds} 라운드</Text>
+      <Text style={styles.roundText}>{i18nT(round)} / {i18nT(rounds)} {i18nT('라운드')}</Text>
 
       <View style={styles.aimTrack}>
         <View
@@ -178,11 +179,11 @@ export default function ThrowGame({
       </View>
       <View style={styles.aimBtnRow}>
         <Pressable style={[styles.aimBtn, { borderColor: color }]} onPress={() => moveAim(-6)}>
-          <Text style={[styles.aimBtnText, { color }]}>◀ 조준</Text>
+          <Text style={[styles.aimBtnText, { color }]}>{i18nT('◀ 조준')}</Text>
         </Pressable>
-        <Text style={styles.aimStatus}>{aimed ? '조준 완료!' : '좌우로 조준해 봐'}</Text>
+        <Text style={styles.aimStatus}>{i18nT(aimed ? '조준 완료!' : '좌우로 조준해 봐')}</Text>
         <Pressable style={[styles.aimBtn, { borderColor: color }]} onPress={() => moveAim(6)}>
-          <Text style={[styles.aimBtnText, { color }]}>조준 ▶</Text>
+          <Text style={[styles.aimBtnText, { color }]}>{i18nT('조준 ▶')}</Text>
         </Pressable>
       </View>
 
@@ -224,10 +225,10 @@ export default function ThrowGame({
           </Animated.Text>
         )}
         {phase !== 'throwing' && (
-          <Text style={[styles.projectileIdle, { left: `${aimX}%` }]}>{icon}</Text>
+          <Text style={[styles.projectileIdle, { left: `${aimX}%` }]}>{i18nT(icon)}</Text>
         )}
-        {flash === 'hit' && <Text style={styles.flashHit}>명중! 맞혔다</Text>}
-        {flash === 'miss' && <Text style={styles.flashMiss}>빗나감</Text>}
+        {flash === 'hit' && <Text style={styles.flashHit}>{i18nT('명중! 맞혔다')}</Text>}
+        {flash === 'miss' && <Text style={styles.flashMiss}>{i18nT('빗나감')}</Text>}
       </View>
 
       <View style={styles.gaugeTrack}>
@@ -239,11 +240,11 @@ export default function ThrowGame({
         />
         <View style={[styles.gaugeFill, { width: `${power}%`, backgroundColor: color }]} />
       </View>
-      <Text style={styles.count}>힘 {Math.round(power)}</Text>
+      <Text style={styles.count}>{i18nT('힘')} {Math.round(power)}</Text>
 
       {phase === 'ready' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPressIn={startCharge}>
-          <Text style={styles.bigBtnText}>누르고 있기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('누르고 있기')}</Text>
         </Pressable>
       )}
       {phase === 'charging' && (
@@ -251,12 +252,12 @@ export default function ThrowGame({
           style={[styles.tapBtn, { borderColor: color, backgroundColor: color }]}
           onPressOut={release}
         >
-          <Text style={[styles.tapBtnText, { color: '#fff' }]}>손 떼서 치기!</Text>
+          <Text style={[styles.tapBtnText, { color: '#fff' }]}>{i18nT('손 떼서 치기!')}</Text>
         </Pressable>
       )}
       {phase === 'done' && (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={retry}>
-          <Text style={styles.bigBtnText}>다시 하기</Text>
+          <Text style={styles.bigBtnText}>{i18nT('다시 하기')}</Text>
         </Pressable>
       )}
     </View>
@@ -341,8 +342,8 @@ const styles = StyleSheet.create({
   },
   gaugeFill: { height: '100%' },
   count: { fontSize: 15, fontWeight: '700', color: colors.ink, marginBottom: 20 },
-  bigBtn: { paddingHorizontal: 36, paddingVertical: 18, borderRadius: 22 },
-  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
+  bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   tapBtn: {
     width: 220,
     height: 220,

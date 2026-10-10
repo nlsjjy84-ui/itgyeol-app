@@ -34,6 +34,9 @@ export default function TasteScreen({ navigation, route }) {
     return (
       <SafeAreaView style={st.safe}>
         <ScrollView contentContainerStyle={st.wrap}>
+          <Pressable onPress={() => setStep(1)} hitSlop={10} style={st.back} accessibilityRole="button">
+            <Text style={st.backTxt}>{t('‹ 다시 고르기')}</Text>
+          </Pressable>
           <Text style={st.kicker}>{t('예시 둘러보기')}</Text>
           <Text style={st.q}>{t('이런 작품이 놓일 수 있어요')}</Text>
           <Text style={st.sub}>
@@ -112,6 +115,8 @@ export default function TasteScreen({ navigation, route }) {
 }
 
 const st = StyleSheet.create({
+  back: { alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, borderColor: colors.border, marginBottom: 10 },
+  backTxt: { fontSize: 13, color: colors.ink, fontWeight: '600' },
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 20, gap: 14, maxWidth: 560, width: '100%', alignSelf: 'center' },
   kicker: { fontSize: 12, fontWeight: '800', color: colors.accentDeep, letterSpacing: 1 },
