@@ -14,6 +14,7 @@ import WingMirrorGame from '../components/jinbeop/WingMirrorGame';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import TraceReward from '../components/TraceReward';
 import Board from '../ui/Board';
 import { JINBEOP_MISSIONS } from '../data/missions';
 import { play } from '../utils/sound';
@@ -254,6 +255,7 @@ export default function JinbeopScreen({ navigation }) {
           <MissionGate
             resetKey={`${formation.id}-${restartNonce}`}
             info={{
+              scene: 'jinbeop',
               ...(JINBEOP_MISSIONS[formation.id] || { kicker: formation.tag, title: formation.name, story: formation.description, mission: MECHANIC_HINT[formation.mechanic] || '모양을 맞춰 보세요.', steps: [] }),
               example: <FormationPreview positions={formation.positions} color={ohang.color} size={130} />,
             }}
@@ -386,6 +388,7 @@ export default function JinbeopScreen({ navigation }) {
               오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
             </Text>
             {completed && <Text style={styles.modalScore}>{skillLabel(rating)}</Text>}
+            <TraceReward sceneId="jinbeop" success={completed} />
             <View style={styles.modalActions}>
               <Pressable
                 style={styles.modalClose}
@@ -591,7 +594,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.night,
     borderRadius: 12,
   },
-  modalCloseText: { color: colors.bg, fontWeight: '600', fontSize: 12 },
+  modalCloseText: { color: colors.onNight, fontWeight: '600', fontSize: 12 },
   modalPrimary: {
     paddingHorizontal: 16,
     paddingVertical: 8,

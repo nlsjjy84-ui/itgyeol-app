@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 18,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   flashLose: {
     position: 'absolute',
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontSize: 15,
     fontWeight: '800',
-    color: '#b2482f',
+    color: colors.accent,
   },
   gaugeTrack: {
     width: '100%',

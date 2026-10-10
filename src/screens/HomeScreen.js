@@ -3,6 +3,8 @@ import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-nat
 import Text from '../ui/Text';
 import MascotDuo from '../components/MascotDuo';
 import OhangPicker from '../components/OhangPicker';
+import ThemeToggle from '../ui/ThemeToggle';
+import StoryScene from '../ui/StoryScene';
 import { useJourney } from '../context/JourneyContext';
 import { colors } from '../theme';
 import Frame from '../ui/Frame';
@@ -100,7 +102,10 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.title}>대한민국의 보물</Text>
         </View>
         {/* [오늘의 기운 선택 기능] 홈에서도 바로 보고 바꿀 수 있게 — 바꾸면 세 판 전체에 반영된다. */}
-        <OhangPicker />
+        <View style={{ alignItems: 'flex-end', gap: 8 }}>
+          <OhangPicker />
+          <ThemeToggle />
+        </View>
       </View>
       <View style={{ alignItems: 'center', marginTop: 6 }}>
         <CloudBand width={260} />
@@ -109,12 +114,14 @@ export default function HomeScreen({ navigation }) {
         손끝으로 만나는 세 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.
       </Text>
 
+      <StoryScene scene="prologue" style={{ marginTop: 16 }} />
+
       <MascotDuo
         leftValue={pungValue}
         rightValue={gyeolValue}
-        caption="안녕! 우리는 풍이와 결이야. 진법·훈민정음·전래놀이, 세 가지 전통을 함께 만들어보자!"
-        size={64}
-        style={{ marginTop: 18 }}
+        caption="판을 놀수록 우리 둘의 모습이 또렷해져."
+        size={52}
+        style={{ marginTop: 14 }}
       />
 
       {/* 이 앱이 왜 만들어졌는지 — 마스코트의 말이 아니라 만든 사람의 실제 이력으로
@@ -239,7 +246,7 @@ const styles = StyleSheet.create({
     marginBottom: 7,
     textTransform: 'uppercase',
   },
-  makerText: { fontSize: 12.5, color: colors.bg, lineHeight: 19.5 },
+  makerText: { fontSize: 12.5, color: colors.onNight, lineHeight: 19.5 },
   list: { marginTop: 20, gap: 14 },
   roadmapHeader: { marginTop: 26, marginBottom: 2 },
   roadmapTitle: { fontSize: 13.5, fontWeight: '800', color: colors.ink },

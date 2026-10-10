@@ -8,6 +8,7 @@ import OhangPicker from '../components/OhangPicker';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import TraceReward from '../components/TraceReward';
 import { playMission } from '../data/missions';
 import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
@@ -301,7 +302,7 @@ export default function PlayScreen({ navigation }) {
             )}
             <MissionGate
               resetKey={`${game.id}-${tier}`}
-              info={playMission(game)}
+              info={{ scene: 'play', ...playMission(game) }}
               onModeSelect={setTimeMode}
             >
               <MascotGuide which="pung" message={CONTROL_HINTS[game.mechanic]} style={styles.controlBox} />
@@ -318,6 +319,7 @@ export default function PlayScreen({ navigation }) {
             <Text style={styles.modalComment}>
               오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
             </Text>
+            <TraceReward sceneId="tbd" success={completed} />
             <View style={styles.modalActions}>
               <Pressable style={styles.modalClose} onPress={() => setResultVisible(false)}>
                 <Text style={styles.modalCloseText}>닫기</Text>
@@ -480,7 +482,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.night,
     borderRadius: 12,
   },
-  modalCloseText: { color: colors.bg, fontWeight: '600', fontSize: 12 },
+  modalCloseText: { color: colors.onNight, fontWeight: '600', fontSize: 12 },
   modalPrimary: {
     paddingHorizontal: 16,
     paddingVertical: 8,

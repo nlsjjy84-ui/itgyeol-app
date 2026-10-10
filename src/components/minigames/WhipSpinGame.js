@@ -125,7 +125,7 @@ export default function WhipSpinGame({
         <View
           style={[
             styles.gaugeFill,
-            { width: `${speed}%`, backgroundColor: overThreshold ? '#2f8f4e' : color },
+            { width: `${speed}%`, backgroundColor: overThreshold ? colors.green : color },
           ]}
         />
       </View>
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     top: 4,
     fontSize: 16,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   gaugeTrack: {
     width: '100%',

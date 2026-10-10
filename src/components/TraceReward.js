@@ -1,0 +1,74 @@
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import Text from '../ui/Text';
+import Jogakbo, { PatchChip } from './Jogakbo';
+import { Dialogue } from '../ui/StoryScene';
+import { useJourney } from '../context/JourneyContext';
+import { SUCCESS, FAIL } from '../data/story';
+import { Gauge } from './ResultWhy';
+import { explainPatch } from '../utils/explain';
+import { SCENE_TARGET, LEVEL_NAME, nextHint } from '../utils/progress';
+import { colors } from '../theme';
+
+const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이' };
+
+// 한 판을 마친 순간 — 방금 생긴 조각, 지금까지 이어진 조각보, 풍이·결이의 반응을 보여 준다.
+export default function TraceReward({ sceneId, success }) {
+  const { attempts, progress } = useJourney();
+  if (!success) return <Dialogue lines={FAIL} style={{ marginTop: 4 }} />;
+  const mine = attempts.find((a) => a.sceneId === sceneId);
+  const n = new Set(attempts.map((a) => a.sceneId)).size;
+  const cnt = (progress.counts && progress.counts[sceneId]) || 1;
+  const lv = Math.max(1, (progress.levels && progress.levels[sceneId]) || 1);
+  const why = mine ? explainPatch(mine, cnt) : null;
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.row}>
+        <View style={styles.col}>
+          <PatchChip attempt={mine} size={64} level={lv} />
+          <Text style={styles.cap}>방금 생긴 {SCENE_NAME[sceneId]} 조각</Text>
+        </View>
+        <Text style={styles.plus}>→</Text>
+        <View style={styles.col}>
+          <Jogakbo attempts={attempts} size={104} />
+          <Text style={styles.cap}>이어진 조각보 · {n}/3</Text>
+        </View>
+      </View>
+      {why ? (
+        <View style={styles.why}>
+          <Text style={styles.whyTitle}>왜 이런 조각이 나왔을까요?</Text>
+          <Text style={styles.whyLine}>{why[0].v}</Text>
+          <Text style={styles.whyLine}>{why[1].v}</Text>
+          <View style={styles.gaugeHead}>
+            <Text style={styles.whyTitle}>작품 완성도 {progress.percent}%</Text>
+            <Text style={styles.cap}>{SCENE_TARGET[sceneId].name} · {LEVEL_NAME[lv]}</Text>
+          </View>
+          <Gauge percent={progress.percent} height={8} />
+          <Text style={styles.whyLine}>{nextHint(sceneId, cnt)}</Text>
+        </View>
+      ) : null}
+      <Dialogue lines={SUCCESS[sceneId] || []} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: { marginTop: 2 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14 },
+  col: { alignItems: 'center', gap: 5 },
+  plus: { fontSize: 20, color: colors.accent, fontWeight: '700' },
+  why: {
+    marginTop: 10,
+    marginBottom: 4,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.paper,
+    gap: 4,
+  },
+  whyTitle: { fontSize: 12, fontWeight: '800', color: colors.accent },
+  whyLine: { fontSize: 11.5, color: colors.ink, lineHeight: 17 },
+  gaugeHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 4 },
+  cap: { fontSize: 11.5, color: colors.muted },
+});

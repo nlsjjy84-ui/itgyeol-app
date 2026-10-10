@@ -44,7 +44,7 @@ export default function Hanji({ children, style, tone }) {
               y1={f.y1}
               x2={f.x2}
               y2={f.y2}
-              stroke="#8a7447"
+              stroke={colors.fiber}
               strokeWidth="0.18"
               strokeOpacity={f.o}
             />

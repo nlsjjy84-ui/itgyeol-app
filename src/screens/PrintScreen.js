@@ -11,6 +11,7 @@ import { ohangByKey } from '../data/formations';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import TraceReward from '../components/TraceReward';
 import { printMission } from '../data/missions';
 import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
@@ -495,7 +496,7 @@ export default function PrintScreen({ navigation }) {
   }, [moveSelected, snapSelected, cycleSelected]);
 
   const timeRatio = timeLimitMs ? remainingMs / timeLimitMs : 1;
-  const timerColor = timeRatio > 0.5 ? '#4c9a5a' : timeRatio > 0.2 ? '#c18a2f' : '#b2482f';
+  const timerColor = timeRatio > 0.5 ? colors.green : timeRatio > 0.2 ? colors.gold : colors.accent;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -569,7 +570,7 @@ export default function PrintScreen({ navigation }) {
 
           <MissionGate
             resetKey={type.id}
-            info={{ ...printMission(type), example: <FormationPreview positions={type.positions} color={ohang.color} size={130} /> }}
+            info={{ scene: 'print', ...printMission(type), example: <FormationPreview positions={type.positions} color={ohang.color} size={130} /> }}
             onModeSelect={(mode) => {
               timeModeRef.current = mode;
               gateOpenRef.current = true;
@@ -624,7 +625,7 @@ export default function PrintScreen({ navigation }) {
                   y={p.y}
                   label={isDecoy ? decoyGlyphs[i - type.tokens.length] : type.tokens[i]}
                   rotateDeg={isDecoy ? 0 : tokenStyles[i]?.rotate || 0}
-                  tintColor={isDecoy ? '#b2482f' : tokenStyles[i]?.color}
+                  tintColor={isDecoy ? colors.accent : tokenStyles[i]?.color}
                   resetSignal={resetSignal}
                   onDragEnd={handleDragEnd}
                   onSelect={setSelectedIdx}
@@ -679,6 +680,7 @@ export default function PrintScreen({ navigation }) {
               오늘의 기운: {ohang.label} ({ohang.hint} 느낌) — {resultComment}
             </Text>
             {completed && <Text style={styles.modalScore}>{skillLabel(rating)}</Text>}
+            <TraceReward sceneId="print" success={completed} />
             <View style={styles.modalActions}>
               <Pressable style={styles.modalClose} onPress={() => setResultVisible(false)}>
                 <Text style={styles.modalCloseText}>닫기</Text>
@@ -837,7 +839,7 @@ const styles = StyleSheet.create({
     minHeight: 330,
     marginHorizontal: 16,
     borderRadius: 4,
-    backgroundColor: '#e6d8b6',
+    backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
     overflow: 'hidden',
@@ -862,7 +864,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#b2482f',
+    borderColor: colors.accent,
     backgroundColor: 'rgba(178,72,47,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -870,7 +872,7 @@ const styles = StyleSheet.create({
   excludeZoneText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#b2482f',
+    color: colors.accent,
     textAlign: 'center',
     lineHeight: 13,
   },
@@ -939,7 +941,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.night,
     borderRadius: 12,
   },
-  modalCloseText: { color: colors.bg, fontWeight: '600', fontSize: 12 },
+  modalCloseText: { color: colors.onNight, fontWeight: '600', fontSize: 12 },
   modalPrimary: {
     paddingHorizontal: 16,
     paddingVertical: 8,

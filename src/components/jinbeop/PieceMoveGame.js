@@ -102,7 +102,7 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
 
   const correctCount = assignment.filter((personId, i) => personId === i).length;
   const ratio = limitMs ? remainingMs / limitMs : 1;
-  const timerColor = ratio > 0.5 ? '#4c9a5a' : ratio > 0.2 ? '#c18a2f' : '#b2482f';
+  const timerColor = ratio > 0.5 ? colors.green : ratio > 0.2 ? colors.gold : colors.accent;
 
   // 미션 안내에서 이미 '시작하기'를 눌렀으므로 바로 시작한다(실패·완료 뒤에만 다시 시작 버튼이 보인다).
   useEffect(() => {
@@ -134,7 +134,7 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
               {
                 left: `${p.x * 100}%`,
                 top: `${p.y * 100}%`,
-                borderColor: selectedSlot === slotIndex ? '#2f8f4e' : color,
+                borderColor: selectedSlot === slotIndex ? colors.green : color,
                 borderWidth: selectedSlot === slotIndex ? 4 : 2.5,
               },
             ]}
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     maxWidth: 340,
     height: 330,
     position: 'relative',
-    backgroundColor: '#e6d8b6',
+    backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: 4,
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   flashMiss: {
     position: 'absolute',
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#b2482f',
+    color: colors.accent,
   },
   bigBtn: { paddingHorizontal: 30, paddingVertical: 16, borderRadius: 20 },
   bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },

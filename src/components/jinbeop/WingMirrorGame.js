@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     maxWidth: 340,
     height: 330,
     position: 'relative',
-    backgroundColor: '#e6d8b6',
+    backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: 4,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   flashMiss: {
     position: 'absolute',
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#b2482f',
+    color: colors.accent,
   },
   timeTrack: {
     width: '100%',

@@ -139,7 +139,7 @@ export default function RaceMashGame({
       <View
         style={[
           styles.ropeRow,
-          burstActive && { borderColor: '#b2482f', borderWidth: 2, borderRadius: 14 },
+          burstActive && { borderColor: colors.accent, borderWidth: 2, borderRadius: 14 },
         ]}
       >
         <Text style={styles.sideIcon}>{oppIcon}</Text>
@@ -193,7 +193,7 @@ export default function RaceMashGame({
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', width: '100%', flex: 1, justifyContent: 'center' },
   burstBanner: {
-    backgroundColor: '#b2482f',
+    backgroundColor: colors.accent,
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 16,

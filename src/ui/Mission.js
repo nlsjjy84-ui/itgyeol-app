@@ -4,6 +4,7 @@ import Text from './Text';
 import Frame from './Frame';
 import SealButton from './SealButton';
 import { CloudBand } from './Motifs';
+import StoryScene from './StoryScene';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 
@@ -35,6 +36,7 @@ export function MissionCard({ info, onStart, onStartFree, startLabel = '시작�
   }, []);
   return (
     <Frame style={styles.card}>
+      {info.scene ? <StoryScene scene={info.scene} style={{ marginBottom: 12 }} /> : null}
       <Text style={styles.kicker}>{info.kicker}</Text>
       <Text brush style={styles.title}>
         {info.title}
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 1,
   },
-  stepNoText: { color: colors.baek, fontSize: 13, fontWeight: '700' },
+  stepNoText: { color: colors.bg, fontSize: 13, fontWeight: '700' },
   stepText: { flex: 1, fontSize: 15, color: colors.ink, lineHeight: 22 },
   tip: { fontSize: 12, color: colors.muted, lineHeight: 18, marginBottom: 10 },
   btns: { gap: 10, marginTop: 4 },

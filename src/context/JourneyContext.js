@@ -1,10 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OHANG, pickTodayOhang } from '../data/formations';
+import { computeProgress } from '../utils/progress';
 
-const JourneyContext = createContext(null);
+export const JourneyContext = createContext(null);
 const STORAGE_KEY = 'itgyeol_journey_v1';
 const SKILL_KEY = 'itgyeol_skill_v1';
+const SOLVED_KEY = 'itgyeol_solved_v1';
 // [오늘의 기운 선택 기능] 전에는 화면마다 useRef(pickTodayOhang())로 각자 따로 뽑아서
 // 같은 "오늘의 기운"인데 화면마다 색이 달라 보였다 — 이제 앱 전체가 공유하는 값 하나를
 // 여기서 들고, 사용자가 직접 골라 바꿀 수도 있게 한다(안 고르면 기기별로 하루치 랜덤값).
@@ -33,6 +35,8 @@ export function JourneyProvider({ children }) {
   // 세션을 넘어 기억한다 — 다음에 같은 놀이를 열면 그 기억을 반영한 시작 난이도로
   // 열린다. 숫자 하나뿐이라 과하지 않게, 그러나 실제로 사람마다 달라지게 설계했다.
   const [skills, setSkills] = useState({});
+  // 판마다 "서로 다른 문제를 몇 가지 풀었는지" — 많이 풀수록 결과물의 완성도가 올라간다.
+  const [solvedIds, setSolvedIds] = useState({});
   // [오늘의 기운 선택 기능] 처음엔 null — 기기에 저장된 값을 읽어오기 전까지는 아직
   // 모른다는 뜻. 읽어온 뒤(또는 저장된 게 없으면 그날의 랜덤값으로) 채워진다.
   const [ohangKey, setOhangKeyState] = useState(null);
@@ -56,6 +60,15 @@ export function JourneyProvider({ children }) {
       try {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') setSkills(parsed);
+      } catch (e) {
+        // 손상된 값은 무시
+      }
+    });
+    safeGetItem(SOLVED_KEY).then((raw) => {
+      if (!mounted || !raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') setSolvedIds(parsed);
       } catch (e) {
         // 손상된 값은 무시
       }
@@ -91,6 +104,13 @@ export function JourneyProvider({ children }) {
   }, []);
 
   const addResult = useCallback((attempt) => {
+    setSolvedIds((prev) => {
+      const list = prev[attempt.sceneId] || [];
+      if (list.includes(attempt.formationId)) return prev;
+      const next = { ...prev, [attempt.sceneId]: [...list, attempt.formationId] };
+      AsyncStorage.setItem(SOLVED_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
     setAttempts((prev) => {
       // 같은 판(sceneId)의 결과는 가장 최근 것으로 교체, 다른 판 결과는 유지
       const next = [...prev.filter((a) => a.sceneId !== attempt.sceneId), attempt];
@@ -106,7 +126,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, resetJourney, loaded, skills, recordSkill, ohangKey, setOhangKey }}
+      value={{ attempts, addResult, resetJourney, loaded, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds) }}
     >
       {children}
     </JourneyContext.Provider>

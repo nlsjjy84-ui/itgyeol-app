@@ -31,7 +31,7 @@ export default function Board({ children, style, grid = 6, tone }) {
 
 const styles = StyleSheet.create({
   board: {
-    backgroundColor: '#e6d8b6',
+    backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: 4,

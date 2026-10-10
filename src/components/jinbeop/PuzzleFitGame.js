@@ -140,7 +140,7 @@ export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess,
   };
 
   const ratio = limitMs ? remainingMs / limitMs : 1;
-  const timerColor = ratio > 0.5 ? '#4c9a5a' : ratio > 0.2 ? '#c18a2f' : '#b2482f';
+  const timerColor = ratio > 0.5 ? colors.green : ratio > 0.2 ? colors.gold : colors.accent;
 
   return (
     <View style={styles.wrap}>
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 240,
     position: 'relative',
-    backgroundColor: '#e6d8b6',
+    backgroundColor: colors.borderSoft,
     borderWidth: 2,
     borderColor: colors.ink,
     borderRadius: 4,
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#2f8f4e',
+    color: colors.green,
   },
   flashMiss: {
     position: 'absolute',
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontWeight: '800',
-    color: '#b2482f',
+    color: colors.accent,
   },
   secondaryBtn: {
     paddingHorizontal: 24,
