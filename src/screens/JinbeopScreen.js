@@ -14,6 +14,7 @@ import WingMirrorGame from '../components/jinbeop/WingMirrorGame';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
 import Board from '../ui/Board';
 import { JINBEOP_MISSIONS } from '../data/missions';
@@ -173,7 +174,7 @@ export default function JinbeopScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScreenHeader title="진법" sub="풍물 · 강강술래 · 역사 속 대형 만들기" onBack={() => navigation.navigate('Home')} />
+      <ScreenHeader scene="Jinbeop" title="진법" sub="풍물 · 강강술래 · 역사 속 대형 만들기" onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           {/* 성인반/아동반 — 전래놀이와 동일한 반 구분 */}
@@ -419,6 +420,7 @@ export default function JinbeopScreen({ navigation }) {
                 </>
               )}
             </View>
+            {completed && <OtherScenes current="Jinbeop" navigation={navigation} onGo={() => setResultVisible(false)} />}
           </View>
         </View>
       )}

@@ -8,6 +8,7 @@ import OhangPicker from '../components/OhangPicker';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
 import { playMission } from '../data/missions';
 import { play } from '../utils/sound';
@@ -228,7 +229,7 @@ export default function PlayScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScreenHeader title="전래놀이" sub="손끝으로 즐기는 열두 가지 놀이" onBack={() => navigation.navigate('Home')} />
+      <ScreenHeader scene="Play" title="전래놀이" sub="손끝으로 즐기는 열두 가지 놀이" onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
         <View style={styles.headerRight}>
           <View style={styles.tierRow}>
@@ -336,6 +337,7 @@ export default function PlayScreen({ navigation }) {
                 </Pressable>
               )}
             </View>
+            {completed && <OtherScenes current="Play" navigation={navigation} onGo={() => setResultVisible(false)} />}
           </View>
         </View>
       )}

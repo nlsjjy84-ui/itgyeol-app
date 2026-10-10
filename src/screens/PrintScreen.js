@@ -11,6 +11,8 @@ import { ohangByKey } from '../data/formations';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
+import OtherScenes from '../components/OtherScenes';
+import PrintPlay from '../components/PrintPlay';
 import TraceReward from '../components/TraceReward';
 import { printMission } from '../data/missions';
 import { play } from '../utils/sound';
@@ -39,12 +41,15 @@ const JAMO_PALETTE = [
 // 없는 2종(소고·비녀)만, 성인반은 받침·겹모음이 섞인 전체 목록을 돈다.
 // (metaltype=4, woodblock=5, 보물=5, 문화재=7, 한글날=9, 풍물놀이=11)
 const ROUND_ORDER_BY_TIER = {
-  아동반: ['jamo-sogo', 'jamo-binyeo'],
+  아동반: ['jamo-sogo', 'mirror', 'jamo-binyeo', 'shape'],
   성인반: [
     'metaltype',
+    'mirror',
     'woodblock',
     'jamo-bomul',
+    'shape',
     'jamo-munhwajae',
+    'sentence',
     'jamo-hangeulnal',
     'jamo-pungmulnori',
   ],
@@ -185,6 +190,12 @@ export default function PrintScreen({ navigation }) {
 
   const startAttempt = useCallback(
     (size) => {
+      if (type.mode) {
+        // 끌어 놓는 판이 아닌 놀이(거울 활자 등)는 시간 제한·조각 흩뿌리기가 필요 없다.
+        clearTimer();
+        settledRef.current = false;
+        return;
+      }
       const s = size || stageSize;
       if (!s.width || !s.height) return;
       const effectiveStreak = Math.max(0, streak + decoyStreakAdjust(tier, rating));
@@ -361,7 +372,9 @@ export default function PrintScreen({ navigation }) {
     // [지능형 난이도] 이 인쇄 방식을 성공할 때마다 숙련도가 쌓여, 다음에 열 때 시작 난이도가 달라진다.
     recordSkill(skillId, true);
 
-    const mapping = Object.fromEntries(type.tokens.map((_, i) => [i, i]));
+    const mapping = type.tokens.length
+      ? Object.fromEntries(type.tokens.map((_, i) => [i, i]))
+      : { 0: Math.min(9, result.mistakes || 0) };
     const attemptResult = buildAttemptResult({
       sceneId: 'print',
       formationId: type.id,
@@ -500,7 +513,7 @@ export default function PrintScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScreenHeader title="훈민정음 · 인쇄" sub="글자를 짓고, 새기고, 찍어내는 판" onBack={() => navigation.navigate('Home')} />
+      <ScreenHeader scene="Print" title="훈민정음 · 인쇄" sub="글자를 짓고, 새기고, 찍어내는 판" onBack={() => navigation.navigate('Home')} />
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           <View style={styles.tierRow}>
@@ -570,13 +583,33 @@ export default function PrintScreen({ navigation }) {
 
           <MissionGate
             resetKey={type.id}
-            info={{ scene: 'print', ...printMission(type), example: <FormationPreview positions={type.positions} color={ohang.color} size={130} /> }}
+            info={{ scene: 'print', ...printMission(type), example: type.mode ? null : <FormationPreview positions={type.positions} color={ohang.color} size={130} /> }}
             onModeSelect={(mode) => {
               timeModeRef.current = mode;
               gateOpenRef.current = true;
               if (stageSize.width && stageSize.height) startAttempt(stageSize);
             }}
           >
+          {type.mode ? (
+            <>
+              <PrintPlay
+                mode={type.mode}
+                color={ohang.color}
+                resetKey={`${type.id}-${resetSignal}`}
+                onDone={(r) => {
+                  if (settledRef.current) return;
+                  completeSuccess({ targets: [0], mistakes: r.mistakes });
+                }}
+              />
+              <CompletionEffect nonce={stampNonce} variant="stamp" color={ohang.color} label={`${type.tag} 완성!`} />
+              <View style={styles.actions}>
+                <Pressable style={styles.secondaryBtn} onPress={() => { settledRef.current = false; setResetSignal((v) => v + 1); }}>
+                  <Text style={styles.secondaryBtnText}>처음부터 다시</Text>
+                </Pressable>
+              </View>
+            </>
+          ) : (
+            <>
           <View style={styles.timerRow}>
             <View style={styles.timerTrack}>
               <View
@@ -665,6 +698,8 @@ export default function PrintScreen({ navigation }) {
               <Text style={styles.primaryBtnText}>완성!</Text>
             </Pressable>
           </View>
+            </>
+          )}
           </MissionGate>
           </ScrollView>
         </View>
@@ -708,6 +743,7 @@ export default function PrintScreen({ navigation }) {
                 </>
               )}
             </View>
+            {completed && <OtherScenes current="Print" navigation={navigation} onGo={() => setResultVisible(false)} />}
           </View>
         </View>
       )}

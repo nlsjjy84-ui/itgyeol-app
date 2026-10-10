@@ -5,7 +5,7 @@
 export const SCENE_TARGET = {
   // total: 그 판에 있는 문제 수 / l2·l3: 2단계·3단계가 열리는 문제 종류 수
   jinbeop: { name: '진법', total: 7, l2: 3, l3: 6, unit: '가지 진' },
-  print: { name: '훈민정음·인쇄', total: 8, l2: 3, l3: 6, unit: '가지 글자·활자' },
+  print: { name: '훈민정음·인쇄', total: 11, l2: 3, l3: 6, unit: '가지 글자·활자' },
   tbd: { name: '전래놀이', total: 12, l2: 4, l3: 8, unit: '가지 놀이' },
 };
 

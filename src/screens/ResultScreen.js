@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform, TextInput } from 'react-native';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform, TextInput, useWindowDimensions } from 'react-native';
 import Text from '../ui/Text';
 import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
 import ResultPattern from '../components/ResultPattern';
 import MascotDuo from '../components/MascotDuo';
-import Rotatable3D from '../components/Solid3D';
-import KeyringShape, { KEYRING_SHAPES, KeyringShapeIcon } from '../components/KeyringShape';
+import Obj3DViewer from '../components/obj3d/Obj3DViewer';
+import { CATALOG, findItem } from '../components/obj3d/catalog';
 import TransformResultShape from '../components/TransformResultShape';
 import Jogakbo, { PatchChip } from '../components/Jogakbo';
 import StoryScene from '../ui/StoryScene';
@@ -18,7 +18,6 @@ import { synthesizeAttention } from '../utils/attentionSynth';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
 import ArtFrame from '../components/ArtFrame';
-import { Taegeuk } from '../ui/Motifs';
 import { play } from '../utils/sound';
 
 const SCENE_LABEL = {
@@ -28,16 +27,6 @@ const SCENE_LABEL = {
 };
 
 const SCENE_ORDER = ['jinbeop', 'print', 'tbd'];
-
-// 결과물을 담아낼 수 있는 형태. 키링만 실제로 끝까지 구현했고(10가지 모양 +
-// 3D 회전 + 이미지 저장 + QR), 나머지는 "이런 형태로도 나올 수 있다"는 걸
-// 보여주기만 한다 — 전부 다 지금 만들 필요는 없다는 방침.
-const ITEM_FORMATS = [
-  { id: 'keyring', label: '키링', ready: true },
-  { id: 'brooch', label: '브로치', ready: false },
-  { id: 'magnet', label: '마그넷', ready: false },
-  { id: 'sticker', label: '스티커', ready: false },
-];
 
 // 완성한 판들로부터 "가져갈 수 있는 결과물" 선택지를 만든다.
 // - 판 하나만 완성했으면: 그 판의 단독 결과물 1개
@@ -76,6 +65,13 @@ function ResultArt({ mode, attempts, size }) {
   return <ResultPattern attempts={attempts} size={size} />;
 }
 
+// 3D 물건에 입힐 그림 — 네모 꽉 찬 한 장(원형 테두리 없이)
+function TextureArt({ mode, attempts, size }) {
+  if (mode === 'jogakbo') return <Jogakbo attempts={attempts} size={size} shape="square" />;
+  if (mode === 'transform') return <TransformResultShape attempts={attempts} size={size} />;
+  return <ResultPattern attempts={attempts} size={size} />;
+}
+
 export default function ResultScreen({ navigation }) {
   const { attempts, skills, progress } = useJourney();
   const shotRef = useRef(null);
@@ -101,7 +97,19 @@ export default function ResultScreen({ navigation }) {
     attempts: orderedSolved.slice(0, i + 1),
     label: i === 0 ? '첫 조각' : i === 1 ? '1+2 이어붙임' : '1+2+3 완성',
   }));
-  const [keyringShapeId, setKeyringShapeId] = useState('circle');
+  const { width: winW } = useWindowDimensions();
+  const viewerW = Math.min(360, Math.max(260, winW - 44));
+  const [groupId, setGroupId] = useState('keyring');
+  const [itemId, setItemId] = useState('norigae');
+  const [variantId, setVariantId] = useState(null);
+  const [hookOn, setHookOn] = useState(true);
+  const { group, item } = findItem(groupId, itemId);
+  const variant = item.variants.find((v) => v.id === variantId) || item.variants[0];
+  const pickGroup = (g) => {
+    setGroupId(g.id);
+    setItemId(g.items[0].id);
+    setVariantId(null);
+  };
   const [customShapeText, setCustomShapeText] = useState('');
   const [customRequests, setCustomRequests] = useState([]);
   // [결과물+결과물=전통창작결과물] 두 가지 결과물 보기 방식 — "기존 문양"은 원래 있던
@@ -320,83 +328,89 @@ export default function ResultScreen({ navigation }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>3D 모델 예시</Text>
-          <Rotatable3D
-            width={180}
-            height={180}
-            front={
-              <View style={styles.disc}>
-                <ResultArt mode={patternMode} attempts={selectedAttempts} size={140} />
-              </View>
-            }
-            back={
-              <View style={[styles.disc, styles.discBack]}>
-                <Taegeuk size={84} />
-              </View>
-            }
-          />
-          <Text style={styles.sectionHint}>
-            손가락으로 좌우로 끌어 직접 돌려볼 수 있어요. 같은 무늬를 입체 오브젝트로 만들었을 때의
-            예시입니다.
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>키링 예시</Text>
-          <View style={styles.shapeIconRow}>
-            {KEYRING_SHAPES.map((s) => (
+          <Text style={styles.sectionTitle}>내 결과물을 이 물건에 입혀 가져가요</Text>
+          <View style={styles.groupRow}>
+            {CATALOG.map((g) => (
               <Pressable
-                key={s.id}
-                style={[
-                  styles.shapeIconChip,
-                  s.id === keyringShapeId && styles.shapeIconChipActive,
-                ]}
-                onPress={() => setKeyringShapeId(s.id)}
+                key={g.id}
+                style={[styles.groupChip, g.id === groupId && styles.groupChipOn]}
+                onPress={() => pickGroup(g)}
               >
-                <KeyringShapeIcon shapeId={s.id} boxSize={40} />
-                <Text
-                  style={[
-                    styles.shapeIconLabel,
-                    s.id === keyringShapeId && styles.shapeIconLabelActive,
-                  ]}
-                >
-                  {s.label}
-                </Text>
+                <Text style={[styles.groupChipText, g.id === groupId && styles.groupChipTextOn]}>{g.label}</Text>
               </Pressable>
             ))}
           </View>
-          <Rotatable3D
-            width={160}
-            height={220}
-            front={
-              <KeyringShape
-                shapeId={keyringShapeId}
-                attempts={selectedAttempts}
-                patternMode={patternMode}
-              />
-            }
-            back={
-              <KeyringShape
-                shapeId={keyringShapeId}
-                attempts={selectedAttempts}
-                patternMode={patternMode}
-                blank
-              />
-            }
+          <Text style={styles.sectionHint}>{group.intro}</Text>
+
+          {group.items.length > 1 ? (
+            <View style={styles.itemRow}>
+              {group.items.map((it) => (
+                <Pressable
+                  key={it.id}
+                  style={[styles.itemChip, it.id === item.id && styles.itemChipOn]}
+                  onPress={() => {
+                    setItemId(it.id);
+                    setVariantId(null);
+                  }}
+                >
+                  <Text style={[styles.itemChipText, it.id === item.id && styles.itemChipTextOn]}>{it.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+
+          {item.variants.length > 1 ? (
+            <View style={styles.variantRow}>
+              <Text style={styles.variantLabel}>모양</Text>
+              {item.variants.map((v) => (
+                <Pressable
+                  key={v.id}
+                  style={[styles.variantChip, v.id === variant.id && styles.variantChipOn]}
+                  onPress={() => setVariantId(v.id)}
+                >
+                  <Text style={[styles.variantChipText, v.id === variant.id && styles.variantChipTextOn]}>{v.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+
+          <Obj3DViewer
+            art={<TextureArt mode={patternMode} attempts={selectedAttempts} size={256} />}
+            artSize={256}
+            build={variant.build}
+            hook={group.hook && hookOn}
+            width={viewerW}
+            height={Math.round(viewerW * 1.05)}
+            resetKey={`${patternMode}|${selectedKey || ''}|${selectedAttempts.length}`}
           />
-          <Text style={styles.sectionHint}>
-            원형뿐 아니라 비녀·거울·붓·먹 같은 전통 소재 모양으로도 가져갈 수 있어요. 이것도
-            돌려볼 수 있어요.
-          </Text>
+
+          {group.hook ? (
+            <Pressable style={[styles.hookBtn, hookOn && styles.hookBtnOn]} onPress={() => setHookOn((v) => !v)}>
+              <Text style={[styles.hookBtnText, hookOn && styles.hookBtnTextOn]}>
+                키링 고리 {hookOn ? '달려 있어요' : '빼고 보기'}
+              </Text>
+            </Pressable>
+          ) : null}
+
+          <View style={styles.aboutBox}>
+            <Text style={styles.aboutTitle}>
+              {item.label} · {variant.label}
+            </Text>
+            <Text style={styles.aboutText}>{item.about}</Text>
+            {variant.note ? <Text style={styles.aboutText}>{variant.note}</Text> : null}
+            <Text style={styles.aboutText}>
+              끌어서 돌리거나 아래 버튼으로 앞·뒤·옆·위·아래를 바로 볼 수 있어요. 물건의 앞뒤 모두 그 물건의 실제 모양이에요.
+            </Text>
+          </View>
 
           <View style={styles.customBox}>
-            <Text style={styles.customLabel}>그 외 다른 모양의 전통소재를 가져가고 싶나요?</Text>
+            <Text style={styles.customLabel}>그 외 다른 전통 물건에 입히고 싶나요?</Text>
             <View style={styles.customRow}>
               <TextInput
                 style={styles.customInput}
                 value={customShapeText}
                 onChangeText={setCustomShapeText}
-                placeholder="예: 노리개, 갓, 항아리..."
+                placeholder="예: 갓끈, 향낭, 베개..."
                 placeholderTextColor={colors.muted}
                 onSubmitEditing={handleRequestShape}
                 returnKeyType="done"
@@ -407,32 +421,9 @@ export default function ResultScreen({ navigation }) {
             </View>
             {customRequests.length > 0 && (
               <Text style={styles.customAck}>
-                '{customRequests[customRequests.length - 1]}' 모양 요청을 받았어요! 지금은 예시로
-                10가지 모양만 보여드리고 있지만, 실제 서비스에서는 이렇게 요청해주신 전통 소재
-                모양들을 계속 추가해 나갈 수 있어요.
+                '{customRequests[customRequests.length - 1]}' 요청을 받았어요! 새 물건은 같은 방식으로 계속 추가할 수 있어요.
               </Text>
             )}
-          </View>
-
-          {/* [결과물 형태 확장 근거] 키링 "하나의 형태"만 끝까지 완성해두고, 그 외
-              형태는 전부 다 모델링해 넣는 대신 "이런 형태로도 나올 수 있다"는 것만
-              보여준다 — 실제 제작(인쇄소·업체 연결)은 이 결과물을 채택하는 쪽의
-              몫이라는 방침과 같은 선상. */}
-          <View style={styles.formatBox}>
-            <Text style={styles.customLabel}>키링 말고 다른 형태로도 가져갈 수 있어요</Text>
-            <View style={styles.formatRow}>
-              {ITEM_FORMATS.map((f) => (
-                <View key={f.id} style={[styles.formatChip, f.ready && styles.formatChipReady]}>
-                  <Text style={styles.formatChipLabel}>{f.label}</Text>
-                  <Text style={styles.formatChipState}>{f.ready ? '지금 가능' : '준비 중'}</Text>
-                </View>
-              ))}
-            </View>
-            <Text style={styles.sectionHint}>
-              지금 만든 무늬를 입히는 방식 자체는 형태가 바뀌어도 똑같아서, 키링에서 검증한
-              걸 그대로 브로치·마그넷·스티커 제작으로 넓힐 수 있어요. 실제 인쇄·제작은
-              이 결과물을 쓰는 쪽에서 업체를 연결해 진행하면 됩니다.
-            </Text>
           </View>
         </View>
 
@@ -631,6 +622,29 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   discBack: { backgroundColor: colors.accentSoft },
+  groupRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 4 },
+  groupChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
+  groupChipOn: { backgroundColor: colors.accentDeep, borderColor: colors.accentDeep },
+  groupChipText: { fontSize: 13, fontWeight: '800', color: colors.muted },
+  groupChipTextOn: { color: '#fff' },
+  itemRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginTop: 10 },
+  itemChip: { paddingHorizontal: 11, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
+  itemChipOn: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
+  itemChipText: { fontSize: 12, fontWeight: '700', color: colors.muted },
+  itemChipTextOn: { color: colors.accentDeep },
+  variantRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10, marginBottom: 6 },
+  variantLabel: { fontSize: 11.5, color: colors.muted, fontWeight: '700', marginRight: 2 },
+  variantChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, borderWidth: 1, borderColor: colors.border },
+  variantChipOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  variantChipText: { fontSize: 11.5, fontWeight: '700', color: colors.muted },
+  variantChipTextOn: { color: '#fff' },
+  hookBtn: { marginTop: 8, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: colors.border },
+  hookBtnOn: { borderColor: colors.accent },
+  hookBtnText: { fontSize: 11.5, color: colors.muted, fontWeight: '700' },
+  hookBtnTextOn: { color: colors.accent },
+  aboutBox: { marginTop: 12, width: '100%', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper, gap: 4 },
+  aboutTitle: { fontSize: 13.5, fontWeight: '800', color: colors.ink },
+  aboutText: { fontSize: 12, color: colors.ink, lineHeight: 18 },
   customBox: {
     width: '100%',
     marginTop: 18,

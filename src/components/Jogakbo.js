@@ -28,6 +28,9 @@ const PRINT_WORD = {
   'jamo-hangeulnal': '한글날',
   metaltype: '活',
   woodblock: '板',
+  mirror: '反',
+  sentence: '序',
+  shape: '象',
 };
 
 const PLAY_HANJA = {
