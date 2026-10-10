@@ -128,12 +128,12 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
     clear();
     setMode('show');
     setPos(0);
-    setMsg('잘 보세요');
+    setMsg('잘 봐 👀');
     s.forEach((p, i) => {
       later(() => { setLit(p); play('tap'); }, 900 + i * 900);
       later(() => setLit(-1), 900 + i * 900 + 560);
     });
-    later(() => { setMode('input'); setMsg('이제 따라 해 보세요'); }, 900 + s.length * 900 + 200);
+    later(() => { setMode('input'); setMsg('이제 따라 해 볼까?'); }, 900 + s.length * 900 + 200);
   };
 
   const newRound = (r) => {

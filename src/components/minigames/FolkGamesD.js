@@ -179,7 +179,7 @@ export function DdakjiFanGame({ color, onComplete, rounds = 3, timeSec = 9, myIc
       phase={phase}
       onStart={start}
       hud={`뒤집은 딱지 ${q.flipped}/${rounds} · 남은 시간 ${Math.max(0, Math.ceil(q.left))}초`}
-      hint="화면 위에서 손가락을 좌우로 빠르게 휙휙 흔들어 바람을 일으키세요. 바람이 선(목표) 위로 올라가 잠깐 버티면 상대 딱지가 뒤집혀요. (키보드는 ← → 번갈아)"
+      hint="화면 위에서 손가락을 좌우로 빠르게 휙휙 흔들어 바람을 일으켜요. 바람이 선(목표) 위로 올라가 잠깐 버티면 상대 딱지가 뒤집혀요. (키보드는 ← → 번갈아)"
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#e9e0cb' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -247,7 +247,7 @@ export function TuhoDialGame({ color, onComplete, arrows = 7, need = 4, zoneDeg 
         const diff = Math.abs(q.fly.r - q.jar);
         q.last = q.fly.r;
         const hit = diff <= TOL;
-        if (hit) { q.hits += 1; q.note = '쏙! 들어갔어요'; play('stamp'); } else { q.note = q.fly.r < q.jar ? '짧았어요 — 힘이나 각도를 키워요' : '길었어요 — 줄여 보세요'; play('geomungo'); }
+        if (hit) { q.hits += 1; q.note = '쏙! 들어갔다 🏺'; play('stamp'); } else { q.note = q.fly.r < q.jar ? '짧았어 — 힘이나 각도를 키워 보자' : '길었어 — 조금 줄여 보자'; play('geomungo'); }
         q.fly = null;
         q.jar = newJar();
         if (q.hits >= need) { setPhase('done'); onComplete({ success: true, score: q.thrown, elapsedMs: Date.now() - q.start }); return; }
@@ -277,7 +277,7 @@ export function TuhoDialGame({ color, onComplete, arrows = 7, need = 4, zoneDeg 
       phase={phase}
       onStart={start}
       hud={`들어간 화살 ${q.hits}/${need} · 남은 화살 ${Math.max(0, arrows - q.thrown)}개`}
-      hint="아래 두 줄을 눌러 끌어 각도와 힘을 정하고 '던지기'를 누르세요. 항아리는 던질 때마다 다른 거리에 놓여요. 지난 화살이 떨어진 자리(점)를 보고 고쳐 보세요."
+      hint="아래 두 줄을 눌러 끌어 각도와 힘을 정하고 '던지기'를 눌러요. 항아리는 던질 때마다 다른 거리에 놓여요. 지난 화살이 떨어진 자리(점)를 보고 고쳐 보자."
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#ece6d6' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -377,7 +377,7 @@ export function JachigiSwipeGame({ color, onComplete, targetHits = 10, maxMiss =
       phase={phase}
       onStart={start}
       hud={`멀리 보낸 횟수 ${q.hits}/${targetHits} · 실수 ${q.miss}/${maxMiss}`}
-      hint="막대(새끼)가 튀어 오르는 쪽으로 손가락을 휙 쓸어 치세요. 시간이 지나면 막대가 떨어져요. 갈수록 빨라져요."
+      hint="막대(새끼)가 튀어 오르는 쪽으로 손가락을 휙 쓸어 쳐요. 시간이 지나면 막대가 떨어져요. 갈수록 빨라져요."
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#e8e1c8' }]}>
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>

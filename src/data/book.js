@@ -12,10 +12,14 @@
 //   - input이 있으면 lines를 다 본 뒤 칩(또는 톡 버튼)이 나오고, 가만히 있으면 silent 쪽으로 넘어간다.
 //   - choice[key]에 고른 id가 저장돼서 뒤의 말(text 함수)이 그걸 기억한다.
 
+import { getLang } from '../i18n';
+import EN from '../i18n/book_en';
+import { SCENES } from './story';
+
 const P = (text) => ({ who: 'pung', text });
 const G = (text) => ({ who: 'gyeol', text });
 
-export const BOOK = {
+const BOOK = {
   // ── 프롤로그: 마당 어귀 ──
   prologue: [
     {
@@ -197,7 +201,7 @@ export const BOOK = {
 
 // ───────────────────────── 놀이별 한 마디 ─────────────────────────
 // start: 놀이를 열었을 때 한 줄 · win: 성공 두 줄 · lose: 실패 두 줄 · again: 같은 놀이를 3번 이상 했을 때 한 줄
-export const GAME_LINES = {
+const GAME_LINES = {
   julneomgi: {
     start: P('줄이 돈다~ 타이밍만 맞추면 돼! 폴짝 🦘'),
     win: [G('와, 안 걸렸어! 폴짝폴짝 얼쑤!'), P('방금 발이 공중에 오래 떠 있었는데? 🚀')],
@@ -273,35 +277,18 @@ export const GAME_LINES = {
 };
 
 // 놀이 말고 다른 판의 성공/실패 한 마디 (조각이 생긴 순간)
-export const SCENE_WIN = {
+const SCENE_WIN = {
   jinbeop: [P('어? 방금 네가 한 거야?'), G('진이 딱 맞춰졌어. 이 자리가 조각 하나로 남았어 🧩')],
   print: [G('도장이 쾅 찍혔어! 방금 맞춘 글자가 그대로 남았네 🔖'), P('잠깐, 앞 조각 옆에 쏙 이어 붙는데?')],
   hangul: [G('블록이 차곡차곡 쌓여서 줄이 지워졌어! 🧱'), P('이 조각은 글자 블록 모양이야. 조각보에 이어 붙었어!')],
 };
 
-export const SCENE_LOSE = {
+const SCENE_LOSE = {
   jinbeop: [P('어? 아직 안 맞았나 봐 🤔'), G('괜찮아, 마당은 그대로 있어. 천천히 다시 해 보자.')],
   print: [P('글자가 아직 제자리를 못 찾았네 🙈'), G('먹이 마르려면 시간이 걸려. 다시 맞춰 보자.')],
   tbd: [P('아이고, 이번엔 아깝다 😅'), G('놀이는 원래 지는 날도 있는 거야. 한 번 더!')],
   hangul: [P('으악, 블록이 천장까지 쌓였다 🙈'), G('우린 한 번 더 하면 되지, 뭐. 다시 쌓자!')],
 };
-
-// 판 뒤에 붙는 조건부 한 줄 — 우선순위: 첫 판 > 같은 놀이 3번+ > 같은 판 3번+ > 제일 자주 한 놀이 > 없음
-export function afterLines({ sceneId, gameId, success, playLog, gameName, topGameName }) {
-  const log = playLog || { byGame: {}, byScene: {} };
-  const nScene = (log.byScene && log.byScene[sceneId]) || 0;
-  const nGame = (gameId && log.byGame && log.byGame[gameId]) || 0;
-  if (!success) {
-    return sceneId === 'tbd' && gameId && GAME_LINES[gameId] ? GAME_LINES[gameId].lose : SCENE_LOSE[sceneId] || SCENE_LOSE.tbd;
-  }
-  const base = sceneId === 'tbd' && gameId && GAME_LINES[gameId] ? GAME_LINES[gameId].win : SCENE_WIN[sceneId] || [];
-  let extra = null;
-  if (nScene <= 1) extra = G('첫 조각이야! 오늘은 이걸로 박수 한 번 👏');
-  else if (nGame >= 3 && GAME_LINES[gameId]) extra = GAME_LINES[gameId].again;
-  else if (nScene >= 3) extra = P(`이 판, 벌써 ${nScene}번째야! 단골 인정 😎`);
-  else if (topGameName && gameName && topGameName === gameName) extra = G(`요즘 ${topGameName} 자주 하네? 제일 좋아하는 놀이인가 봐 👀`);
-  return extra ? [...base, extra] : base;
-}
 
 // 받침에 따라 을/를 고르기 (딱지치기를, 투호를, 줄넘기를 …)
 function eulReul(word) {
@@ -319,17 +306,53 @@ const EPI_BY_COUNT = {
   4: [P('네 판이 다 모였다!! 조각보가 꽉 찼어 🎉'), G('진법, 글자, 놀이, 한글 블록까지 — 네가 걸어온 길이 무늬가 됐어.')],
 };
 
+// 조건에 따라 끼워 넣는 문장들(언어마다 따로 쓴다)
+const T = {
+  firstPiece: () => G('첫 조각이야! 오늘은 이걸로 박수 한 번 👏'),
+  sceneNth: (n) => P(`이 판, 벌써 ${n}번째야! 단골 인정 😎`),
+  topGame: (name) => G(`요즘 ${name} 자주 하네? 제일 좋아하는 놀이인가 봐 👀`),
+  epiZero: [G('판 하나만 놀고 오면 여기에 네 작품이랑 "작품 해설"이 생겨 📖'), P('진법, 글방, 놀이 마당, 한글 블록 — 어디부터 갈래? 🚪')],
+  epiTop: (name) => P(`그러고 보니 ${eulReul(name)} 제일 자주 했네? 네 조각에 그 손맛이 들어갔어 ✋`),
+  epiNoTop: () => P('어떤 놀이를 많이 하느냐에 따라 모양이 또 달라져. 신기하지? 🔮'),
+  epiAbout: () => G('아래 "작품 해설"에 왜 이런 모양이 됐는지 적어 놨어. 한번 읽어 봐 📖'),
+  epiNextAll: () => P('다음엔 탈춤이나 단청 판도 열릴지 몰라. 기대해! 🎭'),
+  epiNext: () => P('아직 안 가 본 판도 있어. 마당은 언제든 열려 있어 🚪'),
+};
+
+const KO = { BOOK, GAME_LINES, SCENE_WIN, SCENE_LOSE, EPI_BY_COUNT, T, SCENES };
+const PACKS = { en: EN };
+// 지금 언어의 그림책 묶음(없으면 한국어)
+const pack = () => PACKS[getLang()] || KO;
+
+export const getBook = () => pack().BOOK;
+export const getGameLines = () => pack().GAME_LINES;
+export const getScenes = () => pack().SCENES || SCENES;
+
+// 판 뒤에 붙는 조건부 한 줄 — 우선순위: 첫 판 > 같은 놀이 3번+ > 같은 판 3번+ > 제일 자주 한 놀이 > 없음
+export function afterLines({ sceneId, gameId, success, playLog, gameName, topGameName }) {
+  const B = pack();
+  const log = playLog || { byGame: {}, byScene: {} };
+  const nScene = (log.byScene && log.byScene[sceneId]) || 0;
+  const nGame = (gameId && log.byGame && log.byGame[gameId]) || 0;
+  const gl = gameId && B.GAME_LINES[gameId];
+  if (!success) return sceneId === 'tbd' && gl ? gl.lose : B.SCENE_LOSE[sceneId] || B.SCENE_LOSE.tbd;
+  const base = sceneId === 'tbd' && gl ? gl.win : B.SCENE_WIN[sceneId] || [];
+  let extra = null;
+  if (nScene <= 1) extra = B.T.firstPiece();
+  else if (nGame >= 3 && gl) extra = gl.again;
+  else if (nScene >= 3) extra = B.T.sceneNth(nScene);
+  else if (topGameName && gameName && topGameName === gameName) extra = B.T.topGame(topGameName);
+  return extra ? [...base, extra] : base;
+}
+
 export function epilogueLines({ solvedCount, topGameName }) {
+  const B = pack();
   const n = Math.min(4, solvedCount || 0);
-  const out = [...EPI_BY_COUNT[n]];
-  if (n === 0) {
-    out.push(G('판 하나만 놀고 오면 여기에 네 작품이랑 "작품 해설"이 생겨 📖'));
-    out.push(P('진법, 글방, 놀이 마당, 한글 블록 — 어디부터 갈래? 🚪'));
-    return out;
-  }
-  out.push(topGameName ? P(`그러고 보니 ${eulReul(topGameName)} 제일 자주 했네? 네 조각에 그 손맛이 들어갔어 ✋`) : P('어떤 놀이를 많이 하느냐에 따라 모양이 또 달라져. 신기하지? 🔮'));
-  out.push(G('아래 "작품 해설"에 왜 이런 모양이 됐는지 적어 놨어. 한번 읽어 봐 📖'));
-  out.push(P(n >= 4 ? '다음엔 탈춤이나 단청 판도 열릴지 몰라. 기대해! 🎭' : '아직 안 가 본 판도 있어. 마당은 언제든 열려 있어 🚪'));
+  const out = [...B.EPI_BY_COUNT[n]];
+  if (n === 0) return [...out, ...B.T.epiZero];
+  out.push(topGameName ? B.T.epiTop(topGameName) : B.T.epiNoTop());
+  out.push(B.T.epiAbout());
+  out.push(n >= 4 ? B.T.epiNextAll() : B.T.epiNext());
   return out;
 }
 

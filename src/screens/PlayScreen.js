@@ -10,7 +10,7 @@ import ScreenHeader from '../ui/ScreenHeader';
 import MissionGate from '../ui/Mission';
 import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
-import { GAME_LINES } from '../data/book';
+import { getGameLines } from '../data/book';
 import { playMission } from '../data/missions';
 import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
@@ -40,15 +40,15 @@ function speedComment(ms) {
 // 놀이 방식(mechanic)마다 조작 방법을 정확히 알려주는 안내 문구.
 // 터치뿐 아니라 키보드(스페이스바·화살표 키)로도 똑같이 조작할 수 있다.
 const CONTROL_HINTS = {
-  race: '육상 달리기 게임처럼 왼쪽/오른쪽을 "번갈아" 눌러야 전진해요. 화살표 키(←→)나 A/D 키를 번갈아 누르거나, 왼발·오른발 버튼을 번갈아 클릭해도 되고 섞어서 눌러도 돼요. 가끔 뜨는 "영차!" 구간에서는 특히 집중하세요.',
-  rhythm: '도는 점이 위쪽 "여기!" 구간을 지나가는 순간 버튼(또는 스페이스바·Z/X 키)을 탭하거나, "여기!" 구간을 직접 클릭하세요. 맞힐수록 점점 빨라져요.',
-  throw: '화살표(←→)나 A/D 키로 조준, 버튼(스페이스바)을 누르고 있다가 힘이 초록 구간일 때 떼서 던지세요. 내 물체가 상대 물체를 직접 맞혀 튕겨내야 명중이에요.',
-  whip: '버튼(또는 스페이스바·Z/X 키)을 빠르게 연타하거나 빙글빙글 도는 그림을 직접 클릭해서 계속 쳐 주세요. 치지 않으면 속도가 줄어들어요.',
-  stoneTopple: '화살표(←→)나 A/D 키로 세워진 비석을 조준하고, 버튼을 누르고 있다가 힘이 초록 구간일 때 떼서 맞히세요. 조준과 세기가 둘 다 맞아야 비석이 쓰러져요.',
-  pitchPot: '화살표(←→)나 A/D 키로 항아리를 조준하고, 버튼을 누르고 있다가 힘이 초록 구간일 때 떼서 던지세요. 화살이 포물선을 그리며 날아가요.',
+  race: '육상 달리기 게임처럼 왼쪽/오른쪽을 "번갈아" 눌러야 전진해요. 화살표 키(←→)나 A/D 키를 번갈아 누르거나, 왼발·오른발 버튼을 번갈아 클릭해도 되고 섞어서 눌러도 돼요. 가끔 뜨는 "영차!" 구간에서는 특히 집중해요 🔥',
+  rhythm: '도는 점이 위쪽 "여기!" 구간을 지나가는 순간 버튼(또는 스페이스바·Z/X 키)을 탭하거나, "여기!" 구간을 직접 클릭해도 돼요. 맞힐수록 점점 빨라져요.',
+  throw: '화살표(←→)나 A/D 키로 조준, 버튼(스페이스바)을 누르고 있다가 힘이 초록 구간일 때 떼면 던져져요. 내 물체가 상대 물체를 직접 맞혀 튕겨내야 명중이에요.',
+  whip: '버튼(또는 스페이스바·Z/X 키)을 빠르게 연타하거나 빙글빙글 도는 그림을 직접 클릭해서 계속 쳐 줘요. 치지 않으면 속도가 줄어들어요.',
+  stoneTopple: '화살표(←→)나 A/D 키로 세워진 비석을 조준하고, 버튼을 누르고 있다가 힘이 초록 구간일 때 떼면 던져져요. 조준과 세기가 둘 다 맞아야 비석이 쓰러져요.',
+  pitchPot: '화살표(←→)나 A/D 키로 항아리를 조준하고, 버튼을 누르고 있다가 힘이 초록 구간일 때 떼면 던져져요. 화살이 포물선을 그리며 날아가요.',
   jachigi: '먼저 버튼(스페이스바·Z/X 키)을 게이지가 "팝!" 구간에 있을 때 탭해 막대를 띄우고, 공중에 뜨면 곧바로 다시 탭해서 "스윙!" 구간에 맞춰 쳐야 멀리 날아가요.',
-  ddakjiSlam: '조준은 필요 없어요. 버튼을 누르고 있다가 힘이 초록 구간일 때 손을 떼서 세게 내리치세요. 충격파가 세야 상대 딱지가 뒤집혀요.',
-  rhythmJump: '줄(또는 고무줄)이 발밑을 지나가는 정확한 순간에 버튼(스페이스바·Z/X 키)을 탭해서 뛰어넘으세요. 아무 때나 눌러도 소용없고, 타이밍을 놓치면 걸려 넘어져요.',
+  ddakjiSlam: '조준은 필요 없어요. 버튼을 누르고 있다가 힘이 초록 구간일 때 손을 떼서 세게 내리쳐요. 충격파가 세야 상대 딱지가 뒤집혀요.',
+  rhythmJump: '줄(또는 고무줄)이 발밑을 지나가는 정확한 순간에 버튼(스페이스바·Z/X 키)을 탭하면 폴짝 뛰어넘어요. 아무 때나 눌러도 소용없고, 타이밍을 놓치면 걸려 넘어져요.',
   sangmoCircle: '화면의 동그라미 위에서 손가락(마우스)을 눌러 빙글빙글 돌려요. 빛나는 점을 가까이 따라가면 상모가 돌고, 놓치면 멈춰요. (키보드는 ← →)',
   marbleSling: '아래쪽 내 구슬을 눌러 뒤로 끌었다가 놓으면 반대쪽으로 튕겨요. 많이 끌수록 세게 가요. 동그라미 밖으로 내보내면 따먹어요.',
   topChase: '팽이가 여기저기 돌아다녀요. 팽이를 콕 눌러 채로 치면 힘이 붙어요. 힘이 떨어지거나 선 밖으로 나가면 쓰러져요.',
@@ -61,7 +61,7 @@ const CONTROL_HINTS = {
   gomuPattern: '불이 켜지는 발 모양 순서를 기억했다가 같은 순서로 눌러요. 줄이 점점 길어져요. (키보드 ← ↓ →)',
   kiteSteer: '손가락(마우스)을 좌우로 움직여 연을 이끌어요. 푸른 바람 길 안에 있으면 연이 올라가요.',
   hoopSpeed: '화면을 꾹 누르면 빨라지고 떼면 느려져요. 오르내리는 초록 칸 안에 속도를 맞추면 굴렁쇠가 쓰러지지 않아요. (스페이스바 꾹)',
-  kiteFly: '바람 게이지가 계속 움직여요. "쎈 바람" 구간일 때만 버튼(스페이스바·Z/X 키)을 탭해서 얼레를 감으세요. 타이밍이 안 맞으면 연이 오히려 내려와요.',
+  kiteFly: '바람 게이지가 계속 움직여요. "쎈 바람" 구간일 때만 버튼(스페이스바·Z/X 키)을 탭해서 얼레를 감아요. 타이밍이 안 맞으면 연이 오히려 내려와요.',
 };
 
 // 전래놀이를 화면 터치/키보드로 즐기는 미니게임 모음 장면.
@@ -121,7 +121,7 @@ export default function PlayScreen({ navigation }) {
       addResult(attemptResult);
     } else {
       setCompleted(false);
-      setResultComment('아깝게 성공하지 못했어요. 창을 닫고 바로 한 번 더 도전해보세요.');
+      setResultComment('아깝다! 창을 닫으면 바로 한 번 더 할 수 있어 😉');
     }
     setResultVisible(true);
   };
@@ -344,7 +344,7 @@ export default function PlayScreen({ navigation }) {
             )}
             <MissionGate
               resetKey={`${game.id}-${tier}`}
-              info={{ scene: 'play', lines: GAME_LINES[game.id] ? [GAME_LINES[game.id].start] : undefined, ...playMission(game) }}
+              info={{ scene: 'play', lines: getGameLines()[game.id] ? [getGameLines()[game.id].start] : undefined, ...playMission(game) }}
               onModeSelect={setTimeMode}
             >
               <MascotGuide which="pung" message={CONTROL_HINTS[game.mechanic]} style={styles.controlBox} />

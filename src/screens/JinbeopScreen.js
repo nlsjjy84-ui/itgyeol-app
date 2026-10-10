@@ -43,11 +43,11 @@ const BURST_ICONS_BY_TAG = {
 // [놀이 방식 다양화] 진법마다 조작 방식이 전부 달라졌기 때문에, 미리보기 안내 문구도
 // 진법마다 실제로 뭘 해야 하는지 정확히 알려주도록 mechanic별로 따로 둔다.
 const MECHANIC_HINT = {
-  flowSnake: '이 구불구불한 길을 따라 멈추지 않고 걸어가 보세요.',
+  flowSnake: '구불구불 길을 따라 끝까지 쭉 걸어가 보자 🐍',
   sequentialVault: '순서를 지켜 한 명씩 넘어가면 이 모양으로 말려들어요.',
-  pieceMove: '한 사람을 짚고 바꿀 자리를 짚어서, 말을 옮기듯 자리를 바꿔보세요.',
-  puzzleFit: '조각을 점선 자리로 끌어다 퍼즐처럼 맞춰보세요.',
-  drawMatch: '제한 시간 15초 동안 이 모양을 손으로 직접 그려보세요.',
+  pieceMove: '한 사람을 짚고, 바꿀 자리를 짚어서 자리를 바꿔 보자 ♟️',
+  puzzleFit: '조각을 점선 자리로 옮겨서 퍼즐처럼 맞춰 보자 🧩',
+  drawMatch: '15초 동안 이 모양을 손으로 쓱쓱 그려 보자 ✏️',
   wingMirror: '한쪽 날개를 벌리면 반대쪽도 거울처럼 같이 벌어져요.',
 };
 
@@ -257,7 +257,7 @@ export default function JinbeopScreen({ navigation }) {
             resetKey={`${formation.id}-${restartNonce}`}
             info={{
               scene: 'jinbeop',
-              ...(JINBEOP_MISSIONS[formation.id] || { kicker: formation.tag, title: formation.name, story: formation.description, mission: MECHANIC_HINT[formation.mechanic] || '모양을 맞춰 보세요.', steps: [] }),
+              ...(JINBEOP_MISSIONS[formation.id] || { kicker: formation.tag, title: formation.name, story: formation.description, mission: MECHANIC_HINT[formation.mechanic] || '모양을 맞춰 보자 🧩', steps: [] }),
               example: <FormationPreview positions={formation.positions} color={ohang.color} size={130} />,
             }}
           >

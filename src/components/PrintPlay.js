@@ -116,7 +116,7 @@ function SentencePlay({ onDone, color, accent }) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.q}>훈민정음 서문을 활자로 짜 올려요. 낱말 활자를 읽는 순서대로 눌러 한 줄을 완성하세요. ({s + 1}/{SENTENCES.length}줄)</Text>
+      <Text style={styles.q}>훈민정음 서문을 활자로 짜 올려요. 낱말 활자를 읽는 순서대로 눌러 한 줄을 짜 보자. ({s + 1}/{SENTENCES.length}줄)</Text>
       <View style={[styles.composing, { borderColor: color }]}>
         {sent.chunks.map((c, i) => (
           <View key={c} style={[styles.slot, i < got && { backgroundColor: color, borderStyle: 'solid' }]}>
@@ -179,7 +179,7 @@ function ShapePlay({ onDone, color, accent }) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.q}>세종대왕은 소리 낼 때 입과 혀의 모양을 본떠 자음을 만들었어요. 왼쪽 글자를 누르고, 본뜬 모양을 오른쪽에서 짝지어 주세요.</Text>
+      <Text style={styles.q}>세종대왕은 소리 낼 때 입과 혀의 모양을 본떠 자음을 만들었어요. 왼쪽 글자를 누르고, 본뜬 모양을 오른쪽에서 짝지어 봐요.</Text>
       <View style={styles.twoCol}>
         <View style={styles.col}>
           {SHAPES.map((it) => {

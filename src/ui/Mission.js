@@ -7,6 +7,7 @@ import { CloudBand } from './Motifs';
 import StoryScene from './StoryScene';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
+import { t } from '../i18n';
 
 // ── 시간 설정 ─────────────────────────────────────────────
 // 예전에는 판마다 7~16초라 읽고 이해하기도 전에 끝났다. 이제 기본 시간을 3배로 늘리고,
@@ -30,7 +31,7 @@ function makeTime(timed) {
 // ── 미션 안내 카드 ───────────────────────────────────────
 // 한 판을 시작하기 전에 "이야기 한 줄 → 해야 할 일 한 줄 → 하는 방법 → 완성 예시"를 보여 준다.
 // info = { kicker, title, story, mission, steps: [string], example: node, tip }
-export function MissionCard({ info, onStart, onStartFree, startLabel = '시작하기' }) {
+export function MissionCard({ info, onStart, onStartFree, startLabel }) {
   useEffect(() => {
     play('drum');
   }, []);
@@ -46,12 +47,12 @@ export function MissionCard({ info, onStart, onStartFree, startLabel = '시작�
       </View>
       {info.story ? <Text style={styles.story}>{info.story}</Text> : null}
       <View style={styles.missionBox}>
-        <Text style={styles.missionLabel}>이번 미션</Text>
+        <Text style={styles.missionLabel}>{t('이번 미션')}</Text>
         <Text style={styles.mission}>{info.mission}</Text>
       </View>
       {info.example ? (
         <View style={styles.exampleWrap}>
-          <Text style={styles.exampleLabel}>완성하면 이렇게 돼요</Text>
+          <Text style={styles.exampleLabel}>{t('완성하면 이렇게 돼요')}</Text>
           <View style={styles.example}>{info.example}</View>
         </View>
       ) : null}
@@ -69,9 +70,9 @@ export function MissionCard({ info, onStart, onStartFree, startLabel = '시작�
       ) : null}
       {info.tip ? <Text style={styles.tip}>{info.tip}</Text> : null}
       <View style={styles.btns}>
-        <SealButton label={startLabel} onPress={onStart} />
+        <SealButton label={startLabel || t('시작하기')} onPress={onStart} />
         <Pressable onPress={onStartFree} hitSlop={8} style={styles.free}>
-          <Text style={styles.freeText}>시간 제한 없이 천천히 해볼래요</Text>
+          <Text style={styles.freeText}>{t('시간 제한 없이 천천히 해볼래요')}</Text>
         </Pressable>
       </View>
     </Frame>

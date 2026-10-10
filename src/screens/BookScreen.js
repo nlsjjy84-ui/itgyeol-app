@@ -3,7 +3,8 @@ import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-nat
 import Text from '../ui/Text';
 import StoryScene, { Dialogue } from '../ui/StoryScene';
 import { useJourney } from '../context/JourneyContext';
-import { BOOK, resolveLines } from '../data/book';
+import { getBook, resolveLines } from '../data/book';
+import { t } from '../i18n';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 
@@ -13,6 +14,7 @@ import { play } from '../utils/sound';
 export default function BookScreen({ navigation, route }) {
   const { part = 'prologue', then = 'Home' } = route.params || {};
   const { book, markBook } = useJourney();
+  const BOOK = getBook();
   const pages = BOOK[part] || BOOK.prologue;
   const choice = (book && book.choice) || {};
 
@@ -83,7 +85,7 @@ export default function BookScreen({ navigation, route }) {
     setReactShown(1);
   };
 
-  const hint = waitingInput ? '' : last && reactDone && allShown ? '마당으로 ›' : '톡 ›';
+  const hint = waitingInput ? '' : last && reactDone && allShown ? t('마당으로 ›') : t('톡 ›');
 
   return (
     <SafeAreaView style={st.safe}>
@@ -94,7 +96,7 @@ export default function BookScreen({ navigation, route }) {
           ))}
         </View>
         <Pressable onPress={finish} hitSlop={10}>
-          <Text style={st.skip}>건너뛰기</Text>
+          <Text style={st.skip}>{t('건너뛰기')}</Text>
         </Pressable>
       </View>
       <Pressable style={{ flex: 1 }} onPress={advance}>
@@ -114,7 +116,7 @@ export default function BookScreen({ navigation, route }) {
                 </Pressable>
               ))}
               {!picked && !input.options.some((o) => o.id === input.silent) ? (
-                <Text style={st.waitHint}>…가만히 있어도 돼</Text>
+                <Text style={st.waitHint}>{t('…가만히 있어도 돼')}</Text>
               ) : null}
             </View>
           ) : null}

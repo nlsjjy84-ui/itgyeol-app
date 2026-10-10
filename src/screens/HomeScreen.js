@@ -11,6 +11,8 @@ import Frame from '../ui/Frame';
 import { CloudBand, DancheongBand, Taegeuk } from '../ui/Motifs';
 import { play } from '../utils/sound';
 import { PART_OF_CARD } from '../data/book';
+import { t } from '../i18n';
+import LangToggle from '../ui/LangToggle';
 
 const HANJA = { jinbeop: '陣', print: '文', tbd: '遊', hangul: '塊', talchum: '面', mask: '面', dancheong: '彩', pattern: '彩' };
 
@@ -109,10 +111,11 @@ export default function HomeScreen({ navigation }) {
             <Taegeuk size={34} />
             <Text brush style={styles.logo}>잇결</Text>
           </View>
-          <Text style={styles.title}>대한민국의 보물</Text>
+          <Text style={styles.title}>{t('대한민국의 보물')}</Text>
         </View>
         {/* [오늘의 기운 선택 기능] 홈에서도 바로 보고 바꿀 수 있게 — 바꾸면 세 판 전체에 반영된다. */}
         <View style={{ alignItems: 'flex-end', gap: 8 }}>
+          <LangToggle />
           <OhangPicker />
           <ThemeToggle />
         </View>
@@ -121,7 +124,7 @@ export default function HomeScreen({ navigation }) {
         <CloudBand width={260} />
       </View>
       <Text style={styles.subtitle}>
-        손끝으로 만나는 세 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.
+        {t('손끝으로 만나는 네 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.')}
       </Text>
 
       <StoryScene scene="prologue" style={{ marginTop: 16 }} />
@@ -129,7 +132,7 @@ export default function HomeScreen({ navigation }) {
       <MascotDuo
         leftValue={pungValue}
         rightValue={gyeolValue}
-        caption="판을 놀수록 우리 둘의 모습이 또렷해져."
+        caption={t('판을 놀수록 우리 둘의 모습이 또렷해져.')}
         size={52}
         style={{ marginTop: 14 }}
       />
@@ -138,12 +141,9 @@ export default function HomeScreen({ navigation }) {
           직접 말한다. 국악(사물놀이·풍물) 전공, 인천에서 10년 넘게 운영한 국악연구소,
           2015년에 직접 쓴 전래놀이 교육 교재 — 이 세 가지 장면은 그 경험에서 나왔다. */}
       <Frame tone="dark" style={{ marginTop: 18 }}>
-        <Text style={styles.makerLabel}>만든 사람</Text>
+        <Text style={styles.makerLabel}>{t('만든 사람')}</Text>
         <Text style={styles.makerText}>
-          사물놀이·풍물을 전공하고, 인천에서 10년 넘게 국악연구소를 운영하며 아이들에게
-          국악과 전래놀이를 가르쳤습니다. 2015년에는 전래놀이 교육 교재를 직접 써서
-          강사들을 교육하기도 했어요. 이 앱의 진법과 전래놀이 열두 가지는 그 현장 경험을
-          그대로 옮긴 것입니다.
+          {t('사물놀이·풍물을 전공하고, 인천에서 10년 넘게 국악연구소를 운영하며 아이들에게 국악과 전래놀이를 가르쳤습니다. 2015년에는 전래놀이 교육 교재를 직접 써서 강사들을 교육하기도 했어요. 이 앱의 진법과 전래놀이 열두 가지는 그 현장 경험을 그대로 옮긴 것입니다.')}
         </Text>
       </Frame>
 
@@ -153,13 +153,13 @@ export default function HomeScreen({ navigation }) {
 
       <View style={styles.exploreRow}>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Book', { part: 'prologue', then: 'Home' }); }}>
-          <Text style={styles.exploreTxt}>그림책 다시 읽기</Text>
+          <Text style={styles.exploreTxt}>{t('그림책 다시 읽기')}</Text>
         </Pressable>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
-          <Text style={styles.exploreTxt}>예시 작품 둘러보기</Text>
+          <Text style={styles.exploreTxt}>{t('예시 작품 둘러보기')}</Text>
         </Pressable>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Taste', { again: true }); }}>
-          <Text style={styles.exploreTxt}>떠오르는 것 다시 고르기</Text>
+          <Text style={styles.exploreTxt}>{t('떠오르는 것 다시 고르기')}</Text>
         </Pressable>
       </View>
 
@@ -181,9 +181,9 @@ export default function HomeScreen({ navigation }) {
                   <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
-                  <Text style={styles.cardTitle}>{c.title}</Text>
-                  <Text style={styles.cardDesc}>{c.desc}</Text>
+                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{t(c.eyebrow)}</Text>
+                  <Text style={styles.cardTitle}>{t(c.title)}</Text>
+                  <Text style={styles.cardDesc}>{t(c.desc)}</Text>
                 </View>
               </View>
             </Frame>
@@ -195,11 +195,9 @@ export default function HomeScreen({ navigation }) {
           지금 세 판을 만든 같은 방식(전통 소재 → 공통 설계 질문 → 난이도 단계)을 다음에
           무엇에 적용할지 구체적으로 보여준다. */}
       <View style={styles.roadmapHeader}>
-        <Text style={styles.roadmapTitle}>다음 체험, 준비 중</Text>
+        <Text style={styles.roadmapTitle}>{t('다음 체험, 준비 중')}</Text>
         <Text style={styles.roadmapHint}>
-          진법·훈민정음·전래놀이를 만든 같은 방식 — 전통 소재에서 공통된 설계 질문을
-          뽑아내고, 난이도 단계를 나누어 직접 해보게 만드는 방식 — 을 다른 전통 영역에도
-          그대로 넓힐 수 있어요. 아래 두 가지가 다음 후보입니다.
+          {t('진법·훈민정음·전래놀이를 만든 같은 방식 — 전통 소재에서 공통된 설계 질문을 뽑아내고, 난이도 단계를 나누어 직접 해보게 만드는 방식 — 을 다른 전통 영역에도 그대로 넓힐 수 있어요. 아래 두 가지가 다음 후보입니다.')}
         </Text>
       </View>
       <View style={styles.list}>
@@ -211,10 +209,10 @@ export default function HomeScreen({ navigation }) {
                   <Text brush style={styles.hanjaText}>{HANJA[c.id] || '傳'}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{c.eyebrow}</Text>
-                  <Text style={styles.cardTitle}>{c.title}</Text>
-                  <Text style={styles.cardDesc}>{c.desc}</Text>
-                  <Text style={styles.soon}>준비 중</Text>
+                  <Text style={[styles.cardEyebrow, { color: c.accent }]}>{t(c.eyebrow)}</Text>
+                  <Text style={styles.cardTitle}>{t(c.title)}</Text>
+                  <Text style={styles.cardDesc}>{t(c.desc)}</Text>
+                  <Text style={styles.soon}>{t('준비 중')}</Text>
                 </View>
               </View>
             </Frame>

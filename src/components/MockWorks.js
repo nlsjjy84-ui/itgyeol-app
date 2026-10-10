@@ -4,9 +4,34 @@ import Text from '../ui/Text';
 import { colors } from '../theme';
 import { MOCK_IMAGES } from '../data/mockWorks';
 import { TASTE_KEYWORDS } from '../data/taste';
+import { t } from '../i18n';
+import { CATALOG } from './obj3d/catalog';
+import { GAME_NAMES, SCENE_NAMES } from '../data/taste';
+import { traitText } from '../utils/shapeDna';
 
-const LABEL = {};
-TASTE_KEYWORDS.forEach((k) => { LABEL[k.id] = k.label; });
+// 글자는 렌더할 때 지금 언어로 만든다(예시 자료에는 물건·놀이 id와 횟수만 있다).
+const kwLabel = (id) => (TASTE_KEYWORDS.find((k) => k.id === id) || {}).label || '';
+function findItem(itemId) {
+  for (const g of CATALOG) for (const it of g.items) if (it.id === itemId) return it;
+  return null;
+}
+export function workTitle(w) {
+  const it = findItem(w.item);
+  if (!it) return w.title;
+  const v = it.variants.find((x) => x.id === w.variant);
+  return it.variants.length > 1 && v ? `${it.label} · ${v.label}` : it.label;
+}
+function workPlays(w) {
+  if (!w.raw) return w.plays;
+  return [
+    ...w.raw.g.map(([id, n]) => t('{name} {n}번', { name: GAME_NAMES[id], n })),
+    ...w.raw.s.map(([id, n]) => t('{name} {n}번', { name: t(SCENE_NAMES[id]), n })),
+  ];
+}
+function workTraits(w) {
+  if (!w.raw) return w.traits || [];
+  return [...w.raw.g.map(([id, n]) => traitText('g', id, n)), ...w.raw.s.map(([id, n]) => traitText('s', id, n))].filter(Boolean);
+}
 
 // 예시 작품 한 장 — 가상 기록으로 만든 모양이다. 실제 사람의 작품처럼 보이지 않게 "예시"라고 늘 적는다.
 export function MockCard({ work, size = 104, onPress }) {
@@ -15,8 +40,8 @@ export function MockCard({ work, size = 104, onPress }) {
       <View style={[st.thumb, { width: size, height: size }]}>
         <Image source={MOCK_IMAGES[work.id]} style={{ width: size - 8, height: size - 8 }} resizeMode="contain" />
       </View>
-      <Text style={st.title} numberOfLines={1}>{work.title}</Text>
-      <Text style={st.sub} numberOfLines={1}>예시 · {LABEL[work.main] || ''}</Text>
+      <Text style={st.title} numberOfLines={1}>{workTitle(work)}</Text>
+      <Text style={st.sub} numberOfLines={1}>{t('예시')} · {kwLabel(work.main)}</Text>
     </Pressable>
   );
 }
@@ -31,28 +56,28 @@ export function MockDetail({ work, onClose }) {
             <View style={st.big}>
               <Image source={MOCK_IMAGES[work.id]} style={{ width: 230, height: 230 }} resizeMode="contain" />
             </View>
-            <Text style={st.h}>{work.title}</Text>
-            <Text style={st.badge}>예시 작품 · 가상의 놀이 기록으로 빚은 모양이에요 · #{work.code}</Text>
-            <Text style={st.sec}>이 모양이 나온 기록</Text>
-            <Text style={st.body}>{work.plays.join(' · ')}</Text>
-            {work.traits && work.traits.length ? (
+            <Text style={st.h}>{workTitle(work)}</Text>
+            <Text style={st.badge}>{t('예시 작품 · 가상의 놀이 기록으로 빚은 모양이에요')} · #{work.code}</Text>
+            <Text style={st.sec}>{t('이 모양이 나온 기록')}</Text>
+            <Text style={st.body}>{workPlays(work).join(' · ')}</Text>
+            {workTraits(work).length ? (
               <View style={{ gap: 2 }}>
-                {work.traits.slice(0, 7).map((t) => (
-                  <Text key={t} style={st.trait}>· {t}</Text>
+                {workTraits(work).slice(0, 7).map((x) => (
+                  <Text key={x} style={st.trait}>· {x}</Text>
                 ))}
               </View>
             ) : null}
-            <Text style={st.sec}>닿아 있는 이야기</Text>
+            <Text style={st.sec}>{t('닿아 있는 이야기')}</Text>
             <View style={st.tagRow}>
-              {work.tags.slice(0, 8).map((t) => (
-                <View key={t} style={[st.tag, t === work.main && st.tagMain]}>
-                  <Text style={[st.tagTxt, t === work.main && { color: '#fff' }]}>{LABEL[t]}</Text>
+              {work.tags.slice(0, 8).map((x) => (
+                <View key={x} style={[st.tag, x === work.main && st.tagMain]}>
+                  <Text style={[st.tagTxt, x === work.main && { color: '#fff' }]}>{kwLabel(x)}</Text>
                 </View>
               ))}
             </View>
-            <Text style={st.note}>내 작품은 내가 한 놀이의 흔적으로만 모양이 정해져요. 예시는 그저 이런 모양도 나올 수 있다는 구경거리예요.</Text>
+            <Text style={st.note}>{t('내 작품은 내가 한 놀이의 흔적으로만 모양이 정해져요. 예시는 그저 이런 모양도 나올 수 있다는 구경거리예요.')}</Text>
             <Pressable style={st.close} onPress={onClose}>
-              <Text style={st.closeTxt}>닫기</Text>
+              <Text style={st.closeTxt}>{t('닫기')}</Text>
             </Pressable>
           </ScrollView>
         </Pressable>

@@ -87,7 +87,7 @@ export const PLAY_GAMES = [
     name: '자치기',
     tag: '반응',
     description:
-      '작은 막대("새끼")를 긴 막대로 쳐서 멀리 보내던 놀이입니다. 새끼가 튀어 오르는 방향으로 손가락을 휙 쓸어 치세요. 갈수록 빨라져요.',
+      '작은 막대("새끼")를 긴 막대로 쳐서 멀리 보내던 놀이입니다. 새끼가 튀어 오르는 방향으로 손가락을 휙 쓸어 쳐요. 갈수록 빨라져요.',
     mechanic: 'jachigiSwipe',
     targetHits: 10,
     maxMiss: 3,

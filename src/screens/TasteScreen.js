@@ -7,6 +7,8 @@ import { TASTE_GROUPS, TASTE_KEYWORDS } from '../data/taste';
 import { matchWorks } from '../data/mockWorks';
 import { MockCard, MockDetail } from '../components/MockWorks';
 import { play } from '../utils/sound';
+import { t } from '../i18n';
+import LangToggle from '../ui/LangToggle';
 
 // 시작하기 전에 — "대한민국 전통문화 하면 뭐가 떠오르세요?"
 // 사전지식이 없어도 들어올 수 있게: 하나도 안 골라도 되고, 건너뛸 수 있다.
@@ -32,24 +34,24 @@ export default function TasteScreen({ navigation, route }) {
     return (
       <SafeAreaView style={st.safe}>
         <ScrollView contentContainerStyle={st.wrap}>
-          <Text style={st.kicker}>예시 둘러보기</Text>
-          <Text style={st.q}>이런 작품이 놓일 수 있어요</Text>
+          <Text style={st.kicker}>{t('예시 둘러보기')}</Text>
+          <Text style={st.q}>{t('이런 작품이 놓일 수 있어요')}</Text>
           <Text style={st.sub}>
             {picks.length
-              ? `떠오른 ${picks.slice(0, 3).map((p) => labelOf[p]).join(' · ')}${picks.length > 3 ? ` 외 ${picks.length - 3}개` : ''}와 닿아 있는 예시예요.`
-              : '고른 게 없어서 여러 갈래를 고르게 보여 드려요.'}
+              ? t('떠오른 {list}{more}와 닿아 있는 예시예요.', { list: picks.slice(0, 3).map((p) => labelOf[p]).join(' · '), more: picks.length > 3 ? t(' 외 {n}개', { n: picks.length - 3 }) : '' })
+              : t('고른 게 없어서 여러 갈래를 고르게 보여 드려요.')}
           </Text>
           <View style={st.grid}>
             {matches.map((w) => (
               <MockCard key={w.id} work={w} size={100} onPress={setOpen} />
             ))}
           </View>
-          <Text style={st.note}>예시는 가상의 놀이 기록으로 빚은 모양이에요. 내 작품은 내가 놀이에서 남긴 흔적으로만 정해져요.</Text>
+          <Text style={st.note}>{t('예시는 가상의 놀이 기록으로 빚은 모양이에요. 내 작품은 내가 놀이에서 남긴 흔적으로만 정해져요.')}</Text>
           <Pressable style={st.ghost} onPress={() => navigation.navigate('Gallery')}>
-            <Text style={st.ghostTxt}>예시 전체 둘러보기</Text>
+            <Text style={st.ghostTxt}>{t('예시 전체 둘러보기')}</Text>
           </Pressable>
           <Pressable style={st.primary} onPress={goHome}>
-            <Text style={st.primaryTxt}>놀이하러 가기</Text>
+            <Text style={st.primaryTxt}>{t('놀이하러 가기')}</Text>
           </Pressable>
         </ScrollView>
         <MockDetail work={open} onClose={() => setOpen(null)} />
@@ -60,10 +62,13 @@ export default function TasteScreen({ navigation, route }) {
   return (
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.wrap}>
-        <Text style={st.kicker}>{again ? '다시 떠올려 보기' : '시작하기 전에'}</Text>
-        <Text style={st.q}>대한민국 전통문화, 하면 뭐가 떠오르세요?</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={st.kicker}>{again ? t('다시 떠올려 보기') : t('시작하기 전에')}</Text>
+          <LangToggle />
+        </View>
+        <Text style={st.q}>{t('대한민국 전통문화, 하면 뭐가 떠오르세요?')}</Text>
         <Text style={st.sub}>
-          하나여도, 여러 개여도, 하나도 안 떠올라도 괜찮아요. 떠오른 걸 눌러 두면 닿아 있는 예시 작품을 먼저 보여 드려요. 답은 이 기기에만 남아요.
+          {t('하나여도, 여러 개여도, 하나도 안 떠올라도 괜찮아요. 떠오른 걸 눌러 두면 닿아 있는 예시 작품을 먼저 보여 드려요. 답은 이 기기에만 남아요.')}
         </Text>
         {TASTE_GROUPS.map((g) => (
           <View key={g.id} style={st.group}>
@@ -90,7 +95,7 @@ export default function TasteScreen({ navigation, route }) {
             goHome();
           }}
         >
-          <Text style={st.skipTxt}>건너뛰기</Text>
+          <Text style={st.skipTxt}>{t('건너뛰기')}</Text>
         </Pressable>
         <Pressable
           style={st.primaryBar}
@@ -99,7 +104,7 @@ export default function TasteScreen({ navigation, route }) {
             setStep(2);
           }}
         >
-          <Text style={st.primaryTxt}>{picks.length ? `${picks.length}개 떠올랐어요 · 예시 보기` : '떠오르는 게 없어요 · 예시 보기'}</Text>
+          <Text style={st.primaryTxt}>{picks.length ? t('{n}개 떠올랐어요 · 예시 보기', { n: picks.length }) : t('떠오르는 게 없어요 · 예시 보기')}</Text>
         </Pressable>
       </View>
     </SafeAreaView>
