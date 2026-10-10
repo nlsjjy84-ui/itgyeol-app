@@ -17,6 +17,7 @@ import { useJourney } from '../context/JourneyContext';
 import { resultOptionCode } from '../utils/resultSeed';
 import { synthesizeAttention } from '../utils/attentionSynth';
 import { colors } from '../theme';
+import { buildFacts, baseCommentary, polishCommentary, polishEnabled } from '../utils/commentary';
 import ScreenHeader from '../ui/ScreenHeader';
 import ArtFrame from '../components/ArtFrame';
 import { play } from '../utils/sound';
@@ -108,6 +109,17 @@ export default function ResultScreen({ navigation }) {
   const [hookOn, setHookOn] = useState(true);
   const { group, item } = findItem(groupId, itemId);
   const variant = item.variants.find((v) => v.id === variantId) || item.variants[0];
+  // 작품 해설: 고정 자료로 만든 기본 문장이 먼저 보이고, (선택) AI가 문장만 다듬는다
+  const facts = useMemo(() => buildFacts({ item, variant, dna }), [item, variant, dna]);
+  const baseText = useMemo(() => baseCommentary({ item, variant, dna }), [item, variant, dna]);
+  const [polished, setPolished] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    setPolished(null);
+    if (!polishEnabled()) return undefined;
+    polishCommentary({ facts, base: baseText }).then((r) => { if (alive && r.polished) setPolished(r.text); });
+    return () => { alive = false; };
+  }, [facts, baseText]);
   const pickGroup = (g) => {
     setGroupId(g.id);
     setItemId(g.items[0].id);
@@ -410,11 +422,19 @@ export default function ResultScreen({ navigation }) {
           ) : null}
 
           <View style={styles.aboutBox}>
+            <Text style={styles.aboutTitle}>작품 해설</Text>
+            <Text style={styles.aboutText}>{polished || baseText}</Text>
+            <Text style={styles.commentNote}>
+              {polished
+                ? '내용은 고정 자료에서 가져왔고, AI는 문장만 다듬었어요. 개인 정보는 보내지 않아요.'
+                : '내용은 고정 자료에서 가져왔어요.'}
+            </Text>
+          </View>
+
+          <View style={styles.aboutBox}>
             <Text style={styles.aboutTitle}>
               {item.label} · {variant.label}
             </Text>
-            <Text style={styles.aboutText}>{item.about}</Text>
-            {variant.note ? <Text style={styles.aboutText}>{variant.note}</Text> : null}
             <Text style={styles.aboutText}>
               끌어서 돌리거나 아래 버튼으로 앞·뒤·옆·위·아래를 바로 볼 수 있어요. 물건의 앞뒤 모두 그 물건의 실제 모양이에요.
             </Text>
@@ -666,6 +686,7 @@ const styles = StyleSheet.create({
   aboutBox: { marginTop: 12, width: '100%', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper, gap: 4 },
   aboutTitle: { fontSize: 13.5, fontWeight: '800', color: colors.ink },
   aboutText: { fontSize: 12, color: colors.ink, lineHeight: 18 },
+  commentNote: { fontSize: 10.5, color: colors.muted, lineHeight: 15, marginTop: 2 },
   customBox: {
     width: '100%',
     marginTop: 18,
