@@ -2,7 +2,7 @@ import { lobedShape, getDna, THREE, mesh, group, lathe, cyl, torus, sphere, rbox
 } from './kit';
 
 // ───────── 노리개 ─────────
-function norigaeTop(m, y) {
+export function norigaeTop(m, y) {
   // 위쪽: 걸이 고리 + 끈 + 매듭
   const g = new THREE.Group();
   g.add(mesh(new THREE.TorusGeometry(0.2, 0.035, 12, 32), m.gold, [0, y + 0.55, 0]));
@@ -13,7 +13,7 @@ function norigaeTop(m, y) {
   return g;
 }
 
-function norigaeBottom(m, y, tasselLen = 1.1) {
+export function norigaeBottom(m, y, tasselLen = 1.1) {
   const g = new THREE.Group();
   const k = knot(0.12, m.silkRed, m.gold);
   k.position.set(0, y - 0.1, 0);

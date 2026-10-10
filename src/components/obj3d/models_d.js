@@ -22,15 +22,17 @@ function patchOnLathe(prof, j0, j1, phiStart, phiLength, mat, grow = 1.006) {
 
 export const treasureMoonJar = ({ tex, m }) => {
   // 백자 달항아리 (보물 제1438호 같은 둥근 항아리)
-  const prof = warpProfile([[0.0, 0], [0.5, 0], [0.54, 0.05], [0.62, 0.15], [0.82, 0.38], [1.0, 0.7], [1.08, 1.05], [1.04, 1.4], [0.9, 1.7], [0.68, 1.92], [0.52, 2.02], [0.5, 2.12], [0.56, 2.2], [0.5, 2.26]]);
+  const prof = warpProfile([[0.0, 0], [0.45, 0], [0.48, 0.06], [0.6, 0.2], [0.82, 0.45], [1.02, 0.8], [1.1, 1.2], [1.07, 1.5], [0.92, 1.78], [0.7, 1.98], [0.54, 2.08], [0.52, 2.16], [0.58, 2.24], [0.52, 2.3]]);
   const g = new THREE.Group();
   const body = lathe(prof, m.porcelain, 96);
   body.material = m.porcelain.clone();
   body.material.side = THREE.DoubleSide;
   g.add(body);
   // 조각보를 앞쪽 배에 붙인다
-  g.add(patchOnLathe(prof, 4, 9, -0.95, 1.9, texMat(tex), 1.008));
-  g.add(mesh(new THREE.TorusGeometry(prof[12][0] - 0.04, 0.012, 8, 64), m.gold, [0, 2.2, 0], [Math.PI / 2, 0, 0]));
+  g.add(patchOnLathe(prof, 4, 8, -0.95, 1.9, texMat(tex), 1.008));
+  // 달항아리는 위아래 두 쪽을 붙여 빚는다 — 허리의 이음 자국
+  g.add(mesh(new THREE.TorusGeometry(prof[6][0] + 0.002, 0.007, 8, 96), m.porcelain, [0, prof[6][1], 0], [Math.PI / 2, 0, 0]));
+  g.add(mesh(new THREE.TorusGeometry(prof[12][0] - 0.04, 0.012, 8, 64), m.gold, [0, prof[12][1], 0], [Math.PI / 2, 0, 0]));
   g.position.y = -1.1;
   return g;
 };

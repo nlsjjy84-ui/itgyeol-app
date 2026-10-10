@@ -78,24 +78,41 @@ export const drumJanggu = ({ tex, m }) => {
 };
 
 export const drumBuk = ({ tex, m }) => {
-  // 북: 불룩한 통, 앞가죽 조각보, 뒷가죽 생가죽, 못줄과 양옆 고리
+  // 북: 나무 통에 앞가죽 조각보, 뒷가죽 생가죽. 양쪽 테를 잇는 조임줄(지그재그 줄)이 통을 감싼다
   const face = texMat(tex);
   const g = new THREE.Group();
   const prof = [[0.99, -0.6], [1.08, -0.4], [1.14, -0.2], [1.16, 0], [1.14, 0.2], [1.08, 0.4], [0.99, 0.6]];
-  const body = lathe(prof, m.woodDark, 72);
+  const body = lathe(prof, m.woodLight, 72);
   body.rotation.x = Math.PI / 2;
-  body.material = m.woodDark.clone();
+  body.material = m.woodLight.clone();
   body.material.side = THREE.DoubleSide;
   g.add(body);
+  // 가죽 면과 가죽을 두른 테(가장자리 말아 올린 부분)
   g.add(mesh(new THREE.CircleGeometry(1.0, 72), face, [0, 0, 0.62]));
   g.add(mesh(new THREE.CircleGeometry(1.0, 72), m.skin, [0, 0, -0.62], [0, Math.PI, 0]));
   [0.6, -0.6].forEach((z) => {
-    g.add(mesh(new THREE.TorusGeometry(1.0, 0.07, 12, 72), m.brass, [0, 0, z]));
-    g.add(studRing(1.08, z * 0.86, 30, m.gold, 0.04));
+    g.add(mesh(new THREE.TorusGeometry(1.0, 0.075, 12, 72), m.skin, [0, 0, z * 1.02]));
+    g.add(mesh(new THREE.TorusGeometry(1.03, 0.04, 10, 72), m.woodLight, [0, 0, z * 0.9]));
   });
+  // 조임줄: 위 테에서 아래 테로 비스듬히 내려갔다 다시 올라오는 V자 줄이 한 바퀴를 돈다
+  const n = 14;
+  const P = (a, z, r) => [Math.cos(a) * r, Math.sin(a) * r, z];
+  for (let i = 0; i < n; i += 1) {
+    const a0 = (i / n) * Math.PI * 2;
+    const a1 = ((i + 0.5) / n) * Math.PI * 2;
+    const a2 = ((i + 1) / n) * Math.PI * 2;
+    g.add(tube([P(a0, 0.56, 1.05), P((a0 + a1) / 2, 0, 1.19), P(a1, -0.56, 1.05)], 0.026, m.woodDark, 20));
+    g.add(tube([P(a1, -0.56, 1.05), P((a1 + a2) / 2, 0, 1.19), P(a2, 0.56, 1.05)], 0.026, m.woodDark, 20));
+  }
+  // 줄이 꺾이는 자리에 매듭 알
+  for (let i = 0; i < n; i += 1) {
+    const a0 = (i / n) * Math.PI * 2;
+    g.add(mesh(new THREE.SphereGeometry(0.04, 10, 8), m.woodDark, P(a0, 0.57, 1.06)));
+    g.add(mesh(new THREE.SphereGeometry(0.04, 10, 8), m.woodDark, P(a0 + Math.PI / n, -0.57, 1.06)));
+  }
   [-1, 1].forEach((s) => {
-    g.add(mesh(new THREE.TorusGeometry(0.16, 0.035, 10, 24), m.gold, [s * 1.2, 0, 0], [0, Math.PI / 2, 0]));
-    g.add(mesh(new THREE.SphereGeometry(0.07, 12, 10), m.gold, [s * 1.14, 0, 0]));
+    g.add(mesh(new THREE.TorusGeometry(0.16, 0.035, 10, 24), m.brass, [s * 1.22, 0, 0], [0, Math.PI / 2, 0]));
+    g.add(mesh(new THREE.SphereGeometry(0.07, 12, 10), m.brass, [s * 1.16, 0, 0]));
   });
   g.rotation.x = -0.25;
   return g;

@@ -4,6 +4,7 @@ import * as C from './models_c';
 import * as D from './models_d';
 import * as E from './models_e';
 import * as F from './models_f';
+import * as G from './models_g';
 
 // 결과물 카탈로그 — 어떤 물건에 조각보를 입힐 수 있는지.
 // group: 키링(전통 소품) · 브로치 · 마그넷 · 스티커 · 우리나라 보물
@@ -24,6 +25,7 @@ export const CATALOG = [
           { id: 'round', label: '원형 패', build: A.norigaeRound },
           { id: 'square', label: '네모 패', build: A.norigaeSquare },
           { id: 'samjak', label: '삼작', build: A.norigaeSamjak, note: '큰 패 하나와 작은 패 둘을 함께 단 노리개' },
+          { id: 'bat', label: '박쥐 패 삼작', build: G.norigaeBat, note: '박쥐는 복을 뜻해 패 모양으로 많이 썼어요' },
         ],
       },
       {
@@ -34,6 +36,7 @@ export const CATALOG = [
           { id: 'round', label: '원두잠', build: A.binyeoRound, note: '머리가 둥근 판 모양' },
           { id: 'lotus', label: '연봉잠', build: A.binyeoLotus, note: '연꽃봉오리 모양 머리' },
           { id: 'bamboo', label: '죽절잠', build: A.binyeoBamboo, note: '대나무 마디를 본뜬 몸통' },
+          { id: 'dragon', label: '용잠', build: G.binyeoDragon, note: '머리에 용을 새긴 비녀. 용은 임금과 힘을 뜻해요' },
         ],
       },
       {
@@ -137,6 +140,7 @@ export const CATALOG = [
           { id: 'round', label: '원형', build: E.broochRound },
           { id: 'square', label: '네모', build: E.broochSquare },
           { id: 'flower', label: '꽃 모양', build: E.broochFlower },
+          { id: 'ttuljam', label: '떨잠', build: G.broochTtuljam, note: '움직일 때 떨리는 머리 장식. 금판에 보석을 박아요' },
         ],
       },
     ],
