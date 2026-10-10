@@ -13,14 +13,14 @@ echo [3/5] commit on redesign-ui
 git checkout redesign-ui
 if errorlevel 1 (echo CHECKOUT FAILED & pause & exit /b 1)
 git add -A
-git commit -m "3D: park-ref shapes - bat norigae, dragon binyeo, ttuljam, buk lacing, fan ribs, moonjar"
+git commit -m "Add work commentary from fixed facts (optional sentence polish)"
 echo [4/5] push redesign-ui
 git push origin redesign-ui
 if errorlevel 1 (echo PUSH FAILED & pause & exit /b 1)
 echo [5/5] merge into master and push
 git checkout master
 git pull origin master
-git merge redesign-ui -m "Merge redesign-ui: reference-based 3D shapes"
+git merge redesign-ui -m "Merge redesign-ui: work commentary"
 if errorlevel 1 (echo MERGE FAILED - tell Claude & pause & exit /b 1)
 git push origin master
 echo.
