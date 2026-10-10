@@ -1,4 +1,5 @@
 @echo off
+set GIT_MERGE_AUTOEDIT=no
 setlocal
 set SRC=%~dp0_apply\itgyeol-redesign.zip
 set DST=%~dp0

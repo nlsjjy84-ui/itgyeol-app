@@ -26,26 +26,26 @@ const PRINT_WORD = {
   'jamo-pungmulnori': '풍물놀이',
   'jamo-munhwajae': '문화재',
   'jamo-hangeulnal': '한글날',
-  metaltype: '活',
-  woodblock: '板',
-  mirror: '反',
-  sentence: '序',
-  shape: '象',
+  metaltype: '직지',
+  woodblock: '대장경',
+  mirror: '거울',
+  sentence: '서문',
+  shape: '꼴',
 };
 
-const PLAY_HANJA = {
-  julneomgi: '跳',
-  juldarigi: '索',
-  sangmo: '舞',
-  guseulchigi: '珠',
-  paengi: '螺',
-  jachigi: '尺',
-  biseok: '碑',
-  tuho: '壺',
-  ddakji: '牌',
-  gomugojul: '繩',
-  yeonnaligi: '鳶',
-  gullyeongsoe: '輪',
+const PLAY_MARK = {
+  julneomgi: '넘',
+  juldarigi: '당',
+  sangmo: '돌',
+  guseulchigi: '구',
+  paengi: '팽',
+  jachigi: '자',
+  biseok: '비',
+  tuho: '투',
+  ddakji: '딱',
+  gomugojul: '고',
+  yeonnaligi: '연',
+  gullyeongsoe: '굴',
 };
 
 export const SCENE_ORDER = ['jinbeop', 'print', 'tbd', 'hangul'];
@@ -116,7 +116,7 @@ export function PatchArt({ attempt, box, empty = false, level = 1 }) {
       out.push(<Circle key={`d${i}`} cx={qx} cy={qy} r={Math.max(3.2, Math.min(w, h) / 24)} fill={base} />)
     );
   } else if (attempt.sceneId === 'print') {
-    const word = PRINT_WORD[attempt.formationId] || '印';
+    const word = PRINT_WORD[attempt.formationId] || '글';
     const chars = Array.from(word);
     const s = Math.min(w, h) * 0.52;
     const fs = chars.length === 1 ? s * 0.78 : Math.min(s * 0.5, (s - 8) / chars.length * 1.05);
@@ -153,7 +153,7 @@ export function PatchArt({ attempt, box, empty = false, level = 1 }) {
       </G>
     );
   } else {
-    const ch = PLAY_HANJA[attempt.formationId] || '遊';
+    const ch = PLAY_MARK[attempt.formationId] || '놀';
     const r = Math.min(w, h) * 0.3;
     out.push(
       <G key="play" rotation={tilt} origin={`${cx}, ${cy}`}>
