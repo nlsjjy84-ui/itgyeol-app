@@ -9,12 +9,13 @@ import { MockCard, MockDetail } from '../components/MockWorks';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
+import { QuickTourStart } from '../ui/QuickTour';
 
 // 시작하기 전에 — "대한민국 전통문화 하면 뭐가 떠오르세요?"
 // 사전지식이 없어도 들어올 수 있게: 하나도 안 골라도 되고, 건너뛸 수 있다.
 // 이 답은 결과의 모양을 정하지 않는다(결과는 놀이 행동의 흔적으로만). 비슷한 예시를 미리 보여 주는 데에만 쓴다.
 export default function TasteScreen({ navigation, route }) {
-  const { taste, setTaste, book } = useJourney();
+  const { taste, setTaste, book, markBook } = useJourney();
   const again = route && route.params && route.params.again;
   const [picks, setPicks] = useState(taste && taste.picks ? taste.picks : []);
   // 단계는 화면 주소(params)에 둔다 — 예시 전체 보기에 갔다 돌아와도 같은 자리에 있게
@@ -27,6 +28,12 @@ export default function TasteScreen({ navigation, route }) {
   const toggle = (id) => {
     play('tap');
     setPicks((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  };
+  // 3분 둘러보기: 질문과 그림책 프롤로그를 본 것으로 두고 홈의 둘러보기 카드로 바로 간다.
+  const startTour = () => {
+    setTaste([]);
+    markBook({ prologue: true });
+    navigation.replace('Home', { tour: true });
   };
   const goHome = () => (book && !book.prologue ? navigation.replace('Book', { part: 'prologue', then: 'Home' }) : navigation.replace('Home'));
 
@@ -69,6 +76,7 @@ export default function TasteScreen({ navigation, route }) {
           <Text style={st.kicker}>{again ? t('다시 떠올려 보기') : t('시작하기 전에')}</Text>
           <LangToggle />
         </View>
+        {!again && <QuickTourStart onStart={startTour} />}
         <Text style={st.q}>{t('대한민국 전통문화, 하면 뭐가 떠오르세요?')}</Text>
         <Text style={st.sub}>
           {t('하나여도, 여러 개여도, 하나도 안 떠올라도 괜찮아요. 떠오른 걸 눌러 두면 닿아 있는 예시 작품을 먼저 보여 드려요. 답은 이 기기에만 남아요.')}
