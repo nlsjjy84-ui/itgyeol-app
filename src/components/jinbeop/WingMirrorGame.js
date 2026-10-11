@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../../ui/Mission';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { useTime } from '../../ui/Mission';
 import SealButton from '../../ui/SealButton';
 import { play } from '../../utils/sound';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
 import { useArrowHold } from '../../utils/useTapKey';
 import { t as i18nT } from '../../i18n';
 
@@ -80,6 +82,7 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
       }
     }, 80);
   };
+  useAutoStart(phase === 'ready', start);
 
   const changeSpread = (delta) => {
     spreadRef.current = Math.max(0, Math.min(1, spreadRef.current + delta));
@@ -109,6 +112,7 @@ export default function WingMirrorGame({ peopleCount = 10, targetPositions, colo
       </Text>
 
       <View style={styles.field}>
+        <Madang variant="court" seed={53} />
         <View style={[styles.centerDot, { backgroundColor: color, left: `${CENTER.x * 100}%`, top: `${CENTER.y * 100}%` }]} />
         {positions.map((target, i) => {
           const x = CENTER.x + (target.x - CENTER.x) * spread;

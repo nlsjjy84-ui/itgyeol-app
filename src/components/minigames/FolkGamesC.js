@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
+import { StandStone, HoopRing } from '../../ui/Sprites';
 import { useHoldKey } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
@@ -98,13 +100,16 @@ export function StoneFlickGame({ color, onComplete, stones = 3, throws = 8 }) {
       color={color}
       phase={phase}
       onStart={start}
-      hud={i18nT('쓰러뜨린 비석 {p0}/{p1} · 남은 돌 {p2}개', { p0: q.down, p1: stones, p2: Math.max(0, throws - q.threw) })}
+      hud={i18nT('{p0} 단계 · 쓰러뜨린 비석 {p1}/{p2} · 남은 망 {p3}개', { p0: i18nT(['던지기', '발걸이', '세 발 뛰어 던지기'][Math.min(q.down, 2)]), p1: q.down, p2: stones, p3: Math.max(0, throws - q.threw) })}
       hint={i18nT('아래의 내 돌을 눌러 위쪽으로 쓸어 올리며 놓으면 던져져요. 멀리 쓸수록 멀리 날아가요. 점선 끝이 떨어질 자리예요.')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#efe6cf' }]}>
+        <Madang variant="yard" seed={31} ground={0.16} sun={false} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           {q.stand.map((s, i) => (
-            <View key={i} style={[st.stone, { left: s.x - 15, top: s.y - 24, backgroundColor: s.fallen ? '#9aa09b' : '#6f6a5f', transform: [{ translateY: s.fallen ? 14 : 0 }, { rotate: `${s.rot}deg` }] }]} />
+            <View key={i} style={{ position: 'absolute', left: s.x - 15, top: s.y - 24, transform: [{ translateY: s.fallen ? 14 : 0 }, { rotate: `${s.rot}deg` }] }}>
+              <StandStone width={30} height={48} fallen={s.fallen} />
+            </View>
           ))}
           {aim ? (
             <>
@@ -177,12 +182,15 @@ export function HoopSpeedGame({ color, onComplete, targetSec = 14, lives = 3 }) 
       hint={i18nT('화면을 꾹 누르면 굴렁쇠가 빨라지고, 떼면 느려져요. 오른쪽 초록 칸(오르내려요) 안에 속도를 맞춰요. 벗어나면 비틀거려요. (스페이스바 꾹)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#e8efe0' }]}>
+        <Madang variant="yard" seed={32} ground={0.647} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <View style={st.ground} />
           {[0, 1, 2, 3, 4, 5].map((i) => <View key={i} style={[st.dash, { left: ((i * 60 - q.off + 360) % 360) - 30 }]} />)}
-          <View style={[st.bigHoop, { borderColor: color, transform: [{ rotate: `${q.ang}deg` }, { translateX: (100 - q.stab) / 14 * (Math.sin(q.t * 18) > 0 ? 1 : -1) }] }]}>
-            <View style={[st.spoke, { backgroundColor: color }]} />
-            <View style={[st.spoke, { backgroundColor: color, transform: [{ rotate: '90deg' }] }]} />
+          {/* 굴렁대: 끝을 ㄷ자로 구부린 쇠막대로 굴렁쇠 뒤쪽을 민다 */}
+          <View style={{ position: 'absolute', left: 150, top: 120, width: 96, height: 5, borderRadius: 2, backgroundColor: '#5b4a35', transform: [{ rotate: '-48deg' }] }} />
+          <View style={{ position: 'absolute', left: 160, top: 152, width: 14, height: 14, borderWidth: 3, borderColor: '#5b4a35', borderRightWidth: 0, borderRadius: 2 }} />
+          <View style={{ position: 'absolute', left: 60, top: 110, transform: [{ translateX: (100 - q.stab) / 14 * (Math.sin(q.t * 18) > 0 ? 1 : -1) }] }}>
+            <HoopRing size={110} spin={q.ang} />
           </View>
           <View style={[st.gauge, { top: 40, height: GAUGE_H }]}>
             <View style={[st.band, { top: yOf(q.bandC + 15), height: (30 / 100) * GAUGE_H, backgroundColor: q.inBand ? 'rgba(107,143,60,0.7)' : 'rgba(107,143,60,0.35)' }]} />

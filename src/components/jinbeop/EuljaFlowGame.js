@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../../ui/Mission';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { useTime } from '../../ui/Mission';
 import SealButton from '../../ui/SealButton';
 import { play } from '../../utils/sound';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
 import { useArrowHold } from '../../utils/useTapKey';
 import { euljaPathPoint, euljaGuidePoints } from '../../data/formations';
 import { t as i18nT } from '../../i18n';
@@ -86,6 +88,7 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
       }
     }, TICK_MS);
   };
+  useAutoStart(phase === 'ready', start);
 
   useArrowHold(
     () => moveHead(-0.018),
@@ -110,6 +113,7 @@ export default function EuljaFlowGame({ color, peopleCount = 8, streak = 0, onSu
           : i18nT('머리가 되어 을자(乙) 길을 걸어 보자')}
       </Text>
       <View style={styles.field}>
+        <Madang variant="court" seed={51} />
         {GUIDE_POINTS.map((p, i) => (
           <View key={i} style={[styles.guideDot, { left: `${p.x * 100}%`, top: `${p.y * 100}%` }]} />
         ))}

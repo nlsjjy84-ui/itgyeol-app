@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../../ui/Mission';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { useTime } from '../../ui/Mission';
 import SealButton from '../../ui/SealButton';
 import { play } from '../../utils/sound';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
 import { t as i18nT } from '../../i18n';
 
 function shuffleAssignment(n) {
@@ -72,6 +74,7 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
       }
     }, 100);
   };
+  useAutoStart(phase === 'ready', start);
 
   const tapSlot = (slotIndex) => {
     if (phase !== 'playing') return;
@@ -126,6 +129,7 @@ export default function PieceMoveGame({ positions, color, streak = 0, onSuccess,
       )}
 
       <View style={styles.field}>
+        <Madang variant="court" seed={52} />
         {positions.map((p, slotIndex) => (
           <Pressable
             key={slotIndex}
@@ -170,6 +174,7 @@ const styles = StyleSheet.create({
   },
   timeFill: { height: '100%' },
   field: {
+    overflow: 'hidden',
     width: '100%',
     maxWidth: 340,
     height: 330,

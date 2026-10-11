@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../../ui/Mission';
 import { View, StyleSheet, Pressable, Animated } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
@@ -114,6 +115,7 @@ export default function RaceMashGame({
     }, 100);
     scheduleBurst();
   };
+  useAutoStart(phase === 'ready', start);
 
   const handleAlternate = (side) => {
     if (phaseRef.current !== 'running') return;

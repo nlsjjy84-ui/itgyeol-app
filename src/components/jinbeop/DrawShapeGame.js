@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../../ui/Mission';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { useTime } from '../../ui/Mission';
@@ -8,6 +9,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
 import { similarityToTemplate } from '../../utils/shapeMatch';
 import { formationTemplate } from '../../data/formations';
 import { t as i18nT } from '../../i18n';
@@ -85,6 +87,7 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
       }
     }, 100);
   };
+  useAutoStart(phase === 'ready', start);
 
   const startStroke = (x, y) => {
     pointsRef.current = [{ x, y }];
@@ -135,6 +138,7 @@ export default function DrawShapeGame({ formationId, closed = false, color, stre
 
       <GestureDetector gesture={pan}>
         <View style={styles.canvas} onLayout={onCanvasLayout}>
+          <Madang variant="hanji" seed={55} />
           {template.length > 0 &&
             canvasSize.width > 0 &&
             template.map((p, i) => (

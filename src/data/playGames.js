@@ -29,7 +29,7 @@ export const PLAY_GAMES = [
       '두 사람이 줄을 돌리면 그 사이로 들어가 계속 뛰어넘던 놀이입니다. 줄이 발밑을 지나가는 순간에 맞춰 탭해서 뛰어넘어보세요. 줄은 점점 빨라져요.',
     mechanic: 'rhythmJump',
     variant: 'rope',
-    targetSkips: 12,
+    targetSkips: 6,
     cycleMsStart: 1150,
     maxMisses: 5,
     tip: '처음엔 줄 없이 제자리 뛰기부터 연습시키고, "줄"이 아니라 "박자"에 먼저 집중하게 하세요. 하나·둘 소리를 내어 박자를 세어주면 타이밍을 훨씬 빨리 잡습니다.',
@@ -43,7 +43,7 @@ export const PLAY_GAMES = [
     mechanic: 'race',
     meIcon: '🙂',
     oppIcon: '😤',
-    durationMs: 9000,
+    durationMs: 6000,
     opponentRate: 4.3,
     burstEnabled: true,
     tip: '다 함께 당길 땐 "영차" 같은 구호를 미리 맞춰야 힘이 한 번에 모입니다. 허리를 다치지 않게 무릎을 살짝 굽히고 당기도록 꼭 알려주세요.',
@@ -55,7 +55,7 @@ export const PLAY_GAMES = [
     description:
       '풍물패 상쇠가 모자 위의 상모를 빙빙 돌리던 기예입니다. 화면의 동그라미를 따라 손가락으로 원을 그리며, 빛나는 점을 가까이 따라가면 상모가 돌아요.',
     mechanic: 'sangmoCircle',
-    limitSec: 20,
+    limitSec: 12,
     speedDeg: 75,
     tolerance: 46,
     tip: '처음엔 상모 없이 고개만 작게 돌리는 연습부터 시키세요. 목에 무리가 가지 않도록 절대 한 번에 세게 돌리지 않게 합니다.',
@@ -67,8 +67,8 @@ export const PLAY_GAMES = [
     description:
       '구슬을 손가락으로 튕겨 동그라미 안의 구슬을 밖으로 내보내던 놀이입니다. 내 구슬을 뒤로 끌었다 놓으면 튕겨 나가고, 구슬끼리 부딪히며 굴러가요.',
     mechanic: 'marbleSling',
-    targets: 3,
-    shots: 7,
+    targets: 2,
+    shots: 6,
     tip: '바닥이 평평한 곳에서 해야 구슬이 똑바로 굴러갑니다. 손가락 힘 조절이 서툰 아이는 엄지를 바닥에 고정하고 검지만 튕기게 하면 훨씬 쉬워합니다.',
   },
   {
@@ -78,7 +78,7 @@ export const PLAY_GAMES = [
     description:
       '채로 팽이를 쳐서 쓰러지지 않게 돌리던 놀이입니다. 팽이가 여기저기 돌아다녀요 — 팽이를 콕 눌러 채로 쳐서 힘을 보태 주세요. 힘이 빠지거나 선 밖으로 나가면 쓰러져요.',
     mechanic: 'topChase',
-    targetHits: 14,
+    targetHits: 7,
     lives: 3,
     drift: 0.34,
     tip: '채로 치는 방향이 팽이의 회전 방향과 같아야 속도가 붙어요. 반대로 치면 오히려 팽이가 멈추니, 처음엔 회전 방향을 손으로 짚어 보여주세요.',
@@ -86,14 +86,14 @@ export const PLAY_GAMES = [
   {
     id: 'jachigi',
     name: '자치기',
-    tag: '반응',
+    tag: '튀겨 치기',
     description:
-      '작은 막대("새끼")를 긴 막대로 쳐서 멀리 보내던 놀이입니다. 새끼가 튀어 오르는 방향으로 손가락을 휙 쓸어 쳐요. 갈수록 빨라져요.',
+      '구멍 위에 걸쳐 놓은 짧은 알을 긴 자로 튀겨 올린 뒤, 공중에서 쳐서 멀리 보내던 놀이입니다. 날아간 거리를 긴 자로 재어 점수를 매기고, 수비가 알을 받으면 그 점수는 없어져요.',
     mechanic: 'jachigiSwipe',
-    targetHits: 10,
+    targetHits: 5,
     maxMiss: 3,
     windowMs: 1500,
-    tip: '긴 막대를 휘두를 때는 주변과의 거리가 중요합니다. 반드시 한 사람씩 순서대로 하게 하고, 뒤쪽 공간을 충분히 비워두세요.',
+    tip: '처음엔 알을 손으로 던져 올려 치는 단계부터 시작하고, 익숙해지면 구멍 위의 알을 튀겨 올려 치게 하세요. 거리는 긴 자로 직접 재어 보게 하면 수 세기 공부도 됩니다. 긴 막대를 휘두를 때는 주변과의 거리가 중요합니다. 반드시 한 사람씩 순서대로 하게 하고, 뒤쪽 공간을 충분히 비워두세요.',
   },
   {
     id: 'biseok',
@@ -102,8 +102,8 @@ export const PLAY_GAMES = [
     description:
       '작은 돌(비석)을 던져 세워 둔 상대의 비석을 쓰러뜨리던 놀이입니다. 내 돌을 눌러 위쪽으로 쓸어 올리며 놓으면 던져져요. 점선 끝이 돌이 떨어질 자리예요.',
     mechanic: 'stoneFlick',
-    stones: 3,
-    throws: 8,
+    stones: 2,
+    throws: 6,
     tip: '처음엔 가까운 거리부터 시작해서 성공 경험을 먼저 주고, 거리를 조금씩 늘리는 식으로 난이도를 올리면 쉽게 포기하지 않습니다.',
   },
   {
@@ -113,23 +113,22 @@ export const PLAY_GAMES = [
     description:
       '화살을 던져 항아리 안에 넣던 궁중·양반가의 놀이입니다. 각도와 힘 두 줄을 직접 맞춘 뒤 던지세요. 항아리는 던질 때마다 다른 거리에 놓여요.',
     mechanic: 'tuhoDial',
-    arrows: 7,
-    need: 4,
+    arrows: 5,
+    need: 2,
     zoneDeg: 11,
     tip: '항아리를 처음부터 멀리 두면 금방 흥미를 잃습니다. 가까이서 몇 번 넣어본 다음 거리를 늘리는 순서로 지도하면 훨씬 오래 집중합니다.',
   },
   {
     id: 'ddakji',
     name: '딱지치기',
-    tag: '바람',
+    tag: '넘겨먹기',
     description:
-      '딱지를 내리쳐 일으킨 바람으로 상대 딱지를 뒤집던 놀이입니다. 화면 위에서 손가락을 좌우로 빠르게 흔들어 바람을 일으키고, 목표선 위로 잠깐 버티면 딱지가 뒤집혀요.',
+      '바닥에 놓인 상대 딱지를 내 딱지로 내리쳐 뒤집으면 따는 놀이(넘겨먹기)입니다. 높이 들어 칠수록 세지만 손이 흔들려 덜 정확해요. 한가운데보다 가장자리를 쳐야 잘 넘어가요.',
     mechanic: 'ddakjiFan',
-    myIcon: '🟦',
-    oppIcon: '🟧',
-    rounds: 3,
+    doubleSided: false,
+    rounds: 2,
     timeSec: 9,
-    tip: '바람을 일으키려면 딱지 전체가 동시에 바닥에 닿아야 해요. 비스듬히 치면 바람이 새니, 수직으로 "내리찍는" 느낌을 강조해서 알려주세요.',
+    tip: '높이 칠수록 세지만 정확도가 떨어져요. 처음엔 낮게 정확히 맞히는 감부터 익히고, 익숙해지면 상대 딱지의 가장자리를 노려 세게 치게 하세요. 단면딱지는 한 번, 양면딱지는 두 번 넘겨야 따요. 발을 상대 딱지 옆에 대고 치는 「발 대고 치기」도 함께 알려 주면 좋아요.',
   },
   {
     id: 'gomugojul',
@@ -138,7 +137,7 @@ export const PLAY_GAMES = [
     description:
       '고무줄을 넘으며 노래에 맞춰 발 모양을 바꾸던 놀이입니다. 불이 켜지는 순서대로 발 모양을 기억했다가 똑같이 따라 해 보세요. 노래가 점점 길어져요.',
     mechanic: 'gomuPattern',
-    rounds: 5,
+    rounds: 3,
     startLen: 3,
     maxMistakes: 3,
     tip: '높이가 올라갈수록 무릎을 많이 써야 합니다. 발목 단계에서 박자를 충분히 익힌 다음에 높이를 올려야 다치지 않아요.',
@@ -160,7 +159,7 @@ export const PLAY_GAMES = [
     description:
       '굴렁쇠를 막대로 밀며 달리던 놀이입니다. 화면을 꾹 누르면 빨라지고 떼면 느려져요. 오르내리는 초록 칸 안에 속도를 맞추면 굴렁쇠가 쓰러지지 않고 굴러가요.',
     mechanic: 'hoopSpeed',
-    targetSec: 16,
+    targetSec: 8,
     lives: 3,
     tip: '굴렁쇠는 너무 세게 치면 방향을 잃습니다. 작게, 자주 쳐서 균형을 잡는 게 핵심이라고 알려주세요.',
   },
@@ -197,7 +196,7 @@ export function scaleGameForTier(game, tier) {
       g.rounds = Math.max(1, g.rounds - 1);
       break;
     case 'rhythmJump':
-      g.targetSkips = Math.max(6, Math.round(g.targetSkips * 0.6));
+      g.targetSkips = Math.max(4, Math.round(g.targetSkips * 0.7));
       g.cycleMsStart = Math.round(g.cycleMsStart * 1.2);
       g.maxMisses = g.maxMisses + 2;
       break;
@@ -226,8 +225,8 @@ export function scaleGameForTier(game, tier) {
       g.limitSec += 8;
       break;
     case 'marbleSling':
-      g.shots += 3;
-      g.targets = 2;
+      g.shots += 2;
+      g.targets = 1;
       break;
     case 'topWhip':
       g.lives += 1;
@@ -235,27 +234,28 @@ export function scaleGameForTier(game, tier) {
       g.drift = +(g.drift * 0.75).toFixed(2);
       break;
     case 'topChase':
-      g.targetHits = 9;
+      g.targetHits = 5;
       g.lives += 1;
       g.drift = +(g.drift * 0.75).toFixed(2);
       break;
     case 'jachigiSwipe':
-      g.targetHits = 7;
+      g.targetHits = 4;
       g.maxMiss += 2;
       g.windowMs = Math.round(g.windowMs * 1.3);
       break;
     case 'tuhoDial':
       g.zoneDeg = Math.round(g.zoneDeg * 1.5);
       g.need = 2;
-      g.arrows += 1;
+      g.arrows += 2;
       break;
     case 'ddakjiFan':
-      g.rounds = 2;
+      g.rounds = 1;
       g.timeSec += 4;
+      g.doubleSided = false;
       break;
     case 'stoneFlick':
-      g.throws += 3;
-      g.stones = 2;
+      g.throws += 2;
+      g.stones = 1;
       break;
     case 'tuhoSwing':
       g.periodSec = +(g.periodSec * 1.3).toFixed(2);
@@ -264,7 +264,7 @@ export function scaleGameForTier(game, tier) {
       break;
     case 'gomuPattern':
       g.startLen = 2;
-      g.rounds = 3;
+      g.rounds = 2;
       g.maxMistakes += 2;
       break;
     case 'kiteSteer':
@@ -272,7 +272,7 @@ export function scaleGameForTier(game, tier) {
       break;
     case 'hoopSpeed':
       g.lives += 2;
-      g.targetSec = 10;
+      g.targetSec = 6;
       break;
     default:
       break;
