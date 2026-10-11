@@ -961,6 +961,15 @@ const ui = {
   "펑펑!": "Pop pop!",
   "돌리면 바뀌는 모음": "Vowels change as you rotate",
   "판 위에서: 좌우로 밀기 = 이동 · 톡 = 돌리기 · 아래로 휙 = 쭉 내리기": "On the board: slide left/right = move · tap = rotate · swipe down = drop",
+  "처음이라면": "New here?",
+  "3분 둘러보기": "3-minute tour",
+  "질문과 그림책을 건너뛰고 놀이 한 판, 예시 작품, 전통 자료실을 차례로 봐요.": "Skip the question and picture book, and see one game, the sample works and the heritage archive in turn.",
+  "놀이 한 판": "One game",
+  "전래놀이 하나를 짧게 해 봐요": "Try one traditional game — it's short",
+  "예시 작품": "Sample works",
+  "가상의 놀이 기록으로 빚은 예시 450점": "450 samples shaped from imaginary play records",
+  "작품의 바탕이 된 실제 유물 121점": "121 real heritage objects behind the works",
+  "다 보고 나면 아래 네 개의 판에서 마음대로 골라 놀아요.": "After that, pick any of the four boards below and play as you like.",
 };
 
 // object catalog (groups → items → styles)

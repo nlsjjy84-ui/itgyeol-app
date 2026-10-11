@@ -6,6 +6,7 @@ import OhangPicker from '../components/OhangPicker';
 import ThemeToggle from '../ui/ThemeToggle';
 import StoryScene from '../ui/StoryScene';
 import { useJourney } from '../context/JourneyContext';
+import { QuickTourCard } from '../ui/QuickTour';
 import { colors } from '../theme';
 import Frame from '../ui/Frame';
 import SealIcon from '../ui/SealIcon';
@@ -80,7 +81,7 @@ const CARDS = [
   },
 ];
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, route }) {
   const { skills, book } = useJourney();
   // [1,2,3에 적용한 걸 결과물에도] 와 같은 논리 — 홈 화면의 두 캐릭터도 지금까지
   // 실제로 쌓인 숙련도(skills)를 시그모이드로 눌러 존재감(링 밝기)으로 드러낸다.
@@ -128,6 +129,9 @@ export default function HomeScreen({ navigation }) {
       <Text style={styles.subtitle}>
         {t('손끝으로 만나는 네 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.')}
       </Text>
+      {route && route.params && route.params.tour ? (
+        <QuickTourCard navigation={navigation} onClose={() => navigation.setParams({ tour: false })} />
+      ) : null}
 
       <StoryScene scene="prologue" style={{ marginTop: 16 }} />
 
