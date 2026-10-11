@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
 import Text from './Text';
 import Frame from './Frame';
@@ -20,8 +20,25 @@ export function useTime() {
   return useContext(TimeContext);
 }
 
+// 미션 카드에서 「시작하기」를 누르면 판 안의 시작 단추를 또 누르지 않아도 바로 시작한다.
+// (시작 단추가 두 번 나와 헷갈린다는 의견 — 짧은 시간에 여러 판을 하도록)
+export function useAutoStart(isReady, start, delayMs = 450) {
+  const { autoStart } = useContext(TimeContext);
+  const done = useRef(false);
+  const fn = useRef(start);
+  fn.current = start;
+  useEffect(() => {
+    if (!autoStart || !isReady || done.current) return undefined;
+    done.current = true;
+    const t = setTimeout(() => fn.current && fn.current(), delayMs);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
+
 function makeTime(timed) {
   return {
+    autoStart: true,
     timed,
     // 시간 제한이 없으면 사실상 끝나지 않는 큰 값을 돌려준다.
     scaleMs: (ms) => (timed ? ms * TIME_SCALE : 60 * 60 * 1000),

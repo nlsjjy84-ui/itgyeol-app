@@ -2,13 +2,13 @@ import { t as i18nT } from '../i18n';
 // 한글 테트리스 판 — 같은 놀이를 "단계"로 나눠 서로 다른 문제로 센다.
 // 단계가 오를수록 지워야 할 줄이 늘고 블록이 빨리 떨어진다.
 export const HANGUL_STAGES = [
-  { id: 'st1', name: '1단계 · 천천히', tag: '3줄', lines: 3, dropMs: 1200, level: 'easy',
+  { id: 'st1', name: '1단계 · 천천히', tag: '2줄', lines: 2, dropMs: 1200, level: 'easy',
     tip: '블록이 천천히 떨어져요. ㅗ를 돌리면 ㅏ → ㅜ → ㅓ로 바뀌는 걸 읽으며 익혀 봐요.' },
-  { id: 'st2', name: '2단계 · 보통', tag: '5줄', lines: 5, dropMs: 950, level: 'easy',
+  { id: 'st2', name: '2단계 · 보통', tag: '3줄', lines: 3, dropMs: 950, level: 'easy',
     tip: '막대(ㅣ·ㅡ)는 한 번 돌릴 때마다 서 있다가 누웠다가 해요. 90도씩 네 번 돌리면 처음 모양으로 돌아와요.' },
-  { id: 'st3', name: '3단계 · 빠르게', tag: '8줄', lines: 8, dropMs: 720, level: 'hard',
+  { id: 'st3', name: '3단계 · 빠르게', tag: '5줄', lines: 5, dropMs: 720, level: 'hard',
     tip: '속도가 올라가요. 스페이스바로 쭉 내리면 빠르게 쌓을 수 있어요.' },
-  { id: 'st4', name: '4단계 · 달인', tag: '12줄', lines: 12, dropMs: 560, level: 'hard',
+  { id: 'st4', name: '4단계 · 달인', tag: '8줄', lines: 8, dropMs: 560, level: 'hard',
     tip: 'ㄷ은 5칸짜리 특수 블록이에요. 가끔 나오니 빈칸을 미리 남겨 두면 좋아요.' },
 ];
 

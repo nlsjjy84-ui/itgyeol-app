@@ -5,6 +5,7 @@ import { useTime } from '../../ui/Mission';
 import { play } from '../../utils/sound';
 import Dot from '../Dot';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
 import { t as i18nT } from '../../i18n';
 
 const SNAP_THRESHOLD = 34;
@@ -155,6 +156,7 @@ export default function PuzzleFitGame({ positions, color, streak = 0, onSuccess,
       </View>
 
       <View style={styles.stage} onLayout={onStageLayout}>
+        <Madang variant="court" seed={54} />
         {targetPx.map((t, i) => (
           <Pressable
             key={`ghost-${i}`}

@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../ui/Mission';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
-import { useRaf } from './minigames/common';
+import { useRaf, usePad } from './minigames/common';
+import Svg, { Line } from 'react-native-svg';
+import Madang from '../ui/Madang';
 import { t as i18nT } from '../i18n';
 
 // 한글 테트리스 — 규칙은 일반 테트리스와 똑같다.
@@ -81,6 +84,7 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
     setPhase('running');
     draw();
   };
+  useAutoStart(phase === 'ready', start);
 
   const lock = () => {
     const s = st.current;
@@ -91,13 +95,17 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
       if (py >= 0) s.board[py][px] = { kind: p.kind, g: glyphOf(p), rot: p.r % 4 };
     });
     // 줄 지우기
+    const clearedRows = [];
+    s.board.forEach((row, yy) => { if (row.every((c) => c)) clearedRows.push(yy); });
     const keep = s.board.filter((row) => row.some((c) => !c));
     const cleared = ROWS - keep.length;
+    if (cleared > 0) s.flash = { rows: clearedRows, t: 0.5 };
     if (cleared > 0) {
       s.board = [...Array.from({ length: cleared }, () => Array(COLS).fill(null)), ...keep];
       s.lines += cleared;
       play('stamp');
       if (s.lines >= targetLines) {
+        setTimeout(() => { st.current.flash = null; draw(); }, 600);
         setPhase('won');
         onDone && onDone({ mistakes: Math.max(0, 3 - Math.min(3, Math.floor(s.lines / targetLines))), lines: s.lines, elapsedMs: Date.now() - s.start });
         draw();
@@ -150,6 +158,7 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
 
   useRaf((dt) => {
     const s = st.current;
+    if (s.flash) { s.flash.t -= dt; if (s.flash.t <= 0) s.flash = null; }
     if (!s.cur) return;
     // 줄을 지울수록 조금씩 빨라진다(아주 완만하게)
     const ms = Math.max(350, dropMs - s.lines * 60);
@@ -186,6 +195,28 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
     st.current = { board: emptyBoard(), cur: null, next: null, lines: 0, acc: 0, bagIdx: 0, start: 0 };
   }, [resetKey]);
 
+  // 손가락 조작: 판 위에서 좌우로 밀면 이동, 톡 치면 돌리기, 아래로 휙 쓸면 쭉 내리기
+  const gest = useRef(null);
+  const pad = usePad({
+    onDown: (x, y) => { gest.current = { x0: x, y0: y, lastX: x, t: Date.now(), moved: false }; },
+    onMove: (x, y) => {
+      const gg = gest.current;
+      if (!gg) return;
+      const step = 21;
+      while (x - gg.lastX >= step) { move(1); gg.lastX += step; gg.moved = true; }
+      while (gg.lastX - x >= step) { move(-1); gg.lastX -= step; gg.moved = true; }
+      if (Math.abs(y - gg.y0) > 10) gg.moved = true;
+    },
+    onUp: (x, y) => {
+      const gg = gest.current;
+      gest.current = null;
+      if (!gg) return;
+      const dy = y - gg.y0;
+      const dt = Date.now() - gg.t;
+      if (dy > 50 && Math.abs(x - gg.x0) < 60) hard();
+      else if (!gg.moved && dt < 300) rotate();
+    },
+  });
   const s = st.current;
   const CELL = 21;
   // 보드에 지금 블록을 겹쳐 그린 칸 목록
@@ -212,7 +243,19 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
         {i18nT(phase === 'won' ? '  ·  성공!' : '')}
       </Text>
       <View style={styles.row}>
-        <View style={[styles.board, { width: COLS * CELL + 4, height: ROWS * CELL + 4, borderColor: color }]}>
+        <View ref={pad.ref} {...pad.handlers} style={[styles.board, { width: COLS * CELL + 4, height: ROWS * CELL + 4, borderColor: color }]}>
+          <Madang variant="hanji" seed={61} />
+          {/* 정간보처럼 옅은 칸선 */}
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            <Svg width={COLS * CELL + 4} height={ROWS * CELL + 4}>
+              {Array.from({ length: COLS - 1 }).map((_, i) => (
+                <Line key={`v${i}`} x1={2 + (i + 1) * CELL} y1="2" x2={2 + (i + 1) * CELL} y2={ROWS * CELL + 2} stroke={colors.fiber} strokeOpacity="0.25" strokeWidth="0.6" />
+              ))}
+              {Array.from({ length: ROWS - 1 }).map((_, i) => (
+                <Line key={`h${i}`} x1="2" y1={2 + (i + 1) * CELL} x2={COLS * CELL + 2} y2={2 + (i + 1) * CELL} stroke={colors.fiber} strokeOpacity="0.25" strokeWidth="0.6" />
+              ))}
+            </Svg>
+          </View>
           {grid.map((row, y) =>
             row.map((c, x) => {
               if (!c) return null;
@@ -225,16 +268,24 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
                     { left: x * CELL + 2, top: y * CELL + 2, width: CELL, height: CELL },
                     c.ghost
                       ? { borderWidth: 1.5, borderColor: b.color, borderStyle: 'dashed', backgroundColor: 'transparent', opacity: 0.55 }
-                      : { backgroundColor: b.color },
+                      : { backgroundColor: '#ead2a2', borderWidth: 1.5, borderColor: b.color, borderBottomWidth: 3 },
                   ]}
                 >
                   {!c.ghost ? (
-                    <Text style={[styles.cellText, !BASE[c.kind].glyphs && { transform: [{ rotate: `${(c.rot || 0) * 90}deg` }] }]}>{i18nT(c.g)}</Text>
+                    <Text style={[styles.cellText, { color: b.color }, !BASE[c.kind].glyphs && { transform: [{ rotate: `${(c.rot || 0) * 90}deg` }] }]}>{i18nT(c.g)}</Text>
                   ) : null}
                 </View>
               );
             })
           )}
+          {s.flash ? (
+            <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+              {s.flash.rows.map((ry) => (
+                <View key={ry} style={{ position: 'absolute', left: 2, right: 2, top: ry * CELL + 2, height: CELL, backgroundColor: '#fff6d8', opacity: Math.min(1, s.flash.t * 2.4), borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.gold }} />
+              ))}
+              <Text style={[styles.pop, { top: s.flash.rows[0] * CELL - 26, opacity: Math.min(1, s.flash.t * 2.4), color }]}>{i18nT(s.flash.rows.length > 1 ? '펑펑!' : '펑!')}</Text>
+            </View>
+          ) : null}
         </View>
         <View style={styles.side}>
           <Text style={styles.sideCap}>{i18nT('다음 글자 블록')}</Text>
@@ -245,7 +296,19 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
               <Text style={styles.nextGlyph}>·</Text>
             )}
           </View>
-          <Text style={styles.sideNote}>{i18nT('ㅗ를 돌리면')}{'\n'}ㅏ → ㅜ → ㅓ{'\n'}{i18nT('ㅣ를 돌리면 ㅡ')}</Text>
+          <Text style={styles.sideCap}>{i18nT('돌리면 바뀌는 모음')}</Text>
+          <View style={styles.rotCard}>
+            {['ㅗ', 'ㅏ', 'ㅜ', 'ㅓ'].map((v, i) => {
+              const on = s.cur && s.cur.kind === 't' && s.cur.r % 4 === i && phase === 'running';
+              return <Text key={v} style={[styles.rotGlyph, on && { color: '#fff', backgroundColor: BASE.t.color }]}>{v}</Text>;
+            })}
+          </View>
+          <View style={styles.rotCard}>
+            {['ㅣ', 'ㅡ'].map((v, i) => {
+              const on = s.cur && s.cur.kind === 'i' && s.cur.r % 2 === i && phase === 'running';
+              return <Text key={v} style={[styles.rotGlyph, on && { color: '#fff', backgroundColor: BASE.i.color }]}>{v}</Text>;
+            })}
+          </View>
         </View>
       </View>
       {phase === 'running' ? (
@@ -261,6 +324,7 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
           <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>
         </Pressable>
       )}
+      <Text style={styles.hint}>{i18nT('판 위에서: 좌우로 밀기 = 이동 · 톡 = 돌리기 · 아래로 휙 = 쭉 내리기')}</Text>
       <Text style={styles.hint}>{i18nT('키보드: ← → 이동 · ↑ 돌리기 · ↓ 한 칸 · 스페이스 쭉 내리기')}</Text>
     </View>
   );
@@ -270,9 +334,12 @@ const styles = StyleSheet.create({
   wrap: { alignItems: 'center', gap: 10 },
   hud: { fontSize: 14, fontWeight: '800', color: colors.ink, textAlign: 'center' },
   row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  board: { borderWidth: 2, borderRadius: 6, backgroundColor: colors.paper, position: 'relative' },
+  board: { borderWidth: 2, borderRadius: 6, backgroundColor: colors.paper, position: 'relative', overflow: 'hidden', userSelect: 'none' },
   cell: { position: 'absolute', borderRadius: 3, alignItems: 'center', justifyContent: 'center' },
-  cellText: { fontSize: 12, fontWeight: '800', color: '#fff' },
+  cellText: { fontSize: 15, fontWeight: '900', color: '#fff', lineHeight: 17, userSelect: 'none' },
+  pop: { position: 'absolute', left: 0, right: 0, textAlign: 'center', fontSize: 22, fontWeight: '900' },
+  rotCard: { flexDirection: 'row', gap: 3, flexWrap: 'wrap', justifyContent: 'center' },
+  rotGlyph: { width: 20, height: 22, textAlign: 'center', fontSize: 14, fontWeight: '800', color: colors.ink, borderRadius: 3, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, lineHeight: 20 },
   side: { width: 92, alignItems: 'center', gap: 8 },
   sideCap: { fontSize: 11, color: colors.muted },
   nextBox: { width: 70, height: 70, borderRadius: 10, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.paper, alignItems: 'center', justifyContent: 'center' },

@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, Image } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
+const KITE_IMG = require('../../../assets/sprites/kite.png'); // 방패연 사진: 위키미디어 공용 「고려」 CC BY 4.0
 import { useArrowHold, useTapKey } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
@@ -81,6 +83,7 @@ export function TuhoGame({ color, onComplete, arrows = 6, need = 3, periodSec = 
       hint={i18nT('팔이 좌우로 천천히 흔들려요. 화살이 항아리를 향한 순간(초록 불이 켜질 때) \'던지기\'를 눌러요. (스페이스바도 돼요)')}
     >
       <View style={S.stage}>
+        <Madang variant="yard" seed={21} ground={0.16} sun={false} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <Text style={[st.jar, { left: q.jarX - 24, top: JAR_Y - 40 }]}>🏺</Text>
           <View style={[st.mouth, { left: q.jarX - 26, top: JAR_Y - 6 }]} />
@@ -212,6 +215,7 @@ export function GomuGame({ color, onComplete, rounds = 4, startLen = 3, maxMista
       hint={i18nT('고무줄 넘는 발 모양이 불빛 순서대로 켜져요. 순서를 잘 기억했다가 같은 순서로 눌러요. 줄이 점점 길어져요.')}
     >
       <View style={[S.stage, { alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
+        <Madang variant="hanji" seed={22} />
         <View style={st.songRow}>
           {seq.map((p, i) => (
             <Text key={i} style={[st.syl, mode === 'input' && i < pos && { color: colors.green }]}>{i18nT(SYL[i])}</Text>
@@ -287,6 +291,7 @@ export function KiteSteerGame({ color, onComplete, limitSec = 25 }) {
       hint={i18nT('손가락(마우스)을 좌우로 움직여 연을 이끌어요. 바람이 부는 푸른 길 안에 있으면 연이 올라가요. 바람 길은 천천히 움직여요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#dcecf5' }]}>
+        <Madang variant="sky" seed={23} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           {q.bands.map((b, i) => (
             <View key={i} style={[st.wind, { left: bandX(b, q.t) - 28, opacity: 0.35 + 0.1 * Math.sin(q.t * 2 + i) }]}>
@@ -297,7 +302,9 @@ export function KiteSteerGame({ color, onComplete, limitSec = 25 }) {
           ))}
           <View style={[st.spool, { left: q.x - 14 }]}><Text style={{ fontSize: 22 }}>🧵</Text></View>
           <View style={[st.string, { left: q.x - 0.5, top: kiteY + 20, height: KY + 70 - kiteY }]} />
-          <View style={[st.kite, { left: q.x - 22, top: kiteY - 24, backgroundColor: q.inWind ? color : '#e0b252', transform: [{ rotate: `${(q.tx - q.x) * 0.6}deg` }, { rotate: '45deg' }] }]} />
+          <View style={{ position: 'absolute', left: q.x - 30, top: kiteY - 50, transform: [{ rotate: `${(q.tx - q.x) * 0.6}deg` }], opacity: q.inWind ? 1 : 0.85 }}>
+            <Image source={KITE_IMG} style={{ width: 60, height: 70 }} resizeMode="contain" />
+          </View>
         </View>
       </View>
       <Bar value={q.h} color={color} />
@@ -383,6 +390,7 @@ export function HoopGame({ color, onComplete, targetSec = 25, lives = 3, speed =
       hint={i18nT('화면의 왼쪽을 누르면 한 칸 왼쪽 길로, 오른쪽을 누르면 오른쪽 길로 가요. 돌부리와 풀덤불을 피해 끝까지 굴려요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#efe3c8' }]}>
+        <Madang variant="yard" seed={24} ground={0.72} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           {[1, 2].map((i) => <View key={i} style={[st.laneLine, { left: i * LANE_W }]} />)}
           {q.obs.map((o, i) => <Text key={i} style={[st.obs, { left: o.lane * LANE_W + LANE_W / 2 - 16, top: o.y - 16 }]}>{i18nT(o.icon)}</Text>)}

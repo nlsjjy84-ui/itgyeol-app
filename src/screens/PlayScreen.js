@@ -54,9 +54,9 @@ const CONTROL_HINTS = {
   sangmoCircle: '화면의 동그라미 위에서 손가락(마우스)을 눌러 빙글빙글 돌려요. 빛나는 점을 가까이 따라가면 상모가 돌고, 놓치면 멈춰요. (키보드는 ← →)',
   marbleSling: '아래쪽 내 구슬을 눌러 뒤로 끌었다가 놓으면 반대쪽으로 튕겨요. 많이 끌수록 세게 가요. 동그라미 밖으로 내보내면 따먹어요.',
   topChase: '팽이가 여기저기 돌아다녀요. 팽이를 콕 눌러 채로 치면 힘이 붙어요. 힘이 떨어지거나 선 밖으로 나가면 쓰러져요.',
-  ddakjiFan: '화면 위에서 손가락을 좌우로 빠르게 흔들어 바람을 일으켜요. 바람이 빨간 목표선 위로 올라가 잠깐 버티면 딱지가 뒤집혀요. (키보드는 ← → 번갈아)',
+  ddakjiFan: '손가락으로 끌어 겨누고, 단추를 꾹 눌러 딱지를 들어 올렸다가 떼면 내리쳐요. 상대 딱지의 가장자리를 쳐야 넘어가요. (키보드: 화살표로 겨누고 스페이스바 꾹)',
   tuhoDial: '아래 두 줄(각도·힘)을 눌러 끌어 값을 정하고 "던지기"를 눌러요. 지난 화살이 떨어진 빨간 점을 보고 고쳐 봐요. (스페이스바로도 던져요)',
-  jachigiSwipe: '막대가 튀어 오르는 쪽(화살표)으로 손가락을 휙 쓸어 쳐요. 시간 막대가 줄기 전에 쳐야 해요.',
+  jachigiSwipe: '위로 휙 쓸어 알을 튀겨 올리고, 떠 있을 때 옆으로 휙 쓸어 쳐요. 날아간 거리를 자로 재요.',
   topWhip: '팽이가 기우는 쪽 화면을 눌러 채로 쳐서 바로 세워요. 반대쪽을 치면 더 기울어요.',
   stoneFlick: '아래의 내 돌을 눌러 위쪽으로 쓸어 올리며 놓으면 던져져요. 점선 끝(동그라미)이 돌이 떨어질 자리예요. 세워 둔 비석에 맞히면 쓰러져요.',
   tuhoSwing: '팔이 좌우로 천천히 흔들려요. 화살이 항아리를 향한 순간(초록 불) "던지기"를 눌러요. (스페이스바도 돼요)',
@@ -260,7 +260,7 @@ export default function PlayScreen({ navigation }) {
       case 'topChase':
         return <TopChaseGame {...common} targetHits={game.targetHits} lives={game.lives} drift={game.drift} />;
       case 'ddakjiFan':
-        return <DdakjiFanGame {...common} myIcon={game.myIcon} oppIcon={game.oppIcon} rounds={game.rounds} timeSec={game.timeSec} />;
+        return <DdakjiFanGame {...common} rounds={game.rounds} timeSec={game.timeSec} doubleSided={game.doubleSided} />;
       case 'tuhoDial':
         return <TuhoDialGame {...common} arrows={game.arrows} need={game.need} zoneDeg={game.zoneDeg} />;
       case 'jachigiSwipe':

@@ -30,7 +30,7 @@ const VARIANTS = [
 ];
 
 function MirrorPlay({ onDone, color, accent }) {
-  const rounds = useMemo(() => shuffle(MIRROR_GLYPHS).slice(0, 3), []);
+  const rounds = useMemo(() => shuffle(MIRROR_GLYPHS).slice(0, 2), []);
   const [r, setR] = useState(0);
   const [msg, setMsg] = useState('');
   const mistakes = useRef(0);

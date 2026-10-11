@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../../ui/Mission';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { useTime } from '../../ui/Mission';
@@ -69,6 +70,7 @@ export default function GosariVaultGame({ peopleCount = 10, targetPositions, col
     sessionStartRef.current = Date.now();
     armTurnTimer();
   };
+  useAutoStart(phase === 'ready', start);
 
   const showFlash = (key, msg, ms = 700) => {
     setFlash(key);

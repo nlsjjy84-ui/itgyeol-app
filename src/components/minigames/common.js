@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable, PanResponder } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { t as i18nT } from '../../i18n';
+import { useAutoStart } from '../../ui/Mission';
 
 // 새 전래놀이 미니게임들이 함께 쓰는 도구 — 프레임 루프, 손가락 패드, 공통 틀.
 
@@ -75,6 +76,7 @@ export function clamp(v, a, b) {
 
 // 시작/다시 하기 버튼 + 상단 안내 + 하단 힌트가 있는 공통 틀
 export function Shell({ color, phase, onStart, hud, hint, children }) {
+  useAutoStart(phase === 'ready', onStart);
   return (
     <View style={styles.wrap}>
       {hud ? <Text style={styles.hud}>{i18nT(hud)}</Text> : null}
@@ -103,6 +105,6 @@ export const styles = StyleSheet.create({
   hint: { fontSize: 12.5, color: colors.muted, textAlign: 'center', lineHeight: 18, paddingHorizontal: 8 },
   bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
   bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
-  stage: { width: STAGE_W, height: STAGE_H, borderRadius: 6, borderWidth: 2, borderColor: colors.ink, backgroundColor: colors.paper, overflow: 'hidden' },
+  stage: { width: STAGE_W, height: STAGE_H, borderRadius: 6, borderWidth: 2, borderColor: colors.ink, backgroundColor: colors.paper, overflow: 'hidden', userSelect: 'none' },
   barTrack: { borderRadius: 8, backgroundColor: colors.border, overflow: 'hidden' },
 });

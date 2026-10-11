@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { View, StyleSheet, Image, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
+import { Marble } from '../../ui/Sprites';
 import { useArrowHold } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
@@ -83,6 +85,7 @@ export function SangmoGame({ color, onComplete, limitSec = 20, speedDeg = 60, to
       hint={i18nT('화면의 동그라미 위에서 손가락(마우스)을 눌러 빙글빙글 돌려요. 빛나는 점을 가까이 따라가면 상모가 돌아요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { cursor: 'pointer' }]}>
+        <Madang variant="court" seed={11} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <View style={[st.orbit, { left: CX - R, top: CY - R, width: R * 2, height: R * 2, borderRadius: R, borderColor: color }]} />
           <Image source={PUNG} resizeMode="contain" style={[st.hat, { left: CX - 46, top: CY - 46, transform: [{ rotate: `${q.hat}deg` }] }]} />
@@ -244,14 +247,14 @@ export function MarbleGame({ color, onComplete, targets = 3, shots = 8 }) {
       hint={i18nT('아래쪽 내 구슬(색 구슬)을 꾹 눌러 뒤로 끌었다가 놓으면 반대쪽으로 튕겨요. 많이 끌수록 세게 가요. 동그라미 안의 구슬을 밖으로 내보내요.')}
     >
       <View ref={pad.ref} {...pad.handlers} style={S.stage}>
+        <Madang variant="court" seed={12} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <View style={[st.ring, { left: CX - RING, top: CY - 10 - RING, width: RING * 2, height: RING * 2, borderRadius: RING }]} />
           {q.m.map((b, i) =>
             b.out && !b.me ? null : (
-              <View
-                key={i}
-                style={[st.marble, { left: b.x - MR, top: b.y - MR, width: MR * 2, height: MR * 2, borderRadius: MR, backgroundColor: b.me ? color : ['#3f6f8f', '#6b8f3c', '#8a4f8a', '#b08a4a'][i % 4] }]}
-              />
+              <View key={i} style={{ position: 'absolute', left: b.x - MR, top: b.y - MR }}>
+                <Marble size={MR * 2} color={b.me ? '#c1592f' : ['#2b5f8e', '#2c7a64', '#7a3f8a', '#c8982b'][i % 4]} />
+              </View>
             )
           )}
           {aim && me
@@ -342,6 +345,7 @@ export function TopGame({ color, onComplete, targetHits = 12, lives = 3, drift =
       hint={i18nT('팽이가 기우는 쪽 화면을 눌러 채로 쳐서 세워요. 반대쪽을 치면 더 기울어요.')}
     >
       <View style={S.stage}>
+        <Madang variant="court" seed={13} />
         <View style={st.topFloor} />
         <View style={[st.topZone, { left: 0, backgroundColor: q.lean < -0.12 ? 'rgba(193,89,47,0.16)' : 'transparent' }]}>
           <Pressable style={st.zonePress} onPress={() => hit(-1)}><Text style={st.zoneTxt}>{i18nT('◀ 왼쪽을 쳐요')}</Text></Pressable>
@@ -437,6 +441,7 @@ export function StoneBalanceGame({ color, onComplete, holdSec = 4, maxDrops = 6 
       hint={i18nT('화면의 왼쪽을 누르면 돌이 왼쪽으로, 오른쪽을 누르면 오른쪽으로 밀려요. 초록 칸 안에 돌을 두면 게이지가 차요. (키보드는 ← →)')}
     >
       <View ref={pad.ref} {...pad.handlers} style={S.stage}>
+        <Madang variant="yard" seed={14} ground={0.7} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <View style={st.ladder}>
             {POSES.map((p, i) => (

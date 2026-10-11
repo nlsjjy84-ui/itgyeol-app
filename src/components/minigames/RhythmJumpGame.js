@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAutoStart } from '../../ui/Mission';
 import { View, StyleSheet, Pressable, Animated, Easing } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
+import Madang from '../../ui/Madang';
 import { useTapKey } from '../../utils/useTapKey';
 import Mascot from '../Mascot';
 import { jangdanForPeriod } from '../../data/jangdan';
@@ -171,6 +173,7 @@ export default function RhythmJumpGame({
       setCycleT(cycleTRef.current);
     }, 30);
   };
+  useAutoStart(phase === 'ready', start);
 
   const handleTap = () => {
     if (phase !== 'running') return;
@@ -254,11 +257,25 @@ export default function RhythmJumpGame({
 
       {/* 실제 게임 필드 — 캐릭터가 직접 줄을 넘는 모습이 여기 들어간다 */}
       <View style={[styles.field, { borderColor: mainColor }]}>
+        <Madang variant="yard" seed={5} ground={0.746} />
+        {/* 줄을 돌리는 두 친구 (한복 저고리·바지) */}
+        {[{ side: 'left', c: '#2b5f8e' }, { side: 'right', c: '#b3322b' }].map((k) => (
+          <View key={k.side} pointerEvents="none" style={{ position: 'absolute', bottom: GROUND_BOTTOM, [k.side]: 4, alignItems: 'center' }}>
+            <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: '#f0d2ad', borderWidth: 1.2, borderColor: '#3a2a1a' }} />
+            <View style={{ width: 22, height: 20, marginTop: 1, borderTopLeftRadius: 7, borderTopRightRadius: 7, backgroundColor: k.c }} />
+            <View style={{ flexDirection: 'row', gap: 3 }}>
+              <View style={{ width: 7, height: 14, backgroundColor: '#efe6d2' }} />
+              <View style={{ width: 7, height: 14, backgroundColor: '#efe6d2' }} />
+            </View>
+          </View>
+        ))}
         <Animated.View
           style={[
             styles.rope,
             {
-              backgroundColor: mainColor,
+              backgroundColor: '#9c7a45',
+              borderColor: '#5e4520',
+              borderWidth: 1,
               bottom: ROPE_BASE_BOTTOM,
               transform: [{ translateY: ropeTranslateY }],
             },
@@ -340,10 +357,10 @@ const styles = StyleSheet.create({
   },
   rope: {
     position: 'absolute',
-    left: '8%',
-    width: '84%',
-    height: 10,
-    borderRadius: 5,
+    left: '9%',
+    width: '82%',
+    height: 6,
+    borderRadius: 3,
   },
   ground: {
     position: 'absolute',
