@@ -20,6 +20,11 @@ if exist "%SRC%" powershell -NoProfile -Command "Expand-Archive -Force -LiteralP
 if errorlevel 1 (echo UNZIP FAILED & pause & exit /b 1)
 echo [3/6] npm install
 call npm install
+echo [3b] tests and translation check (fail = nothing is pushed)
+call npm test
+if errorlevel 1 (echo TESTS FAILED - nothing was pushed. Tell Claude & pause & exit /b 1)
+call npm run i18n:check
+if errorlevel 1 (echo TRANSLATION FILE BROKEN - nothing was pushed. Tell Claude & pause & exit /b 1)
 echo [4/6] commit and push redesign-ui
 rem Save the newest bat into the repo so every branch has the same copy
 copy /y "%~f0" "%DST%apply-and-publish.bat" >nul

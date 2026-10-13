@@ -27,6 +27,8 @@ import { REAL_PHOTOS } from '../data/realPhotos';
 import { getLang } from '../i18n';
 import { linkedArchive } from '../data/archiveLinks';
 import { ArchiveDetail, entryName } from './ArchiveScreen';
+import TakeHome from '../components/TakeHome';
+import { carryUrl } from '../utils/carry';
 
 const SCENE_LABEL = {
   jinbeop: '진법',
@@ -82,8 +84,10 @@ function TextureArt({ mode, attempts, size }) {
 }
 
 export default function ResultScreen({ navigation }) {
-  const { attempts, skills, progress, playLog } = useJourney();
+  const { attempts, skills, progress, playLog, exhibit, setExhibit } = useJourney();
   const shotRef = useRef(null);
+  const scrollRef = useRef(null);
+  const [takeY, setTakeY] = useState(0);
   const [saveStatus, setSaveStatus] = useState('');
   const [archOpen, setArchOpen] = useState(null);
   useEffect(() => {
@@ -204,7 +208,7 @@ export default function ResultScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <ScreenHeader title="나만의 결과물" sub="완성한 판이 하나의 작품이 돼요" onBack={() => navigation.navigate('Home')} />
         <StoryScene
           art="sunset"
@@ -342,13 +346,22 @@ export default function ResultScreen({ navigation }) {
           <Text style={styles.primaryBtnText}>{t('이미지로 저장하기')}</Text>
         </Pressable>
         {!!saveStatus && <Text style={styles.status}>{saveStatus}</Text>}
+        {selected ? (
+          <Pressable
+            style={styles.jumpBtn}
+            onPress={() => { play('tap'); if (scrollRef.current) scrollRef.current.scrollTo({ y: Math.max(0, takeY - 12), animated: true }); }}
+          >
+            <Text style={styles.jumpTxt}>{t('가져가는 방법 보기 · 사진·키링·3D 모형 ↓')}</Text>
+          </Pressable>
+        ) : null}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('QR코드로 가져가기')}</Text>
+          <Text style={styles.sectionTitle}>{t('QR로 집에서 이어서 하기')}</Text>
           <View style={styles.qrBox}>
-            <QRCode value={code} size={120} color={colors.ink} backgroundColor={colors.paper} />
+            <QRCode value={carryUrl({ attempts, playLog })} size={150} color="#1b2227" backgroundColor="#ffffff" />
           </View>
-          <Text style={styles.sectionHint}>{t('이 QR을 찍으면 내가 고른 결과 코드를 확인할 수 있어요.')}</Text>
+          <Text style={styles.sectionHint}>{t('집에서 이 QR을 찍으면 내 작품이 그대로 열려요. 거기서 판을 더 놀 수 있어요.')}</Text>
+          <Text style={styles.sectionHint}>{t('결과 코드')} · {code}</Text>
         </View>
 
         <View style={styles.section}>
@@ -502,6 +515,20 @@ export default function ResultScreen({ navigation }) {
           </View>
         </View>
 
+        {/* 가져가는 방법 — 싼 것부터: 무료 저장 → 사진 → 키링 → 3D 모형, 받는 방법, 전시 동의 */}
+        {selected ? (
+          <View style={styles.section} onLayout={(e) => setTakeY(e.nativeEvent.layout.y)}>
+            <TakeHome
+              onHall={() => navigation.navigate('Exhibit')}
+              code={code}
+              shapeLabel={`${item.label} · ${variant.label}`}
+              isKeyring={groupId === 'keyring'}
+              entry={(exhibit || []).find((e) => e.code === code) || null}
+              onExhibit={(patch) => setExhibit(code, patch ? { ...patch, attempts: selectedAttempts } : null)}
+            />
+          </View>
+        ) : null}
+
         <ArchiveDetail entry={archOpen} onClose={() => setArchOpen(null)} />
         <Pressable style={styles.secondaryBtn} onPress={() => navigation.popToTop()}>
           <Text style={styles.secondaryBtnText}>{t('홈으로')}</Text>
@@ -612,6 +639,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnDisabled: { opacity: 0.5 },
+  jumpBtn: { marginTop: 10, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 999, borderWidth: 1.5, borderColor: colors.accent, backgroundColor: colors.paper },
+  jumpTxt: { fontSize: 12.5, fontWeight: '800', color: colors.accent },
   primaryBtnText: { color: '#fff', fontWeight: '700' },
   status: { marginTop: 8, fontSize: 11.5, color: colors.muted },
   attentionBox: {
@@ -649,7 +678,7 @@ const styles = StyleSheet.create({
   sectionHint: { fontSize: 11, color: colors.muted, marginTop: 8, textAlign: 'center' },
   qrBox: {
     padding: 14,
-    backgroundColor: colors.paper,
+    backgroundColor: '#ffffff',
     borderRadius: 6,
     borderWidth: 1,
     borderColor: colors.border,
