@@ -92,6 +92,24 @@ function Picto({ kind, s, fg }) {
         </G>
       );
       break;
+    case 'frame': // 액자 — 전시관
+      body = (
+        <G {...p}>
+          <Rect x="3.5" y="5" width="17" height="14" rx="0.8" />
+          <Rect x="6.5" y="8" width="11" height="8" rx="0.4" />
+          <Path d="M9 3l3 2 3-2" />
+        </G>
+      );
+      break;
+    case 'phone': // 휴대폰 — 내 폰으로 하기
+      body = (
+        <G {...p}>
+          <Rect x="7" y="3" width="10" height="18" rx="2" />
+          <Path d="M10.5 18h3" />
+          <Rect x="9.5" y="7" width="5" height="5" rx="0.4" />
+        </G>
+      );
+      break;
     case 'colors': // 오방색 띠 — 단청
       body = (
         <G>

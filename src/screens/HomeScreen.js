@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+import { SITE_URL } from '../utils/carry';
+import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, useWindowDimensions } from 'react-native';
 import Text from '../ui/Text';
 import MascotDuo from '../components/MascotDuo';
 import OhangPicker from '../components/OhangPicker';
@@ -15,6 +17,7 @@ import { play } from '../utils/sound';
 import { PART_OF_CARD } from '../data/book';
 import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
+import HomeNumbers from '../components/HomeNumbers';
 
 // 판 도장 — 그림(누구나 알아봄) + 우리말 한 글자(도장 귀퉁이)
 const SEAL = { jinbeop: ['circle', '진'], print: ['type', '글'], tbd: ['top', '놀'], hangul: ['blocks', '쌓'], talchum: ['mask', '탈'], mask: ['mask', '탈'], dancheong: ['colors', '색'], pattern: ['colors', '색'] };
@@ -82,7 +85,10 @@ const CARDS = [
 ];
 
 export default function HomeScreen({ navigation, route }) {
-  const { skills, book } = useJourney();
+  const { skills, book, attempts, exhibit, carried } = useJourney();
+  const { width: winW } = useWindowDimensions();
+  // 넓은 화면(키오스크·태블릿)에서는 맨 위에 "내 폰으로" QR을 띄워 줄을 줄인다.
+  const kiosk = winW >= 700;
   // [1,2,3에 적용한 걸 결과물에도] 와 같은 논리 — 홈 화면의 두 캐릭터도 지금까지
   // 실제로 쌓인 숙련도(skills)를 시그모이드로 눌러 존재감(링 밝기)으로 드러낸다.
   const { pungValue, gyeolValue } = useMemo(() => {
@@ -129,6 +135,31 @@ export default function HomeScreen({ navigation, route }) {
       <Text style={styles.subtitle}>
         {t('손끝으로 만나는 네 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.')}
       </Text>
+      {carried ? (
+        <Pressable onPress={() => { play('stamp'); navigation.navigate('Result'); }}>
+          <Frame accent={colors.green} style={{ marginTop: 14 }}>
+            <Text style={styles.carryTitle}>{t('박물관에서 만든 작품을 가져왔어요')}</Text>
+            <Text style={styles.carryText}>{t('집에서도 판을 더 놀면 작품이 계속 자라요. 눌러서 내 결과물을 보세요 ›')}</Text>
+          </Frame>
+        </Pressable>
+      ) : null}
+      {kiosk ? (
+        <Pressable onPress={() => navigation.navigate('Kiosk')}>
+          <Frame style={{ marginTop: 14 }}>
+            <View style={styles.kioskRow}>
+              <View style={styles.kioskQr}>
+                <QRCode value={SITE_URL} size={96} color="#1b2227" backgroundColor="#ffffff" />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.carryTitle}>{t('줄 서지 말고 내 폰으로')}</Text>
+                <Text style={styles.carryText}>{t('QR을 찍으면 구경하면서 할 수 있어요. 결과물은 굿즈숍에서 찾거나 택배로 받아요.')}</Text>
+              </View>
+            </View>
+          </Frame>
+        </Pressable>
+      ) : null}
+      {/* 숫자를 먼저 — 한 판 시간, 놀이 수, 자료 수, 언어 수, 예시 작품 그래프 */}
+      <HomeNumbers attempts={attempts} exhibit={exhibit} onGallery={() => navigation.navigate('Gallery')} onResult={() => navigation.navigate('Result')} onHall={() => navigation.navigate('Exhibit')} />
       {route && route.params && route.params.tour ? (
         <QuickTourCard navigation={navigation} onClose={() => navigation.setParams({ tour: false })} />
       ) : null}
@@ -202,6 +233,14 @@ export default function HomeScreen({ navigation, route }) {
           <SealIcon kind="idea" letter="고" size={48} tilt={false} />
           <Text style={styles.exploreTxt}>{t('떠오르는 것 다시 고르기')}</Text>
         </Pressable>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Exhibit'); }}>
+          <SealIcon kind="frame" letter="전" size={48} tilt={false} />
+          <Text style={styles.exploreTxt}>{t('잇결 전시관')}</Text>
+        </Pressable>
+        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Kiosk'); }}>
+          <SealIcon kind="phone" letter="폰" size={48} tilt={false} />
+          <Text style={styles.exploreTxt}>{t('내 폰으로 하기 QR')}</Text>
+        </Pressable>
       </View>
 
       {/* [체험 확장 근거] "다른 방향의 체험도 할 수 있다"는 말만으로는 근거가 안 되므로,
@@ -236,6 +275,10 @@ export default function HomeScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  carryTitle: { fontSize: 15, fontWeight: '800', color: colors.ink },
+  carryText: { fontSize: 12.5, color: colors.muted, marginTop: 4, lineHeight: 18 },
+  kioskRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  kioskQr: { padding: 6, backgroundColor: '#ffffff', borderRadius: 3 },
   exploreRow: { flexDirection: 'row', gap: 8, justifyContent: 'space-between', marginTop: 4, marginBottom: 10, flexWrap: 'wrap' },
   exploreBtn: { width: '48.5%', flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderBottomWidth: 3, borderColor: colors.ink, backgroundColor: colors.paper },
   exploreIcon: { fontSize: 24, color: colors.accent, lineHeight: 28, width: 26, textAlign: 'center' },

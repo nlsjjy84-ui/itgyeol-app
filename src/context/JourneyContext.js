@@ -2,6 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OHANG, pickTodayOhang } from '../data/formations';
 import { computeProgress } from '../utils/progress';
+import { readCarryOnce, mergeAttempts, mergeLog } from '../utils/carry';
+import { nextExhibit, cleanExhibit } from '../utils/exhibit';
 
 export const JourneyContext = createContext(null);
 const STORAGE_KEY = 'itgyeol_journey_v1';
@@ -17,6 +19,9 @@ const PLAYLOG_KEY = 'itgyeol_playlog_v1';
 // 그림책: 프롤로그를 봤는지, 판마다 입구 이야기를 봤는지, 이야기 중에 고른 반응.
 const BOOK_KEY = 'itgyeol_book_v1';
 const BOOK_EMPTY = { prologue: false, gates: {}, choice: {} };
+// 전시해도 된다고 동의한 작품 목록 — [{code, attempts, nick, country, at}].
+// 결과 화면에서 켜고 끄고, 전시관 화면과 홈의 "내 기록"에 보인다. 이름은 받지 않고 별명·나라만.
+const EXHIBIT_KEY = 'itgyeol_exhibit_v1';
 // 놀이별 숙련도 점수의 범위 — -3(많이 헤맴) ~ +3(많이 능숙함). 7단계면 체감 차이를
 // 주기에 충분하고, 한두 판 실수했다고 극단으로 튀지 않을 만큼 좁다.
 const SKILL_MIN = -3;
@@ -33,6 +38,8 @@ function safeGetItem(key, timeoutMs = 1200) {
 // 앱 전체에서 공유하기 위한 저장소. 각 판을 완성할 때마다 결과(attempt)를
 // 하나씩 추가하면, 결과 화면에서는 쌓인 결과들을 레이어로 겹쳐 보여준다.
 export function JourneyProvider({ children }) {
+  // 집에서 QR로 열었으면(?w=) 박물관에서 만든 기록을 한 번 가져온다.
+  const [carried] = useState(() => readCarryOnce());
   const [attempts, setAttempts] = useState([]);
   const [loaded, setLoaded] = useState(false);
   // [지능형 난이도] 놀이(game.id)별 숙련도 점수 — 성공할 때마다 조금씩 오르고
@@ -52,6 +59,7 @@ export function JourneyProvider({ children }) {
   const [playLog, setPlayLog] = useState({ byGame: {}, byScene: {} });
   // 그림책 진행 — null이면 아직 읽는 중
   const [book, setBookState] = useState(null);
+  const [exhibit, setExhibitState] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -64,6 +72,13 @@ export function JourneyProvider({ children }) {
         } catch (e) {
           // 저장된 값이 깨져있으면 무시하고 새로 시작
         }
+      }
+      if (carried && carried.attempts.length) {
+        setAttempts((prev) => {
+          const next = mergeAttempts(prev, carried.attempts);
+          AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+          return next;
+        });
       }
       setLoaded(true);
     });
@@ -97,13 +112,19 @@ export function JourneyProvider({ children }) {
       setTasteState(v);
     });
     safeGetItem(PLAYLOG_KEY).then((raw) => {
-      if (!mounted || !raw) return;
+      if (!mounted) return;
+      let cur = { byGame: {}, byScene: {} };
       try {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.byGame && parsed.byScene) setPlayLog(parsed);
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (parsed && parsed.byGame && parsed.byScene) cur = parsed;
       } catch (e) {
         // 손상된 값은 무시
       }
+      if (carried) {
+        cur = mergeLog(cur, carried.playLog);
+        AsyncStorage.setItem(PLAYLOG_KEY, JSON.stringify(cur)).catch(() => {});
+      }
+      setPlayLog(cur);
     });
     safeGetItem(BOOK_KEY).then((raw) => {
       if (!mounted) return;
@@ -115,6 +136,15 @@ export function JourneyProvider({ children }) {
         // 손상된 값은 무시
       }
       setBookState(v);
+    });
+    safeGetItem(EXHIBIT_KEY).then((raw) => {
+      if (!mounted || !raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        setExhibitState(cleanExhibit(parsed));
+      } catch (e) {
+        // 손상된 값은 무시
+      }
     });
     safeGetItem(OHANG_KEY).then((raw) => {
       if (!mounted) return;
@@ -189,6 +219,16 @@ export function JourneyProvider({ children }) {
     });
   }, []);
 
+  // 작품 하나를 전시 후보로 올리거나(entry: {code, attempts, nick, country}) 내린다(code만).
+  // 같은 코드가 이미 있으면 별명·나라만 고친다.
+  const setExhibit = useCallback((code, entry) => {
+    setExhibitState((prev) => {
+      const next = nextExhibit(prev, code, entry);
+      AsyncStorage.setItem(EXHIBIT_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  }, []);
+
   const resetJourney = useCallback(() => {
     setAttempts([]);
     AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
@@ -196,7 +236,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds) }}
+      value={{ attempts, addResult, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds), exhibit, setExhibit, carried: !!(carried && carried.attempts.length) }}
     >
       {children}
     </JourneyContext.Provider>

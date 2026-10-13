@@ -2,10 +2,11 @@
 // 1) 코드 안의 t('…') / tr('…') 문장과 영어팩의 문장 목록을 모아서, 언어별로 빠진 번역을 찾는다.
 // 2) 물건·선택지·놀이 이름 같은 자료 번역도 영어팩과 같은 항목이 다 있는지 본다.
 // 3) 그림책(book_*.js)의 쪽 수·대사 수가 영어판과 같은지 본다.
+// 윈도우(D:\...)에서도 돌도록 파일 경로는 file:// 주소로 바꿔 불러온다.
 // 빠진 번역은 앱에서 한국어로 보이므로 배포는 멈추지 않는다(--strict를 주면 실패로 처리).
 import { readFileSync, readdirSync, statSync, appendFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = join(root, 'src');
@@ -40,9 +41,9 @@ for (const f of walk(src)) {
 }
 
 const packs = {};
-for (const l of LANGS) packs[l] = (await import(join(src, 'i18n', `${l}.js`))).default;
+for (const l of LANGS) packs[l] = (await import(pathToFileURL(join(src, 'i18n', `${l}.js`)).href)).default;
 const books = {};
-for (const l of LANGS) books[l] = (await import(join(src, 'i18n', `book_${l}.js`))).default;
+for (const l of LANGS) books[l] = (await import(pathToFileURL(join(src, 'i18n', `book_${l}.js`)).href)).default;
 
 const allKeys = new Set([...found, ...Object.keys(packs.en.ui)]);
 const lines = ['## 언어팩 점검 (Translation check)', ''];

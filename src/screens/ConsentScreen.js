@@ -12,8 +12,9 @@ export default function ConsentScreen({ onAgree }) {
         <LangToggle style={{ alignSelf: 'flex-end', marginBottom: 6 }} />
         <Text style={styles.title}>{t('시작하기 전에')}</Text>
         <Text style={styles.body}>
-          {t('이 앱에서 여러분이 만든 대형·결과물은 전시 및 포트폴리오 목적으로 활용될 수 있습니다. 개인을 식별할 수 있는 정보는 수집하지 않으며, 화면에서 만든 결과(진법 모양, 오늘의 기운 등)만 기록됩니다.')}
+          {t('이 앱은 놀이 기록(어떤 놀이를 했는지, 만든 모양)만 이 기기에 남겨요. 이름이나 연락처 같은 개인 정보는 모으지 않아요.')}
         </Text>
+        <Text style={styles.body}>{t('내 작품을 전시할지는 결과 화면에서 작품마다 직접 골라요. 고르지 않으면 전시되지 않아요.')}</Text>
         <Text style={styles.body}>{t('동의하시면 체험을 시작할 수 있어요.')}</Text>
         <Pressable style={styles.btn} onPress={onAgree}>
           <Text style={styles.btnText}>{t('동의하고 시작하기')}</Text>

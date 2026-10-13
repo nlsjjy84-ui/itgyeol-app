@@ -87,6 +87,10 @@ export function MissionCard({ info, onStart, onStartFree, startLabel }) {
         </View>
       ) : null}
       {info.tip ? <Text style={styles.tip}>{i18nT(info.tip)}</Text> : null}
+      {/* 전시 기대감 — 판마다 시작 전에 한 줄 */}
+      <View style={styles.exhibitLine}>
+        <Text style={styles.exhibitTxt}>{t('마음에 들면 내 작품이 전시될 수 있어요')}</Text>
+      </View>
       <View style={styles.btns}>
         <SealButton label={startLabel || t('시작하기')} onPress={onStart} />
         <Pressable onPress={onStartFree} hitSlop={8} style={styles.free}>
@@ -161,6 +165,8 @@ const styles = StyleSheet.create({
   stepNoText: { color: colors.bg, fontSize: 13, fontWeight: '700' },
   stepText: { flex: 1, fontSize: 15, color: colors.ink, lineHeight: 22 },
   tip: { fontSize: 12, color: colors.muted, lineHeight: 18, marginBottom: 10 },
+  exhibitLine: { alignSelf: 'center', borderWidth: 1, borderColor: colors.hwang, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5, marginBottom: 12 },
+  exhibitTxt: { fontSize: 12, fontWeight: '800', color: colors.ink },
   btns: { gap: 10, marginTop: 4 },
   free: { alignItems: 'center', paddingVertical: 6 },
   freeText: { fontSize: 13, color: colors.muted, textDecorationLine: 'underline' },
