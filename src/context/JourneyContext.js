@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { mergeSenses } from '../utils/senseMath';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OHANG, pickTodayOhang } from '../data/formations';
 import { computeProgress } from '../utils/progress';
@@ -196,9 +197,19 @@ export function JourneyProvider({ children }) {
     });
   }, []);
 
+  // 몸짓·표정·감탄사(동의한 사람만) — 놀이 화면을 나갈 때 잰 값을 기록에 더한다. 횟수와 세기만 남는다.
+  const addSenses = useCallback((data) => {
+    if (!data) return;
+    setPlayLog((prev) => {
+      const next = { ...prev, senses: mergeSenses(prev.senses, data) };
+      AsyncStorage.setItem(PLAYLOG_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  }, []);
+
   const addResult = useCallback((attempt) => {
     setPlayLog((prev) => {
-      const next = { byGame: { ...prev.byGame }, byScene: { ...prev.byScene } };
+      const next = { ...prev, byGame: { ...prev.byGame }, byScene: { ...prev.byScene } };
       next.byScene[attempt.sceneId] = (next.byScene[attempt.sceneId] || 0) + 1;
       if (attempt.sceneId === 'tbd') next.byGame[attempt.formationId] = (next.byGame[attempt.formationId] || 0) + 1;
       AsyncStorage.setItem(PLAYLOG_KEY, JSON.stringify(next)).catch(() => {});
@@ -236,7 +247,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds), exhibit, setExhibit, carried: !!(carried && carried.attempts.length) }}
+      value={{ attempts, addResult, addSenses, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds), exhibit, setExhibit, carried: !!(carried && carried.attempts.length) }}
     >
       {children}
     </JourneyContext.Provider>

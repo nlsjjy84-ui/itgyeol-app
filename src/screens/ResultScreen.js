@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform, TextInput, useWindowDimensions, Image } from 'react-native';
 import Text from '../ui/Text';
 import QRCode from 'react-native-qrcode-svg';
@@ -6,6 +6,8 @@ import ViewShot from 'react-native-view-shot';
 import ResultPattern from '../components/ResultPattern';
 import MascotDuo from '../components/MascotDuo';
 import Obj3DViewer from '../components/obj3d/Obj3DViewer';
+import { exportPrintFile } from '../components/obj3d/kit';
+import { describeShape } from '../utils/shapeStory';
 import { makeDna, dnaSummary } from '../utils/shapeDna';
 import { CATALOG, findItem } from '../components/obj3d/catalog';
 import TransformResultShape from '../components/TransformResultShape';
@@ -28,6 +30,8 @@ import { getLang } from '../i18n';
 import { linkedArchive } from '../data/archiveLinks';
 import { ArchiveDetail, entryName } from './ArchiveScreen';
 import TakeHome from '../components/TakeHome';
+import { productKey } from '../utils/order';
+import SurpriseGift from '../components/SurpriseGift';
 import { carryUrl } from '../utils/carry';
 
 const SCENE_LABEL = {
@@ -76,9 +80,19 @@ function ResultArt({ mode, attempts, size }) {
   return <ResultPattern attempts={attempts} size={size} />;
 }
 
+// 물건마다 무늬를 입히는 전통 기법(catalog의 craft)
+const CRAFT_TEXT = {
+  jogakbo: () => t('조각보 — 비단 조각을 이어 붙인 보자기'),
+  sanggam: () => t('청자 상감 — 비색 바탕에 흰 흙·검은 흙을 메운 무늬'),
+  cheonghwa: () => t('백자 청화 — 흰 바탕에 푸른 안료로 그린 무늬'),
+  najeon: () => t('나전칠기 — 검은 옻칠에 자개를 오려 붙인 무늬'),
+  dancheong: () => t('단청 — 건물에 칠하는 주홍·청·녹 색띠와 무늬'),
+  ipsa: () => t('금은 입사 — 쇠 바탕에 금실·은실을 박아 넣은 무늬'),
+};
+
 // 3D 물건에 입힐 그림 — 네모 꽉 찬 한 장(원형 테두리 없이)
-function TextureArt({ mode, attempts, size }) {
-  if (mode === 'jogakbo') return <Jogakbo attempts={attempts} size={size} shape="square" />;
+function TextureArt({ mode, attempts, size, craft, plain }) {
+  if (mode === 'jogakbo') return <Jogakbo attempts={attempts} size={size} shape="square" craft={craft} plain={plain} />;
   if (mode === 'transform') return <TransformResultShape attempts={attempts} size={size} />;
   return <ResultPattern attempts={attempts} size={size} />;
 }
@@ -86,6 +100,10 @@ function TextureArt({ mode, attempts, size }) {
 export default function ResultScreen({ navigation }) {
   const { attempts, skills, progress, playLog, exhibit, setExhibit } = useJourney();
   const shotRef = useRef(null);
+  // 화면에 보이는 3D 물체(출력 파일로 그대로 내보낸다). 상태가 아니라 ref라 다시 그리지 않는다.
+  const printObj = useRef(null);
+  const onPrintReady = useCallback((o) => { printObj.current = o; }, []);
+  const [printMsg, setPrintMsg] = useState('');
   const scrollRef = useRef(null);
   const [takeY, setTakeY] = useState(0);
   const [saveStatus, setSaveStatus] = useState('');
@@ -102,6 +120,7 @@ export default function ResultScreen({ navigation }) {
   const selectedAttempts = selected ? selected.attempts : [];
   const code = selected ? resultOptionCode(selectedAttempts) : 'ITGYEOL-----';
   const dna = useMemo(() => makeDna(selectedAttempts, playLog), [selectedAttempts, playLog]);
+  const printRecord = useMemo(() => ({ attempts: selectedAttempts, log: playLog }), [selectedAttempts, playLog]);
   const bySceneId = Object.fromEntries(attempts.map((a) => [a.sceneId, a]));
   const orderedSolved = SCENE_ORDER.map((id) => bySceneId[id]).filter(Boolean);
   const solvedCount = orderedSolved.length;
@@ -121,7 +140,7 @@ export default function ResultScreen({ navigation }) {
   const { width: winW } = useWindowDimensions();
   const viewerW = Math.min(360, Math.max(260, winW - 44));
   const [groupId, setGroupId] = useState('keyring');
-  const [itemId, setItemId] = useState('norigae');
+  const [itemId, setItemId] = useState('mypae');
   const [variantId, setVariantId] = useState(null);
   const [hookOn, setHookOn] = useState(true);
   const { group, item } = findItem(groupId, itemId);
@@ -412,19 +431,60 @@ export default function ResultScreen({ navigation }) {
           ) : null}
 
           <Obj3DViewer
-            art={<TextureArt mode={patternMode} attempts={selectedAttempts} size={256} />}
+            art={<TextureArt mode={patternMode} attempts={selectedAttempts} size={256} craft={item.craft} plain={!!item.shaped} />}
             artSize={256}
             build={variant.build}
             hook={group.hook && hookOn}
             dna={dna}
             width={viewerW}
             height={Math.round(viewerW * 1.05)}
-            resetKey={`${patternMode}|${selectedKey || ''}|${selectedAttempts.length}|${dna.code}`}
+            resetKey={`${patternMode}|${selectedKey || ''}|${selectedAttempts.length}|${dna.code}|${item.craft || ''}`}
+            onReady={onPrintReady}
+            record={printRecord}
+            printable={group.print3d !== false}
+            longMm={item.longMm || group.longMm || 50}
           />
+          {Platform.OS === 'web' && group.print3d !== false ? (
+            <Pressable
+              style={styles.hookBtn}
+              onPress={async () => {
+                play('tap');
+                if (!printObj.current) { setPrintMsg(t('3D 모델이 다 만들어진 뒤에 눌러 주세요.')); return; }
+                try {
+                  const longMm = item.longMm || group.longMm || 50;
+                  const { data, mm, realParts } = await exportPrintFile(printObj.current, { longMm });
+                  const url = URL.createObjectURL(new Blob([data], { type: 'model/gltf-binary' }));
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `itgyeol-${dna.code}-${item.id}-${variant.id}.glb`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  setTimeout(() => URL.revokeObjectURL(url), 4000);
+                  setPrintMsg(t('출력용 파일을 만들었어요 · {x}×{y}×{z}mm · 실로 다는 술·매듭 {n}개와 쇠 고리는 파일에서 빼고 따로 달아요.', { x: Math.round(mm.x), y: Math.round(mm.y), z: Math.round(mm.z), n: realParts.thread }));
+                } catch (e) {
+                  setPrintMsg(t('출력용 파일을 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.'));
+                }
+              }}
+            >
+              <Text style={styles.hookBtnText}>{t('업체에 보낼 출력용 3D 파일 (.glb)')}</Text>
+            </Pressable>
+          ) : null}
+          {printMsg ? <Text style={styles.dnaLine}>{printMsg}</Text> : null}
+          {patternMode === 'jogakbo' && CRAFT_TEXT[item.craft || 'jogakbo'] ? (
+            <Text style={styles.dnaLine}>{t('무늬 기법')} · {CRAFT_TEXT[item.craft || 'jogakbo']()}</Text>
+          ) : null}
           {dna.k ? (
             <View style={styles.dnaBox}>
               <Text style={styles.dnaLine}>{t('이 작품만의 형태')} · #{dna.code} — {dnaSummary(dna)}</Text>
-              {dna.traits && dna.traits.length > 0 ? (
+              {item.shaped ? (
+                <View style={styles.dnaList}>
+                  {describeShape(item.id, selectedAttempts, playLog).map((x) => (
+                    <Text key={x} style={styles.dnaTrait}>· {x}</Text>
+                  ))}
+                </View>
+              ) : null}
+              {!item.shaped && dna.traits && dna.traits.length > 0 ? (
                 <View style={styles.dnaList}>
                   {dna.traits.slice(0, 8).map((t) => (
                     <Text key={t} style={styles.dnaTrait}>· {t}</Text>
@@ -515,6 +575,11 @@ export default function ResultScreen({ navigation }) {
           </View>
         </View>
 
+        {/* 깜짝 선물 — 놀이 중 반응이 컸던 순간의 사진(카메라를 허용한 사람만, 저장 안 하면 사라짐) */}
+        <View style={styles.section}>
+          <SurpriseGift title={`${item.label}`} code={code} />
+        </View>
+
         {/* 가져가는 방법 — 싼 것부터: 무료 저장 → 사진 → 키링 → 3D 모형, 받는 방법, 전시 동의 */}
         {selected ? (
           <View style={styles.section} onLayout={(e) => setTakeY(e.nativeEvent.layout.y)}>
@@ -522,7 +587,8 @@ export default function ResultScreen({ navigation }) {
               onHall={() => navigation.navigate('Exhibit')}
               code={code}
               shapeLabel={`${item.label} · ${variant.label}`}
-              isKeyring={groupId === 'keyring'}
+              product={productKey(groupId, item.id)}
+              printable={group.print3d !== false}
               entry={(exhibit || []).find((e) => e.code === code) || null}
               onExhibit={(patch) => setExhibit(code, patch ? { ...patch, attempts: selectedAttempts } : null)}
             />

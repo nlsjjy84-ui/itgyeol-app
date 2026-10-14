@@ -60,7 +60,8 @@ export function b64decode(s) {
 // 판 기록을 짧게: [판, 문제, 짝맞춤, 기운, 속도, 시드]
 export function packJourney({ attempts = [], playLog } = {}) {
   const a = attempts.map((x) => [x.sceneId, x.formationId, x.mappingCode, x.ohangKey, x.speed, x.seed]);
-  const p = playLog ? [playLog.byGame || {}, playLog.byScene || {}] : [{}, {}];
+  // 셋째 칸: 몸짓·표정·감탄사 횟수와 세기(있을 때만) — 집에서 열어도 같은 모양이 나오게 함께 옮긴다
+  const p = playLog ? [playLog.byGame || {}, playLog.byScene || {}, ...(playLog.senses ? [playLog.senses] : [])] : [{}, {}];
   return b64encode(JSON.stringify({ v: 1, a, p }));
 }
 
@@ -75,7 +76,9 @@ export function unpackJourney(code) {
       }));
     const num = (m) => Object.fromEntries(Object.entries(m && typeof m === 'object' ? m : {}).filter(([, v]) => Number.isFinite(v)));
     const p = Array.isArray(o.p) ? o.p : [{}, {}];
-    return { attempts, playLog: { byGame: num(p[0]), byScene: num(p[1]) } };
+    const playLog = { byGame: num(p[0]), byScene: num(p[1]) };
+    if (p[2] && typeof p[2] === 'object') playLog.senses = num(p[2]);
+    return { attempts, playLog };
   } catch (e) {
     return null;
   }
@@ -115,5 +118,7 @@ export function mergeLog(cur = { byGame: {}, byScene: {} }, inc = { byGame: {}, 
     Object.entries(b || {}).forEach(([k, v]) => { o[k] = Math.max(o[k] || 0, v); });
     return o;
   };
-  return { byGame: mx(cur.byGame, inc.byGame), byScene: mx(cur.byScene, inc.byScene) };
+  const out = { byGame: mx(cur.byGame, inc.byGame), byScene: mx(cur.byScene, inc.byScene) };
+  if (cur.senses || inc.senses) out.senses = mx(cur.senses, inc.senses);
+  return out;
 }
