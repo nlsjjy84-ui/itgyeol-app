@@ -14,3 +14,14 @@ export function nextExhibit(prev, code, entry, now = Date.now()) {
 export function cleanExhibit(raw) {
   return Array.isArray(raw) ? raw.filter((e) => e && typeof e.code === 'string') : [];
 }
+
+// 전시 화면에 넘길 순서: 담당자가 "걸기"한 관람객 작품을 먼저(신청 순서대로), 그다음 예시 작품으로 채운다.
+// 걸린 작품이 많으면 예시는 넣지 않는다(최대 12점).
+export function wallQueue(entries, fillers = [], max = 12) {
+  const shown = (Array.isArray(entries) ? entries : [])
+    .filter((e) => e && e.status === 'showing')
+    .sort((a, b) => (a.at || 0) - (b.at || 0))
+    .map((e) => ({ key: `v-${e.code}`, kind: 'visitor', entry: e }));
+  const fill = fillers.slice(0, Math.max(0, max - shown.length)).map((w) => ({ key: `m-${w.id}`, kind: 'mock', work: w }));
+  return [...shown, ...fill].slice(0, max);
+}

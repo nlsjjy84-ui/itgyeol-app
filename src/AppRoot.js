@@ -17,6 +17,8 @@ import BookScreen from './screens/BookScreen';
 import ArchiveScreen from './screens/ArchiveScreen';
 import ExhibitScreen from './screens/ExhibitScreen';
 import KioskScreen from './screens/KioskScreen';
+import MakerScreen from './screens/MakerScreen';
+import ExhibitWallScreen from './screens/ExhibitWallScreen';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { colors, getThemeMode } from './theme';
 import { loadLang, setLang } from './i18n';
@@ -52,6 +54,7 @@ const BookH = withHanji(BookScreen);
 const ArchiveH = withHanji(ArchiveScreen);
 const ExhibitH = withHanji(ExhibitScreen);
 const KioskH = withHanji(KioskScreen);
+const MakerH = withHanji(MakerScreen);
 
 // 처음 열면 "전통문화 하면 떠오르는 것" 질문부터, 한 번 답하거나 건너뛰었으면 바로 홈으로.
 function Nav() {
@@ -84,6 +87,8 @@ function Nav() {
         <Stack.Screen name="Archive" component={ArchiveH} />
         <Stack.Screen name="Exhibit" component={ExhibitH} />
         <Stack.Screen name="Kiosk" component={KioskH} />
+        <Stack.Screen name="Maker" component={MakerH} />
+        <Stack.Screen name="ExhibitWall" component={ExhibitWallScreen} />
         <Stack.Screen name="Home" component={HomeH} />
         <Stack.Screen name="Jinbeop" component={JinbeopH} />
         <Stack.Screen name="Print" component={PrintH} />

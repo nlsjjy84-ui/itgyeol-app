@@ -622,6 +622,15 @@ export default function ResultScreen({ navigation }) {
               shapeLabel={`${item.label} · ${variant.label}`}
               product={productKey(groupId, item.id)}
               printable={group.print3d !== false}
+              onMaker={() => navigation.navigate('Maker')}
+              spec={productKey(groupId, item.id) ? makerSpec({
+                product: productKey(groupId, item.id),
+                title: item.__ko ? item.__ko.label || item.label : item.label,
+                variant: variant.__ko ? variant.__ko.label || variant.label : variant.label,
+                code,
+                mm: group.print3d !== false ? printMm.current : null,
+                made: new Date().toISOString().slice(0, 10),
+              }) : null}
               entry={(exhibit || []).find((e) => e.code === code) || null}
               onExhibit={(patch) => setExhibit(code, patch ? { ...patch, attempts: selectedAttempts } : null)}
             />
