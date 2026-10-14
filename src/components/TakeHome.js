@@ -9,7 +9,7 @@ import { play } from '../utils/sound';
 // 결과 화면 "가져가는 방법" — 싼 것부터 차례로(무료 저장 → 사진 → 키링 → 3D 모형).
 // 받는 방법(굿즈숍에서 찾기 / 택배), 전시 동의를 여기서 고른다.
 // 가격은 사업성 검토의 가정값이고, 실제 결제·제작은 박물관 굿즈숍과 연결 업체가 맡는다(앱은 주문표까지).
-import { PRICES, orderTotal, orderItems, orderNumber, comma } from '../utils/order';
+import { PRICES, orderTotal, orderItems, orderNumber, comma, ORDER_KEYS } from '../utils/order';
 
 const won = (n) => t('{n}원', { n: comma(n) });
 
@@ -38,9 +38,9 @@ export const COUNTRIES = ['한국', '미국', '중국', '일본', '그 밖의 �
 const DEFAULT_COUNTRY = { ko: '한국', zh: '중국', ja: '일본' };
 
 // entry: 이 작품의 전시 신청(없으면 null). onExhibit(patch) — patch가 null이면 신청 취소.
-export default function TakeHome({ code, shapeLabel, isKeyring, entry, onExhibit, onHall }) {
+export default function TakeHome({ code, shapeLabel, product, printable = true, entry, onExhibit, onHall }) {
   const exhibitOn = !!entry;
-  const [pick, setPick] = useState({ photo: false, keyring: false, model: false });
+  const [pick, setPick] = useState({});
   const [how, setHow] = useState('shop');
   const [sheet, setSheet] = useState(false);
   const toggle = (k) => {
@@ -51,7 +51,25 @@ export default function TakeHome({ code, shapeLabel, isKeyring, entry, onExhibit
   const total = orderTotal(pick);
   const chosen = orderItems(pick);
   const orderNo = orderNumber(code);
-  const NAMES = { photo: t('사진 2장'), keyring: t('맞춤 키링'), model: t('3D 모형') };
+  const NAMES = {
+    photo: t('깜짝 사진 엽서 2장'), badge: t('나만의 배지'), keyring: t('맞춤 키링'), stamp: t('나만의 낙관 도장'), sumak: t('나만의 수막새'),
+    paperweight: t('나만의 문진'), coaster: t('나만의 코스터'), bookmark: t('나만의 책갈피'), model: t('3D 모형'),
+    fan: t('접부채'), towel: t('수건'), cup: t('백자 잔'), spoonrest: t('수저받침'),
+  };
+  const DESC = {
+    badge: t('위에서 고른 {s}를 지름 약 3cm로 출력하고 뒤에 쇠 핀을 달아요.', { s: shapeLabel }),
+    keyring: t('위에서 고른 {s}를 약 4.5cm 입체로 출력해요. 술과 매듭은 진짜 실이에요.', { s: shapeLabel }),
+    sumak: t('위에서 고른 {s}를 지름 약 4.5cm로 출력하고 뒤에 자석을 붙여요.', { s: shapeLabel }),
+    model: t('위에서 돌려 본 {s} 그대로, 높이 약 5cm 실물이에요.', { s: shapeLabel }),
+    fan: t('한지에 내 무늬를 인쇄해 대나무 살에 붙여요.'),
+    towel: t('면 수건에 내 무늬를 날염해요.'),
+    stamp: t('위에서 고른 {s}를 약 2×2×4cm로 출력해요. 도장면 글자는 찍으면 바로 읽혀요.', { s: shapeLabel }),
+    paperweight: t('위에서 고른 {s}를 높이 약 7cm로 출력해요.', { s: shapeLabel }),
+    coaster: t('위에서 고른 {s}를 지름 약 9cm로 출력해요.', { s: shapeLabel }),
+    bookmark: t('위에서 고른 {s}를 얇은 황동 판으로 잘라 만들고 진짜 술을 달아요.', { s: shapeLabel }),
+    cup: t('백자 잔에 내 무늬 띠와 낙관을 전사지로 구워 입혀요.'),
+    spoonrest: t('백자 수저받침에 내 무늬와 낙관을 전사지로 구워 입혀요.'),
+  };
 
   return (
     <View style={styles.wrap}>
@@ -60,16 +78,23 @@ export default function TakeHome({ code, shapeLabel, isKeyring, entry, onExhibit
 
       <View style={styles.list}>
         <Rung free title={t('이미지·QR 저장')} price={t('무료')} desc={t('위에서 바로 저장해요. 누구나.')} />
-        <Rung on={pick.photo} onPress={() => toggle('photo')} title={t('내 사진 + 작품 테두리 2장')} price={won(PRICES.photo)} desc={t('굿즈숍 사진 기계에서 찍어 엽서 크기로 뽑아요.')} />
-        <Rung
-          on={pick.keyring}
-          onPress={() => toggle('keyring')}
-          title={t('맞춤 키링')}
-          price={won(PRICES.keyring)}
-          desc={isKeyring ? t('위에서 고른 {s} 모양에 내 조각보를 입혀요.', { s: shapeLabel }) : t('키링 모양은 위 "키링"에서 골라요.')}
-        />
-        <Rung on={pick.model} onPress={() => toggle('model')} title={t('3D 모형')} price={won(PRICES.model)} desc={t('위에서 돌려 본 {s} 그대로, 높이 약 5cm 실물이에요.', { s: shapeLabel })} />
+        <Rung on={pick.photo} onPress={() => toggle('photo')} title={t('깜짝 사진 엽서 2장')} price={won(PRICES.photo)} desc={t('놀이 중 찍어 둔 깜짝 선물 사진(없으면 굿즈숍 사진 기계에서 찍은 사진)을 엽서 크기로 뽑아요.')} />
+        {product ? (
+          <Rung on={!!pick[product]} onPress={() => toggle(product)} title={NAMES[product]} price={won(PRICES[product])} desc={DESC[product]} />
+        ) : null}
+        {ORDER_KEYS.filter((k) => k !== 'photo' && k !== product && pick[k]).map((k) => (
+          <Rung key={k} on onPress={() => toggle(k)} title={NAMES[k]} price={won(PRICES[k])} desc={t('앞에서 담아 둔 물건이에요. 누르면 빠져요.')} />
+        ))}
       </View>
+      <Text style={styles.sub}>
+        {printable
+          ? t('배지·키링·도장·수막새·문진·코스터·3D 모형은 풀컬러 3D 프린팅이에요. 화면의 모양은 1.5mm보다 얇은 곳을 두껍게 다듬은 출력용 모양이라, 받는 물건과 같아요.')
+          : product === 'bookmark'
+            ? t('책갈피는 황동 판을 화면의 윤곽 그대로 잘라 만들어요. 3D 출력으로는 너무 얇아서예요.')
+            : product === 'cup' || product === 'spoonrest'
+              ? t('잔·수저받침은 입과 음식이 닿아 3D 출력 대신 백자에 무늬를 전사지로 구워 입혀요.')
+              : t('부채·수건은 화면의 무늬 그림을 그대로 인쇄해요.')}
+      </Text>
 
       <Text style={styles.label}>{t('받는 방법')}</Text>
       <View style={styles.howRow}>

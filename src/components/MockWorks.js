@@ -8,6 +8,7 @@ import { t } from '../i18n';
 import { CATALOG } from './obj3d/catalog';
 import { GAME_NAMES, SCENE_NAMES } from '../data/taste';
 import { traitText } from '../utils/shapeDna';
+import { describeShape } from '../utils/shapeStory';
 
 // 글자는 렌더할 때 지금 언어로 만든다(예시 자료에는 물건·놀이 id와 횟수만 있다).
 const kwLabel = (id) => (TASTE_KEYWORDS.find((k) => k.id === id) || {}).label || '';
@@ -29,6 +30,13 @@ function workPlays(w) {
   ];
 }
 function workTraits(w) {
+  // 놀이가 모양을 빚은 예시: 무엇이 어디가 됐는지(3D와 같은 계산)
+  const it = findItem(w.item);
+  if (w.a && it && it.shaped) {
+    const attempts = w.a.map(([sceneId, formationId]) => ({ sceneId, formationId }));
+    const byGame = Object.fromEntries((w.raw && w.raw.g) || []);
+    return describeShape(w.item, attempts, { byGame, byScene: {} });
+  }
   if (!w.raw) return w.traits || [];
   return [...w.raw.g.map(([id, n]) => traitText('g', id, n)), ...w.raw.s.map(([id, n]) => traitText('s', id, n))].filter(Boolean);
 }

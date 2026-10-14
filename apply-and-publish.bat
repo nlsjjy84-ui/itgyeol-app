@@ -29,7 +29,7 @@ echo [4/6] commit and push redesign-ui
 rem Save the newest bat into the repo so every branch has the same copy
 copy /y "%~f0" "%DST%apply-and-publish.bat" >nul
 git add -A
-git commit -m "Update from _apply zip"
+git commit -m "feat: new goods (seal stamp, paperweight, coaster, bookmark, porcelain cup, spoon rest), 450 examples, voice guide, moves/expression/cheer sensing with consent, surprise gift photos" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01Pc635XgYEi1EBmYTHPBfjJ"
 git push origin redesign-ui
 if errorlevel 1 (echo PUSH FAILED - tell Claude & pause & exit /b 1)
 echo [5/6] merge into master and push

@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { PRICES, orderTotal, orderItems, orderNumber, comma } from '../src/utils/order.js';
+import { PRICES, orderTotal, orderItems, orderNumber, comma, productKey } from '../src/utils/order.js';
 import { nextExhibit, cleanExhibit } from '../src/utils/exhibit.js';
 import { countWorks } from '../src/utils/works.js';
 import { packJourney, unpackJourney, carryUrl, mergeAttempts, mergeLog, b64encode, b64decode, SITE_URL } from '../src/utils/carry.js';
@@ -35,14 +35,34 @@ test('놀이 기록이 조금만 달라도 시드가 달라진다 (같은 기록
   assert.notEqual(a.seed, d.seed);
 });
 
-test('주문 합계 — 사다리 가격(사진 4,000 · 키링 15,000 · 3D 모형 45,000)', () => {
-  assert.deepEqual(PRICES, { photo: 4000, keyring: 15000, model: 45000 });
+test('주문 합계 — 뮷즈 값대 기준(배지 15,000 · 키링 15,000 · 수막새 18,000 · 3D 모형 45,000 · 접부채 12,000 · 수건 15,000)', () => {
+  assert.deepEqual(PRICES, {
+    photo: 4000, badge: 15000, keyring: 15000, stamp: 20000, sumak: 18000, paperweight: 25000, coaster: 15000,
+    bookmark: 12000, model: 45000, fan: 12000, towel: 15000, cup: 25000, spoonrest: 9000,
+  });
   assert.equal(orderTotal({}), 0);
   assert.equal(orderTotal({ photo: true }), 4000);
   assert.equal(orderTotal({ photo: true, model: true }), 49000);
   assert.equal(orderTotal({ photo: true, keyring: true, model: true }), 64000);
-  assert.deepEqual(orderItems({ model: true, photo: true }), ['photo', 'model']);
+  assert.equal(orderTotal({ badge: true, sumak: true, fan: true }), 45000);
+  assert.deepEqual(orderItems({ model: true, photo: true, badge: true }), ['photo', 'badge', 'model']);
   assert.equal(comma(64000), '64,000');
+});
+
+test('고른 물건 → 주문 항목', () => {
+  assert.equal(productKey('badge', 'mybadge'), 'badge');
+  assert.equal(productKey('keyring', 'mypae'), 'keyring');
+  assert.equal(productKey('sumak', 'mysumak'), 'sumak');
+  assert.equal(productKey('treasure', 'myjar'), 'model');
+  assert.equal(productKey('daily', 'fan'), 'fan');
+  assert.equal(productKey('daily', 'towel'), 'towel');
+  assert.equal(productKey('stamp', 'mystamp'), 'stamp');
+  assert.equal(productKey('desk', 'mystele'), 'paperweight');
+  assert.equal(productKey('desk', 'mycoaster'), 'coaster');
+  assert.equal(productKey('bookmark', 'mybookmark'), 'bookmark');
+  assert.equal(productKey('daily', 'cup'), 'cup');
+  assert.equal(productKey('daily', 'spoonrest'), 'spoonrest');
+  assert.equal(productKey('nothing', 'x'), null);
 });
 
 test('주문 번호는 같은 작품이면 같고, 비어 있어도 깨지지 않는다', () => {
@@ -108,4 +128,30 @@ test('가져온 기록 합치기 — 같은 판은 가져온 것으로, 놀이 �
   const m = mergeAttempts(cur, inc);
   assert.deepEqual(m.map((a) => `${a.sceneId}:${a.seed}`).sort(), ['jinbeop:3', 'print:2', 'tbd:9']);
   assert.deepEqual(mergeLog({ byGame: { a: 2 }, byScene: { tbd: 5 } }, { byGame: { a: 1, b: 4 }, byScene: { tbd: 7 } }), { byGame: { a: 2, b: 4 }, byScene: { tbd: 7 } });
+});
+
+import { mergeSenses, senseSummary } from '../src/utils/senseMath.js';
+
+test('몸짓·표정·감탄사 기록은 더해지고, 요약은 0~1 세기와 횟수만 남긴다', () => {
+  const a = { big: 2, levelSum: 3, levelN: 10, smile: 1, surprise: 0, burst: 2 };
+  const b = { big: 1, levelSum: 1, levelN: 10, smile: 2, surprise: 1, burst: 0 };
+  const m = mergeSenses(a, b);
+  assert.deepEqual(m, { big: 3, levelSum: 4, levelN: 20, smile: 3, surprise: 1, burst: 2 });
+  assert.equal(mergeSenses(null, null), null);
+  const s = senseSummary(m);
+  assert.equal(s.level, 0.2);
+  assert.equal(s.smile, 3);
+  assert.equal(s.wow, 3);
+  assert.equal(s.camera, true);
+  assert.equal(senseSummary(null), null);
+});
+
+test('QR로 옮겨도 몸짓·표정·감탄사 기록이 같이 간다(없으면 예전 QR과 같다)', () => {
+  const senses = { big: 3, levelSum: 4, levelN: 20, smile: 3, surprise: 1, burst: 2 };
+  const attempts = [{ sceneId: 'jinbeop', formationId: 'wonjin', mappingCode: 'x', ohangKey: 'mok', speed: 1, seed: 7 }];
+  const back = unpackJourney(packJourney({ attempts, playLog: { byGame: {}, byScene: { jinbeop: 1 }, senses } }));
+  assert.deepEqual(back.playLog.senses, senses);
+  const old = unpackJourney(packJourney({ attempts, playLog: { byGame: {}, byScene: {} } }));
+  assert.equal(old.playLog.senses, undefined);
+  assert.deepEqual(mergeLog({ byGame: {}, byScene: {} }, { byGame: {}, byScene: {}, senses }).senses, senses);
 });

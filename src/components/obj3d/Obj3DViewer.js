@@ -3,7 +3,8 @@ import { View, StyleSheet, PanResponder, Platform, Pressable } from 'react-nativ
 import Text from '../../ui/Text';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { THREE, makeMats, addKeyringHook, dnaRef, deformObject } from './kit';
+import { THREE, makeMats, addKeyringHook, dnaRef, deformObject, printSafe, printLook } from './kit';
+import { recordRef } from './models_mine';
 import { colors } from '../../theme';
 import { t } from '../../i18n';
 
@@ -63,7 +64,7 @@ function shadowTexture() {
   return t;
 }
 
-function Scene({ tex, build, hook, dna, ctl, onBuilt, onFail }) {
+function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, ctl, onBuilt, onFail }) {
   const root = useRef();
   const { gl, scene } = useThree();
   const [envOk, setEnvOk] = useState(null);
@@ -93,8 +94,12 @@ function Scene({ tex, build, hook, dna, ctl, onBuilt, onFail }) {
     try {
       const m = makeMats(envOk ? 1 : 0.35);
       dnaRef.v = dna;
+      recordRef.v = record || null; // 놀이가 모양을 빚는 물건(나만의 패·항아리)이 읽는다
       let obj = build({ tex, m, dna });
+      // 화면에 보이는 모양 = 출력하는 모양: 1.5mm보다 얇은 곳을 먼저 두껍게 다듬는다
+      if (printable) obj = printSafe(obj, { longMm, dna });
       obj = deformObject(obj, dna);
+      if (printable) obj = printLook(obj); // 업체 출력물과 같은 수지 재질(인쇄 굿즈는 원래 재료 그대로)
       if (hook) addKeyringHook(obj, m);
       const box = new THREE.Box3().setFromObject(obj);
       const size = box.getSize(new THREE.Vector3());
@@ -110,13 +115,13 @@ function Scene({ tex, build, hook, dna, ctl, onBuilt, onFail }) {
     } catch (e) {
       return { error: e };
     }
-  }, [envOk, tex, build, hook, dna]);
+  }, [envOk, tex, build, hook, dna, record, printable, longMm]);
 
   const shadowTex = useMemo(() => shadowTexture(), []);
 
   useEffect(() => {
     if (built && built.error) onFail && onFail(built.error);
-    else if (built) onBuilt && onBuilt();
+    else if (built) onBuilt && onBuilt(built.pivot);
   }, [built, onFail, onBuilt]);
 
   useFrame((_, dt) => {
@@ -163,7 +168,7 @@ const VIEWS = [
   { id: 'bottom', label: '아래', yaw: 0, pitch: -1.15 },
 ];
 
-export default function Obj3DViewer({ art, artSize = 280, build, hook = false, dna, width = 320, height = 340, resetKey }) {
+export default function Obj3DViewer({ art, artSize = 280, build, hook = false, dna, width = 320, height = 340, resetKey, onReady, record, printable = true, longMm }) {
   const shotRef = useRef(null);
   const [tex, setTex] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -251,7 +256,7 @@ export default function Obj3DViewer({ art, artSize = 280, build, hook = false, d
             gl={{ alpha: true, antialias: true }}
             onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
           >
-            <Scene tex={tex} build={build} hook={hook} dna={dna} ctl={ctl} onFail={() => setFailed(true)} />
+            <Scene tex={tex} build={build} hook={hook} dna={dna} record={record} printable={printable} longMm={longMm || (hook ? 45 : 50)} ctl={ctl} onFail={() => setFailed(true)} onBuilt={onReady} />
           </Canvas>
         ) : (
           <View style={[styles.fallback, { width, height }]}>

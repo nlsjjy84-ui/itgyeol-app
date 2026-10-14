@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 22, paddingTop: 28, paddingBottom: 32 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   brand: { fontSize: 13, color: colors.accentDeep, fontWeight: '700', letterSpacing: 1 },
-  title: { fontSize: 26, fontWeight: '700', color: colors.ink, marginTop: 4 },
+  title: { fontSize: 26, fontWeight: '700', color: colors.ink, marginTop: 4, wordBreak: 'keep-all' },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 8, lineHeight: 19 },
   mascotIntro: {
     flexDirection: 'row',
