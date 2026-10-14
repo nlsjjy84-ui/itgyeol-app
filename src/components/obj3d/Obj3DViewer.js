@@ -78,7 +78,7 @@ function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, c
         const env = pm.fromScene(new RoomEnvironment(), 0.04).texture;
         if (disposed) return;
         scene.environment = env;
-        scene.environmentIntensity = 0.7;
+        scene.environmentIntensity = 0.8;
         setEnvOk(true);
       } catch (e) {
         if (!disposed) setEnvOk(false);
@@ -144,10 +144,12 @@ function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, c
   if (!built || built.error) return null;
   return (
     <>
-      <ambientLight intensity={envOk ? 0.35 : 0.9} />
-      <hemisphereLight args={[0xfff4e0, 0x6a5a48, envOk ? 0.45 : 0.8]} />
-      <directionalLight position={[3, 4, 5]} intensity={envOk ? 1.4 : 1.7} />
-      <directionalLight position={[-4, 1.5, -3]} intensity={0.6} color={0xdfe8ff} />
+      {/* 제품 사진처럼: 따뜻한 주광 하나 + 반대편 테두리 빛 + 약한 보조광, 바탕빛은 낮춰 입체가 드러나게 */}
+      <ambientLight intensity={envOk ? 0.12 : 0.7} />
+      <hemisphereLight args={[0xfff4e0, 0x5a4a3a, envOk ? 0.3 : 0.7]} />
+      <directionalLight position={[3, 5, 4]} intensity={envOk ? 1.9 : 2.0} color={0xfff1df} />
+      <directionalLight position={[-3.5, 2.5, -4]} intensity={0.9} color={0xdfe8ff} />
+      <directionalLight position={[-4, 0.5, 3]} intensity={0.45} color={0xffffff} />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -built.height / 2 - 0.12, 0]}>
         <planeGeometry args={[3.2, 3.2]} />
         <meshBasicMaterial map={shadowTex} transparent depthWrite={false} />
@@ -249,12 +251,11 @@ export default function Obj3DViewer({ art, artSize = 280, build, hook = false, d
           <View style={[styles.fallback, { width, height }]}>{art}</View>
         ) : tex ? (
           <Canvas
-            flat
             dpr={[1, 2]}
             style={{ width, height, backgroundColor: 'transparent' }}
             camera={{ position: [0, 0.35, 6.4], fov: 32 }}
             gl={{ alpha: true, antialias: true }}
-            onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
+            onCreated={({ gl }) => { gl.setClearColor(0x000000, 0); gl.toneMappingExposure = 0.9; }}
           >
             <Scene tex={tex} build={build} hook={hook} dna={dna} record={record} printable={printable} longMm={longMm || (hook ? 45 : 50)} ctl={ctl} onFail={() => setFailed(true)} onBuilt={onReady} />
           </Canvas>

@@ -480,16 +480,49 @@ export function printSafe(obj, { longMm = 50, minMm = 1.6, dna } = {}) {
 // 업체에서 실제로 나오는 것은 한 가지 수지(레진)에 색을 입힌 출력물이다. 금·은처럼 반짝이는 금속,
 // 유리처럼 비치는 면, 옻칠의 깊은 광택은 출력되지 않는다. 그래서 화면도 같은 수지 재질로 보여 준다
 // (색과 무늬는 그대로, 금속은 금빛 "색"이 된다). 술·매듭(진짜 실)과 키링 고리(쇠 부품)만 원래 재질이다.
+// 출력면의 잔결: 작은 얼룩무늬 거칠기 지도(한 번만 만든다). 웹이 아니면 없이 간다.
+let grain = null;
+function grainTexture() {
+  if (grain !== null) return grain || null;
+  try {
+    if (typeof document === 'undefined') throw new Error('no dom');
+    const c = document.createElement('canvas');
+    c.width = 128;
+    c.height = 128;
+    const x = c.getContext('2d');
+    const img = x.createImageData(128, 128);
+    for (let i = 0; i < 128 * 128; i += 1) {
+      const v = 200 + Math.floor(Math.random() * 55);
+      img.data[i * 4] = v;
+      img.data[i * 4 + 1] = v;
+      img.data[i * 4 + 2] = v;
+      img.data[i * 4 + 3] = 255;
+    }
+    x.putImageData(img, 0, 0);
+    grain = new THREE.CanvasTexture(c);
+    grain.wrapS = THREE.RepeatWrapping;
+    grain.wrapT = THREE.RepeatWrapping;
+    grain.repeat.set(6, 6);
+  } catch (e) {
+    grain = false;
+  }
+  return grain || null;
+}
+
 export function printLook(obj) {
   const cache = new Map();
   const toResin = (mt) => {
     if (!mt) return mt;
     if (cache.has(mt)) return cache.get(mt);
-    const nm = new THREE.MeshStandardMaterial({
+    // 풀컬러 레진 출력물 + 얇은 투명 코팅(실제 출력 후가공) — 잔결(거칠기 얼룩)을 넣어 매끈한 장난감처럼 보이지 않게
+    const nm = new THREE.MeshPhysicalMaterial({
       color: mt.color ? mt.color.clone() : new THREE.Color(0xffffff),
       map: mt.map || null,
-      roughness: 0.48,
+      roughness: 0.62,
+      roughnessMap: grainTexture(),
       metalness: 0,
+      clearcoat: 0.3,
+      clearcoatRoughness: 0.35,
       side: mt.side,
     });
     if (mt.metalness > 0.3 && mt.color) nm.color.multiplyScalar(0.92); // 금속 색은 살짝 차분하게(인쇄된 금색)

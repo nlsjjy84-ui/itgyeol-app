@@ -31,6 +31,7 @@ import { linkedArchive } from '../data/archiveLinks';
 import { ArchiveDetail, entryName } from './ArchiveScreen';
 import TakeHome from '../components/TakeHome';
 import { productKey } from '../utils/order';
+import { makerSpec } from '../utils/makerSpec';
 import SurpriseGift from '../components/SurpriseGift';
 import { carryUrl } from '../utils/carry';
 
@@ -104,6 +105,7 @@ export default function ResultScreen({ navigation }) {
   const printObj = useRef(null);
   const onPrintReady = useCallback((o) => { printObj.current = o; }, []);
   const [printMsg, setPrintMsg] = useState('');
+  const printMm = useRef(null); // 마지막으로 만든 출력용 파일의 크기(mm) — 사양서에 그대로 적는다
   const scrollRef = useRef(null);
   const [takeY, setTakeY] = useState(0);
   const [saveStatus, setSaveStatus] = useState('');
@@ -453,6 +455,7 @@ export default function ResultScreen({ navigation }) {
                 try {
                   const longMm = item.longMm || group.longMm || 50;
                   const { data, mm, realParts } = await exportPrintFile(printObj.current, { longMm });
+                  printMm.current = mm;
                   const url = URL.createObjectURL(new Blob([data], { type: 'model/gltf-binary' }));
                   const a = document.createElement('a');
                   a.href = url;
@@ -468,6 +471,36 @@ export default function ResultScreen({ navigation }) {
               }}
             >
               <Text style={styles.hookBtnText}>{t('업체에 보낼 출력용 3D 파일 (.glb)')}</Text>
+            </Pressable>
+          ) : null}
+          {Platform.OS === 'web' && productKey(groupId, item.id) ? (
+            <Pressable
+              style={styles.hookBtn}
+              onPress={() => {
+                play('tap');
+                const text = makerSpec({
+                  product: productKey(groupId, item.id),
+                  title: item.__ko ? item.__ko.label || item.label : item.label,
+                  variant: variant.__ko ? variant.__ko.label || variant.label : variant.label,
+                  code: dna.code,
+                  mm: group.print3d !== false ? printMm.current : null,
+                  made: new Date().toISOString().slice(0, 10),
+                });
+                if (!text) return;
+                const url = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/plain;charset=utf-8' }));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `itgyeol-${dna.code}-${item.id}-spec.txt`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 4000);
+                setPrintMsg(group.print3d !== false && !printMm.current
+                  ? t('제작 사양서를 만들었어요. 출력용 3D 파일을 먼저 만들면 실제 크기(mm)가 사양서에 들어가요.')
+                  : t('제작 사양서를 만들었어요 · 크기·재질·공정·따로 다는 부품·색 기준이 들어 있어요.'));
+              }}
+            >
+              <Text style={styles.hookBtnText}>{t('업체용 제작 사양서 (.txt)')}</Text>
             </Pressable>
           ) : null}
           {printMsg ? <Text style={styles.dnaLine}>{printMsg}</Text> : null}
