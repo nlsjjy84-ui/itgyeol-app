@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { View } from 'react-native';
 import Svg, { G, Rect, Circle, Line, Path, Text as SvgText, ClipPath, Defs, Polyline, LinearGradient, Stop } from 'react-native-svg';
 import { FORMATIONS } from '../data/formations';
+import { motifLines } from '../data/motifs';
 import { fonts } from '../theme';
 import { JourneyContext } from '../context/JourneyContext';
 
@@ -54,6 +55,8 @@ const FAMILY = {
 const FAMILY_KEYS = Object.keys(FAMILY);
 const LIGHT_SILK = new Set(['misaek', 'eunhoe', 'songhwa', 'ok', 'bunhong', 'yeondu']);
 
+// 한글 테트리스 단계 → 창살 가운데 새기는 자모(자음·모음)
+const HANGUL_GLYPH = { st1: 'ㅣ', st2: 'ㅏ', st3: 'ㅁ', st4: 'ㄷ' };
 const PRINT_WORD = {
   'jamo-sogo': '소고',
   'jamo-binyeo': '비녀',
@@ -81,7 +84,6 @@ const FILLERS = [
   { x: 0, y: 180, w: 120, h: 40 },
   { x: 120, y: 180, w: 100, h: 40 },
 ];
-const HANGUL_GLYPH = { st1: 'ㅣ', st2: 'ㅏ', st3: 'ㅁ', st4: 'ㄷ' };
 
 function rng(seed) {
   let a = (seed >>> 0) || 1;
@@ -162,127 +164,15 @@ function cutPieces(box, seed) {
   return { center: c, ring: out, rand: r };
 }
 
-// ───── 전래놀이 수 무늬 (실로 놓은 선 그림) ─────
+// 전래놀이 수 무늬 — 놀이 기호가 아니라 놀이와 짝지은 전통 문양(덩굴·나비·태극·구름 등)을 실로 놓은 선으로 그린다.
+// 선 자료는 src/data/motifs.js 하나를 3D 부조와 함께 쓴다(위가 +y라 화면에서는 뒤집는다).
 function playMotif(id, cx, cy, s, col) {
-  const sw = Math.max(1.3, s * 0.07);
-  const P = { fill: 'none', stroke: col, strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round' };
-  const q = (v) => v * s;
-  switch (id) {
-    case 'yeonnaligi': // 방패연: 네모 몸 + 가운데 방구멍 + 살대
-      return (
-        <G>
-          <Rect x={cx - q(0.38)} y={cy - q(0.46)} width={q(0.76)} height={q(0.92)} rx={q(0.03)} {...P} />
-          <Circle cx={cx} cy={cy + q(0.04)} r={q(0.15)} {...P} />
-          <Line x1={cx - q(0.38)} y1={cy - q(0.46)} x2={cx + q(0.38)} y2={cy + q(0.46)} {...P} strokeWidth={sw * 0.6} />
-          <Line x1={cx + q(0.38)} y1={cy - q(0.46)} x2={cx - q(0.38)} y2={cy + q(0.46)} {...P} strokeWidth={sw * 0.6} />
-          <Circle cx={cx} cy={cy - q(0.3)} r={q(0.08)} fill={SEAL} />
-        </G>
-      );
-    case 'paengi': // 팽이: 위가 넓고 아래가 뾰족한 몸 + 도는 결
-      return (
-        <G>
-          <Path d={`M${cx - q(0.36)} ${cy - q(0.2)} L${cx + q(0.36)} ${cy - q(0.2)} L${cx} ${cy + q(0.48)} Z`} {...P} />
-          <Line x1={cx - q(0.36)} y1={cy - q(0.32)} x2={cx + q(0.36)} y2={cy - q(0.32)} {...P} />
-          <Path d={`M${cx - q(0.2)} ${cy - q(0.05)} Q${cx} ${cy + q(0.06)} ${cx + q(0.2)} ${cy - q(0.05)}`} {...P} strokeWidth={sw * 0.7} />
-          <Path d={`M${cx - q(0.11)} ${cy + q(0.14)} Q${cx} ${cy + q(0.22)} ${cx + q(0.11)} ${cy + q(0.14)}`} {...P} strokeWidth={sw * 0.7} />
-        </G>
-      );
-    case 'juldarigi': // 새끼줄: 두 가닥이 꼬인 줄
-      return (
-        <G>
-          <Path d={`M${cx - q(0.48)} ${cy} C${cx - q(0.3)} ${cy - q(0.22)} ${cx - q(0.14)} ${cy + q(0.22)} ${cx} ${cy} S${cx + q(0.3)} ${cy - q(0.22)} ${cx + q(0.48)} ${cy}`} {...P} />
-          <Path d={`M${cx - q(0.48)} ${cy} C${cx - q(0.3)} ${cy + q(0.22)} ${cx - q(0.14)} ${cy - q(0.22)} ${cx} ${cy} S${cx + q(0.3)} ${cy + q(0.22)} ${cx + q(0.48)} ${cy}`} {...P} />
-          <Line x1={cx} y1={cy - q(0.3)} x2={cx} y2={cy + q(0.3)} {...P} strokeWidth={sw * 0.6} strokeDasharray={`${q(0.05)} ${q(0.06)}`} />
-        </G>
-      );
-    case 'julneomgi': // 줄넘기: 둥글게 넘어가는 줄과 두 손잡이
-      return (
-        <G>
-          <Path d={`M${cx - q(0.36)} ${cy + q(0.3)} C${cx - q(0.42)} ${cy - q(0.55)} ${cx + q(0.42)} ${cy - q(0.55)} ${cx + q(0.36)} ${cy + q(0.3)}`} {...P} />
-          <Rect x={cx - q(0.42)} y={cy + q(0.26)} width={q(0.12)} height={q(0.2)} rx={q(0.03)} fill={col} />
-          <Rect x={cx + q(0.3)} y={cy + q(0.26)} width={q(0.12)} height={q(0.2)} rx={q(0.03)} fill={col} />
-        </G>
-      );
-    case 'sangmo': // 상모: 머리 위 꼭지에서 감겨 나가는 긴 끈
-      return (
-        <G>
-          <Path d={`M${cx - q(0.24)} ${cy + q(0.34)} Q${cx} ${cy + q(0.1)} ${cx + q(0.24)} ${cy + q(0.34)}`} {...P} />
-          <Line x1={cx} y1={cy + q(0.2)} x2={cx} y2={cy - q(0.02)} {...P} />
-          <Path d={`M${cx} ${cy - q(0.02)} C${cx + q(0.5)} ${cy - q(0.1)} ${cx + q(0.3)} ${cy - q(0.5)} ${cx - q(0.06)} ${cy - q(0.36)} S${cx - q(0.46)} ${cy - q(0.02)} ${cx - q(0.3)} ${cy - q(0.4)}`} {...P} />
-        </G>
-      );
-    case 'guseulchigi': // 구슬 세 알
-      return (
-        <G>
-          <Circle cx={cx - q(0.22)} cy={cy + q(0.14)} r={q(0.15)} {...P} />
-          <Circle cx={cx + q(0.22)} cy={cy + q(0.14)} r={q(0.15)} {...P} />
-          <Circle cx={cx} cy={cy - q(0.22)} r={q(0.15)} {...P} />
-          <Circle cx={cx - q(0.26)} cy={cy + q(0.09)} r={q(0.04)} fill={col} />
-          <Circle cx={cx + q(0.18)} cy={cy + q(0.09)} r={q(0.04)} fill={col} />
-          <Circle cx={cx - q(0.04)} cy={cy - q(0.27)} r={q(0.04)} fill={col} />
-        </G>
-      );
-    case 'jachigi': // 자치기: 긴 채와 짧은 알
-      return (
-        <G>
-          <Line x1={cx - q(0.42)} y1={cy + q(0.34)} x2={cx + q(0.34)} y2={cy - q(0.36)} {...P} strokeWidth={sw * 1.4} />
-          <Line x1={cx - q(0.1)} y1={cy - q(0.28)} x2={cx + q(0.26)} y2={cy + q(0.04)} {...P} strokeWidth={sw * 1.4} />
-        </G>
-      );
-    case 'biseok': // 비석치기: 둥근 머리의 비석과 던질 돌
-      return (
-        <G>
-          <Path d={`M${cx - q(0.2)} ${cy + q(0.42)} L${cx - q(0.2)} ${cy - q(0.24)} Q${cx} ${cy - q(0.48)} ${cx + q(0.2)} ${cy - q(0.24)} L${cx + q(0.2)} ${cy + q(0.42)}`} {...P} />
-          <Line x1={cx - q(0.34)} y1={cy + q(0.42)} x2={cx + q(0.34)} y2={cy + q(0.42)} {...P} />
-          <Line x1={cx - q(0.08)} y1={cy - q(0.12)} x2={cx + q(0.08)} y2={cy - q(0.12)} {...P} strokeWidth={sw * 0.6} />
-          <Line x1={cx - q(0.08)} y1={cy + q(0.02)} x2={cx + q(0.08)} y2={cy + q(0.02)} {...P} strokeWidth={sw * 0.6} />
-        </G>
-      );
-    case 'tuho': // 투호: 항아리와 꽂힌 화살 둘
-      return (
-        <G>
-          <Path d={`M${cx - q(0.12)} ${cy - q(0.04)} Q${cx - q(0.36)} ${cy + q(0.2)} ${cx - q(0.14)} ${cy + q(0.44)} L${cx + q(0.14)} ${cy + q(0.44)} Q${cx + q(0.36)} ${cy + q(0.2)} ${cx + q(0.12)} ${cy - q(0.04)} Z`} {...P} />
-          <Line x1={cx - q(0.04)} y1={cy - q(0.04)} x2={cx - q(0.24)} y2={cy - q(0.48)} {...P} />
-          <Line x1={cx + q(0.04)} y1={cy - q(0.04)} x2={cx + q(0.2)} y2={cy - q(0.5)} {...P} />
-          <Path d={`M${cx - q(0.3)} ${cy - q(0.42)} L${cx - q(0.24)} ${cy - q(0.48)} L${cx - q(0.18)} ${cy - q(0.4)}`} {...P} strokeWidth={sw * 0.7} />
-          <Path d={`M${cx + q(0.14)} ${cy - q(0.43)} L${cx + q(0.2)} ${cy - q(0.5)} L${cx + q(0.26)} ${cy - q(0.43)}`} {...P} strokeWidth={sw * 0.7} />
-        </G>
-      );
-    case 'ddakji': // 딱지: 접힌 네모와 접은 금
-      return (
-        <G>
-          <Rect x={cx - q(0.34)} y={cy - q(0.34)} width={q(0.68)} height={q(0.68)} {...P} />
-          <Line x1={cx - q(0.34)} y1={cy - q(0.34)} x2={cx + q(0.34)} y2={cy + q(0.34)} {...P} strokeWidth={sw * 0.6} />
-          <Line x1={cx + q(0.34)} y1={cy - q(0.34)} x2={cx - q(0.34)} y2={cy + q(0.34)} {...P} strokeWidth={sw * 0.6} />
-          <Rect x={cx - q(0.12)} y={cy - q(0.12)} width={q(0.24)} height={q(0.24)} transform={`rotate(45 ${cx} ${cy})`} fill={col} />
-        </G>
-      );
-    case 'gomugojul': // 고무줄: 두 기둥 사이 꺾여 넘는 줄
-      return (
-        <G>
-          <Line x1={cx - q(0.4)} y1={cy - q(0.36)} x2={cx - q(0.4)} y2={cy + q(0.4)} {...P} />
-          <Line x1={cx + q(0.4)} y1={cy - q(0.36)} x2={cx + q(0.4)} y2={cy + q(0.4)} {...P} />
-          <Polyline points={`${cx - q(0.4)},${cy} ${cx - q(0.2)},${cy - q(0.2)} ${cx},${cy + q(0.08)} ${cx + q(0.2)},${cy - q(0.2)} ${cx + q(0.4)},${cy}`} {...P} />
-        </G>
-      );
-    case 'gullyeongsoe': // 굴렁쇠: 테와 굴리는 채
-      return (
-        <G>
-          <Circle cx={cx - q(0.06)} cy={cy + q(0.06)} r={q(0.34)} {...P} />
-          <Circle cx={cx - q(0.06)} cy={cy + q(0.06)} r={q(0.27)} {...P} strokeWidth={sw * 0.5} strokeDasharray={`${q(0.04)} ${q(0.06)}`} />
-          <Line x1={cx + q(0.2)} y1={cy + q(0.14)} x2={cx + q(0.46)} y2={cy - q(0.46)} {...P} />
-          <Line x1={cx + q(0.12)} y1={cy + q(0.12)} x2={cx + q(0.26)} y2={cy + q(0.16)} {...P} />
-        </G>
-      );
-    default: // 그 밖의 놀이: 매듭 꽃
-      return (
-        <G>
-          {[0, 1, 2, 3].map((i) => (
-            <Circle key={i} cx={cx + Math.cos((i * Math.PI) / 2) * q(0.2)} cy={cy + Math.sin((i * Math.PI) / 2) * q(0.2)} r={q(0.15)} {...P} />
-          ))}
-        </G>
-      );
-  }
+  const sw = Math.max(1.2, s * 0.06);
+  const d = motifLines(id)
+    .filter((l) => l.length > 1)
+    .map((l) => l.map(([x, y], i) => `${i ? 'L' : 'M'}${(cx + x * s).toFixed(1)} ${(cy - y * s).toFixed(1)}`).join(' '))
+    .join(' ');
+  return <Path d={d} fill="none" stroke={col} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />;
 }
 
 // 단화(둥근 수 무늬) 바탕: 짙은 원판 + 금실 테 + 둘레 꽃땀
@@ -381,7 +271,7 @@ export function PatchArt({ attempt, box, empty = false, level = 1, plain = false
   } else if (attempt.sceneId === 'print') {
     const word = PRINT_WORD[attempt.formationId] || '글';
     const chars = Array.from(word);
-    const sz = s * 0.66;
+    const sz = s * 0.48; // 낙관은 작고 단정하게
     const cols = chars.length > 2 ? 2 : 1;
     const rows = Math.ceil(chars.length / cols);
     const cell = (sz - 8) / Math.max(rows, cols);
@@ -407,28 +297,26 @@ export function PatchArt({ attempt, box, empty = false, level = 1, plain = false
     // 낙관 옆 세로 먹 글씨 줄(제발) 흉내 — 가는 먹선 두 줄
     out.push(<Line key="ink1" x1={c.x + 6} y1={c.y + 6} x2={c.x + 6} y2={c.y + c.h * 0.6} stroke={SILK.meok} strokeWidth={1} opacity={0.45} strokeDasharray="3 2" />);
   } else if (attempt.sceneId === 'hangul') {
-    const gch = HANGUL_GLYPH[attempt.formationId] || 'ㅏ';
-    const b = Math.min(c.w / 3.3, c.h / 2.3);
-    const shapes = [
-      [[-1, 0], [0, 0], [1, 0], [0, 1]],
-      [[-1, 0], [0, 0], [0, 1], [1, 1]],
-      [[0, -1], [0, 0], [0, 1], [1, 1]],
-      [[-1, 0], [0, 0], [1, 0], [1, -1]],
-    ];
-    const cells = shapes[seed % shapes.length];
-    const tones = [fam[1], fam[2], fam[3] || fam[1], fam[4] || fam[2]];
+    // 한글 테트리스 → 아자(亞字) 창살: 쌓은 단계만큼 살이 촘촘해진다(창호의 전통 살 무늬)
+    const n = { st1: 2, st2: 3, st3: 4, st4: 5 }[attempt.formationId] || 3;
+    const L = Math.min(c.w, c.h) * 0.8;
+    const x0 = cx - L / 2;
+    const y0 = cy - L / 2;
+    const stroke = thread; // 금실로 놓은 창살
+    out.push(<Rect key="fr" x={x0} y={y0} width={L} height={L} fill="none" stroke={stroke} strokeWidth={1.4} />);
+    for (let i = 1; i <= n; i += 1) {
+      const t = (i / (n + 1)) * L;
+      out.push(<Line key={`v${i}`} x1={x0 + t} y1={y0} x2={x0 + t} y2={y0 + L} stroke={stroke} strokeWidth={0.6} opacity={0.6} />);
+      out.push(<Line key={`h${i}`} x1={x0} y1={y0 + t} x2={x0 + L} y2={y0 + t} stroke={stroke} strokeWidth={0.6} opacity={0.6} />);
+    }
+    const a = L * 0.18;
+    const b = L * 0.34;
+    const P = [[-a, -b], [a, -b], [a, -a], [b, -a], [b, a], [a, a], [a, b], [-a, b], [-a, a], [-b, a], [-b, -a], [-a, -a]];
+    out.push(<Path key="ah" d={`M${P.map(([px, py]) => `${(cx + px).toFixed(1)} ${(cy + py).toFixed(1)}`).join(' L')} Z`} fill="none" stroke={stroke} strokeWidth={1.6} />);
     out.push(
-      <G key="hg">
-        {cells.map(([dx, dy], i) => (
-          <G key={i}>
-            <Rect x={cx + dx * b - b / 2} y={cy + (dy - 0.3) * b - b / 2} width={b} height={b} fill={SILK[tones[i]]} stroke="rgba(20,15,10,0.45)" strokeWidth={0.8} />
-            <Rect x={cx + dx * b - b / 2 + 1.8} y={cy + (dy - 0.3) * b - b / 2 + 1.8} width={b - 3.6} height={b - 3.6} fill="none" stroke={threadOn(tones[i])} strokeWidth={0.6} strokeDasharray="1.2 1.8" />
-          </G>
-        ))}
-        <SvgText x={cx} y={cy - 0.3 * b + b * 0.32} fontSize={b * 0.9} fontFamily={fonts.serifHeavy} fill={GOLD} stroke={GOLD_DEEP} strokeWidth={0.4} textAnchor="middle">
-          {gch}
-        </SvgText>
-      </G>
+      <SvgText key="jm" x={cx} y={cy + L * 0.11} fontSize={L * 0.32} fontFamily={fonts.serifHeavy} fill={stroke} textAnchor="middle">
+        {HANGUL_GLYPH[attempt.formationId] || 'ㅏ'}
+      </SvgText>
     );
   } else {
     const r = s * 0.42;
@@ -663,7 +551,7 @@ function CraftMotif({ attempt, box, c, craft, level }) {
   } else if (attempt.sceneId === 'print') {
     const word = PRINT_WORD[attempt.formationId] || '글';
     const chars = Array.from(word);
-    const sz = s * 0.72;
+    const sz = s * 0.5; // 낙관은 작고 단정하게 — 그림 한쪽에 찍는 인장 크기
     const cols = chars.length > 2 ? 2 : 1;
     const rows = Math.ceil(chars.length / cols);
     const cell = (sz - 8) / Math.max(rows, cols);
@@ -688,17 +576,25 @@ function CraftMotif({ attempt, box, c, craft, level }) {
       </G>
     );
   } else if (attempt.sceneId === 'hangul') {
-    const gch = HANGUL_GLYPH[attempt.formationId] || 'ㅏ';
-    const b = Math.min(ib.w / 3.3, ib.h / 2.3);
-    const shapes = [[[-1, 0], [0, 0], [1, 0], [0, 1]], [[-1, 0], [0, 0], [0, 1], [1, 1]], [[0, -1], [0, 0], [0, 1], [1, 1]], [[-1, 0], [0, 0], [1, 0], [1, -1]]];
-    const cells = shapes[seed % shapes.length];
-    cells.forEach(([dx, dy], i) => {
-      const fill = craft === 'najeon' ? (i % 2 ? 'url(#pearl)' : 'none') : craft === 'dancheong' ? ['#b8312a', '#2f5d8c', '#e3b23c', '#f6f0e2'][i] : craft === 'sanggam' ? (i % 2 ? '#f4f1e4' : '#c9ddd0') : craft === 'cheonghwa' ? (i % 2 ? '#c5d2e8' : '#f3f1ea') : (i % 2 ? '#3a3c40' : 'none');
-      out.push(<Rect key={`c${i}`} x={cx + dx * b - b / 2} y={cy + (dy - 0.3) * b - b / 2} width={b} height={b} fill={fill} stroke={craft === 'najeon' ? '#c9a24b' : c.line} strokeWidth={1.1} />);
-    });
+    // 한글 테트리스 → 아자(亞字) 창살: 쌓은 단계만큼 살이 촘촘해진다(창호의 전통 살 무늬)
+    const n = { st1: 2, st2: 3, st3: 4, st4: 5 }[attempt.formationId] || 3;
+    const L = Math.min(ib.w, ib.h) * 0.86;
+    const x0 = cx - L / 2;
+    const y0 = cy - L / 2;
+    const stroke = craft === 'najeon' ? '#c9a24b' : craft === 'dancheong' ? '#f6f0e2' : craft === 'ipsa' ? c.accent : c.line;
+    out.push(<Rect key="fr" x={x0} y={y0} width={L} height={L} fill="none" stroke={stroke} strokeWidth={1.4} />);
+    for (let i = 1; i <= n; i += 1) {
+      const t = (i / (n + 1)) * L;
+      out.push(<Line key={`v${i}`} x1={x0 + t} y1={y0} x2={x0 + t} y2={y0 + L} stroke={stroke} strokeWidth={0.6} opacity={0.6} />);
+      out.push(<Line key={`h${i}`} x1={x0} y1={y0 + t} x2={x0 + L} y2={y0 + t} stroke={stroke} strokeWidth={0.6} opacity={0.6} />);
+    }
+    const a = L * 0.18;
+    const b = L * 0.34;
+    const P = [[-a, -b], [a, -b], [a, -a], [b, -a], [b, a], [a, a], [a, b], [-a, b], [-a, a], [-b, a], [-b, -a], [-a, -a]];
+    out.push(<Path key="ah" d={`M${P.map(([px, py]) => `${(cx + px).toFixed(1)} ${(cy + py).toFixed(1)}`).join(' L')} Z`} fill="none" stroke={stroke} strokeWidth={1.6} />);
     out.push(
-      <SvgText key="g" x={cx} y={cy - 0.3 * b + b * 0.32} fontSize={b * 0.9} fontFamily={fonts.serifHeavy} fill={craft === 'dancheong' ? '#1d1b19' : craft === 'najeon' ? '#c9a24b' : craft === 'sanggam' ? ink : c.accent} stroke={craft === 'cheonghwa' ? '#f3f1ea' : 'none'} strokeWidth={0.6} textAnchor="middle">
-        {gch}
+      <SvgText key="jm" x={cx} y={cy + L * 0.11} fontSize={L * 0.32} fontFamily={fonts.serifHeavy} fill={stroke} textAnchor="middle">
+        {HANGUL_GLYPH[attempt.formationId] || 'ㅏ'}
       </SvgText>
     );
   } else {

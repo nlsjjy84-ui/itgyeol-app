@@ -1,4 +1,5 @@
 import { senseSummary } from '../../utils/senseMath';
+import { TRAD, motifLines } from '../../data/motifs';
 import { THREE, mesh, group, rbox, tube, knot, tassel, texMat, getDna, smoothProfile } from './kit';
 import { FORMATIONS } from '../../data/formations';
 import { GLYPHS } from '../../data/glyphs';
@@ -24,6 +25,29 @@ export function senseFx(log) {
   return { wave: 1 + (s.camera ? Math.min(1, s.level * 1.6 + s.big * 0.03) * 0.9 : 0), extra: Math.min(12, s.smile + s.wow), s };
 } // Obj3DViewer가 만들기 직전에 { attempts, log } 를 넣는다
 const rec = () => recordRef.v || { attempts: [], log: null };
+
+// 납작한 띠 테두리: 바깥·안쪽 반지름을 각도마다 정해(꽃잎 윤곽을 그대로 따라) 얇게 뽑는다.
+// 둥근 고리(토러스)는 출력 두께를 맞출 때 통째로 커져 몸체 밖으로 떠 보이므로 쓰지 않는다.
+function bandRing(rOut, rIn, h, mat, n = 160) {
+  const sh = new THREE.Shape();
+  for (let i = 0; i <= n; i += 1) {
+    const a = (i / n) * Math.PI * 2;
+    const r = rOut(a);
+    if (i === 0) sh.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    else sh.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+  }
+  const hole = new THREE.Path();
+  for (let i = n; i >= 0; i -= 1) {
+    const a = (i / n) * Math.PI * 2;
+    const r = rIn(a);
+    if (i === n) hole.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    else hole.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+  }
+  sh.holes.push(hole);
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: true, bevelThickness: h * 0.3, bevelSize: Math.min(0.01, h * 0.3), bevelSegments: 2, curveSegments: 8 });
+  return new THREE.Mesh(geo, mat);
+}
+
 
 const HANGUL_GLYPH = { st1: 'ㅣ', st2: 'ㅏ', st3: 'ㅁ', st4: 'ㄷ' };
 const PRINT_WORD = {
@@ -114,37 +138,10 @@ function sealRelief(word, size, mat, h) {
 }
 
 // ───── 전래놀이 부조: 선 그림(단위 상자 -0.5~0.5)을 관(tube)으로 도드라지게 ─────
-const circle = (cx, cy, r, n = 20) => Array.from({ length: n + 1 }, (_, i) => [cx + Math.cos((i / n) * Math.PI * 2) * r, cy + Math.sin((i / n) * Math.PI * 2) * r]);
-const arc = (pts, n = 14) => {
-  const out = [];
-  for (let i = 0; i <= n; i += 1) {
-    const t = i / n;
-    const [a, b, c] = pts;
-    out.push([(1 - t) * (1 - t) * a[0] + 2 * (1 - t) * t * b[0] + t * t * c[0], (1 - t) * (1 - t) * a[1] + 2 * (1 - t) * t * b[1] + t * t * c[1]]);
-  }
-  return out;
-};
-export const MOTIF_LINES = {
-  yeonnaligi: () => [[[-0.36, -0.44], [0.36, -0.44], [0.36, 0.44], [-0.36, 0.44], [-0.36, -0.44]], circle(0, 0, 0.14), [[-0.36, 0.44], [-0.1, 0.1]], [[0.36, 0.44], [0.1, 0.1]], [[-0.36, -0.44], [-0.1, -0.1]], [[0.36, -0.44], [0.1, -0.1]]],
-  paengi: () => [[[-0.36, 0.22], [0.36, 0.22], [0, -0.48], [-0.36, 0.22]], [[-0.36, 0.34], [0.36, 0.34]], arc([[-0.2, 0.04], [0, -0.06], [0.2, 0.04]])],
-  juldarigi: () => {
-    const a = [];
-    const b = [];
-    for (let i = 0; i <= 24; i += 1) { const x = -0.48 + (i / 24) * 0.96; a.push([x, Math.sin(i / 24 * Math.PI * 4) * 0.16]); b.push([x, -Math.sin(i / 24 * Math.PI * 4) * 0.16]); }
-    return [a, b];
-  },
-  julneomgi: () => [arc([[-0.36, -0.3], [0, 0.95], [0.36, -0.3]], 18), [[-0.36, -0.3], [-0.36, -0.46]], [[0.36, -0.3], [0.36, -0.46]]],
-  sangmo: () => [arc([[-0.24, -0.34], [0, -0.1], [0.24, -0.34]]), [[0, -0.2], [0, 0.02]], arc([[0, 0.02], [0.5, 0.2], [0.05, 0.4]]), arc([[0.05, 0.4], [-0.4, 0.5], [-0.32, 0.12]])],
-  guseulchigi: () => [circle(-0.22, -0.14, 0.15), circle(0.22, -0.14, 0.15), circle(0, 0.22, 0.15)],
-  jachigi: () => [[[-0.42, -0.34], [0.34, 0.36]], [[-0.1, 0.28], [0.26, -0.04]]],
-  biseok: () => [[[-0.2, -0.42], [-0.2, 0.24]], arc([[-0.2, 0.24], [0, 0.5], [0.2, 0.24]]), [[0.2, 0.24], [0.2, -0.42]], [[-0.34, -0.42], [0.34, -0.42]]],
-  tuho: () => [[[-0.12, 0.04], [-0.3, -0.2], [-0.14, -0.44], [0.14, -0.44], [0.3, -0.2], [0.12, 0.04], [-0.12, 0.04]], [[-0.04, 0.04], [-0.24, 0.48]], [[0.04, 0.04], [0.2, 0.5]]],
-  ddakji: () => [[[-0.34, -0.34], [0.34, -0.34], [0.34, 0.34], [-0.34, 0.34], [-0.34, -0.34]], [[-0.34, -0.34], [0.34, 0.34]], [[0.34, -0.34], [-0.34, 0.34]]],
-  gomugojul: () => [[[-0.4, 0.36], [-0.4, -0.4]], [[0.4, 0.36], [0.4, -0.4]], [[-0.4, 0], [-0.2, 0.2], [0, -0.08], [0.2, 0.2], [0.4, 0]]],
-  gullyeongsoe: () => [circle(-0.06, -0.06, 0.34, 24), [[0.2, -0.14], [0.46, 0.46]]],
-};
+// 놀이 → 전통 문양 선(src/data/motifs.js). 화면 무늬와 같은 선으로 3D 부조를 만든다.
+export const MOTIF_LINES = Object.fromEntries(Object.keys(TRAD).map((k) => [k, () => motifLines(k)]));
 function motifRelief(id, size, mat, h) {
-  const make = MOTIF_LINES[id] || MOTIF_LINES.guseulchigi;
+  const make = MOTIF_LINES[id] || MOTIF_LINES.yeonnaligi;
   const g = new THREE.Group();
   const r = Math.max(0.03, size * 0.045);
   make().forEach((line) => {
@@ -261,7 +258,7 @@ export const mineNorigae = ({ tex, m }) => {
   disc.position.z = z;
   g.add(disc);
   if (by.print) {
-    const sr = sealRelief(PRINT_WORD[by.print.formationId] || '글', 0.62, seal, 0.045);
+    const sr = sealRelief(PRINT_WORD[by.print.formationId] || '글', 0.42, seal, 0.045);
     sr.position.z = z + 0.015;
     g.add(sr);
   } else if (games.length) {
@@ -269,8 +266,8 @@ export const mineNorigae = ({ tex, m }) => {
     mr.position.z = z + 0.015;
     g.add(mr);
   }
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.03, 10, 64), goldM);
-  ring.position.z = z;
+  const ring = bandRing(() => 0.53, () => 0.47, 0.03, goldM);
+  ring.position.z = z - 0.015;
   g.add(ring);
   // 4) 뒷면: 놀이마다 부조 — 한 놀이를 여러 번 했으면 크게
   const back = new THREE.Group();
@@ -385,7 +382,7 @@ export const mineJar = ({ tex, m }) => {
     return hold;
   };
   // 3) 앞 어깨: 낙관(양각)
-  if (by.print) g.add(place(sealRelief(PRINT_WORD[by.print.formationId] || '글', 0.46, seal, 0.045), 0, yS + 0.05, rS - 0.03));
+  if (by.print) g.add(place(sealRelief(PRINT_WORD[by.print.formationId] || '글', 0.3, seal, 0.045), 0, yS + 0.05, rS - 0.03));
   // 4) 어깨 둘레: 놀이마다 흰 흙 상감처럼 도드라진 부조
   const games = gameCounts(log, attempts);
   games.forEach(([id, n], i) => {
@@ -446,8 +443,9 @@ export const mineBadge = ({ tex, m }) => {
   const goldM = new THREE.MeshStandardMaterial({ color: 0xd1ad55, roughness: 0.45 });
   const seal = new THREE.MeshStandardMaterial({ color: 0xb8312a, roughness: 0.5 });
   // 둘레 금테
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.86, 0.035, 10, 96), goldM);
-  rim.position.z = z;
+  const edge = (a) => R * (1 + amp * Math.cos(lobes * (a - Math.PI / 2)));
+  const rim = bandRing((a) => edge(a) * 0.95, (a) => edge(a) * 0.87, 0.03, goldM);
+  rim.position.z = T / 2 + 0.005;
   g.add(rim);
   // 진 모양 그대로 볼록 점(둘레 띠 위)
   holePositions(pts, R * 1.02).forEach(([x, y]) => g.add(mesh(new THREE.SphereGeometry(0.06, 16, 12), goldM, [x * 1.05, y * 1.05, z])));
@@ -622,66 +620,98 @@ export const mineStamp = ({ tex, m }) => {
 };
 
 // ───── 나만의 책갈피 ─────
-// 얇은 황동 판(0.5mm)을 부식·레이저로 잘라 만드는 책갈피 — 3D 출력이 아니라 금속 가공이다.
-// 머리: 진법 인원 수만큼 꽃잎이 진 둥근 머리, 그 안에 진 모양 투각. 몸통: 맞춘 글자를 새긴 낙관 칸.
-// 맨 위 구멍에 진짜 술을 단다.
+// 얇은 황동 판(0.5mm, 약 3×12cm)을 부식·레이저로 잘라 만드는 책갈피 — 3D 출력이 아니라 금속 가공이다.
+// 윗머리: 진법 인원 수만큼 물결진 꽃잎 머리. 몸통: 진 모양(사람 자리)을 위에서 아래로 늘어놓은 투각 구멍,
+// 놀이 가짓수만큼 가로 마디(부식선). 흥(몸짓)이 클수록 머리 물결이 깊어진다. 맨 위 구멍에 진짜 술을 단다.
+// 글자는 새기지 않는다(뜻 없는 단어가 들어가지 않게).
 export const mineBookmark = ({ m }) => {
-  const { attempts } = rec();
+  const { attempts, log } = rec();
   const by = byScene(attempts);
+  const fx = senseFx(log);
   const f = by.jinbeop ? FORMATIONS.find((q) => q.id === by.jinbeop.formationId) : null;
   const pts = (f && f.positions) || [];
-  const lobes = pts.length ? Math.min(12, Math.max(5, pts.length)) : 8;
-  const R = 0.62;
+  const lobes = pts.length ? Math.min(9, Math.max(3, Math.round(pts.length / 2))) : 5;
+  const games = gameCounts(log, attempts);
+  const W = 0.62;
+  const H = 2.5;
+  const top = H / 2;
+  const bot = -H / 2;
+  const r = 0.06;
   const sh = new THREE.Shape();
-  // 아래 몸통(긴 띠) → 머리(꽃잎 원) 순서로 한 바퀴
-  const bw = 0.34;
-  const bodyBottom = -2.3;
-  sh.moveTo(-bw / 2, bodyBottom + 0.12);
-  sh.quadraticCurveTo(-bw / 2, bodyBottom, 0, bodyBottom - 0.04);
-  sh.quadraticCurveTo(bw / 2, bodyBottom, bw / 2, bodyBottom + 0.12);
-  sh.lineTo(bw / 2, -R * 0.82);
-  const N = 140;
-  const start = Math.atan2(-R * 0.82, bw / 2);
+  // 아래 둥근 모서리부터 시계 반대 방향
+  sh.moveTo(-W / 2 + r, bot);
+  sh.lineTo(W / 2 - r, bot);
+  sh.quadraticCurveTo(W / 2, bot, W / 2, bot + r);
+  sh.lineTo(W / 2, top - 0.22);
+  // 머리: 물결진 꽃잎 가장자리(좌우로 W 폭)
+  const N = 90;
   for (let i = 0; i <= N; i += 1) {
-    const a = start + (i / N) * (Math.PI * 2 - 2 * (start + Math.PI / 2));
-    const r = R * (1 + 0.08 * senseFx(rec().log).wave * Math.cos(lobes * (a - Math.PI / 2)));
-    sh.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    const t = i / N;
+    const x = W / 2 - t * W;
+    const wave = Math.abs(Math.sin(t * Math.PI * lobes));
+    const y = top - 0.22 + 0.1 + Math.sin(t * Math.PI) * 0.12 + wave * 0.07 * fx.wave;
+    sh.lineTo(x, y);
   }
-  sh.lineTo(-bw / 2, -R * 0.82);
-  sh.closePath();
-  holePositions(pts, R * 0.95).forEach(([x, y]) => {
-    const hp = new THREE.Path();
-    hp.absarc(x * 0.85, y * 0.85, 0.05, 0, Math.PI * 2, true);
-    sh.holes.push(hp);
-  });
-  const top = new THREE.Path();
-  top.absarc(0, R * 0.78, 0.07, 0, Math.PI * 2, true);
-  sh.holes.push(top);
-  const brass = new THREE.MeshStandardMaterial({ color: 0xc9a24b, roughness: 0.32, metalness: 0.85, side: THREE.DoubleSide });
-  const plate = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.025, bevelEnabled: false, curveSegments: 40 }), brass);
-  const g = new THREE.Group();
-  g.add(plate);
-  // 몸통의 낙관 칸(부식으로 새김 — 짙은 색 면)
-  const etch = new THREE.MeshStandardMaterial({ color: 0x5a4316, roughness: 0.7, side: THREE.DoubleSide });
-  const word = by.print ? PRINT_WORD[by.print.formationId] || '글' : by.hangul ? HANGUL_GLYPH[by.hangul.formationId] || 'ㅏ' : null;
-  if (word) {
-    const chars = Array.from(word);
-    const cell = 0.24;
-    chars.forEach((ch, i) => {
-      const geo = glyphGeo(ch, cell, 0.004);
-      if (geo) g.add(mesh(geo, etch, [0, -1.0 - i * (cell + 0.06), 0.026]));
+  sh.lineTo(-W / 2, bot + r);
+  sh.quadraticCurveTo(-W / 2, bot, -W / 2 + r, bot);
+  // 술 구멍
+  const hole = new THREE.Path();
+  hole.absarc(0, top - 0.06, 0.055, 0, Math.PI * 2, true);
+  sh.holes.push(hole);
+  // 진 모양 투각: 사람 자리를 몸통 안 세로 칸(폭 W*0.6, 높이 H*0.55)에 맞춰 뚫는다
+  if (pts.length) {
+    const xs = pts.map((p) => p.x);
+    const ys = pts.map((p) => -p.y);
+    const x0 = Math.min(...xs);
+    const x1 = Math.max(...xs);
+    const y0 = Math.min(...ys);
+    const y1 = Math.max(...ys);
+    const bw = W * 0.56;
+    const bh = H * 0.5;
+    const placed = [];
+    pts.forEach((p) => {
+      const px = p.x;
+      const py = -p.y;
+      const hx = x1 > x0 ? ((px - x0) / (x1 - x0) - 0.5) * bw : 0;
+      const hy = (y1 > y0 ? ((py - y0) / (y1 - y0) - 0.5) * bh : 0) + 0.12;
+      if (placed.every(([qx, qy]) => Math.hypot(qx - hx, qy - hy) > 0.11)) placed.push([hx, hy]);
+    });
+    placed.slice(0, 14).forEach(([hx, hy]) => {
+      const hp = new THREE.Path();
+      hp.absarc(hx, hy, 0.035, 0, Math.PI * 2, true);
+      sh.holes.push(hp);
     });
   }
-  g.add(mesh(new THREE.TorusGeometry(R * 0.55, 0.012, 8, 64), etch, [0, 0, 0.026]));
-  // 맨 위 구멍의 진짜 술
+  const brass = new THREE.MeshStandardMaterial({ color: 0xc8a04a, roughness: 0.28, metalness: 0.95, side: THREE.DoubleSide });
+  const plate = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.02, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 1, curveSegments: 24 }), brass);
+  const g = new THREE.Group();
+  g.add(plate);
+  // 부식선: 테두리 안쪽 선 + 놀이 가짓수만큼 아래쪽 가로 마디(짙게 삭은 금속 색)
+  const etch = new THREE.MeshStandardMaterial({ color: 0x6b5220, roughness: 0.6, metalness: 0.5 });
+  const z = 0.0255;
+  const inW = W - 0.1;
+  const inTop = top - 0.2;
+  const inBot = bot + 0.05;
+  [[0, inBot, inW, 0.008], [-inW / 2, (inTop + inBot) / 2, 0.008, inTop - inBot], [inW / 2, (inTop + inBot) / 2, 0.008, inTop - inBot]].forEach(([x, y, w, h]) =>
+    g.add(mesh(new THREE.BoxGeometry(w, h, 0.002), etch, [x, w > 0.01 ? y : y, z]))
+  );
+  const n = Math.max(1, Math.min(6, games.length || 1));
+  for (let i = 0; i < n; i += 1) {
+    const y = bot + 0.18 + i * 0.09;
+    g.add(mesh(new THREE.BoxGeometry(inW * 0.7, 0.008, 0.002), etch, [0, y, z]));
+  }
+  // 맨 위 구멍의 진짜 술(고리 → 매듭 → 술)
   const cord = new THREE.Group();
-  cord.add(tube([[0, R * 0.78, 0.012], [0.12, R * 1.3, 0.03], [0.55, R * 1.25, 0.02], [R + 0.16, R * 0.62, 0]], 0.02, m.silkRed, 24));
-  const ts = tassel(0.9, 0.22, m.silkRed, m.gold, 22);
-  ts.position.set(R + 0.16, R * 0.62, 0);
+  // 구멍에서 위로 올라 고리를 만든 뒤 옆으로 늘어진다(실처럼 아래로 처지게)
+  const sx = W / 2 + 0.16;
+  cord.add(tube([[0, top - 0.06, 0.012], [0.04, top + 0.16, 0.02], [0.2, top + 0.24, 0.02], [sx - 0.03, top + 0.12, 0.01], [sx, top - 0.08, 0]], 0.016, m.silkRed, 24));
+  const ts = tassel(0.75, 0.2, m.silkRed, m.gold, 22);
+  ts.position.set(sx, top - 0.08, 0);
   cord.add(ts);
   cord.userData.real = 'thread';
   g.add(cord);
-  g.rotation.z = 0.12;
+  g.rotation.z = -0.18;
+  g.rotation.y = 0.35;
   return wrap(g);
 };
 
@@ -713,7 +743,7 @@ export const mineStele = ({ tex, m }) => {
   const seal = new THREE.MeshStandardMaterial({ color: 0xb8312a, roughness: 0.5 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x2f3330, roughness: 0.55 });
   if (by.print) {
-    const sr = sealRelief(PRINT_WORD[by.print.formationId] || '글', 0.5, seal, 0.04);
+    const sr = sealRelief(PRINT_WORD[by.print.formationId] || '글', 0.32, seal, 0.04);
     sr.position.set(0, y + bh * 0.68, zf);
     g.add(sr);
   }
@@ -773,7 +803,9 @@ export const mineCoaster = ({ tex, m }) => {
   const g = new THREE.Group();
   g.add(base);
   const goldM = new THREE.MeshStandardMaterial({ color: 0xd1ad55, roughness: 0.45 });
-  g.add(mesh(new THREE.TorusGeometry(0.69, 0.03, 10, 96), goldM, [0, 0, T + 0.03]));
+  const band = bandRing(() => 0.72, () => 0.66, 0.025, goldM);
+  band.position.z = T + 0.012;
+  g.add(band);
   const beads = 12 + games.length * 2 + blocks * 2 + fx.extra;
   for (let i = 0; i < beads; i += 1) {
     const a = (i / beads) * Math.PI * 2;

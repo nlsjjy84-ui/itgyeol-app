@@ -81,7 +81,6 @@ export const CATALOG = [
         variants: [
           { id: 'hand', label: '손거울', build: A.mirrorHand },
           { id: 'bronze', label: '동경(청동거울)', build: A.mirrorBronze },
-          { id: 'frame', label: '틀 거울', build: A.mirrorFrame },
         ],
       },
       {
@@ -214,7 +213,7 @@ export const CATALOG = [
         craft: 'ipsa',
         shaped: true,
         label: '나만의 책갈피',
-        about: '진법 인원 수만큼 꽃잎이 진 머리에 진 모양 구멍을 뚫고, 몸통에 맞춘 글자를 새겨요.',
+        about: '약 3×12cm 황동 책갈피예요. 진법이 물결진 머리와 몸통의 구멍 무늬를, 놀이 가짓수가 아래쪽 가로 마디를 만들어요.',
         variants: [{ id: 'mine', label: '내 기록으로 빚은 책갈피', build: M.mineBookmark }],
       },
     ],
@@ -317,6 +316,41 @@ export const CATALOG = [
         label: '수건',
         about: '면 수건(34×80cm)에 내 무늬를 날염해요.',
         variants: [{ id: 'towel', label: '면 수건', build: H.fabricTowel }],
+      },
+      {
+        id: 'hanky',
+        craft: 'jogakbo',
+        label: '손수건',
+        about: '45cm 면 손수건에 내 무늬를 날염하고 가장자리를 말아 박아요.',
+        variants: [{ id: 'hanky', label: '면 손수건', build: H.fabricHanky }],
+      },
+      {
+        id: 'scarf',
+        craft: 'jogakbo',
+        label: '스카프',
+        about: '긴 스카프에 내 무늬를 두 번 이어 날염해요.',
+        variants: [{ id: 'scarf', label: '스카프', build: H.fabricScarf }],
+      },
+      {
+        id: 'pouch',
+        craft: 'jogakbo',
+        label: '파우치',
+        about: '지퍼 파우치 앞뒤에 내 무늬를 날염해 봉제해요.',
+        variants: [{ id: 'pouch', label: '지퍼 파우치', build: H.fabricPouch }],
+      },
+      {
+        id: 'postcard',
+        craft: 'jogakbo',
+        label: '엽서',
+        about: '엽서(148×100mm) 2장 왼쪽에 내 무늬를, 오른쪽에 쓸 칸을 인쇄해요.',
+        variants: [{ id: 'postcard', label: '엽서 2장', build: H.paperPostcard }],
+      },
+      {
+        id: 'frame',
+        craft: 'jogakbo',
+        label: '작은 액자',
+        about: '내 무늬를 인쇄해 원목 액자에 넣어요. 책상에 세워 둬요.',
+        variants: [{ id: 'frame', label: '원목 액자', build: H.paperFrame }],
       },
       {
         id: 'cup',

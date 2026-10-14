@@ -4,16 +4,18 @@
 // 해외 박물관 상점도 참고했다: 대영박물관 로제타석 문진 £11.99(레진, 8×7cm).
 // 사진 2장 4,000 · 나만의 배지 15,000 · 키링 15,000 · 낙관 도장 20,000 · 수막새 자석 18,000 · 문진 25,000 · 코스터 15,000
 // · 책갈피 12,000 · 3D 모형 45,000 · 접부채 12,000 · 수건 15,000 · 백자 잔 25,000 · 수저받침 9,000
+// · 손수건 12,000 · 스카프 28,000 · 파우치 15,000 · 엽서 2장 3,000 · 작은 액자 18,000
 export const PRICES = {
   photo: 4000, badge: 15000, keyring: 15000, stamp: 20000, sumak: 18000, paperweight: 25000, coaster: 15000,
   bookmark: 12000, model: 45000, fan: 12000, towel: 15000, cup: 25000, spoonrest: 9000,
+  hanky: 12000, scarf: 28000, pouch: 15000, postcard: 3000, frame: 18000,
 };
-export const ORDER_KEYS = ['photo', 'badge', 'keyring', 'stamp', 'sumak', 'paperweight', 'coaster', 'bookmark', 'model', 'fan', 'towel', 'cup', 'spoonrest'];
+export const ORDER_KEYS = ['photo', 'badge', 'keyring', 'stamp', 'sumak', 'paperweight', 'coaster', 'bookmark', 'model', 'fan', 'towel', 'hanky', 'scarf', 'pouch', 'postcard', 'frame', 'cup', 'spoonrest'];
 
 // 위에서 고른 물건 → 주문 항목
 export function productKey(groupId, itemId) {
   if (groupId === 'treasure') return 'model';
-  if (groupId === 'daily') return { towel: 'towel', cup: 'cup', spoonrest: 'spoonrest' }[itemId] || 'fan';
+  if (groupId === 'daily') return ['towel', 'hanky', 'scarf', 'pouch', 'postcard', 'frame', 'cup', 'spoonrest'].includes(itemId) ? itemId : 'fan';
   if (groupId === 'desk') return itemId === 'mycoaster' ? 'coaster' : 'paperweight';
   return ['badge', 'keyring', 'stamp', 'sumak', 'bookmark'].includes(groupId) ? groupId : null;
 }

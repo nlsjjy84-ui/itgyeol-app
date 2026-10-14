@@ -39,6 +39,7 @@ test('주문 합계 — 뮷즈 값대 기준(배지 15,000 · 키링 15,000 · �
   assert.deepEqual(PRICES, {
     photo: 4000, badge: 15000, keyring: 15000, stamp: 20000, sumak: 18000, paperweight: 25000, coaster: 15000,
     bookmark: 12000, model: 45000, fan: 12000, towel: 15000, cup: 25000, spoonrest: 9000,
+    hanky: 12000, scarf: 28000, pouch: 15000, postcard: 3000, frame: 18000,
   });
   assert.equal(orderTotal({}), 0);
   assert.equal(orderTotal({ photo: true }), 4000);
@@ -62,6 +63,8 @@ test('고른 물건 → 주문 항목', () => {
   assert.equal(productKey('bookmark', 'mybookmark'), 'bookmark');
   assert.equal(productKey('daily', 'cup'), 'cup');
   assert.equal(productKey('daily', 'spoonrest'), 'spoonrest');
+  assert.equal(productKey('daily', 'scarf'), 'scarf');
+  assert.equal(productKey('daily', 'postcard'), 'postcard');
   assert.equal(productKey('nothing', 'x'), null);
 });
 
@@ -154,4 +157,16 @@ test('QR로 옮겨도 몸짓·표정·감탄사 기록이 같이 간다(없으�
   const old = unpackJourney(packJourney({ attempts, playLog: { byGame: {}, byScene: {} } }));
   assert.equal(old.playLog.senses, undefined);
   assert.deepEqual(mergeLog({ byGame: {}, byScene: {} }, { byGame: {}, byScene: {}, senses }).senses, senses);
+});
+
+import { makerSpec, SPEC } from '../src/utils/makerSpec.js';
+import { ORDER_KEYS } from '../src/utils/order.js';
+
+test('주문할 수 있는 물건은 모두 업체용 제작 사양서가 있고, 출력 파일 크기가 있으면 그 값을 쓴다', () => {
+  ORDER_KEYS.filter((k) => k !== 'photo').forEach((k) => assert.ok(SPEC[k], `사양 없음: ${k}`));
+  const txt = makerSpec({ product: 'stamp', title: '나만의 낙관 도장', variant: '내 기록으로 빚은 도장', code: 'ITG-1', mm: { x: 20.4, y: 20.4, z: 40.2 } });
+  assert.match(txt, /20×20×40mm/);
+  assert.match(txt, /좌우가 뒤집힌/);
+  assert.match(makerSpec({ product: 'cup', title: '백자 잔' }), /3D 출력 아님/);
+  assert.equal(makerSpec({ product: 'nothing', title: 'x' }), null);
 });

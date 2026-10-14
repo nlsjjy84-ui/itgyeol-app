@@ -55,6 +55,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
     photo: t('깜짝 사진 엽서 2장'), badge: t('나만의 배지'), keyring: t('맞춤 키링'), stamp: t('나만의 낙관 도장'), sumak: t('나만의 수막새'),
     paperweight: t('나만의 문진'), coaster: t('나만의 코스터'), bookmark: t('나만의 책갈피'), model: t('3D 모형'),
     fan: t('접부채'), towel: t('수건'), cup: t('백자 잔'), spoonrest: t('수저받침'),
+    hanky: t('손수건'), scarf: t('스카프'), pouch: t('파우치'), postcard: t('엽서'), frame: t('작은 액자'),
   };
   const DESC = {
     badge: t('위에서 고른 {s}를 지름 약 3cm로 출력하고 뒤에 쇠 핀을 달아요.', { s: shapeLabel }),
@@ -69,6 +70,11 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
     bookmark: t('위에서 고른 {s}를 얇은 황동 판으로 잘라 만들고 진짜 술을 달아요.', { s: shapeLabel }),
     cup: t('백자 잔에 내 무늬 띠와 낙관을 전사지로 구워 입혀요.'),
     spoonrest: t('백자 수저받침에 내 무늬와 낙관을 전사지로 구워 입혀요.'),
+    hanky: t('45cm 면 손수건에 내 무늬를 날염해요.'),
+    scarf: t('긴 스카프에 내 무늬를 두 번 이어 날염해요.'),
+    pouch: t('지퍼 파우치 앞뒤에 내 무늬를 날염해 봉제해요.'),
+    postcard: t('엽서 2장에 내 무늬를 인쇄해요.'),
+    frame: t('내 무늬를 인쇄해 원목 액자에 넣어요.'),
   };
 
   return (
@@ -93,7 +99,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
             ? t('책갈피는 황동 판을 화면의 윤곽 그대로 잘라 만들어요. 3D 출력으로는 너무 얇아서예요.')
             : product === 'cup' || product === 'spoonrest'
               ? t('잔·수저받침은 입과 음식이 닿아 3D 출력 대신 백자에 무늬를 전사지로 구워 입혀요.')
-              : t('부채·수건은 화면의 무늬 그림을 그대로 인쇄해요.')}
+              : t('천·종이 물건은 화면의 무늬 그림을 그대로 날염·인쇄해요.')}
       </Text>
 
       <Text style={styles.label}>{t('받는 방법')}</Text>
