@@ -10,7 +10,7 @@ import { packJourney, unpackJourney, carryUrl, mergeAttempts, mergeLog, b64encod
 import { buildAttemptResult } from '../src/utils/resultSeed.js';
 
 const src = readFileSync(new URL('../src/data/mockWorks.js', import.meta.url), 'utf8');
-const MOCK_WORKS = JSON.parse(src.match(/export const MOCK_WORKS = (\[.*?\]);\n/s)[1]);
+const MOCK_WORKS = JSON.parse(src.match(/export const MOCK_WORKS = (\[.*?\]);\r?\n/s)[1]);
 
 test('예시 작품 450점은 서로 하나도 겹치지 않는다', () => {
   const r = countWorks(MOCK_WORKS);
@@ -169,4 +169,58 @@ test('주문할 수 있는 물건은 모두 업체용 제작 사양서가 있고
   assert.match(txt, /좌우가 뒤집힌/);
   assert.match(makerSpec({ product: 'cup', title: '백자 잔' }), /3D 출력 아님/);
   assert.equal(makerSpec({ product: 'nothing', title: 'x' }), null);
+});
+
+// ── 결과물 주문: 결제(모의) → 업체 전달 → 제작 → 받기 ──
+import { SHIP_FEE, payQuote, placeOrder, advance, cancel, cancelable, cleanOrders } from '../src/utils/orders.js';
+import { wallQueue } from '../src/utils/exhibit.js';
+
+test('결제 금액은 물건 합계 + 택배비(택배일 때만)', () => {
+  assert.deepEqual(payQuote({ photo: true, keyring: true }, 'shop'), { items: ['photo', 'keyring'], goods: 19000, ship: 0, total: 19000 });
+  assert.equal(payQuote({ keyring: true }, 'post').total, 15000 + SHIP_FEE);
+  assert.equal(payQuote({}, 'post').total, 0);
+});
+
+test('동의 없이는 결제되지 않고, 결제하면 바로 업체에 전달된다', () => {
+  assert.equal(placeOrder({ code: 'AB12CD34', pick: { badge: true }, how: 'shop', method: 'card', agreed: false }).error, 'NOT_AGREED');
+  assert.equal(placeOrder({ code: 'AB12CD34', pick: {}, how: 'shop', method: 'card', agreed: true }).error, 'EMPTY');
+  const { order } = placeOrder({ code: 'AB12CD34', pick: { badge: true }, how: 'post', method: 'easy', agreed: true, spec: '사양서', now: Date.UTC(2026, 9, 14, 3) });
+  assert.equal(order.no, 'ITG-12CD34-1');
+  assert.match(order.payRef, /^MOCK-2026101\d-/);
+  assert.equal(order.stage, 'sent');
+  assert.deepEqual(order.log.map((l) => l.stage), ['paid', 'sent']);
+  assert.equal(order.total, 15000 + SHIP_FEE);
+});
+
+test('업체는 단계를 건너뛰지 못하고, 만들기 시작하면 취소할 수 없다', () => {
+  const { order } = placeOrder({ code: 'X1', pick: { stamp: true }, how: 'shop', method: 'counter', agreed: true });
+  assert.ok(cancelable(order));
+  const making = advance(order);
+  assert.equal(making.stage, 'making');
+  assert.equal(cancel(making).error, 'ALREADY_MAKING');
+  const ready = advance(making);
+  assert.equal(ready.stage, 'ready');
+  assert.equal(advance(ready), ready);
+  const c = cancel(order).order;
+  assert.equal(c.stage, 'canceled');
+  assert.equal(c.refund, 20000);
+  assert.equal(advance(c), c);
+  assert.equal(cleanOrders([c, null, { no: 1 }]).length, 1);
+});
+
+test('전시 화면은 걸린 관람객 작품을 먼저, 남는 자리는 예시로 채운다', () => {
+  const entries = [
+    { code: 'a', at: 2, status: 'showing' },
+    { code: 'b', at: 1, status: 'showing' },
+    { code: 'c', at: 0 },
+  ];
+  const q = wallQueue(entries, [{ id: 'w1' }, { id: 'w2' }], 3);
+  assert.deepEqual(q.map((x) => x.key), ['v-b', 'v-a', 'm-w1']);
+  assert.equal(wallQueue([], [{ id: 'w1' }]).length, 1);
+});
+
+test('주문에 붙는 사양서의 주문 번호는 이 주문 번호로 바뀐다', () => {
+  const { order } = placeOrder({ code: 'ZZ99', pick: { keyring: true }, how: 'shop', method: 'card', agreed: true, spec: '잇결 제작 사양서\n주문 번호: ITGYEOL-JH-ZZ99\n물건: 키링' , seq: 2 });
+  assert.match(order.spec, /주문 번호: ITG-ZZ99-2/);
+  assert.doesNotMatch(order.spec, /ITGYEOL-JH/);
 });

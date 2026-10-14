@@ -10,22 +10,44 @@ import Madang from '../ui/Madang';
 import { t as i18nT } from '../i18n';
 
 // 한글 테트리스 — 규칙은 일반 테트리스와 똑같다.
-// 블록은 한글 자모 모양: ㄱ ㄴ ㅁ(4칸), ㄷ(5칸 특수 블록), 모음 ㅣ ㅡ(막대)와 ㅏ ㅓ ㅗ ㅜ(T 블록을 돌린 모양).
-// 블록을 돌리면 모음은 실제 글자(ㅗ→ㅏ→ㅜ→ㅓ, ㅡ→ㅣ)로 바뀐다.
-const COLS = 10;
-const ROWS = 16;
+// 블록은 한글 자모 모양: 자음 ㄱ ㄴ(4칸·짧은 3칸) ㄷ ㅁ, 모음 ㅣ ㅡ(막대), ㅏ ㅓ ㅗ ㅜ(T 블록을 돌린 모양),
+//   ㅛ ㅑ ㅠ ㅕ(가지 둘 블록을 돌린 모양), ㅐ ㅒ(세로획 둘을 잇는 큰 블록).
+//   큰 자음: ㄷ(6칸, 오른쪽이 열림)
+// 칸 안에 글자나 선을 쓰지 않는다. 블록 칸을 하나로 이어 붙여 블록 모양 자체가 글자로 보이게 한다.
+// 블록을 돌리면 모음은 실제 글자(ㅗ→ㅏ→ㅜ→ㅓ, ㅛ→ㅑ→ㅠ→ㅕ, ㅡ→ㅣ)로 바뀐다.
+const COLS = 12; // 일반 테트리스(10칸)보다 양옆 한 칸씩 넓게 — 큰 글자 블록이 들어갈 자리
+const ROWS = 18;
 
 // 기본(처음 나올 때) 모양 — [x, y] 칸 목록. 글자 모양 그대로 시작한다.
 const BASE = {
-  g: { glyph: 'ㄱ', color: '#c1592f', cells: [[0, 0], [1, 0], [2, 0], [2, 1]] }, // ㄱ
-  n: { glyph: 'ㄴ', color: '#3f6f8f', cells: [[0, 0], [0, 1], [0, 2], [1, 2]] }, // ㄴ
-  m: { glyph: 'ㅁ', color: '#b08a4a', cells: [[0, 0], [1, 0], [0, 1], [1, 1]] }, // ㅁ
-  d: { glyph: 'ㄷ', color: '#8a4f8a', cells: [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2]] }, // ㄷ(5칸)
-  i: { glyph: 'ㅣ', color: '#2c7a6b', cells: [[0, 0], [0, 1], [0, 2], [0, 3]], glyphs: ['ㅣ', 'ㅡ'] }, // ㅣ ↔ ㅡ
-  t: { glyph: 'ㅗ', color: '#a23b5c', cells: [[1, 0], [0, 1], [1, 1], [2, 1]], glyphs: ['ㅗ', 'ㅏ', 'ㅜ', 'ㅓ'] }, // ㅗ → ㅏ → ㅜ → ㅓ
+  g: { glyph: 'ㄱ', color: '#e05a47', cells: [[0, 0], [1, 0], [1, 1], [1, 2]] }, // ㄱ — 위 2칸, 오른쪽으로 내려옴
+  g3: { glyph: 'ㄱ', color: '#f08a3c', cells: [[0, 0], [1, 0], [1, 1]] }, // 짧은 ㄱ(3칸)
+  n: { glyph: 'ㄴ', color: '#3a78c4', cells: [[0, 0], [0, 1], [0, 2], [1, 2]] }, // ㄴ
+  n3: { glyph: 'ㄴ', color: '#5bb5e0', cells: [[0, 0], [0, 1], [1, 1]] }, // 짧은 ㄴ(3칸)
+  m: { glyph: 'ㅁ', color: '#f2c230', cells: [[0, 0], [1, 0], [0, 1], [1, 1]] }, // ㅁ
+  d: { glyph: 'ㄷ', color: '#8e63b8', cells: [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2], [2, 2]] }, // ㄷ(6칸) — 위 2칸, 아래 3칸
+  i: { glyph: 'ㅣ', color: '#3fa860', cells: [[0, 0], [0, 1], [0, 2], [0, 3]], glyphs: ['ㅣ', 'ㅡ'] }, // ㅣ ↔ ㅡ
+  t: { glyph: 'ㅗ', color: '#e0567f', cells: [[1, 0], [0, 1], [1, 1], [2, 1]], glyphs: ['ㅗ', 'ㅏ', 'ㅜ', 'ㅓ'] }, // ㅗ → ㅏ → ㅜ → ㅓ
+  // 긴 ㅣ·ㅡ — 5칸 막대
+  il: { glyph: 'ㅣ', color: '#20a39e', cells: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]], glyphs: ['ㅣ', 'ㅡ'] },
+  // 긴 ㅗ·ㅏ·ㅜ·ㅓ — 가로 5칸 가운데에 가지 하나
+  tl: { glyph: 'ㅗ', color: '#f28ab0', cells: [[2, 0], [0, 1], [1, 1], [2, 1], [3, 1], [4, 1]], glyphs: ['ㅗ', 'ㅏ', 'ㅜ', 'ㅓ'] },
+  // 아래 셋은 큰 블록이라 드물게 나온다(어려운 블록) — ㅛ·ㅑ·ㅠ·ㅕ, ㅐ, ㅒ
+  y: { glyph: 'ㅛ', color: '#8cc63f', cells: [[1, 0], [3, 0], [0, 1], [1, 1], [2, 1], [3, 1], [4, 1]], glyphs: ['ㅛ', 'ㅑ', 'ㅠ', 'ㅕ'] }, // ㅛ → ㅑ → ㅠ → ㅕ
+  ae: {
+    glyph: 'ㅐ',
+    color: '#4a55a2',
+    cells: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [1, 2], [2, 0], [2, 1], [2, 2], [2, 3], [2, 4]],
+  }, // ㅐ — 세로획 둘을 가운데 가로획 하나로 잇는다
+  yae: {
+    glyph: 'ㅒ',
+    color: '#c26dbc',
+    cells: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [1, 1], [1, 3], [2, 0], [2, 1], [2, 2], [2, 3], [2, 4]],
+  }, // ㅒ — 세로획 둘을 가로획 둘로 잇는다
 };
-// 자주 나오는 순서(가방 뽑기): 모음 3 : 자음 3 — ㄷ은 드물게
-const BAG = ['g', 'n', 'm', 'i', 't', 't', 'i', 'g', 'n', 'm', 'd'];
+// 나오는 비율(가중치): 4칸 블록은 자주, 긴 ㅣ·ㅡ, 긴 ㅗ·ㅏ·ㅜ·ㅓ와 ㄷ은 가끔, 큰 모음(ㅛ·ㅑ·ㅠ·ㅕ, ㅐ, ㅒ)은 아주 드물게
+const WEIGHT = { g: 6, g3: 4, n: 6, n3: 4, m: 6, i: 7, il: 3, t: 8, tl: 3, d: 3, y: 2, ae: 1, yae: 1 };
+const BAG = Object.entries(WEIGHT).flatMap(([k, w]) => Array(w).fill(k));
 
 function rot(cells) {
   const r = cells.map(([x, y]) => [-y, x]);
@@ -34,15 +56,11 @@ function rot(cells) {
   return r.map(([x, y]) => [x - minx, y - miny]);
 }
 
+let pieceSeq = 0;
 function newPiece(kind) {
   const b = BASE[kind];
-  return { kind, cells: b.cells.map((c) => c.slice()), r: 0, x: Math.floor((COLS - 2) / 2) - 1, y: 0 };
-}
-
-function glyphOf(p) {
-  const b = BASE[p.kind];
-  if (b.glyphs) return b.glyphs[p.r % b.glyphs.length];
-  return b.glyph;
+  pieceSeq += 1;
+  return { id: pieceSeq, kind, cells: b.cells.map((c) => c.slice()), r: 0, x: Math.floor((COLS - 2) / 2) - 1, y: 0 };
 }
 
 function fits(board, cells, x, y) {
@@ -51,6 +69,18 @@ function fits(board, cells, x, y) {
     const py = y + cy;
     return px >= 0 && px < COLS && py < ROWS && (py < 0 || !board[py][px]);
   });
+}
+
+// 블록 색: 일반 테트리스처럼 블록마다 서로 다른 맑은 색 하나(13색). 탁하거나 어두운 색은 쓰지 않는다.
+// 칸 처리: 블록 안 칸을 하나하나 나눠 그리고, 칸마다 위·왼쪽은 밝게, 아래·오른쪽은 어둡게 해서 도드라진 블록처럼 보이게 한다.
+const shadeCache = {};
+function shade(hex, k) {
+  const key = `${hex}${k}`;
+  if (shadeCache[key]) return shadeCache[key];
+  const n = parseInt(hex.slice(1), 16);
+  const f = (c) => Math.round(k > 0 ? c + (255 - c) * k : c * (1 + k));
+  shadeCache[key] = `rgb(${f((n >> 16) & 255)},${f((n >> 8) & 255)},${f(n & 255)})`;
+  return shadeCache[key];
 }
 
 const emptyBoard = () => Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -89,10 +119,10 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
   const lock = () => {
     const s = st.current;
     const p = s.cur;
-    p.cells.forEach(([cx, cy]) => {
+    p.cells.forEach(([cx, cy], ci) => {
       const px = p.x + cx;
       const py = p.y + cy;
-      if (py >= 0) s.board[py][px] = { kind: p.kind, g: glyphOf(p), rot: p.r % 4 };
+      if (py >= 0) s.board[py][px] = { kind: p.kind, pid: p.id, ci, lx: cx, ly: cy, r: p.r % 4 };
     });
     // 줄 지우기
     const clearedRows = [];
@@ -229,9 +259,9 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
       const py = gy + cy;
       if (py >= 0 && py < ROWS && !grid[py][s.cur.x + cx]) grid[py][s.cur.x + cx] = { ghost: true, kind: s.cur.kind };
     });
-    s.cur.cells.forEach(([cx, cy]) => {
+    s.cur.cells.forEach(([cx, cy], ci) => {
       const py = s.cur.y + cy;
-      if (py >= 0 && py < ROWS) grid[py][s.cur.x + cx] = { kind: s.cur.kind, g: glyphOf(s.cur), rot: s.cur.r % 4 };
+      if (py >= 0 && py < ROWS) grid[py][s.cur.x + cx] = { kind: s.cur.kind, pid: s.cur.id, ci, lx: cx, ly: cy, r: s.cur.r % 4 };
     });
   }
 
@@ -260,21 +290,29 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
             row.map((c, x) => {
               if (!c) return null;
               const b = BASE[c.kind];
+              if (c.ghost) {
+                return <View key={`${x}-${y}`} style={[styles.cell, { left: x * CELL + 2, top: y * CELL + 2, width: CELL, height: CELL, borderWidth: 1.5, borderColor: b.color, borderStyle: 'dashed', backgroundColor: 'transparent', opacity: 0.55 }]} />;
+              }
               return (
                 <View
                   key={`${x}-${y}`}
                   style={[
                     styles.cell,
-                    { left: x * CELL + 2, top: y * CELL + 2, width: CELL, height: CELL },
-                    c.ghost
-                      ? { borderWidth: 1.5, borderColor: b.color, borderStyle: 'dashed', backgroundColor: 'transparent', opacity: 0.55 }
-                      : { backgroundColor: '#ead2a2', borderWidth: 1.5, borderColor: b.color, borderBottomWidth: 3 },
+                    {
+                      left: x * CELL + 2,
+                      top: y * CELL + 2,
+                      width: CELL,
+                      height: CELL,
+                      borderRadius: 2,
+                      backgroundColor: b.color,
+                      borderWidth: 3,
+                      borderTopColor: shade(b.color, 0.45),
+                      borderLeftColor: shade(b.color, 0.3),
+                      borderRightColor: shade(b.color, -0.2),
+                      borderBottomColor: shade(b.color, -0.3),
+                    },
                   ]}
-                >
-                  {!c.ghost ? (
-                    <Text style={[styles.cellText, { color: b.color }, !BASE[c.kind].glyphs && { transform: [{ rotate: `${(c.rot || 0) * 90}deg` }] }]}>{i18nT(c.g)}</Text>
-                  ) : null}
-                </View>
+                />
               );
             })
           )}
@@ -299,13 +337,19 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
           <Text style={styles.sideCap}>{i18nT('돌리면 바뀌는 모음')}</Text>
           <View style={styles.rotCard}>
             {['ㅗ', 'ㅏ', 'ㅜ', 'ㅓ'].map((v, i) => {
-              const on = s.cur && s.cur.kind === 't' && s.cur.r % 4 === i && phase === 'running';
+              const on = s.cur && (s.cur.kind === 't' || s.cur.kind === 'tl') && s.cur.r % 4 === i && phase === 'running';
               return <Text key={v} style={[styles.rotGlyph, on && { color: '#fff', backgroundColor: BASE.t.color }]}>{v}</Text>;
             })}
           </View>
           <View style={styles.rotCard}>
+            {['ㅛ', 'ㅑ', 'ㅠ', 'ㅕ'].map((v, i) => {
+              const on = s.cur && s.cur.kind === 'y' && s.cur.r % 4 === i && phase === 'running';
+              return <Text key={v} style={[styles.rotGlyph, on && { color: '#fff', backgroundColor: BASE.y.color }]}>{v}</Text>;
+            })}
+          </View>
+          <View style={styles.rotCard}>
             {['ㅣ', 'ㅡ'].map((v, i) => {
-              const on = s.cur && s.cur.kind === 'i' && s.cur.r % 2 === i && phase === 'running';
+              const on = s.cur && (s.cur.kind === 'i' || s.cur.kind === 'il') && s.cur.r % 2 === i && phase === 'running';
               return <Text key={v} style={[styles.rotGlyph, on && { color: '#fff', backgroundColor: BASE.i.color }]}>{v}</Text>;
             })}
           </View>
@@ -336,7 +380,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   board: { borderWidth: 2, borderRadius: 6, backgroundColor: colors.paper, position: 'relative', overflow: 'hidden', userSelect: 'none' },
   cell: { position: 'absolute', borderRadius: 3, alignItems: 'center', justifyContent: 'center' },
-  cellText: { fontSize: 15, fontWeight: '900', color: '#fff', lineHeight: 17, userSelect: 'none' },
   pop: { position: 'absolute', left: 0, right: 0, textAlign: 'center', fontSize: 22, fontWeight: '900' },
   rotCard: { flexDirection: 'row', gap: 3, flexWrap: 'wrap', justifyContent: 'center' },
   rotGlyph: { width: 20, height: 22, textAlign: 'center', fontSize: 14, fontWeight: '800', color: colors.ink, borderRadius: 3, overflow: 'hidden', borderWidth: 1, borderColor: colors.border, lineHeight: 20 },

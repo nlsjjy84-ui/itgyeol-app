@@ -13,7 +13,7 @@ import { play } from '../utils/sound';
 
 // 잇결 전시관 — 전시해도 된다고 고른 작품만 걸린다.
 // 위: 내가 신청한 작품(전시 대기 중), 아래: 지금 걸려 있는 작품(시연용 예시).
-// 실제 전시 화면·알림은 박물관 쪽 화면이 맡고, 앱은 신청과 상태 표시까지.
+// 박물관 전시 화면(ExhibitWall, 시연)에서 담당자가 걸면 "전시 중"으로 바뀐다. 지금은 같은 기기 안의 모의 연결이다.
 const WALL = 24;
 
 export default function ExhibitScreen({ navigation }) {
@@ -32,6 +32,9 @@ export default function ExhibitScreen({ navigation }) {
       <ScrollView contentContainerStyle={st.content}>
         <ScreenHeader title="잇결 전시관" sub={t('전시해도 된다고 고른 작품만 걸려요')} onBack={() => navigation.goBack()} />
 
+        <Pressable onPress={() => { play('tap'); navigation.navigate('ExhibitWall'); }} style={st.wallBtn}>
+          <Text style={st.wallBtnTxt}>{t('박물관 전시 화면 열기 (큰 화면 · 시연) ›')}</Text>
+        </Pressable>
         <Text style={st.h}>{t('내가 신청한 작품 {n}점', { n: mine.length })}</Text>
         {mine.length === 0 ? (
           <Frame style={{ marginTop: 8 }}>
@@ -51,10 +54,10 @@ export default function ExhibitScreen({ navigation }) {
                     {e.attempts && e.attempts.length ? <Jogakbo attempts={e.attempts} size={104} /> : null}
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={st.badge}>{t('전시 대기 중')}</Text>
+                    <Text style={[st.badge, e.status === 'showing' && st.badgeOn]}>{e.status === 'showing' ? t('전시 중') : t('전시 대기 중')}</Text>
                     <Text style={st.nick} numberOfLines={1}>{e.nick ? e.nick : t('손님')}</Text>
                     <Text style={st.meta}>{t(e.country || '그 밖의 나라')} · #{String(e.code).slice(-6)}</Text>
-                    <Text style={st.meta}>{t('걸리면 이 화면에서 "전시 중"으로 바뀌어요.')}</Text>
+                    <Text style={st.meta}>{e.status === 'showing' ? t('박물관 전시 화면에 걸려 있어요.') : t('걸리면 이 화면에서 "전시 중"으로 바뀌어요.')}</Text>
                     <Pressable onPress={() => { play('tap'); setExhibit(e.code, null); }} hitSlop={8}>
                       <Text style={st.cancel}>{t('전시 신청 취소')}</Text>
                     </Pressable>
@@ -92,6 +95,9 @@ const st = StyleSheet.create({
   mineCard: {},
   mineRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   mineArt: { width: 108, height: 108, alignItems: 'center', justifyContent: 'center' },
+  badgeOn: { backgroundColor: colors.green },
+  wallBtn: { marginTop: 12, paddingVertical: 11, alignItems: 'center', borderRadius: 4, backgroundColor: colors.night, borderWidth: 1.5, borderColor: colors.gold },
+  wallBtnTxt: { color: colors.gold, fontWeight: '800', fontSize: 13 },
   badge: { alignSelf: 'flex-start', fontSize: 11, fontWeight: '800', color: colors.baek, backgroundColor: colors.hwang, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 3, overflow: 'hidden' },
   nick: { fontSize: 17, fontFamily: fonts.serifBold, color: colors.ink, marginTop: 6 },
   meta: { fontSize: 11.5, color: colors.muted, marginTop: 2, lineHeight: 16 },

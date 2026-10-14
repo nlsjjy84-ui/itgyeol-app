@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Pressable, TextInput } from 'react-native';
 import Text from '../ui/Text';
 import Frame from '../ui/Frame';
@@ -8,8 +8,11 @@ import { play } from '../utils/sound';
 
 // 결과 화면 "가져가는 방법" — 싼 것부터 차례로(무료 저장 → 사진 → 키링 → 3D 모형).
 // 받는 방법(굿즈숍에서 찾기 / 택배), 전시 동의를 여기서 고른다.
-// 가격은 사업성 검토의 가정값이고, 실제 결제·제작은 박물관 굿즈숍과 연결 업체가 맡는다(앱은 주문표까지).
+// 가격은 사업성 검토의 가정값이다. 주문표 → 결제(모의) → 업체 전달 → 제작 → 받기까지 흐름이 이어진다.
+// 결제사·업체와는 아직 실제로 연결하지 않았고(결제 번호는 MOCK-), 주문은 이 기기에만 저장한다.
 import { PRICES, orderTotal, orderItems, orderNumber, comma, ORDER_KEYS } from '../utils/order';
+import { SHIP_FEE, STAGES, STAGE_NAME, METHODS, payQuote, placeOrder, cancel, cancelable, readyText } from '../utils/orders';
+import { onOrders, saveOrder } from '../utils/orderStore';
 
 const won = (n) => t('{n}원', { n: comma(n) });
 
@@ -38,14 +41,21 @@ export const COUNTRIES = ['한국', '미국', '중국', '일본', '그 밖의 �
 const DEFAULT_COUNTRY = { ko: '한국', zh: '중국', ja: '일본' };
 
 // entry: 이 작품의 전시 신청(없으면 null). onExhibit(patch) — patch가 null이면 신청 취소.
-export default function TakeHome({ code, shapeLabel, product, printable = true, entry, onExhibit, onHall }) {
+export default function TakeHome({ code, shapeLabel, product, printable = true, entry, onExhibit, onHall, spec, onMaker }) {
   const exhibitOn = !!entry;
   const [pick, setPick] = useState({});
   const [how, setHow] = useState('shop');
   const [sheet, setSheet] = useState(false);
+  const [pay, setPay] = useState(false);
+  const [method, setMethod] = useState('card');
+  const [agreed, setAgreed] = useState(false);
+  const [orders, setOrders] = useState([]);
+  useEffect(() => onOrders((all) => setOrders(all.filter((o) => o.code === code))), [code]);
+  const latest = orders.length ? orders[orders.length - 1] : null;
   const toggle = (k) => {
     play('tap');
     setSheet(false);
+    setPay(false);
     setPick((p) => ({ ...p, [k]: !p[k] }));
   };
   const total = orderTotal(pick);
@@ -188,7 +198,92 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
               : t('결제 화면에서 받을 주소를 적어요. 택배비는 그때 붙어요.')}
           </Text>
           {exhibitOn ? <Text style={styles.sheetHow}>{t('전시 신청도 같이 들어갔어요.')}</Text> : null}
-          <Text style={styles.demo}>{t('시연 화면이에요. 실제 결제와 제작은 박물관 굿즈숍과 연결 업체가 맡아요.')}</Text>
+          {!pay ? (
+            <Pressable onPress={() => { play('tap'); setPay(true); setAgreed(false); }} style={[styles.btn, { marginTop: 12 }]}>
+              <Text style={styles.btnText}>{t('결제하기 (모의)')}</Text>
+            </Pressable>
+          ) : null}
+        </Frame>
+      ) : null}
+
+      {/* 결제(모의) — 낼 돈·결제 수단·맞춤 제작 취소 기준을 보여 주고 동의를 받는다 */}
+      {sheet && pay && total > 0 ? (() => {
+        const q = payQuote(pick, how);
+        return (
+          <Frame style={{ marginTop: 12, alignSelf: 'stretch' }}>
+            <Text style={styles.payTitle}>{t('결제 전에 확인해 주세요')}</Text>
+            <View style={styles.sheetRow}><Text style={styles.sheetItem}>{t('물건')}</Text><Text style={styles.sheetItem}>{won(q.goods)}</Text></View>
+            <View style={styles.sheetRow}><Text style={styles.sheetItem}>{t('택배비')}</Text><Text style={styles.sheetItem}>{q.ship ? won(q.ship) : t('없음 (굿즈숍에서 찾기)')}</Text></View>
+            <View style={[styles.sheetRow, { borderTopWidth: 1, borderTopColor: colors.borderSoft, paddingTop: 6, marginTop: 4 }]}>
+              <Text style={styles.sheetSum}>{t('낼 돈')}</Text>
+              <Text style={styles.sheetSum}>{won(q.total)}</Text>
+            </View>
+            <Text style={styles.formLabel}>{t('결제 수단')}</Text>
+            <View style={styles.countryRow}>
+              {Object.keys(METHODS).filter((m) => how === 'shop' || m !== 'counter').map((m) => (
+                <Pressable key={m} onPress={() => { play('tap'); setMethod(m); }} style={[styles.country, method === m && styles.countryOn]}>
+                  <Text style={[styles.countryTxt, method === m && { color: '#fff' }]}>{t(METHODS[m])}</Text>
+                </Pressable>
+              ))}
+            </View>
+            {how === 'post' ? <Text style={styles.small}>{t('받을 주소는 결제사 화면에서 적어요. 잇결은 주소를 저장하지 않아요.')}</Text> : null}
+            <Pressable onPress={() => { play('tap'); setAgreed((v) => !v); }} style={styles.agreeRow} accessibilityRole="checkbox" accessibilityState={{ checked: agreed }}>
+              <View style={[styles.box, agreed && styles.boxOn]}><Text style={styles.boxMark}>{agreed ? '✓' : ''}</Text></View>
+              <Text style={styles.agreeTxt}>{t('(필수) 내 놀이로 만든 하나뿐인 맞춤 제작품이라, 업체가 만들기 시작한 뒤에는 단순 변심으로 취소할 수 없다는 것을 확인했어요. 만들기 전까지는 전액 취소돼요.')}</Text>
+            </Pressable>
+            <Pressable
+              disabled={!agreed}
+              onPress={() => {
+                const r = placeOrder({ code, pick, how, method: how === 'post' && method === 'counter' ? 'card' : method, agreed, spec: product && pick[product] ? spec || null : null, seq: orders.length + 1 });
+                if (r.error) return;
+                play('stamp');
+                saveOrder(r.order);
+                setPay(false);
+                setSheet(false);
+                setPick({});
+              }}
+              style={[styles.btn, !agreed && { opacity: 0.45 }]}
+            >
+              <Text style={styles.btnText}>{t('{n} 결제 (모의)', { n: won(q.total) })}</Text>
+            </Pressable>
+            <Text style={styles.demo}>{t('시연용 모의 결제예요. 실제 돈은 나가지 않고, 결제 번호는 MOCK-으로 시작해요.')}</Text>
+          </Frame>
+        );
+      })() : null}
+
+      {/* 주문 진행 — 결제 완료 → 업체에 전달 → 만드는 중 → 받을 준비 */}
+      {latest ? (
+        <Frame style={{ marginTop: 12, alignSelf: 'stretch' }}>
+          <Text style={styles.sheetNo}>{t('주문 번호')} {latest.no}</Text>
+          <Text style={styles.small}>{t('결제 번호')} {latest.payRef} · {t(METHODS[latest.method])} · {won(latest.total)}</Text>
+          {latest.stage === 'canceled' ? (
+            <Text style={[styles.stageNow, { color: colors.accent }]}>{t('취소했어요 · {n} 환불(모의)', { n: won(latest.refund || latest.total) })}</Text>
+          ) : (
+            <View style={styles.stages}>
+              {STAGES.map((sg, i) => {
+                const done = STAGES.indexOf(latest.stage) >= i;
+                return (
+                  <View key={sg} style={styles.stage}>
+                    <View style={[styles.stageDot, done && styles.stageDotOn]} />
+                    <Text style={[styles.stageTxt, done && styles.stageTxtOn]}>{t(sg === 'ready' ? readyText(latest) : STAGE_NAME[sg])}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+          {latest.stage === 'sent' ? <Text style={styles.small}>{t('업체가 제작 사양서와 출력 파일을 받았어요. 만들기 시작하면 여기서 바뀌어요.')}</Text> : null}
+          <View style={styles.howRow}>
+            {cancelable(latest) ? (
+              <Pressable onPress={() => { const r = cancel(latest); if (r.order) { play('tap'); saveOrder(r.order); } }} hitSlop={8}>
+                <Text style={styles.hallLink}>{t('주문 취소')}</Text>
+              </Pressable>
+            ) : null}
+            {onMaker ? (
+              <Pressable onPress={() => { play('tap'); onMaker(); }} hitSlop={8}>
+                <Text style={styles.hallLink}>{t('업체 화면에서 보기 (시연) ›')}</Text>
+              </Pressable>
+            ) : null}
+          </View>
         </Frame>
       ) : null}
     </View>
@@ -196,6 +291,16 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
 }
 
 const styles = StyleSheet.create({
+  payTitle: { fontSize: 15, fontFamily: fonts.serifBold, color: colors.ink, marginBottom: 8 },
+  agreeRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', marginTop: 12 },
+  agreeTxt: { flex: 1, fontSize: 12.5, lineHeight: 18, color: colors.ink },
+  stages: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
+  stage: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingRight: 6 },
+  stageDot: { width: 10, height: 10, borderRadius: 5, borderWidth: 1.5, borderColor: colors.border },
+  stageDotOn: { backgroundColor: colors.green, borderColor: colors.green },
+  stageTxt: { fontSize: 12, color: colors.muted },
+  stageTxtOn: { color: colors.ink, fontWeight: '800' },
+  stageNow: { fontSize: 13, fontWeight: '800', marginTop: 10 },
   wrap: { width: '100%', alignItems: 'stretch' },
   title: { fontSize: 16, fontFamily: fonts.serifBold, color: colors.ink, textAlign: 'center' },
   sub: { fontSize: 11.5, color: colors.muted, textAlign: 'center', marginTop: 4 },
