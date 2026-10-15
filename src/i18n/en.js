@@ -368,6 +368,8 @@ const ui = {
   "합계": "Total",
   "택배비는 결제할 때 따로 붙어요.": "Shipping is added at checkout.",
   "가져갈 것을 골라 주세요": "Pick what to take",
+  "누르면 내 작품 그림이 이 기기에 바로 저장돼요. 아무것도 사지 않아도 돼요.": "Tap to save your artwork to this device right away. You don't have to buy anything.",
+  "무료로 가져가기 · 이미지 저장": "Take it free · Save image",
   "주문표 만들기": "Make order slip",
   "주문 번호": "Order no.",
   "굿즈숍 계산대에서 이 번호를 보여 주세요.": "Show this number at the gift shop counter.",

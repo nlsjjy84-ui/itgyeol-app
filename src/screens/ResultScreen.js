@@ -635,6 +635,8 @@ export default function ResultScreen({ navigation }) {
               }) : null}
               entry={(exhibit || []).find((e) => e.code === code) || null}
               onExhibit={(patch) => setExhibit(code, patch ? { ...patch, attempts: selectedAttempts } : null)}
+              onSaveFree={handleSaveImage}
+              freeStatus={saveStatus}
             />
           </View>
         ) : null}
