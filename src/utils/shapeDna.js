@@ -45,6 +45,8 @@ export const PLAY_TRAITS = {
 const SCENE_TRAITS = {
   jinbeop: { text: (n) => tr('진법 {n}번 → 깊이가 두꺼워졌어요', { n }), apply: (d, n) => { d.deep += 0.02 * clampN(n); } },
   print: { text: (n) => tr('훈민정음·인쇄 {n}번 → 꽃잎이 깊어졌어요', { n }), apply: (d, n) => { d.petalDepth += 0.01 * clampN(n); } },
+  talchum: { text: (n) => tr('탈춤 {n}번 → 테두리가 춤추듯 물결쳐요', { n }), apply: (d, n) => { d.lobeAmp += 0.006 * clampN(n); } },
+  dancheong: { text: (n) => tr('단청 {n}번 → 꽃잎이 늘었어요', { n }), apply: (d, n) => { d.petals += clampN(n); } },
   hangul: { text: (n) => tr('한글 테트리스 {n}번 → 몸이 반듯하게 서요', { n }), apply: (d, n) => { d.lean *= Math.max(0.2, 1 - 0.15 * clampN(n)); d.tall += 0.015 * clampN(n); } },
 };
 

@@ -9,6 +9,8 @@ export const SCENE_TARGET = {
   print: { name: '훈민정음·인쇄', total: 11, l2: 3, l3: 6, unit: '가지 글자·활자' },
   tbd: { name: '전래놀이', total: 12, l2: 4, l3: 8, unit: '가지 놀이' },
   hangul: { name: '한글 테트리스', total: 4, l2: 2, l3: 3, unit: '단계' },
+  talchum: { name: '탈춤', total: 3, l2: 2, l3: 3, unit: '단계' },
+  dancheong: { name: '단청', total: 3, l2: 2, l3: 3, unit: '단계' },
 };
 
 export const LEVEL_NAME = ['빈 조각', '1단계 · 바탕 조각', '2단계 · 수놓은 조각', '3단계 · 금실 조각'];

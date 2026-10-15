@@ -59,28 +59,25 @@ const CARDS = [
     ready: true,
     route: 'Hangul',
   },
-  // [체험 확장 로드맵] 지금 세 판은 "국악 전공·전래놀이 교육 경력"에서 나온 것이고,
-  // 같은 설계 방식(공통 설계 질문 추출 → WOZ로 검증 → 난이도 단계)을 다른 전통
-  // 소재에도 그대로 적용할 수 있다는 걸 보여주기 위한 다음 판 예고. 아직 구현은
-  // 안 했지만(ready:false → "준비 중" 배지), 무엇을, 왜 다음으로 고를지는 구체적으로
-  // 적어 둔다 — 그냥 "더 많은 체험 예정"이라고만 하면 근거가 안 되기 때문.
+  // 다섯·여섯 번째 판 — 같은 설계 방식(공통 설계 질문 → 자료 대조 → 단계)을 다른 전통 소재에 옮긴 판.
+  // 탈춤: 봉산탈춤의 장단(굿거리·타령)과 깨끼춤 / 단청: 단청장의 작업 순서(가칠 → 타분 → 오색 → 분선).
   {
     id: 'talchum',
     title: '탈춤 · 가면극',
     eyebrow: '움직임 · 역할',
     accent: '#8a4f8a',
-    desc: '하회탈·봉산탈 등 지역별 탈과 마당(과장)마다 정해진 역할·동작 규칙을 몸짓으로 따라 해보는 판',
-    ready: false,
-    route: null,
+    desc: '굿거리·타령 장단의 큰 박에 맞춰 한삼을 뿌리고 깨끼춤을 추는 판',
+    ready: true,
+    route: 'Talchum',
   },
   {
     id: 'dancheong',
     title: '단청 · 전통 문양',
     eyebrow: '색 · 무늬',
     accent: '#2c7a6b',
-    desc: '오방색 규칙에 맞춰 단청·보자기·규방 문양의 색과 칸을 직접 배치해보는 판',
-    ready: false,
-    route: null,
+    desc: '가칠 → 타분 → 오색 채색 → 분선, 단청장이 칠하는 순서대로 머리초를 완성하는 판',
+    ready: true,
+    route: 'Dancheong',
   },
 ];
 
@@ -97,7 +94,7 @@ export default function HomeScreen({ navigation, route }) {
     const playVals = [];
     Object.entries(skills || {}).forEach(([key, v]) => {
       if (key.startsWith('jinbeop:')) jinbeopVals.push(v);
-      else if (key.startsWith('print:') || key.startsWith('hangul:')) printVals.push(v);
+      else if (key.startsWith('print:') || key.startsWith('hangul:') || key.startsWith('dancheong:')) printVals.push(v);
       else playVals.push(v);
     });
     const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
@@ -174,7 +171,7 @@ export default function HomeScreen({ navigation, route }) {
         style={{ marginTop: 14 }}
       />
 
-      <Text style={styles.sectionLabel}>{t('네 개의 판 — 어디부터 가도 돼요')}</Text>
+      <Text style={styles.sectionLabel}>{t('여섯 개의 판 — 어디부터 가도 돼요')}</Text>
       <View style={styles.list}>
         {CARDS.filter((c) => c.ready).map((c) => (
           <Pressable

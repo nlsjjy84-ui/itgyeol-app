@@ -13,6 +13,8 @@ const SCENES = [
   { id: 'Print', label: '훈민정음·인쇄' },
   { id: 'Play', label: '전래놀이' },
   { id: 'Hangul', label: '한글 테트리스' },
+  { id: 'Talchum', label: '탈춤' },
+  { id: 'Dancheong', label: '단청' },
 ];
 
 // 한 판에 갇히지 않도록 — 지금 판을 강조하고 다른 판으로 바로 건너가는 띠

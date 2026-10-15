@@ -40,9 +40,11 @@ const SCENE_LABEL = {
   print: '훈민정음·인쇄',
   tbd: '전래놀이',
   hangul: '한글 테트리스',
+  talchum: '탈춤',
+  dancheong: '단청',
 };
 
-const SCENE_ORDER = ['jinbeop', 'print', 'tbd', 'hangul'];
+const SCENE_ORDER = ['jinbeop', 'print', 'tbd', 'hangul', 'talchum', 'dancheong'];
 
 // 완성한 판들로부터 "가져갈 수 있는 결과물" 선택지를 만든다.
 // - 판 하나만 완성했으면: 그 판의 단독 결과물 1개
@@ -184,7 +186,7 @@ export default function ResultScreen({ navigation }) {
     const playVals = [];
     Object.entries(skills || {}).forEach(([key, v]) => {
       if (key.startsWith('jinbeop:')) jinbeopVals.push(v);
-      else if (key.startsWith('print:') || key.startsWith('hangul:')) printVals.push(v);
+      else if (key.startsWith('print:') || key.startsWith('hangul:') || key.startsWith('dancheong:')) printVals.push(v);
       else playVals.push(v);
     });
     const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
@@ -700,8 +702,8 @@ const styles = StyleSheet.create({
   optionChipTextActive: { color: '#fff' },
   stackBox: { marginTop: 18, marginBottom: 6 },
   stackTitle: { fontSize: 14, fontWeight: '800', color: colors.ink, letterSpacing: 1, marginBottom: 8 },
-  stackRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-start', gap: 6 },
-  stackCol: { alignItems: 'center', gap: 4, flex: 1 },
+  stackRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', rowGap: 10, columnGap: 6 },
+  stackCol: { alignItems: 'center', gap: 4, width: 96 },
   stackLabel: { fontSize: 12.5, color: colors.ink, fontWeight: '700' },
   stackState: { fontSize: 11, color: colors.muted },
   nextBox: {

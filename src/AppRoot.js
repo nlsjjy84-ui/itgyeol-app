@@ -11,6 +11,8 @@ import PrintScreen from './screens/PrintScreen';
 import PlayScreen from './screens/PlayScreen';
 import ResultScreen from './screens/ResultScreen';
 import HangulScreen from './screens/HangulScreen';
+import TalchumScreen from './screens/TalchumScreen';
+import DancheongScreen from './screens/DancheongScreen';
 import TasteScreen from './screens/TasteScreen';
 import GalleryScreen from './screens/GalleryScreen';
 import BookScreen from './screens/BookScreen';
@@ -27,7 +29,7 @@ import { loadConsent, decided, sensesSupported, askConsent, startSensing, stopSe
 import SenseLayer from './components/SenseLayer';
 
 // 놀이 화면 → 판 이름. 이 화면에 있는 동안만 카메라·마이크(동의한 것)를 켠다.
-const PLAY_SCENE = { Jinbeop: 'jinbeop', Print: 'print', Play: 'tbd', Hangul: 'hangul' };
+const PLAY_SCENE = { Jinbeop: 'jinbeop', Print: 'print', Play: 'tbd', Hangul: 'hangul', Talchum: 'talchum', Dancheong: 'dancheong' };
 import { LangContext } from './i18n/LangContext';
 import './i18n/register';
 
@@ -48,6 +50,8 @@ const PrintH = withHanji(PrintScreen);
 const PlayH = withHanji(PlayScreen);
 const ResultH = withHanji(ResultScreen);
 const HangulH = withHanji(HangulScreen);
+const TalchumH = withHanji(TalchumScreen);
+const DancheongH = withHanji(DancheongScreen);
 const TasteH = withHanji(TasteScreen);
 const GalleryH = withHanji(GalleryScreen);
 const BookH = withHanji(BookScreen);
@@ -94,6 +98,8 @@ function Nav() {
         <Stack.Screen name="Print" component={PrintH} />
         <Stack.Screen name="Play" component={PlayH} />
         <Stack.Screen name="Hangul" component={HangulH} />
+        <Stack.Screen name="Talchum" component={TalchumH} />
+        <Stack.Screen name="Dancheong" component={DancheongH} />
         <Stack.Screen name="Result" component={ResultH} />
       </Stack.Navigator>
       <StatusBar style={getThemeMode() === 'dark' ? 'light' : 'dark'} backgroundColor={colors.bg} />

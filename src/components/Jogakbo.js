@@ -85,6 +85,45 @@ const FILLERS = [
   { x: 120, y: 180, w: 100, h: 40 },
 ];
 
+// 새 판(탈춤·단청)은 아래 두 띠 자리에 조각으로 들어간다 — 판을 풀기 전에는 원래처럼 빈 띠 비단
+export const EXTRA_SCENES = ['talchum', 'dancheong'];
+
+// 탈춤·단청 조각의 수 무늬 — 탈춤: 한삼 자락 네 갈래(춤사위 횟수만큼 길이), 단청: 오색 띠 + 연꽃 머리초
+const DAN5 = ['#2b5f8e', '#b8312a', '#e3b23c', '#f6f0e2', '#1d1b19'];
+function extraMotif(attempt, cx, cy, s, col, k = 'x') {
+  const out = [];
+  if (attempt.sceneId === 'talchum') {
+    const n = String(attempt.mappingCode || '').split('-').map((v) => Math.max(0, Number(v) || 0));
+    const tot = n.reduce((a, b) => a + b, 0) || 1;
+    [200, -20, 250, 70].forEach((ang, i) => {
+      const L = s * (0.22 + 0.32 * ((n[i] || 0) / tot));
+      const a = (ang * Math.PI) / 180;
+      const tx = cx + Math.cos(a) * L;
+      const ty = cy + Math.sin(a) * L;
+      const mx = cx + Math.cos(a + 0.5) * L * 0.55;
+      const my = cy + Math.sin(a + 0.5) * L * 0.55;
+      out.push(<Path key={`${k}h${i}`} d={`M${cx} ${cy} Q${mx} ${my} ${tx} ${ty}`} stroke={col} strokeWidth={Math.max(1.6, s * 0.06)} fill="none" strokeLinecap="round" />);
+    });
+    out.push(<Circle key={`${k}mask`} cx={cx} cy={cy} r={s * 0.13} fill="#b8312a" stroke={col} strokeWidth={0.8} />);
+    out.push(<Circle key={`${k}e1`} cx={cx - s * 0.045} cy={cy - s * 0.02} r={s * 0.022} fill="#fbf8f0" />);
+    out.push(<Circle key={`${k}e2`} cx={cx + s * 0.045} cy={cy - s * 0.02} r={s * 0.022} fill="#fbf8f0" />);
+  } else if (attempt.sceneId === 'dancheong') {
+    const bands = { dc1: 2, dc2: 3, dc3: 5 }[attempt.formationId] || 3;
+    const bw = s * 0.09;
+    for (let i = 0; i < bands; i += 1) {
+      out.push(<Rect key={`${k}b${i}`} x={cx - s * 0.48 + i * bw} y={cy - s * 0.4} width={bw} height={s * 0.8} fill={DAN5[i % 5]} />);
+    }
+    const lx = cx + s * 0.12;
+    for (let i = 0; i < 6; i += 1) {
+      const a = (-90 + i * 60) * (Math.PI / 180);
+      out.push(<Circle key={`${k}p${i}`} cx={lx + Math.cos(a) * s * 0.16} cy={cy + Math.sin(a) * s * 0.16} r={s * 0.085} fill={i % 2 ? '#2b5f8e' : '#b8312a'} />);
+    }
+    out.push(<Circle key={`${k}c`} cx={lx} cy={cy} r={s * 0.08} fill="#e3b23c" />);
+    out.push(<Circle key={`${k}ring`} cx={lx} cy={cy} r={s * 0.27} fill="none" stroke="#f6f0e2" strokeWidth={1} />);
+  }
+  return out;
+}
+
 function rng(seed) {
   let a = (seed >>> 0) || 1;
   return () => {
@@ -318,6 +357,8 @@ export function PatchArt({ attempt, box, empty = false, level = 1, plain = false
         {HANGUL_GLYPH[attempt.formationId] || 'ㅏ'}
       </SvgText>
     );
+  } else if (EXTRA_SCENES.includes(attempt.sceneId)) {
+    extraMotif(attempt, cx, cy, s, thread, 'pa').forEach((el) => out.push(el));
   } else {
     const r = s * 0.42;
     const ground = lightCenter ? SILK.gamcheong : SILK.misaek;
@@ -377,6 +418,7 @@ export default function Jogakbo({ attempts, size = 220, shape = 'circle', progre
   // 빈 띠 조각 색: 이미 이은 조각들의 오행 색 묶음에서 고른다
   const pool = solved.length ? solved.map((id) => familyOf(by[id].ohangKey, by[id].seed >>> 0)).flat() : ['misaek'];
   const fillerPieces = FILLERS.map((b, i) => {
+    if (by[EXTRA_SCENES[i]]) return [];
     const on = solved.length >= 2 + i;
     const t = 0.35 + rand() * 0.3;
     const parts = b.w > 90 ? [{ x: b.x, y: b.y, w: b.w * t, h: b.h }, { x: b.x + b.w * t, y: b.y, w: b.w * (1 - t), h: b.h }] : [b];
@@ -402,6 +444,7 @@ export default function Jogakbo({ attempts, size = 220, shape = 'circle', progre
           {SCENE_ORDER.map((id) => (
             <PatchArt key={id} attempt={by[id]} box={BOXES[id]} empty={!by[id]} level={lvl(id)} plain={plain} />
           ))}
+          {EXTRA_SCENES.map((id, i) => (by[id] ? <PatchArt key={id} attempt={by[id]} box={FILLERS[i]} level={lvl(id)} plain={plain} /> : null))}
           {fillerPieces.map(({ p, name, on, key }) =>
             on ? (
               <SilkPiece key={key} k={key} r={p} name={name} />
@@ -597,6 +640,8 @@ function CraftMotif({ attempt, box, c, craft, level }) {
         {HANGUL_GLYPH[attempt.formationId] || 'ㅏ'}
       </SvgText>
     );
+  } else if (EXTRA_SCENES.includes(attempt.sceneId)) {
+    extraMotif(attempt, cx, cy, s, craft === 'dancheong' ? '#f6f0e2' : c.line, 'cm').forEach((el) => out.push(el));
   } else {
     const r = s * 0.42;
     const col = craft === 'najeon' ? 'url(#pearl)' : craft === 'sanggam' ? ink : craft === 'dancheong' ? '#f6f0e2' : c.line;
@@ -664,9 +709,16 @@ function CraftArt({ attempts, size, shape, progress, craft, plain = false }) {
             <CraftPanel key={id} box={BOXES[id]} c={c} craft={craft} empty={!by[id]} k={i} />
           ))}
           {SCENE_ORDER.map((id) => (by[id] && !plain ? <CraftMotif key={`m${id}`} attempt={by[id]} box={BOXES[id]} c={c} craft={craft} level={lvl(id)} /> : null))}
-          {FILLERS.map((b, i) => (
-            <CraftBand key={`f${i}`} b={b} c={c} craft={craft} on={solved.length >= 2 + i} k={i} />
-          ))}
+          {FILLERS.map((b, i) =>
+            by[EXTRA_SCENES[i]] ? (
+              <G key={`f${i}`}>
+                <CraftPanel box={b} c={c} craft={craft} empty={false} k={4 + i} />
+                {!plain ? <CraftMotif attempt={by[EXTRA_SCENES[i]]} box={b} c={c} craft={craft} level={lvl(EXTRA_SCENES[i])} /> : null}
+              </G>
+            ) : (
+              <CraftBand key={`f${i}`} b={b} c={c} craft={craft} on={solved.length >= 2 + i} k={i} />
+            )
+          )}
         </G>
         {shape === 'circle' ? (
           <Circle cx={110} cy={110} r={106.5} fill="none" stroke={c.frame} strokeWidth={3} />

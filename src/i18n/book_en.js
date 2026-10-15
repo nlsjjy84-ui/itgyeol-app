@@ -259,6 +259,8 @@ const SCENE_WIN = {
   jinbeop: [P('Huh? Did you just do that?'), G('The formation clicked into place. That spot became a piece 🧩')],
   print: [G('Bam, it’s stamped! The letters you matched stayed right there 🔖'), P('Wait, it snaps right next to the last piece!')],
   hangul: [G('The blocks stacked up and a row disappeared! 🧱'), P('This piece is shaped like letter blocks. It joined your jogakbo!')],
+  talchum: [P('Eolssigu! The hansam sleeves went flying 🎭'), G('The dance you just did stayed on the piece as sleeve tails.')],
+  dancheong: [G('You painted it all, in order, from base coat to white lines 🎨'), P('The five-color band joined the bottom of your jogakbo!')],
 };
 
 const SCENE_LOSE = {
@@ -266,6 +268,8 @@ const SCENE_LOSE = {
   print: [P('The letters haven’t found their spots yet 🙈'), G('Ink takes time to dry. Let’s match them again.')],
   tbd: [P('Aigo, so close this time 😅'), G('Some days you lose a game. That’s normal. One more!')],
   hangul: [P('Aaah, the blocks hit the ceiling 🙈'), G('We just go again, right? Let’s stack!')],
+  talchum: [P('Oops, we kept missing the beat 😅'), G('Listen for the big drum “deong!” first. Let’s dance again.')],
+  dancheong: [P('Some spaces aren’t painted yet 🖌️'), G('No rushing with dancheong. Let’s paint it again, step by step.')],
 };
 
 const EPI_BY_COUNT = {
