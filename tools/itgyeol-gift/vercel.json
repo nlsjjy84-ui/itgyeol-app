@@ -1,0 +1,4 @@
+{
+  "rewrites": [{ "source": "/gift", "destination": "/api/gift" }],
+  "crons": [{ "path": "/api/cleanup", "schedule": "0 18 * * *" }]
+}
