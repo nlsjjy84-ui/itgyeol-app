@@ -8,8 +8,8 @@ import QRCode from 'react-native-qrcode-svg';
 import { getMoments, clearMoments, onSensesChange } from '../utils/senses';
 
 // 사진을 폰으로 옮길 임시 저장소(24시간 뒤 자동 삭제) 주소. 비어 있으면 "QR로 받기"는 곧 열림으로 둔다.
-// 저장소: tools/gift-worker (Cloudflare Worker + R2, 하루 지난 파일 자동 삭제)
-export const GIFT_UPLOAD_URL = '';
+// 저장소: tools/itgyeol-gift (Vercel Functions + Blob, 하루 지난 사진 자동 삭제)
+export const GIFT_UPLOAD_URL = 'https://itgyeol-gift.vercel.app';
 
 async function uploadGift(uri) {
   const blob = await (await fetch(uri)).blob();

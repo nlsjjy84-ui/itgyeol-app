@@ -1,8 +1,0 @@
-name = "itgyeol-gift"
-main = "index.js"
-compatibility_date = "2025-01-01"
-
-# setup-gift.ps1 이 처음 설정할 때 아래 id를 채운다(Workers KV — 24시간 뒤 자동 삭제)
-[[kv_namespaces]]
-binding = "GIFTS"
-id = "KV_ID_HERE"
