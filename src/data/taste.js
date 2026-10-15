@@ -134,7 +134,7 @@ export const GAME_NAMES = {
   julneomgi: '줄넘기', juldarigi: '줄다리기', sangmo: '상모돌리기', guseulchigi: '구슬치기', paengi: '팽이치기', jachigi: '자치기',
   biseok: '비석치기', tuho: '투호', ddakji: '딱지치기', gomugojul: '고무줄놀이', yeonnaligi: '연날리기', gullyeongsoe: '굴렁쇠',
 };
-export const SCENE_NAMES = { jinbeop: '진법', print: '훈민정음·인쇄', hangul: '한글 테트리스' };
+export const SCENE_NAMES = { jinbeop: '진법', print: '훈민정음·인쇄', hangul: '한글 테트리스', talchum: '탈춤', dancheong: '단청' };
 
 // 한 작품이 어떤 선택지와 닿는지 — 직접(main) / 물건 / 놀이·판 순으로 점수를 준다.
 export function keywordsFor({ item, games = [], scenes = [] }) {

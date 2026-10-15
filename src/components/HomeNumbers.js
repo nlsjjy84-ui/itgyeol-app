@@ -13,8 +13,8 @@ import { countWorks } from '../utils/works';
 
 // 홈 첫 화면 맨 위 — 글보다 숫자를 먼저 보여 준다.
 // 숫자는 모두 앱 안의 실제 자료에서 센다(손으로 적은 숫자가 아님).
-const BOARD_COUNT = 3; // 진법 · 훈민정음·인쇄 · 한글 테트리스 (전래놀이는 놀이 수로 따로 셈)
-const SCENES = ['jinbeop', 'print', 'tbd', 'hangul'];
+const BOARD_COUNT = 5; // 진법 · 훈민정음·인쇄 · 한글 테트리스 · 탈춤 · 단청 (전래놀이는 놀이 수로 따로 셈)
+const SCENES = ['jinbeop', 'print', 'tbd', 'hangul', 'talchum', 'dancheong'];
 const BAR_COLORS = [colors.accent, colors.cheong, colors.hwang, colors.green, colors.gold];
 
 export default function HomeNumbers({ attempts = [], exhibit = [], onGallery, onResult, onHall }) {

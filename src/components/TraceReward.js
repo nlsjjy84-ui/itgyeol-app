@@ -13,7 +13,7 @@ import { PLAY_GAMES } from '../data/playGames';
 import { SCENE_ORDER } from './Jogakbo';
 import { t as i18nT } from '../i18n';
 
-const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이', hangul: '한글 테트리스' };
+const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이', hangul: '한글 테트리스', talchum: '탈춤', dancheong: '단청' };
 
 // 한 판을 마친 순간 — 방금 생긴 조각, 지금까지 이어진 조각보, 풍이·결이의 반응을 보여 준다.
 export default function TraceReward({ sceneId, success, gameId, gameName }) {

@@ -2,6 +2,8 @@ import { FORMATIONS, ohangByKey } from '../data/formations';
 import { PRINTING_TYPES } from '../data/printing';
 import { PLAY_GAMES } from '../data/playGames';
 import { HANGUL_STAGES } from '../data/hangulGames';
+import { TALCHUM_STAGES } from '../data/talchum';
+import { DANCHEONG_STAGES } from '../data/dancheong';
 import { SCENE_TARGET, LEVEL_NAME, nextHint } from './progress';
 import { t as tr } from '../i18n';
 
@@ -29,6 +31,14 @@ export function sceneProblemName(attempt) {
     const t = PRINTING_TYPES.find((q) => q.id === attempt.formationId);
     return tr(t ? t.name : '훈민정음·인쇄');
   }
+  if (attempt.sceneId === 'talchum') {
+    const h = TALCHUM_STAGES.find((q) => q.id === attempt.formationId);
+    return h ? `${tr('탈춤')} ${tr(h.name)}` : tr('탈춤');
+  }
+  if (attempt.sceneId === 'dancheong') {
+    const h = DANCHEONG_STAGES.find((q) => q.id === attempt.formationId);
+    return h ? `${tr('단청')} ${tr(h.name)}` : tr('단청');
+  }
   if (attempt.sceneId === 'hangul') {
     const h = HANGUL_STAGES.find((q) => q.id === attempt.formationId);
     return h ? `${tr('한글 테트리스')} ${tr(h.name)}` : tr('한글 테트리스');
@@ -48,6 +58,8 @@ const SHAPE_TEXT = {
   print: '직접 맞춘 글자가 붉은 낙관(도장)으로 새겨져요.',
   tbd: '푼 놀이를 뜻하는 한자가 인장으로 새겨져요.',
   hangul: '클리어한 단계를 뜻하는 한글 자모가 블록 네 칸 위에 새겨져요.',
+  talchum: '왼쪽·오른쪽 한삼, 깨끼, 돌기를 몇 번 췄는지가 한삼 자락 네 갈래의 길이가 돼요.',
+  dancheong: '푼 단계만큼 오색 띠가 늘어나고, 가운데에 연꽃 머리초가 들어가요.',
 };
 
 function tiltText(attempt) {
