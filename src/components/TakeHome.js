@@ -20,9 +20,9 @@ function Rung({ on, onPress, title, price, desc, free }) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={free}
+      disabled={free && !onPress}
       style={[styles.rung, on && styles.rungOn, free && styles.rungFree]}
-      accessibilityRole={free ? undefined : 'checkbox'}
+      accessibilityRole={free ? 'button' : 'checkbox'}
       accessibilityState={free ? undefined : { checked: on }}
     >
       <View style={[styles.box, on && styles.boxOn, free && styles.boxFree]}>
@@ -41,7 +41,7 @@ export const COUNTRIES = ['한국', '미국', '중국', '일본', '그 밖의 �
 const DEFAULT_COUNTRY = { ko: '한국', zh: '중국', ja: '일본' };
 
 // entry: 이 작품의 전시 신청(없으면 null). onExhibit(patch) — patch가 null이면 신청 취소.
-export default function TakeHome({ code, shapeLabel, product, printable = true, entry, onExhibit, onHall, spec, onMaker }) {
+export default function TakeHome({ code, shapeLabel, product, printable = true, entry, onExhibit, onHall, spec, onMaker, onSaveFree, freeStatus }) {
   const exhibitOn = !!entry;
   const [pick, setPick] = useState({});
   const [how, setHow] = useState('shop');
@@ -93,7 +93,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
       <Text style={styles.sub}>{t('싼 것부터 골라요. 여러 개 골라도 돼요.')}</Text>
 
       <View style={styles.list}>
-        <Rung free title={t('이미지·QR 저장')} price={t('무료')} desc={t('위에서 바로 저장해요. 누구나.')} />
+        <Rung free onPress={onSaveFree ? () => { play('tap'); onSaveFree(); } : undefined} title={t('이미지·QR 저장')} price={t('무료')} desc={t('누르면 내 작품 그림이 이 기기에 바로 저장돼요. 아무것도 사지 않아도 돼요.')} />
         <Rung on={pick.photo} onPress={() => toggle('photo')} title={t('깜짝 사진 엽서 2장')} price={won(PRICES.photo)} desc={t('놀이 중 찍어 둔 깜짝 선물 사진(없으면 굿즈숍 사진 기계에서 찍은 사진)을 엽서 크기로 뽑아요.')} />
         {product ? (
           <Rung on={!!pick[product]} onPress={() => toggle(product)} title={NAMES[product]} price={won(PRICES[product])} desc={DESC[product]} />
@@ -171,13 +171,19 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
       </View>
       {how === 'post' && total > 0 ? <Text style={styles.small}>{t('택배비는 결제할 때 따로 붙어요.')}</Text> : null}
 
+      {/* 아무것도 고르지 않으면 무료로 그림만 저장해 가져간다(사지 않아도 됨) */}
       <Pressable
-        disabled={total === 0}
-        onPress={() => { play('stamp'); setSheet(true); }}
-        style={[styles.btn, total === 0 && { opacity: 0.45 }]}
+        disabled={total === 0 && !onSaveFree}
+        onPress={() => {
+          if (total === 0) { play('tap'); if (onSaveFree) onSaveFree(); return; }
+          play('stamp');
+          setSheet(true);
+        }}
+        style={[styles.btn, total === 0 && !onSaveFree && { opacity: 0.45 }]}
       >
-        <Text style={styles.btnText}>{total === 0 ? t('가져갈 것을 골라 주세요') : t('주문표 만들기')}</Text>
+        <Text style={styles.btnText}>{total === 0 ? t('무료로 가져가기 · 이미지 저장') : t('주문표 만들기')}</Text>
       </Pressable>
+      {total === 0 && freeStatus ? <Text style={styles.small}>{freeStatus}</Text> : null}
 
       {sheet && total > 0 ? (
         <Frame style={{ marginTop: 12, alignSelf: 'stretch' }}>
