@@ -43,3 +43,6 @@ yarn-error.*
 # local test/publish scratch (not part of the app source)
 /publish_mirror*/
 /publish_assets*/
+
+# 소개 화면 미리보기(한 파일에 그림까지 넣은 것)
+/web-landing/preview.html

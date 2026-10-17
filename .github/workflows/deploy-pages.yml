@@ -36,6 +36,8 @@ jobs:
           EXPO_BASE_URL: /itgyeol-app
       - name: SPA fallback
         run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+      - name: Intro page (소개 화면 — web-landing/site 를 /itgyeol-app/intro/ 로)
+        run: mkdir -p dist/intro && cp -r web-landing/site/. dist/intro/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
