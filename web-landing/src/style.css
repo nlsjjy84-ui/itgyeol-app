@@ -1,0 +1,157 @@
+/* 잇결 소개 화면 — 백자처럼 맑은 바탕, 먹, 오방색(청 · 적 · 황 · 백 · 흑). 네모 틀 없음. */
+.ig-landing {
+  --bg: #f1f4f3; --ink: #1b2227; --muted: #5d6a70; --line: rgba(27, 34, 39, 0.14);
+  --jeok: #b3322b; --cheong: #2b5f8e; --hwang: #c8982b; --green: #2c7a64;
+  position: relative; color: var(--ink); background: var(--bg);
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; word-break: keep-all;
+}
+.ig-landing, .ig-landing * { box-sizing: border-box; }
+.ig-landing a { color: inherit; text-decoration: none; }
+.ig-landing img { max-width: 100%; }
+
+.ig-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; z-index: 0; }
+.ig-backdrop { position: absolute; inset: 0;
+  background: radial-gradient(ellipse 55% 60% at 64% 48%, #fbfcfb 0%, rgba(251, 252, 251, 0) 70%), radial-gradient(ellipse 50% 40% at 12% 100%, rgba(179, 50, 43, 0.07), transparent 70%), var(--bg); }
+/* 한지 섬유 결 */
+.ig-backdrop::after { content: ""; position: absolute; inset: 0; opacity: .5;
+  background-image: repeating-linear-gradient(97deg, rgba(124, 138, 134, 0.05) 0 1px, transparent 1px 9px), repeating-linear-gradient(7deg, rgba(124, 138, 134, 0.04) 0 1px, transparent 1px 13px); }
+.ig-scene { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; }
+.ig-scene.is-ready { opacity: 1; }
+.ig-scene canvas { display: block; width: 100% !important; height: 100% !important; }
+.ig-veil { position: absolute; inset: 0; pointer-events: none; transition: background 1.2s ease; }
+.ig-veil[data-side="left"] { background: linear-gradient(90deg, rgba(241, 244, 243, 0.92) 0%, rgba(241, 244, 243, 0.4) 40%, transparent 66%); }
+.ig-veil[data-side="right"] { background: linear-gradient(270deg, rgba(241, 244, 243, 0.92) 0%, rgba(241, 244, 243, 0.4) 40%, transparent 66%); }
+.ig-veil[data-side="center"] { background: linear-gradient(180deg, rgba(241, 244, 243, 0.94) 0%, rgba(241, 244, 243, 0.6) 32%, transparent 58%); }
+.ig-veil[data-side="soft"] { background: rgba(241, 244, 243, 0.72); }
+
+.ig-masthead { position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; padding: 24px 6%;
+  background: linear-gradient(180deg, rgba(241, 244, 243, 0.85), rgba(241, 244, 243, 0)); }
+.ig-brand { display: inline-flex; align-items: center; gap: .7rem; font-family: 'Nanum Myeongjo', serif; font-weight: 800; font-size: 1.3rem; }
+.ig-seal { width: 2.1rem; height: 2.1rem; border-radius: 50%; display: grid; place-items: center; background: var(--jeok); color: #fff; font-size: 1.05rem; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .35); }
+.ig-top { display: flex; gap: 1.6rem; font-size: .92rem; }
+.ig-top a { color: var(--muted); transition: color .2s; }
+.ig-top a:hover { color: var(--ink); }
+.ig-top .ig-top-strong { color: var(--ink); font-weight: 700; }
+.ig-top .ig-top-strong span { color: var(--jeok); display: inline-block; transition: translate .3s; }
+.ig-top .ig-top-strong:hover span { translate: 3px -3px; }
+
+.ig-flow { position: relative; z-index: 2; margin-top: -100svh; }
+.ig-sec { position: relative; min-height: 100svh; display: flex; align-items: center; padding: 0 7%; }
+.ig-sec-hero { height: 100svh; }
+.ig-col { width: min(580px, 46%); }
+.ig-col-right { margin-left: auto; text-align: right; }
+.ig-col-center { margin: 0 auto; width: min(1000px, 100%); text-align: center; }
+.ig-sec h1, .ig-sec h2 { margin: 0; font-family: 'Nanum Myeongjo', serif; font-size: clamp(2.1rem, 3.9vw, 3.9rem); line-height: 1.3; letter-spacing: -.03em; font-weight: 400; color: var(--muted); text-wrap: balance; }
+.ig-sec h1 { font-weight: 800; color: var(--ink); }
+.ig-sec h2 em { font-style: normal; font-weight: 800; color: var(--ink); }
+.ig-sec .ig-huge { font-size: clamp(2.4rem, 5.4vw, 5.4rem); line-height: 1.22; }
+.ig-col > p:not(.ig-kicker):not(.ig-note) { margin: 1.4rem 0 2.2rem; font-size: clamp(.98rem, 1.2vw, 1.12rem); line-height: 1.9; color: var(--muted); }
+.ig-col-center > p:not(.ig-kicker):not(.ig-note) { margin-left: auto; margin-right: auto; max-width: 36em; }
+.ig-kicker { margin: 0 0 1.1rem; font-size: .82rem; letter-spacing: .2em; color: var(--jeok); }
+.ig-center { text-align: center; }
+.ig-note { margin: 2rem auto 0; max-width: 40em; font-size: .8rem; line-height: 1.7; color: var(--muted); }
+
+.ig-actions { display: flex; align-items: center; gap: 1.7rem; flex-wrap: wrap; }
+.ig-col-center .ig-actions { justify-content: center; }
+.ig-action { display: inline-flex; align-items: center; gap: 1.1rem; font-weight: 700; font-size: 1rem; }
+.ig-action > span { position: relative; padding: .7rem 0; }
+.ig-action > span::after { content: ""; position: absolute; left: 0; right: 0; bottom: .35rem; height: 1px; background: rgba(179, 50, 43, 0.7); transform-origin: left; transition: transform .4s; }
+.ig-action i { width: 3rem; height: 3rem; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 1.25rem; background: var(--jeok); color: #fff; transition: transform .4s; }
+.ig-action:hover i { transform: rotate(45deg); }
+.ig-action:hover > span::after { transform: scaleX(.55); }
+.ig-link { color: var(--muted); font-size: .95rem; padding: .7rem 0; transition: color .2s; }
+.ig-link:hover { color: var(--ink); }
+.ig-scrollcue { position: absolute; left: 50%; bottom: 7svh; width: 1px; height: 64px; background: var(--line); overflow: hidden; }
+.ig-scrollcue i { position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--jeok); animation: ig-cue 2.2s ease-in-out infinite; }
+@keyframes ig-cue { to { top: 100%; } }
+
+/* 놀이: 판 여섯이 가로로 넘어간다 */
+.ig-sec-play { display: block; padding: 0; height: 620svh; }
+.ig-hpin { position: sticky; top: 0; height: 100svh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+.ig-hkicker { position: absolute; left: 7%; top: 17svh; }
+.ig-htrack { display: flex; width: max-content; will-change: transform; }
+.ig-hpanel { position: relative; width: 100vw; padding: 0 7vw; flex: none; }
+.ig-hpanel > * { max-width: 46vw; }
+.ig-hpanel-end { width: 10vw; }
+.ig-hno { display: block; font-size: .85rem; letter-spacing: .14em; color: var(--jeok); margin-bottom: 1rem; }
+.ig-hpanel h3 { margin: 0; font-family: 'Nanum Myeongjo', serif; font-size: clamp(4rem, 10vw, 9.5rem); line-height: 1.05; font-weight: 800; letter-spacing: -.04em; color: var(--ink); }
+.ig-hpanel p { margin: 1.4rem 0 0; max-width: 24em; font-size: clamp(1rem, 1.3vw, 1.18rem); line-height: 1.85; color: var(--muted); }
+.ig-hpanel-img { position: absolute; left: 50vw; top: -6vh; width: clamp(110px, 12vw, 190px); transform: rotate(-12deg); animation: ig-float 5s ease-in-out infinite; filter: drop-shadow(0 18px 24px rgba(27, 34, 39, .18)); }
+@keyframes ig-float { 50% { transform: rotate(-6deg) translateY(-14px); } }
+
+/* 과정: 유물 → 실 → 작품 */
+.ig-sec-process { min-height: 170svh; padding-top: 18svh; padding-bottom: 18svh; align-items: flex-start; }
+.ig-steps { margin-top: 3.5rem; display: grid; gap: 3rem; }
+.ig-step { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; gap: 1rem; position: relative; }
+.ig-real { margin: 0; justify-self: end; width: clamp(110px, 15vw, 190px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; box-shadow: 0 20px 40px rgba(27, 34, 39, .16), 0 0 0 6px rgba(255, 255, 255, .7); }
+.ig-real img { width: 100%; height: 100%; object-fit: cover; }
+.ig-thread { width: 100%; height: 80px; overflow: visible; }
+.ig-thread path { fill: none; stroke: var(--jeok); stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; vector-effect: non-scaling-stroke; }
+.ig-step:nth-child(2) .ig-thread path { stroke: var(--cheong); } .ig-step:nth-child(3) .ig-thread path { stroke: var(--hwang); }
+.ig-work { margin: 0; justify-self: start; width: clamp(120px, 16vw, 210px); }
+.ig-work img { width: 100%; filter: drop-shadow(0 22px 26px rgba(27, 34, 39, .2)); animation: ig-turn 6s ease-in-out infinite; transform-origin: 50% 80%; }
+@keyframes ig-turn { 0%, 100% { transform: perspective(600px) rotateY(-16deg) translateY(0); } 50% { transform: perspective(600px) rotateY(16deg) translateY(-10px); } }
+.ig-step-name { position: absolute; left: 50%; bottom: -1.4rem; transform: translateX(-50%); margin: 0; font-family: 'Nanum Myeongjo', serif; font-weight: 700; font-size: 1.05rem; color: var(--ink); }
+
+/* 결과물: 3D 원이 뒤에서 돈다 */
+.ig-sec-works { min-height: 190svh; align-items: flex-start; padding-top: 18svh; }
+
+/* 자료실: 둥근 유물 사진이 두 줄로 반대로 흐른다 */
+.ig-sec-archive { display: block; padding: 20svh 0; min-height: 100svh; }
+.ig-orbs { overflow: hidden; padding: .8rem 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+.ig-orbs > span { display: inline-flex; gap: 1.6rem; padding-right: 1.6rem; animation: ig-marquee 80s linear infinite; }
+.ig-orbs { white-space: nowrap; }
+.ig-orbs.is-reverse > span { animation-direction: reverse; animation-duration: 90s; }
+.ig-orbs img { width: clamp(84px, 9vw, 130px); aspect-ratio: 1; object-fit: cover; border-radius: 50%; box-shadow: 0 10px 22px rgba(27, 34, 39, .14), 0 0 0 4px rgba(255, 255, 255, .8); }
+.ig-orbs.is-reverse img { width: clamp(64px, 7vw, 100px); opacity: .85; }
+@keyframes ig-marquee { to { transform: translateX(-100%); } }
+
+/* 숫자 */
+.ig-sec-numbers { justify-content: center; }
+.ig-numbers { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(1.6rem, 5vw, 4.5rem); width: 100%; }
+.ig-number { display: grid; gap: .5rem; text-align: center; max-width: 14em; }
+.ig-number strong { font-family: 'Nanum Myeongjo', serif; font-size: clamp(3rem, 6vw, 5.6rem); font-weight: 800; line-height: 1; color: var(--jeok); font-variant-numeric: tabular-nums; }
+.ig-number strong b { font-weight: inherit; }
+.ig-number strong small { font-size: .34em; margin-left: .15em; color: var(--ink); }
+.ig-number span { font-size: .9rem; line-height: 1.6; color: var(--muted); }
+
+.ig-sec-final { height: 100svh; justify-content: center; align-items: flex-start; padding-top: 15svh; }
+
+/* 아래 고정: 장단 이름 · 진행 · 멈춤 */
+.ig-hud { position: fixed; left: 7%; bottom: 26px; z-index: 20; pointer-events: none; }
+.ig-rhythm { margin: 0 0 .7rem; font-size: .78rem; letter-spacing: .08em; color: var(--muted); }
+.ig-rhythm span { margin-left: .5rem; font-family: 'Nanum Myeongjo', serif; font-weight: 800; font-size: 1.02rem; letter-spacing: 0; color: var(--jeok); }
+.ig-progress { display: flex; gap: .4rem; }
+.ig-progress i { width: 1.4rem; height: 2px; background: var(--line); transition: background .4s; }
+.ig-progress i.on { background: var(--jeok); }
+.ig-motion { position: fixed; right: 6%; bottom: 22px; z-index: 20; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line);
+  background: rgba(241, 244, 243, .6); color: var(--muted); cursor: pointer; backdrop-filter: blur(8px); }
+.ig-motion svg { width: 1rem; stroke: currentColor; stroke-width: 1.5; fill: currentColor; }
+.ig-landing.is-paused .ig-orbs > span, .ig-landing.is-paused .ig-work img, .ig-landing.is-paused .ig-hpanel-img { animation-play-state: paused; }
+
+@media (max-width: 760px) {
+  .ig-masthead { padding: 16px 6%; }
+  .ig-top a:not(.ig-top-strong) { display: none; }
+  .ig-sec { align-items: flex-end; padding-bottom: 20svh; }
+  .ig-col, .ig-col-right { width: 100%; text-align: left; margin: 0; }
+  .ig-col-center { text-align: center; }
+  .ig-sec h1, .ig-sec h2 { font-size: 2rem; }
+  .ig-sec .ig-huge { font-size: 2.2rem; }
+  .ig-veil[data-side="left"], .ig-veil[data-side="right"], .ig-veil[data-side="center"] { background: linear-gradient(0deg, rgba(241, 244, 243, 0.96) 0%, rgba(241, 244, 243, 0.7) 50%, transparent 74%); }
+  .ig-hpanel { width: 100vw; padding: 0 7vw; }
+  .ig-hpanel > * { max-width: 86vw; }
+  .ig-hpanel h3 { font-size: 4.4rem; }
+  .ig-hpin { justify-content: flex-end; padding-bottom: 22svh; }
+  .ig-hkicker { top: 14svh; }
+  .ig-hpanel-img { top: -20vh; left: auto; right: 8vw; }
+  .ig-sec-process, .ig-sec-works { align-items: flex-start; padding-bottom: 10svh; }
+  .ig-step { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, 1fr); }
+  .ig-numbers { gap: 2rem 1.4rem; }
+  .ig-number { max-width: 42%; }
+  .ig-sec-numbers, .ig-sec-archive { align-items: center; padding-bottom: 0; }
+  .ig-hud { bottom: 16px; } .ig-motion { bottom: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ig-scene { transition: none; }
+  .ig-orbs > span, .ig-work img, .ig-hpanel-img, .ig-scrollcue i { animation: none; }
+}
