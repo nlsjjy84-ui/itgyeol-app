@@ -75,7 +75,7 @@ export default function HomeNumbers({ attempts = [], exhibit = [], onGallery, on
         <View style={styles.mine}>
           <Text style={styles.mineLabel}>{t('내 기록')}</Text>
           <Text style={styles.mineText}>
-            {t('완성한 판 {s} / 4', { s: solved })}  ·  {t('전시 신청 {e}점', { e: exhibit.length })}
+            {t('완성한 판 {s} / {n}', { s: solved, n: SCENES.length })}  ·  {t('전시 신청 {e}점', { e: exhibit.length })}
           </Text>
           {solved > 0 && onResult ? (
             <Pressable onPress={() => { play('tap'); onResult(); }} hitSlop={8}>

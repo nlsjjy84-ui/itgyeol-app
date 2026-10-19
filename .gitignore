@@ -46,3 +46,8 @@ yarn-error.*
 
 # 소개 화면 미리보기(한 파일에 그림까지 넣은 것)
 /web-landing/preview.html
+
+# 브라우저 테스트(npm run e2e) 결과물
+dist-e2e/
+test-results/
+playwright-report/

@@ -15,7 +15,7 @@ export const SCENES = {
     place: '마당 어귀',
     lines: [
       { who: 'pung', text: '왔다왔다! 오늘은 어디부터 갈래? 😆' },
-      { who: 'gyeol', text: '판은 네 곳이야. 끌리는 데부터 가면 돼. 순서 없어 🚪' },
+      { who: 'gyeol', text: '판은 여섯 곳이야. 끌리는 데부터 가면 돼. 순서 없어 🚪' },
     ],
   },
   jinbeop: {

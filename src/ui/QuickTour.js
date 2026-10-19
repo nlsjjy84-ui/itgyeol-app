@@ -51,7 +51,7 @@ export function QuickTourCard({ navigation, onClose }) {
           <Text style={st.arrow}>›</Text>
         </Pressable>
       ))}
-      <Text style={st.note}>{t('다 보고 나면 아래 네 개의 판에서 마음대로 골라 놀아요.')}</Text>
+      <Text style={st.note}>{t('다 보고 나면 아래 여섯 개의 판에서 마음대로 골라 놀아요.')}</Text>
     </View>
   );
 }

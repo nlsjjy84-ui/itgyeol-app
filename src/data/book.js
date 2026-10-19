@@ -82,7 +82,7 @@ const BOOK = {
     },
     {
       art: 'madang', place: '마당',
-      lines: [P('판은 네 곳이야. 진법, 글방, 놀이 마당, 한글 블록!'), G('끌리는 곳부터 가. 순서 없어. 우린 옆에서 추임새 넣을게 🥳')],
+      lines: [P('판은 여섯 곳이야. 진법, 글방, 놀이 마당, 한글 블록, 탈춤, 단청!'), G('끌리는 곳부터 가. 순서 없어. 우린 옆에서 추임새 넣을게 🥳')],
     },
   ],
 
@@ -309,7 +309,9 @@ const EPI_BY_COUNT = {
   1: [P('첫 조각이야! 다음 판이 이 옆에 이어 붙을 거야 🧩'), G('조각보는 한 조각으로는 아직 보가 아니야. 하나 더 이어 볼까?')],
   2: [G('두 조각이 이어졌어. 사이에 매듭이 생긴 거 보여? 🪢'), P('어? 그림이 아까랑 달라졌는데?!')],
   3: [P('세 판의 흔적이 한 장의 조각보가 됐어!! 얼쑤 🥳'), G('이게 네가 만든 전통 창작물이야. 어떻게 풀었는지에 따라 모양이 달라져.')],
-  4: [P('네 판이 다 모였다!! 조각보가 꽉 찼어 🎉'), G('진법, 글자, 놀이, 한글 블록까지 — 네가 걸어온 길이 무늬가 됐어.')],
+  4: [P('네 판의 흔적이 모였어! 조각보가 제법 넓어졌어 🧶'), G('판마다 손놀림이 달라서, 조각마다 무늬도 달라.')],
+  5: [P('다섯 판째야!! 한 판만 더 하면 조각보가 꽉 차 🔥'), G('지금까지 걸어온 길이 벌써 한 장의 무늬가 됐어.')],
+  6: [P('여섯 판이 다 모였다!! 조각보가 꽉 찼어 🎉'), G('진법, 글자, 놀이, 한글 블록, 탈춤, 단청까지 — 네가 걸어온 길이 무늬가 됐어.')],
 };
 
 // 조건에 따라 끼워 넣는 문장들(언어마다 따로 쓴다)
@@ -317,11 +319,11 @@ const T = {
   firstPiece: () => G('첫 조각이야! 오늘은 이걸로 박수 한 번 👏'),
   sceneNth: (n) => P(`이 판, 벌써 ${n}번째야! 단골 인정 😎`),
   topGame: (name) => G(`요즘 ${name} 자주 하네? 제일 좋아하는 놀이인가 봐 👀`),
-  epiZero: [G('판 하나만 놀고 오면 여기에 네 작품이랑 "작품 해설"이 생겨 📖'), P('진법, 글방, 놀이 마당, 한글 블록 — 어디부터 갈래? 🚪')],
+  epiZero: [G('판 하나만 놀고 오면 여기에 네 작품이랑 "작품 해설"이 생겨 📖'), P('진법, 글방, 놀이 마당, 한글 블록, 탈춤, 단청 — 어디부터 갈래? 🚪')],
   epiTop: (name) => P(`그러고 보니 ${eulReul(name)} 제일 자주 했네? 네 조각에 그 손맛이 들어갔어 ✋`),
   epiNoTop: () => P('어떤 놀이를 많이 하느냐에 따라 모양이 또 달라져. 신기하지? 🔮'),
   epiAbout: () => G('아래 "작품 해설"에 왜 이런 모양이 됐는지 적어 놨어. 한번 읽어 봐 📖'),
-  epiNextAll: () => P('다음엔 탈춤이나 단청 판도 열릴지 몰라. 기대해! 🎭'),
+  epiNextAll: () => P('여섯 판을 다 돌았어! 같은 판도 다시 하면 모양이 또 달라져 🔁'),
   epiNext: () => P('아직 안 가 본 판도 있어. 마당은 언제든 열려 있어 🚪'),
 };
 
@@ -353,12 +355,12 @@ export function afterLines({ sceneId, gameId, success, playLog, gameName, topGam
 
 export function epilogueLines({ solvedCount, topGameName }) {
   const B = pack();
-  const n = Math.min(4, solvedCount || 0);
+  const n = Math.min(6, solvedCount || 0);
   const out = [...B.EPI_BY_COUNT[n]];
   if (n === 0) return [...out, ...B.T.epiZero];
   out.push(topGameName ? B.T.epiTop(topGameName) : B.T.epiNoTop());
   out.push(B.T.epiAbout());
-  out.push(n >= 4 ? B.T.epiNextAll() : B.T.epiNext());
+  out.push(n >= 6 ? B.T.epiNextAll() : B.T.epiNext());
   return out;
 }
 

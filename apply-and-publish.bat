@@ -8,7 +8,7 @@ if /i not "%~1"=="__run" (
 set GIT_MERGE_AUTOEDIT=no
 setlocal
 set DST=%~2
-set SRC=%DST%_apply\itgyeol-redesign.zip
+set SRC=%DST%_apply\itgyeol-tests.zip
 cd /d "%DST%"
 echo [1/6] switch to redesign-ui
 rem Drop local edits to this bat (the running copy is in TEMP) so checkout is never blocked
@@ -20,7 +20,7 @@ if exist "%SRC%" powershell -NoProfile -Command "Expand-Archive -Force -LiteralP
 if errorlevel 1 (echo UNZIP FAILED & pause & exit /b 1)
 echo [3/6] npm install
 call npm install
-echo [3b] tests and translation check (fail = nothing is pushed)
+echo [3b] tests and translation check (fail = nothing is pushed). Browser tests run on GitHub before deploy.
 call npm test
 if errorlevel 1 (echo TESTS FAILED - nothing was pushed. Tell Claude & pause & exit /b 1)
 call npm run i18n:check
@@ -29,7 +29,7 @@ echo [4/6] commit and push redesign-ui
 rem Save the newest bat into the repo so every branch has the same copy
 copy /y "%~f0" "%DST%apply-and-publish.bat" >nul
 git add -A
-git commit -m "feat: talchum board (dance on the jangdan beat) and dancheong board (gachil, tabun, five colors, white lines), gift photo storage on Workers KV" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01Pc635XgYEi1EBmYTHPBfjJ"
+git commit -m "test: 34 browser tests (start, 6 boards, 12 folk games, dancheong played to the end, result lines, 4 languages, order and exhibit across devices against the real server code, offline) run before every deploy; fix six-board texts (home, tour, story, 1/6 and n/6 counters, epilogue for 5-6 boards) and the play patch description" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01Pc635XgYEi1EBmYTHPBfjJ"
 git push origin redesign-ui
 if errorlevel 1 (echo PUSH FAILED - tell Claude & pause & exit /b 1)
 echo [5/6] merge into master and push
