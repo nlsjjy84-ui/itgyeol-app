@@ -3,6 +3,23 @@
 // Game screens and mission details come in phase 2.
 
 const ui = {
+  "결제하기 (테스트)": "Pay (test)",
+  "{a} 외 {n}건": "{a} and {n} more",
+  "{n} 결제 (테스트)": "Pay {n} (test)",
+  "토스페이먼츠 테스트 결제창이 열려요. 실제 돈은 나가지 않아요.": "A Toss Payments test checkout opens. No real money is charged.",
+  "결제를 확인하는 중이에요…": "Checking your payment…",
+  "테스트 결제가 끝났어요. 주문이 업체에 전달됐어요.": "Test payment done. Your order went to the maker.",
+  "결제가 끝나지 않았어요.": "The payment did not go through.",
+  "취소했어요 · {n} 결제 취소(테스트)": "Canceled · {n} payment canceled (test)",
+  "서버에 이어지지 않아 이 기기의 신청만 보여요.": "Not connected to the server — showing this device's entries only.",
+  "잇결 서버에 모인 여러 기기의 신청이에요. 걸면 손님 화면도 \"전시 중\"으로 바뀌어요.": "Entries gathered from many devices on the Itgyeol server. When you hang one, the visitor's screen changes to \"On display\".",
+  "운영하는 쪽 화면": "Staff screens",
+  "업체 컴퓨터나 박물관 큰 화면에서 이 앱을 열고 들어가요. 손님 폰의 주문·전시 신청이 서버로 이어져 여기 들어와요.": "Open this app on the maker's computer or the museum's big screen and go in here. Orders and display requests from visitors' phones arrive through the server.",
+  "업체 화면 (주문 제작) ›": "Maker screen (made-to-order) ›",
+  "박물관 전시 화면 (큰 화면) ›": "Museum display (big screen) ›",
+  "잇결 서버와 이어져 있어요. 다른 기기에서 들어온 주문도 여기 보여요.": "Connected to the Itgyeol server. Orders from other devices show up here too.",
+  "서버에 이어지지 않아 이 기기의 주문만 보여요.": "Not connected to the server — showing this device's orders only.",
+  "서버에 잇는 중…": "Connecting to the server…",
   // 탈춤·단청 판
   "이 칸은 다른 색 자리예요. 칸 안의 작은 색 점을 봐요.": "This space takes another color. Look at the small color dot inside it.",
   "순서가 있어요. 지금은 「{p0}」 차례예요.": "There is an order. Now it’s time for “{p0}”.",

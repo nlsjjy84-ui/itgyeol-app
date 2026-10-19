@@ -8,11 +8,13 @@ import { play } from '../utils/sound';
 
 // 결과 화면 "가져가는 방법" — 싼 것부터 차례로(무료 저장 → 사진 → 키링 → 3D 모형).
 // 받는 방법(굿즈숍에서 찾기 / 택배), 전시 동의를 여기서 고른다.
-// 가격은 사업성 검토의 가정값이다. 주문표 → 결제(모의) → 업체 전달 → 제작 → 받기까지 흐름이 이어진다.
-// 결제사·업체와는 아직 실제로 연결하지 않았고(결제 번호는 MOCK-), 주문은 이 기기에만 저장한다.
+// 가격은 사업성 검토의 가정값이다. 주문표 → 결제 → 업체 전달 → 제작 → 받기까지 흐름이 이어진다.
+// 웹에서는 토스페이먼츠 테스트 결제창으로 낸다(실제 돈은 나가지 않음, 승인 금액은 서버가 다시 계산).
+// 주문은 잇결 서버에 저장돼 업체 화면·굿즈숍이 다른 기기여도 같이 보인다. 서버가 안 열리면 이 기기에만 두는 모의 결제로 돈다.
 import { PRICES, orderTotal, orderItems, orderNumber, comma, ORDER_KEYS } from '../utils/order';
-import { SHIP_FEE, STAGES, STAGE_NAME, METHODS, payQuote, placeOrder, cancel, cancelable, readyText } from '../utils/orders';
-import { onOrders, saveOrder } from '../utils/orderStore';
+import { SHIP_FEE, STAGES, STAGE_NAME, METHODS, payQuote, placeOrder, cancelable, readyText } from '../utils/orders';
+import { onOrders, submitOrder, cancelOrder } from '../utils/orderStore';
+import { tossKey, startTossPay, onPayNotice, clearPayNotice } from '../utils/tossPay';
 
 const won = (n) => t('{n}원', { n: comma(n) });
 
@@ -51,6 +53,17 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
   const [agreed, setAgreed] = useState(false);
   const [orders, setOrders] = useState([]);
   useEffect(() => onOrders((all) => setOrders(all.filter((o) => o.code === code))), [code]);
+  const [toss, setToss] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [payMsg, setPayMsg] = useState(null);
+  useEffect(() => {
+    let live = true;
+    tossKey().then((k) => live && setToss(!!k));
+    return () => {
+      live = false;
+    };
+  }, []);
+  useEffect(() => onPayNotice(setPayMsg), []);
   const latest = orders.length ? orders[orders.length - 1] : null;
   const toggle = (k) => {
     play('tap');
@@ -206,7 +219,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
           {exhibitOn ? <Text style={styles.sheetHow}>{t('전시 신청도 같이 들어갔어요.')}</Text> : null}
           {!pay ? (
             <Pressable onPress={() => { play('tap'); setPay(true); setAgreed(false); }} style={[styles.btn, { marginTop: 12 }]}>
-              <Text style={styles.btnText}>{t('결제하기 (모의)')}</Text>
+              <Text style={styles.btnText}>{toss ? t('결제하기 (테스트)') : t('결제하기 (모의)')}</Text>
             </Pressable>
           ) : null}
         </Frame>
@@ -238,24 +251,52 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
               <Text style={styles.agreeTxt}>{t('(필수) 내 놀이로 만든 하나뿐인 맞춤 제작품이라, 업체가 만들기 시작한 뒤에는 단순 변심으로 취소할 수 없다는 것을 확인했어요. 만들기 전까지는 전액 취소돼요.')}</Text>
             </Pressable>
             <Pressable
-              disabled={!agreed}
-              onPress={() => {
-                const r = placeOrder({ code, pick, how, method: how === 'post' && method === 'counter' ? 'card' : method, agreed, spec: product && pick[product] ? spec || null : null, seq: orders.length + 1 });
+              disabled={!agreed || busy}
+              onPress={async () => {
+                const m = how === 'post' && method === 'counter' ? 'card' : method;
+                const r = placeOrder({ code, pick, how, method: m, agreed, spec: product && pick[product] ? spec || null : null, seq: orders.length + 1 });
                 if (r.error) return;
                 play('stamp');
-                saveOrder(r.order);
+                clearPayNotice();
+                if (toss && m !== 'counter') {
+                  setBusy(true);
+                  const names = r.order.items.map((it) => NAMES[it.key]);
+                  const res = await startTossPay(r.order, names.length > 1 ? t('{a} 외 {n}건', { a: names[0], n: names.length - 1 }) : names[0]);
+                  setBusy(false);
+                  if (!res.fallback) {
+                    if (res.error) setPayMsg({ ok: false, message: res.message || res.error });
+                    return;
+                  }
+                }
+                submitOrder(r.order);
                 setPay(false);
                 setSheet(false);
                 setPick({});
               }}
-              style={[styles.btn, !agreed && { opacity: 0.45 }]}
+              style={[styles.btn, (!agreed || busy) && { opacity: 0.45 }]}
             >
-              <Text style={styles.btnText}>{t('{n} 결제 (모의)', { n: won(q.total) })}</Text>
+              <Text style={styles.btnText}>
+                {toss && method !== 'counter' ? t('{n} 결제 (테스트)', { n: won(q.total) }) : t('{n} 결제 (모의)', { n: won(q.total) })}
+              </Text>
             </Pressable>
-            <Text style={styles.demo}>{t('시연용 모의 결제예요. 실제 돈은 나가지 않고, 결제 번호는 MOCK-으로 시작해요.')}</Text>
+            <Text style={styles.demo}>
+              {toss && method !== 'counter'
+                ? t('토스페이먼츠 테스트 결제창이 열려요. 실제 돈은 나가지 않아요.')
+                : t('시연용 모의 결제예요. 실제 돈은 나가지 않고, 결제 번호는 MOCK-으로 시작해요.')}
+            </Text>
           </Frame>
         );
       })() : null}
+
+      {/* 결제창에서 돌아온 뒤 — 승인 확인 중 / 끝 / 실패 */}
+      {payMsg ? (
+        <Frame style={{ marginTop: 12, alignSelf: 'stretch' }}>
+          <Text style={[styles.payTitle, payMsg.ok === false && { color: colors.accent }]}>
+            {payMsg.busy ? t('결제를 확인하는 중이에요…') : payMsg.ok ? t('테스트 결제가 끝났어요. 주문이 업체에 전달됐어요.') : t('결제가 끝나지 않았어요.')}
+          </Text>
+          {payMsg.ok === false && payMsg.message ? <Text style={styles.small}>{payMsg.message}</Text> : null}
+        </Frame>
+      ) : null}
 
       {/* 주문 진행 — 결제 완료 → 업체에 전달 → 만드는 중 → 받을 준비 */}
       {latest ? (
@@ -263,7 +304,11 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
           <Text style={styles.sheetNo}>{t('주문 번호')} {latest.no}</Text>
           <Text style={styles.small}>{t('결제 번호')} {latest.payRef} · {t(METHODS[latest.method])} · {won(latest.total)}</Text>
           {latest.stage === 'canceled' ? (
-            <Text style={[styles.stageNow, { color: colors.accent }]}>{t('취소했어요 · {n} 환불(모의)', { n: won(latest.refund || latest.total) })}</Text>
+            <Text style={[styles.stageNow, { color: colors.accent }]}>
+              {String(latest.payRef || '').startsWith('TOSS')
+                ? t('취소했어요 · {n} 결제 취소(테스트)', { n: won(latest.refund || latest.total) })
+                : t('취소했어요 · {n} 환불(모의)', { n: won(latest.refund || latest.total) })}
+            </Text>
           ) : (
             <View style={styles.stages}>
               {STAGES.map((sg, i) => {
@@ -280,7 +325,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
           {latest.stage === 'sent' ? <Text style={styles.small}>{t('업체가 제작 사양서와 출력 파일을 받았어요. 만들기 시작하면 여기서 바뀌어요.')}</Text> : null}
           <View style={styles.howRow}>
             {cancelable(latest) ? (
-              <Pressable onPress={() => { const r = cancel(latest); if (r.order) { play('tap'); saveOrder(r.order); } }} hitSlop={8}>
+              <Pressable onPress={() => { play('tap'); cancelOrder(latest); }} hitSlop={8}>
                 <Text style={styles.hallLink}>{t('주문 취소')}</Text>
               </Pressable>
             ) : null}

@@ -9,16 +9,18 @@ import { colors, fonts } from '../theme';
 import { t } from '../i18n';
 import { play } from '../utils/sound';
 import { wallQueue } from '../utils/exhibit';
+import useLive from '../utils/useLive';
 
 // 박물관 전시 화면(큰 화면, 시연) — 전시해도 된다고 고른 작품 중 담당자가 "걸기"한 작품이 한 점씩 크게 넘어간다.
 // 걸린 작품이 없을 때는 예시 작품(가상 기록)으로 채운다. 이름 대신 별명과 나라만 보인다.
 // 담당자 칸: 전시 대기 작품을 보고 걸거나 내린다. 걸면 손님의 전시관 화면이 "전시 중"으로 바뀐다.
-// 지금은 같은 기기 안의 모의 연결이다(실제로는 박물관 전시 서버와 잇는 자리).
+// 잇결 서버로 이어져, 여러 손님 기기의 신청이 이 큰 화면에 모인다(4초마다 새로 읽음). 서버가 안 열리면 이 기기 것만 보인다.
 const SLIDE_MS = 7000;
 const CAPTION = ['관람객이 놀이로 빚은 작품', 'Made by a visitor through play', '观众通过游戏创作的作品', '来館者が遊びでつくった作品'];
 
 export default function ExhibitWallScreen({ navigation }) {
-  const { exhibit, setExhibit } = useJourney();
+  const { exhibit, setExhibit, refreshExhibit } = useJourney();
+  const online = useLive(refreshExhibit, 4000);
   const { width, height } = useWindowDimensions();
   const [i, setI] = useState(0);
   const [staff, setStaff] = useState(false);
@@ -69,7 +71,9 @@ export default function ExhibitWallScreen({ navigation }) {
               </Pressable>
             </View>
           ))}
-          <Text style={st.staffTxt}>{t('시연용이에요. 실제로는 박물관 전시 서버에서 여러 기기의 신청을 모아 걸어요.')}</Text>
+          <Text style={st.staffTxt}>
+            {online === false ? t('서버에 이어지지 않아 이 기기의 신청만 보여요.') : t('잇결 서버에 모인 여러 기기의 신청이에요. 걸면 손님 화면도 "전시 중"으로 바뀌어요.')}
+          </Text>
         </ScrollView>
       ) : cur ? (
         <View style={st.stage}>
