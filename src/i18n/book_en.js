@@ -6,26 +6,15 @@ const P = (text) => ({ who: 'pung', text });
 const G = (text) => ({ who: 'gyeol', text });
 
 const BOOK = {
+  // ── 프롤로그: 마당 어귀 (4쪽) ──
   prologue: [
     {
       art: 'gate', place: 'Courtyard gate',
-      lines: [P('Huh?! Someone’s here!'), P('Hi hi! We just met, right? Weird… it feels like we’ve known each other forever 😆')],
+      lines: [P('Huh?! Someone’s here! Hi hi! We just met, but it feels like forever 😆'), G('I’m Gyeori, the one who ties loose things together 🧵 He’s Pungi. He zooms around like the wind 🌬️')],
     },
     {
       art: 'gate', place: 'Courtyard gate',
-      lines: [G('Don’t mind him. He treats everyone like a ten-year best friend 😏'), P('True! I’m Pungi. “Pung” means wind, so I zoom around everywhere 🌬️')],
-    },
-    {
-      art: 'gate', place: 'Courtyard gate',
-      lines: [G('I’m Gyeori. “Gyeol” means a pattern or a flow. I’m the one who ties loose things together 🧵'), P('And you! We won’t ask your name. We’ll just call you “you” 😎')],
-    },
-    {
-      art: 'gate', place: 'Courtyard gate',
-      lines: [P('Oh, and if we shout “Eolssu!” or “Jota!” now and then, don’t worry!'), G('Those are chuimsae — happy cheers Koreans throw in when the fun kicks in. Feel free to use them too 🥁')],
-    },
-    {
-      art: 'gate', place: 'Courtyard gate',
-      lines: [P('Look at the crack in the gate. Light is leaking out ✨'), G('There’s a madang — a big open yard — in there. What’s the first thing you feel?')],
+      lines: [P('When we shout “Eolssu!”, it just means we’re having fun. Look, light is leaking through the gate ✨'), G('There’s a madang — a big open yard — in there. What’s the first thing you feel?')],
       input: {
         key: 'prologue',
         options: [
@@ -57,37 +46,23 @@ const BOOK = {
     },
     {
       art: 'madang', place: 'The madang',
-      lines: [P('Wooow, the madang! Eolssu!'), G('Think of it as a traditional playground. No need to know anything. We don’t know everything either 😆')],
-    },
-    {
-      art: 'madang', place: 'The madang',
-      lines: [G('Every time you play a board here, you get a “piece.” Ever seen a cloth made of little patches sewn together? That’s jogakbo 🧶'), P('Your piece takes the shape of how YOU played. Same board, different person, different piece!')],
-    },
-    {
-      art: 'madang', place: 'The madang',
-      lines: [P('There are six boards: Jinbeop, the Writing Room, the Play Yard, Hangul Blocks, the Mask Dance and Dancheong!'), G('Go wherever you like. No order. We’ll be right beside you, cheering 🥳')],
+      lines: [P('Wooow, the madang!! Every board you play gives you a piece. Sew them together and you get jogakbo, a patchwork cloth 🧶'), G('There are six boards: Jinbeop, the Writing Room, the Play Yard, Hangul Blocks, the Mask Dance and Dancheong! Start wherever you like 🥳')],
     },
   ],
 
+  // ── 판 입구 이야기: 판마다 2쪽 ──
   jinbeop: [
     {
       art: 'madang', place: 'Board 1 · Jinbeop Yard',
-      lines: [
-        P('Huh? People are standing in the yard, but the lines are a total mess 😵'),
-        G(({ choice }) =>
+      lines: [P('Huh? People are standing in the yard, but the lines are a total mess 😵'), G(({ choice }) =>
           choice.prologue === 'eo' ? 'You spotted things fast with that “Huh?” earlier. I trust those eyes 👀'
           : choice.prologue === 'jamkkan' ? 'You said “Wait!” earlier. I trust that careful mind 😌'
           : choice.prologue === 'silent' ? 'You were quietly watching before. Still in watch mode? 😏'
-          : 'Think you can line them up again?'),
-      ],
+          : 'Think you can line them up again?')],
     },
     {
       art: 'madang', place: 'Board 1 · Jinbeop Yard',
-      lines: [G('This is called “jin” — a formation. People pick their spots so the whole group makes a shape.'), P('When drummers march in rows at a pungmul band show, that’s a jin too 🥁 So is the big circle dance, ganggangsullae!')],
-    },
-    {
-      art: 'madang', place: 'Board 1 · Jinbeop Yard',
-      lines: [P('So, are you good at this? Spot-matching puzzles and stuff?')],
+      lines: [G('This is called “jin” — a formation. People pick their spots to make a shape 🥁'), P('So, are you good at spot-matching puzzles?')],
       input: {
         key: 'jinbeop',
         options: [
@@ -104,39 +79,17 @@ const BOOK = {
         },
       },
     },
-    {
-      art: 'madang', place: 'Board 1 · Jinbeop Yard',
-      lines: [G('Follow along with your eyes and watch how the shape changes 👀'), P('If you miss, the yard is still here. Nobody’s going to laugh at you!')],
-    },
-    {
-      art: 'madang', place: 'Board 1 · Jinbeop Yard',
-      lines: [P('Okay, into the formation we go! Eusha~!'), G('We’re right behind you 🏃')],
-    },
   ],
-
   print: [
     {
       art: 'byeongpung', place: 'Board 2 · Writing Room',
-      lines: [G('The ink by the folding screen isn’t even dry. Someone left mid-letter 🖌️'), P('A ghost, maybe? 👻 …Kidding! Probably!')],
+      lines: [G('The ink by the folding screen isn’t even dry. Someone left mid-letter 🖌️'), P('This room has the story of Hunminjeongeum — how Hangul, the Korean alphabet, was first made ✨')],
     },
     {
       art: 'byeongpung', place: 'Board 2 · Writing Room',
-      lines: [P('This room has the story of Hunminjeongeum — that’s the first name of Hangul, the Korean alphabet.'), G('It was made so ordinary people could read and write easily. Hard letters, made simple ✨')],
-    },
-    {
-      art: 'byeongpung', place: 'Board 2 · Writing Room',
-      lines: [G('Carve letters, add ink, press them on paper — that’s printing. A lot like using a stamp 🔖'), P('Look, letter pieces are scattered! Put them together and — boom — a stamp!')],
-    },
-    {
-      art: 'byeongpung', place: 'Board 2 · Writing Room',
-      lines: [P('Confession: our handwriting is terrible 🙈'), G('Good thing you match pieces here instead of writing. No skills needed 😌')],
-    },
-    {
-      art: 'byeongpung', place: 'Board 2 · Writing Room',
-      lines: [P('Can you smell the ink? Even in your imagination? 👃'), G('Into the Writing Room~ Eolssu!')],
+      lines: [G('Carve letters, add ink, press them on paper — that’s printing. Like a stamp 🔖'), P('Put the scattered letter pieces together and — boom — a stamp! Eolssu!')],
     },
   ],
-
   play: [
     {
       art: 'banner', place: 'Board 3 · Play Yard',
@@ -144,22 +97,9 @@ const BOOK = {
     },
     {
       art: 'banner', place: 'Board 3 · Play Yard',
-      lines: [G('Tug of war, spinning tops, ddakji paper slapping, kite flying… sound familiar?'), P('Even if the names are new, your body will know them! 🤸')],
-    },
-    {
-      art: 'banner', place: 'Board 3 · Play Yard',
-      lines: [P('Never played one before? No worries. We’ll be watching right next to you 😄'), G('They say every game starts with “Huh? What’s this?”')],
-    },
-    {
-      art: 'banner', place: 'Board 3 · Play Yard',
-      lines: [G('No need to play all twelve. Just one gives you your first piece 🧩'), P('Play a lot and you’ll find your favorite! Mine is ddakji. I’m VERY serious about it 🃏')],
-    },
-    {
-      art: 'banner', place: 'Board 3 · Play Yard',
-      lines: [P('Flag goes up~ Blow, wind, blow 🌬️'), G('Eolssu! Let the games begin!')],
+      lines: [G('No need to play all twelve. Just one gives you your first piece 🧩'), P('Mine is ddakji. I’m VERY serious about it 🃏 Eolssu! Let the games begin!')],
     },
   ],
-
   hangul: [
     {
       art: 'sunset', place: 'Board 4 · Hangul Blocks',
@@ -167,15 +107,27 @@ const BOOK = {
     },
     {
       art: 'sunset', place: 'Board 4 · Hangul Blocks',
-      lines: [G('In Hangul you build a letter by snapping consonants and vowels together. Like LEGO 🧱'), P('That’s why it’s a perfect match for Tetris!!')],
+      lines: [G('In Hangul you build a letter by snapping consonants and vowels together, like LEGO 🧱'), P('Fill a whole row and it disappears! Ready? Eolssu!')],
+    },
+  ],
+  talchum: [
+    {
+      art: 'madang', place: 'Board 5 · Mask Dance Yard',
+      lines: [P('Boom, boom! I hear a drum 🥁 People in masks are dancing!'), G('That’s talchum, a Korean mask dance. You wear a mask and dance to the rhythm 🎭')],
     },
     {
-      art: 'sunset', place: 'Board 4 · Hangul Blocks',
-      lines: [P('Stack blocks to fill a whole row and the row disappears. So satisfying 😆'), G('If you scream “Aaah!”, that’s fine. We scream every single time 🙈')],
+      art: 'madang', place: 'Board 5 · Mask Dance Yard',
+      lines: [G('Press the dance moves on the drum’s beats. The rhythm gets faster as you go!'), P('See the long sleeves (hansam) flying? I can’t sit still either. Eolssu!')],
+    },
+  ],
+  dancheong: [
+    {
+      art: 'gate', place: 'Board 6 · Dancheong Eaves',
+      lines: [G('Look under the eaves. See the colorful patterns? That’s dancheong 🏯'), P('It’s like a coat that keeps wooden buildings safe from wind and rain. A stylish coat 😎')],
     },
     {
-      art: 'sunset', place: 'Board 4 · Hangul Blocks',
-      lines: [P('Ready? Blocks incoming~'), G('Eolssu! Let’s stack 🧱')],
+      art: 'gate', place: 'Board 6 · Dancheong Eaves',
+      lines: [G('Dancheong has an order: base coat → transfer the pattern → fill the colors → draw the lines!'), P('Got your brush? Let’s paint in order 🖌️ Eolssu!')],
     },
   ],
 };

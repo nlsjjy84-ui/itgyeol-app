@@ -28,3 +28,24 @@ test('판 수를 4로 적어 둔 곳이 없다 (화면 문장)', () => {
   const home = read('../src/screens/HomeScreen.js') + read('../src/ui/QuickTour.js') + read('../src/components/HomeNumbers.js') + read('../src/components/TraceReward.js');
   assert.doesNotMatch(home, /네 가지 전통|네 개의 판|\/ 4'|SCENE_ORDER\.length\)/);
 });
+
+// 처음 시작이 길다는 피드백(2026-10-19): 프롤로그 4쪽, 판 입구 이야기는 여섯 판 모두 2쪽씩
+for (const [lang, file] of Object.entries(PACKS)) {
+  test(`${lang}: 프롤로그는 4쪽, 여섯 판 모두 입구 이야기 2쪽`, () => {
+    const src = read(file);
+    const block = src.slice(src.indexOf('const BOOK = {'), src.indexOf('\n};', src.indexOf('const BOOK = {')));
+    const pages = (part) => {
+      const i = block.indexOf(`\n  ${part}: [`);
+      assert.ok(i >= 0, `${part} 이야기가 있어야 한다`);
+      const j = block.indexOf('\n  ],', i);
+      return (block.slice(i, j).match(/art: '/g) || []).length;
+    };
+    assert.equal(pages('prologue'), 4);
+    for (const part of ['jinbeop', 'print', 'play', 'hangul', 'talchum', 'dancheong']) assert.equal(pages(part), 2, part);
+  });
+}
+
+test('홈의 여섯 판 카드가 모두 입구 이야기로 이어진다', () => {
+  const src = read('../src/data/book.js');
+  for (const id of ['jinbeop', 'print', 'tbd', 'hangul', 'talchum', 'dancheong']) assert.match(src, new RegExp(`PART_OF_CARD = \\{[^}]*\\b${id}:`));
+});
