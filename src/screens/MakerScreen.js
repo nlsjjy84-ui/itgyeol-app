@@ -7,12 +7,13 @@ import { colors, fonts } from '../theme';
 import { t } from '../i18n';
 import { play } from '../utils/sound';
 import { comma } from '../utils/order';
-import { STAGES, STAGE_NAME, METHODS, advance, readyText } from '../utils/orders';
-import { onOrders, saveOrder } from '../utils/orderStore';
+import { STAGES, STAGE_NAME, METHODS, readyText } from '../utils/orders';
+import { onOrders, onOnline, advanceOrder } from '../utils/orderStore';
 
 // 업체 화면(시연) — 결제가 끝난 주문이 제작 사양서와 함께 여기로 들어온다.
 // 업체가 "만들기 시작 → 다 만들었어요"를 누르면 손님의 결과 화면 진행 표시도 같이 바뀐다.
-// 지금은 같은 기기 안에서 도는 모의 연결이다(실제로는 업체 주문 접수 시스템과 잇는 자리).
+// 주문은 잇결 서버로 이어져, 손님 폰·키오스크와 다른 기기에서 열어도 같은 주문이 보인다(4초마다 새로 읽음).
+// 서버가 안 열리면 같은 기기 안에서만 돈다.
 const NAMES = {
   photo: '깜짝 사진 엽서 2장', badge: '나만의 배지', keyring: '맞춤 키링', stamp: '나만의 낙관 도장', sumak: '나만의 수막새',
   paperweight: '나만의 문진', coaster: '나만의 코스터', bookmark: '나만의 책갈피', model: '3D 모형',
@@ -28,7 +29,9 @@ const when = (ms) => {
 export default function MakerScreen({ navigation }) {
   const [orders, setOrders] = useState([]);
   const [open, setOpen] = useState(null);
+  const [online, setOnline] = useState(null);
   useEffect(() => onOrders(setOrders), []);
+  useEffect(() => onOnline(setOnline), []);
   const list = [...orders].sort((a, b) => b.log[0].at - a.log[0].at);
   const waiting = list.filter((o) => o.stage === 'sent' || o.stage === 'making').length;
 
@@ -37,6 +40,9 @@ export default function MakerScreen({ navigation }) {
       <ScrollView contentContainerStyle={st.content}>
         <ScreenHeader title="업체 화면 (시연)" sub={t('결제가 끝난 주문이 제작 사양서와 함께 들어와요')} onBack={() => navigation.goBack()} />
         <Text style={st.h}>{t('만들 주문 {n}건 · 모두 {m}건', { n: waiting, m: list.length })}</Text>
+        <Text style={st.meta}>
+          {online === true ? t('잇결 서버와 이어져 있어요. 다른 기기에서 들어온 주문도 여기 보여요.') : online === false ? t('서버에 이어지지 않아 이 기기의 주문만 보여요.') : t('서버에 잇는 중…')}
+        </Text>
         {list.length === 0 ? (
           <Frame style={{ marginTop: 8 }}>
             <Text style={st.body}>{t('아직 들어온 주문이 없어요. 결과 화면에서 주문표를 만들고 결제(모의)하면 여기로 들어와요.')}</Text>
@@ -74,7 +80,7 @@ export default function MakerScreen({ navigation }) {
                   style={st.btn}
                   onPress={() => {
                     play('stamp');
-                    saveOrder(advance(o));
+                    advanceOrder(o);
                   }}
                 >
                   <Text style={st.btnTxt}>{t(NEXT_LABEL[o.stage])}</Text>

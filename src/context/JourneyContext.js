@@ -5,6 +5,8 @@ import { OHANG, pickTodayOhang } from '../data/formations';
 import { computeProgress } from '../utils/progress';
 import { readCarryOnce, mergeAttempts, mergeLog } from '../utils/carry';
 import { nextExhibit, cleanExhibit } from '../utils/exhibit';
+import { cloud } from '../utils/cloud';
+import { mergeExhibit, mineOnly } from '../utils/sync';
 
 export const JourneyContext = createContext(null);
 const STORAGE_KEY = 'itgyeol_journey_v1';
@@ -23,6 +25,8 @@ const BOOK_EMPTY = { prologue: false, gates: {}, choice: {} };
 // 전시해도 된다고 동의한 작품 목록 — [{code, attempts, nick, country, at}].
 // 결과 화면에서 켜고 끄고, 전시관 화면과 홈의 "내 기록"에 보인다. 이름은 받지 않고 별명·나라만.
 const EXHIBIT_KEY = 'itgyeol_exhibit_v1';
+// 이 기기에서 전시를 신청한 작품 코드 — 서버에는 모든 기기의 신청이 모이므로 "내가 신청한 작품"은 이것으로 고른다
+const MINE_KEY = 'itgyeol_exhibit_mine_v1';
 // 놀이별 숙련도 점수의 범위 — -3(많이 헤맴) ~ +3(많이 능숙함). 7단계면 체감 차이를
 // 주기에 충분하고, 한두 판 실수했다고 극단으로 튀지 않을 만큼 좁다.
 const SKILL_MIN = -3;
@@ -61,6 +65,12 @@ export function JourneyProvider({ children }) {
   // 그림책 진행 — null이면 아직 읽는 중
   const [book, setBookState] = useState(null);
   const [exhibit, setExhibitState] = useState([]);
+  const [myCodes, setMyCodes] = useState([]);
+  const exhibitRef = React.useRef([]);
+  const pendingRef = React.useRef(new Set());
+  useEffect(() => {
+    exhibitRef.current = exhibit;
+  }, [exhibit]);
 
   useEffect(() => {
     let mounted = true;
@@ -137,6 +147,15 @@ export function JourneyProvider({ children }) {
         // 손상된 값은 무시
       }
       setBookState(v);
+    });
+    safeGetItem(MINE_KEY).then((raw) => {
+      if (!mounted || !raw) return;
+      try {
+        const v = JSON.parse(raw);
+        if (Array.isArray(v)) setMyCodes(v.filter((c) => typeof c === 'string'));
+      } catch (e) {
+        // 손상된 값은 무시
+      }
     });
     safeGetItem(EXHIBIT_KEY).then((raw) => {
       if (!mounted || !raw) return;
@@ -232,12 +251,47 @@ export function JourneyProvider({ children }) {
 
   // 작품 하나를 전시 후보로 올리거나(entry: {code, attempts, nick, country}) 내린다(code만).
   // 같은 코드가 이미 있으면 별명·나라만 고친다.
+  // 바뀐 것은 잇결 서버에도 보낸다(박물관 큰 화면이 다른 기기여도 보이게). 못 보내면 기억해 두었다가 다시 보낸다.
+  const pushExhibit = useCallback((code, entry) => {
+    pendingRef.current.add(code);
+    cloud
+      .putExhibit(code, entry)
+      .then(() => pendingRef.current.delete(code))
+      .catch(() => {});
+  }, []);
+
   const setExhibit = useCallback((code, entry) => {
-    setExhibitState((prev) => {
-      const next = nextExhibit(prev, code, entry);
+    const prev = exhibitRef.current;
+    const next = nextExhibit(prev, code, entry);
+    exhibitRef.current = next;
+    setExhibitState(next);
+    AsyncStorage.setItem(EXHIBIT_KEY, JSON.stringify(next)).catch(() => {});
+    if (entry && !prev.some((e) => e.code === code)) {
+      setMyCodes((m) => {
+        const v = m.includes(code) ? m : [...m, code];
+        AsyncStorage.setItem(MINE_KEY, JSON.stringify(v)).catch(() => {});
+        return v;
+      });
+    }
+    pushExhibit(code, next.find((e) => e.code === code) || null);
+  }, [pushExhibit]);
+
+  // 서버에서 전시 목록 다시 읽기 — 전시관·박물관 큰 화면·결과 화면이 열려 있는 동안 몇 초마다 부른다
+  const refreshExhibit = useCallback(async () => {
+    for (const code of [...pendingRef.current]) {
+      const e = exhibitRef.current.find((x) => x.code === code) || null;
+      await cloud.putExhibit(code, e).then(() => pendingRef.current.delete(code)).catch(() => {});
+    }
+    try {
+      const remote = await cloud.exhibit();
+      const next = mergeExhibit(exhibitRef.current, remote, pendingRef.current);
+      exhibitRef.current = next;
+      setExhibitState(next);
       AsyncStorage.setItem(EXHIBIT_KEY, JSON.stringify(next)).catch(() => {});
-      return next;
-    });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }, []);
 
   const resetJourney = useCallback(() => {
@@ -247,7 +301,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, addSenses, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds), exhibit, setExhibit, carried: !!(carried && carried.attempts.length) }}
+      value={{ attempts, addResult, addSenses, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds), exhibit, setExhibit, refreshExhibit, myExhibit: mineOnly(exhibit, myCodes), carried: !!(carried && carried.attempts.length) }}
     >
       {children}
     </JourneyContext.Provider>

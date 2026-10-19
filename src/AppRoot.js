@@ -27,6 +27,7 @@ import { loadLang, setLang } from './i18n';
 import { loadVoice } from './utils/voice';
 import { loadConsent, decided, sensesSupported, askConsent, startSensing, stopSensing } from './utils/senses';
 import SenseLayer from './components/SenseLayer';
+import { finishTossPay, isPayReturn } from './utils/tossPay';
 
 // 놀이 화면 → 판 이름. 이 화면에 있는 동안만 카메라·마이크(동의한 것)를 켠다.
 const PLAY_SCENE = { Jinbeop: 'jinbeop', Print: 'print', Play: 'tbd', Hangul: 'hangul', Talchum: 'talchum', Dancheong: 'dancheong' };
@@ -62,7 +63,11 @@ const MakerH = withHanji(MakerScreen);
 
 // 처음 열면 "전통문화 하면 떠오르는 것" 질문부터, 한 번 답하거나 건너뛰었으면 바로 홈으로.
 function Nav() {
-  const { taste, book, carried, addSenses } = useJourney();
+  const { taste, book, carried, addSenses, attempts } = useJourney();
+  const [payBack] = useState(() => isPayReturn() && attempts !== undefined);
+  useEffect(() => {
+    finishTossPay();
+  }, []);
   const sceneRef = React.useRef(null);
   // 화면이 바뀔 때: 놀이 화면을 나가면 잰 값을 기록에 더하고, 놀이 화면에 들어가면 켠다(처음이면 먼저 묻는다)
   const onRoute = React.useCallback(
@@ -81,7 +86,8 @@ function Nav() {
   if (taste === null || book === null) return null;
   // 처음이면 질문 → 그림책 프롤로그 → 홈. 질문만 끝낸 사람은 바로 프롤로그부터.
   // QR로 집에서 이어서 여는 사람은 질문·그림책을 건너뛰고 바로 홈(가져온 작품)으로.
-  const first = carried ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
+  // 토스 결제창에서 돌아왔으면 결과 화면(주문 진행)으로 바로 간다.
+  const first = payBack ? 'Result' : carried ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
   return (
     <NavigationContainer onStateChange={onRoute}>
       <Stack.Navigator initialRouteName={first} screenOptions={{ headerShown: false }}>

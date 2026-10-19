@@ -8,7 +8,7 @@ export const MAX_BYTES = 3 * 1024 * 1024;
 export const PREFIX = 'gifts/';
 export const cors = {
   'access-control-allow-origin': ORIGIN,
-  'access-control-allow-methods': 'POST, OPTIONS',
+  'access-control-allow-methods': 'GET, POST, PATCH, OPTIONS',
   'access-control-allow-headers': 'content-type',
 };
 
@@ -16,13 +16,24 @@ export function newId(rand = crypto.getRandomValues.bind(crypto)) {
   return [...rand(new Uint8Array(18))].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-// 하루 지난 사진 지우기 — 새 사진이 올라올 때마다, 그리고 매일 한 번(cron) 돈다.
+// 오래된 것 지우기 — 사진은 하루, 주문·전시 기록은 7일이 지나면 지운다.
+// 새 사진이 올라올 때마다, 그리고 매일 한 번(cron) 돈다.
+export const KEEP = [
+  { prefix: PREFIX, ms: DAY_MS },
+  { prefix: 'orders/', ms: 7 * DAY_MS },
+  { prefix: 'exhibit/', ms: 7 * DAY_MS },
+];
 export async function removeOld(now = Date.now(), api = { list, del }) {
+  let removed = 0;
+  for (const k of KEEP) removed += await removeOldIn(k.prefix, k.ms, now, api);
+  return removed;
+}
+async function removeOldIn(prefix, keepMs, now, api) {
   let cursor;
   let removed = 0;
   do {
-    const page = await api.list({ prefix: PREFIX, cursor, limit: 1000 });
-    const old = page.blobs.filter((b) => now - new Date(b.uploadedAt).getTime() > DAY_MS).map((b) => b.url);
+    const page = await api.list({ prefix, cursor, limit: 1000 });
+    const old = page.blobs.filter((b) => now - new Date(b.uploadedAt).getTime() > keepMs).map((b) => b.url);
     if (old.length) {
       await api.del(old);
       removed += old.length;

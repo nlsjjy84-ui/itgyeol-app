@@ -30,6 +30,7 @@ import { getLang } from '../i18n';
 import { linkedArchive } from '../data/archiveLinks';
 import { ArchiveDetail, entryName } from './ArchiveScreen';
 import TakeHome from '../components/TakeHome';
+import useLive from '../utils/useLive';
 import { productKey } from '../utils/order';
 import { makerSpec } from '../utils/makerSpec';
 import SurpriseGift from '../components/SurpriseGift';
@@ -101,7 +102,8 @@ function TextureArt({ mode, attempts, size, craft, plain }) {
 }
 
 export default function ResultScreen({ navigation }) {
-  const { attempts, skills, progress, playLog, exhibit, setExhibit } = useJourney();
+  const { attempts, skills, progress, playLog, exhibit, setExhibit, refreshExhibit } = useJourney();
+  useLive(refreshExhibit, 8000);
   const shotRef = useRef(null);
   // 화면에 보이는 3D 물체(출력 파일로 그대로 내보낸다). 상태가 아니라 ref라 다시 그리지 않는다.
   const printObj = useRef(null);

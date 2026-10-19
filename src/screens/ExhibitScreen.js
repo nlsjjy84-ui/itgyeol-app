@@ -10,16 +10,18 @@ import { useJourney } from '../context/JourneyContext';
 import { colors, fonts } from '../theme';
 import { t } from '../i18n';
 import { play } from '../utils/sound';
+import useLive from '../utils/useLive';
 
 // 잇결 전시관 — 전시해도 된다고 고른 작품만 걸린다.
 // 위: 내가 신청한 작품(전시 대기 중), 아래: 지금 걸려 있는 작품(시연용 예시).
-// 박물관 전시 화면(ExhibitWall, 시연)에서 담당자가 걸면 "전시 중"으로 바뀐다. 지금은 같은 기기 안의 모의 연결이다.
+// 박물관 전시 화면(ExhibitWall)에서 담당자가 걸면 "전시 중"으로 바뀐다. 잇결 서버로 이어져 큰 화면이 다른 기기여도 된다(5초마다 새로 읽음).
 const WALL = 24;
 
 export default function ExhibitScreen({ navigation }) {
-  const { exhibit, setExhibit, attempts } = useJourney();
+  const { myExhibit, setExhibit, attempts, refreshExhibit } = useJourney();
   const [open, setOpen] = useState(null);
-  const mine = useMemo(() => [...(exhibit || [])].sort((a, b) => (b.at || 0) - (a.at || 0)), [exhibit]);
+  useLive(refreshExhibit, 5000);
+  const mine = useMemo(() => [...(myExhibit || [])].sort((a, b) => (b.at || 0) - (a.at || 0)), [myExhibit]);
   // 매일 다른 작품이 걸리는 것처럼 — 날짜로 시작 위치를 돌린다
   const wall = useMemo(() => {
     const day = Math.floor(Date.now() / 86400000);
