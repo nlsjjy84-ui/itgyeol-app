@@ -130,7 +130,7 @@ export default function HomeScreen({ navigation, route }) {
         <CloudBand width={260} />
       </View>
       <Text style={styles.subtitle}>
-        {t('손끝으로 만나는 네 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.')}
+        {t('손끝으로 만나는 여섯 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.')}
       </Text>
       {carried ? (
         <Pressable onPress={() => { play('stamp'); navigation.navigate('Result'); }}>

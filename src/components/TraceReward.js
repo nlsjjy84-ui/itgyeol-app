@@ -10,7 +10,10 @@ import { explainPatch } from '../utils/explain';
 import { SCENE_TARGET, LEVEL_NAME, nextHint } from '../utils/progress';
 import { colors } from '../theme';
 import { PLAY_GAMES } from '../data/playGames';
-import { SCENE_ORDER } from './Jogakbo';
+import { SCENE_ORDER, EXTRA_SCENES } from './Jogakbo';
+
+// 조각보 칸 수 = 처음 네 판 + 나중에 더한 탈춤·단청 (예전에는 4로 나와 "1/4"처럼 보였다)
+const TOTAL_PIECES = SCENE_ORDER.length + EXTRA_SCENES.length;
 import { t as i18nT } from '../i18n';
 
 const SCENE_NAME = { jinbeop: '진법', print: '인쇄', tbd: '놀이', hangul: '한글 테트리스', talchum: '탈춤', dancheong: '단청' };
@@ -41,7 +44,7 @@ export default function TraceReward({ sceneId, success, gameId, gameName }) {
         <Text style={styles.plus}>→</Text>
         <View style={styles.col}>
           <Jogakbo attempts={attempts} size={104} />
-          <Text style={styles.cap}>{i18nT('이어진 조각보 ·')} {i18nT(n)}/{i18nT(SCENE_ORDER.length)}</Text>
+          <Text style={styles.cap}>{i18nT('이어진 조각보 ·')} {i18nT(n)}/{i18nT(TOTAL_PIECES)}</Text>
         </View>
       </View>
       {why ? (

@@ -65,7 +65,7 @@ const BOOK = {
     },
     {
       art: 'madang', place: 'The madang',
-      lines: [P('There are four boards: Jinbeop, the Writing Room, the Play Yard and Hangul Blocks!'), G('Go wherever you like. No order. We’ll be right beside you, cheering 🥳')],
+      lines: [P('There are six boards: Jinbeop, the Writing Room, the Play Yard, Hangul Blocks, the Mask Dance and Dancheong!'), G('Go wherever you like. No order. We’ll be right beside you, cheering 🥳')],
     },
   ],
 
@@ -277,18 +277,20 @@ const EPI_BY_COUNT = {
   1: [P('Your first piece! The next board will sew right next to it 🧩'), G('One piece isn’t a jogakbo yet. Want to add another?')],
   2: [G('Two pieces joined. See the knot between them? 🪢'), P('Huh? The picture looks different from before!')],
   3: [P('Three boards became one jogakbo!! Eolssu 🥳'), G('This is a traditional artwork YOU made. Its shape depends on how you played.')],
-  4: [P('All four boards are in!! Your jogakbo is full 🎉'), G('Jinbeop, letters, games and Hangul blocks — your path became the pattern.')],
+  4: [P('Four boards’ worth of traces! Your jogakbo is getting wide 🧶'), G('Every board leaves a different touch, so every piece has its own pattern.')],
+  5: [P('Board number five!! One more and your jogakbo is full 🔥'), G('The path you’ve walked has already become one big pattern.')],
+  6: [P('All six boards are in!! Your jogakbo is full 🎉'), G('Jinbeop, letters, games, Hangul blocks, mask dance and dancheong — your path became the pattern.')],
 };
 
 const T = {
   firstPiece: () => G('Your first piece! Let’s give it a round of applause 👏'),
   sceneNth: (n) => P(`This board, already round ${n}! Official regular 😎`),
   topGame: (name) => G(`You play ${name} a lot lately! Your favorite, maybe? 👀`),
-  epiZero: [G('Play one board and your artwork plus its “Story of this piece” will show up here 📖'), P('Jinbeop, Writing Room, Play Yard, Hangul Blocks — where to first? 🚪')],
+  epiZero: [G('Play one board and your artwork plus its “Story of this piece” will show up here 📖'), P('Jinbeop, Writing Room, Play Yard, Hangul Blocks, Mask Dance, Dancheong — where to first? 🚪')],
   epiTop: (name) => P(`Come to think of it, you played ${name} the most! That touch is in your piece now ✋`),
   epiNoTop: () => P('The games you play the most change the shape too. Cool, right? 🔮'),
   epiAbout: () => G('Check “Story of this piece” below to see why it turned out this way 📖'),
-  epiNextAll: () => P('Maybe a mask dance or dancheong board opens next. Stay tuned! 🎭'),
+  epiNextAll: () => P('You’ve been to all six boards! Play one again and the shape changes again 🔁'),
   epiNext: () => P('There are boards you haven’t visited yet. The yard is always open 🚪'),
 };
 
@@ -297,7 +299,7 @@ const SCENES = {
   prologue: {
     art: 'gate',
     place: 'Courtyard gate',
-    lines: [P('You’re here, you’re here! Where to first today? 😆'), G('There are four boards. Go wherever you like. No order 🚪')],
+    lines: [P('You’re here, you’re here! Where to first today? 😆'), G('There are six boards. Go wherever you like. No order 🚪')],
   },
   jinbeop: {
     art: 'madang',

@@ -356,7 +356,7 @@ const ui = {
   "놀이 기록이 다르면 모양과 색이 달라져요. 마음에 들면 내 작품도 전시될 수 있어요.": "A different play record gives a different shape and color. If you like yours, it may be exhibited too.",
   "예시 작품 둘러보기 ›": "Browse sample works ›",
   "내 기록": "My record",
-  "완성한 판 {s} / 4": "Boards done {s} / 4",
+  "완성한 판 {s} / {n}": "Boards done {s} / {n}",
   "전시 신청 {e}점": "Sent to exhibit {e}",
   "내 결과물 보기 ›": "See my work ›",
   "{n}원": "₩{n}",
@@ -444,7 +444,7 @@ const ui = {
 
   // ── home ──
   '대한민국의 보물': 'Treasures of Korea',
-  '손끝으로 만나는 네 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.': 'Four traditions at your fingertips — don’t just look, make something.',
+  '손끝으로 만나는 여섯 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.': 'Six traditions at your fingertips — don’t just look, make something.',
   '판을 놀수록 우리 둘의 모습이 또렷해져.': 'The more you play, the clearer we both get.',
   '만든 사람': 'Made by',
   '사물놀이·풍물을 전공하고, 인천에서 10년 넘게 국악연구소를 운영하며 아이들에게 국악과 전래놀이를 가르쳤습니다. 2015년에는 전래놀이 교육 교재를 직접 써서 강사들을 교육하기도 했어요. 이 앱의 진법과 전래놀이 열두 가지는 그 현장 경험을 그대로 옮긴 것입니다.':
@@ -585,7 +585,7 @@ const ui = {
   '녹색': 'green',
   '푼 진의 사람 자리가 점으로 찍히고, 점을 이어 그 진의 모양이 조각에 남아요.': 'Each person’s spot in the formation becomes a dot, and the dots join up into the formation’s shape on the piece.',
   '직접 맞춘 글자가 붉은 낙관(도장)으로 새겨져요.': 'The letters you matched are carved as a red seal stamp.',
-  '푼 놀이를 뜻하는 한자가 인장으로 새겨져요.': 'A Chinese character for the game you played is carved as a seal.',
+  '푼 놀이와 짝지은 전통 문양이 둥글게 수놓여요(줄다리기는 덩굴무늬, 팽이치기는 소용돌이무늬).': 'The traditional pattern paired with the game you played is embroidered in a circle (a vine pattern for tug-of-war, a swirl for top spinning).',
   '클리어한 단계를 뜻하는 한글 자모가 블록 네 칸 위에 새겨져요.': 'Hangul letters for the stage you cleared are carved on four blocks.',
   '그때의 오늘의 기운이 {oh}({hint} 느낌)이어서 이 색으로 물들었어요.': 'Today’s energy was {oh} (a {hint} feeling) at the time, so the piece took this color.',
   '{speed} 풀었고, 어느 자리에 무엇을 놓았는지가 이 조각의 고유값(시드)에 섞였어요.': '{speed} solved, and where you put what got mixed into this piece’s unique value (seed).',
@@ -1359,7 +1359,7 @@ const ui = {
   "예시 작품": "Sample works",
   "가상의 놀이 기록으로 빚은 예시 450점": "450 samples shaped from imaginary play records",
   "작품의 바탕이 된 실제 유물 121점": "121 real heritage objects behind the works",
-  "다 보고 나면 아래 네 개의 판에서 마음대로 골라 놀아요.": "After that, pick any of the four boards below and play as you like.",
+  "다 보고 나면 아래 여섯 개의 판에서 마음대로 골라 놀아요.": "After that, pick any of the six boards below and play as you like.",
 };
 
 // object catalog (groups → items → styles)

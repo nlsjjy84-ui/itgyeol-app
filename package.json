@@ -37,13 +37,17 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "i18n:check": "node --no-warnings scripts/i18n-check.mjs",
-    "test": "node --no-warnings --test tests/*.test.mjs"
+    "test": "node --no-warnings --test tests/*.test.mjs",
+    "e2e:build": "expo export -p web --output-dir dist-e2e --clear",
+    "e2e": "playwright test"
   },
   "private": true,
   "devDependencies": {
     "@expo/metro-runtime": "^57.0.16",
+    "@playwright/test": "^1.56.1",
     "babel-preset-expo": "^57.0.13",
     "react-dom": "^19.2.3",
-    "react-native-web": "^0.21.3"
+    "react-native-web": "^0.21.3",
+    "serve": "^14.2.4"
   }
 }

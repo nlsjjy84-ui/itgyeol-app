@@ -30,6 +30,19 @@ jobs:
         run: npm test
       - name: Check translations (언어팩 점검)
         run: npm run i18n:check
+      - name: Browser tests (브라우저로 화면을 끝까지 눌러 보는 테스트 — 실패하면 배포 안 함)
+        run: |
+          npm ci --prefix tools/itgyeol-gift
+          npx playwright install --with-deps chromium
+          npm run e2e:build
+          npm run e2e
+      - name: Browser test report (실패했을 때 화면 기록)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: test-results
+          retention-days: 7
       - name: Export web
         run: npx expo export -p web --output-dir dist
         env:
