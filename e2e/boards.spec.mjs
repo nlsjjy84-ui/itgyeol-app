@@ -23,3 +23,20 @@ for (const game of FOLK_GAMES) {
     await expect(page.getByText(game, { exact: false }).filter({ visible: true }).first()).toBeVisible();
   });
 }
+
+test('탈춤·단청도 처음 들어가면 입구 이야기 2쪽이 먼저 뜬다', async ({ page }) => {
+  await openHome(page);
+  for (const [board, first, second] of [
+    ['탈춤 · 가면극', '탈춤이야. 탈을 쓰고 장단에 맞춰 추는 우리 춤이야 🎭', '북이 치는 박에 맞춰 춤사위를 눌러 봐. 갈수록 장단이 빨라져!'],
+    ['단청 · 전통 문양', '저 처마 밑 좀 봐. 알록달록한 무늬 보이지? 단청이야 🏯', '단청은 순서가 있어. 바탕칠 → 무늬 옮기기 → 색칠 → 선 긋기!'],
+  ]) {
+    await page.getByText(board, { exact: true }).filter({ visible: true }).first().click();
+    await expect(page.getByText('건너뛰기', { exact: true }).filter({ visible: true })).toBeVisible();
+    const tok = page.getByText(/^\s*톡 ›\s*$/).filter({ visible: true }).last();
+    for (const line of [first, second]) {
+      for (let i = 0; i < 8 && !(await page.getByText(line).isVisible().catch(() => false)); i += 1) await tok.click().catch(() => {});
+      await expect(page.getByText(line)).toBeVisible();
+    }
+    await openHome(page);
+  }
+});

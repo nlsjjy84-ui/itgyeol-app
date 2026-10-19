@@ -48,8 +48,14 @@ export async function openHome(page, path = '/') {
 /** 판의 입구 이야기가 있으면 건너뛰고, 카메라·마이크 질문에는 「쓰지 않고 놀기」 */
 export async function enterBoard(page, name) {
   await page.getByText(name, { exact: true }).filter({ visible: true }).first().click();
-  const skip = page.getByText('건너뛰기', { exact: true });
-  if (await skip.isVisible().catch(() => false)) await skip.click();
+  // 처음 들어가는 판은 그림책 입구 이야기(2쪽)가 먼저 뜬다 — 잠깐 기다렸다가 건너뛴다
+  const skip = page.getByText('건너뛰기', { exact: true }).filter({ visible: true }).first();
+  try {
+    await skip.waitFor({ state: 'visible', timeout: 2500 });
+    await skip.click();
+  } catch (e) {
+    // 이미 본 판이면 이야기 없이 바로 열린다
+  }
   await dismissSenses(page);
 }
 

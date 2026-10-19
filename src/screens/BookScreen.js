@@ -10,7 +10,7 @@ import { play } from '../utils/sound';
 
 // 그림책 — 미리 짜 둔 장면을 한 쪽씩 넘긴다. 입력은 네 가지뿐:
 //   본다(쪽을 읽는다) · 말한다(추임새 칩 고르기) · 움직인다(톡) · 멈춘다(가만히 — 몇 초 뒤 그것도 반응으로 받아 준다)
-// params: { part: 'prologue'|'jinbeop'|'print'|'play'|'hangul', then: 이어서 갈 화면 이름 }
+// params: { part: 'prologue'|'jinbeop'|'print'|'play'|'hangul'|'talchum'|'dancheong', then: 이어서 갈 화면 이름 }
 export default function BookScreen({ navigation, route }) {
   const { part = 'prologue', then = 'Home' } = route.params || {};
   const { book, markBook } = useJourney();
