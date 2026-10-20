@@ -18,11 +18,11 @@ export const COLORS = {
 export const PAINTS = ['cheong', 'jeok', 'hwang', 'baek', 'heuk'];
 
 export const STEP_INFO = {
-  gachil: { name: '가칠', how: '판을 세 번 눌러 바탕을 뇌록으로 칠해요.' },
-  tabun: { name: '타분', how: '분주머니를 네 번 두드려 도본의 무늬를 옮겨요.' },
+  gachil: { name: '가칠', how: '붓으로 판 전체를 문질러 바탕을 뇌록으로 칠해요.' },
+  tabun: { name: '타분', how: '구멍 뚫린 도본 위를 분주머니로 톡톡 두드려 무늬를 옮겨요.' },
   chae: { name: '채색', how: '색을 고른 뒤, 그 색 점이 찍힌 칸을 눌러 메워요.' },
-  meok: { name: '먹선 긋기', how: '먹선 자리(점선)를 하나씩 눌러 검은 선을 그어요.' },
-  bun: { name: '분선 긋기', how: '분선 자리(점선)를 하나씩 눌러 흰 선을 그어요.' },
+  meok: { name: '먹선 긋기', how: '점선을 따라 손가락으로 쭉 그어 검은 먹선을 그어요.' },
+  bun: { name: '분선 긋기', how: '점선을 따라 손가락으로 쭉 그어 흰 분선을 그어요.' },
 };
 
 // 판(부재) 크기: 가로 240 × 세로 100
@@ -98,6 +98,7 @@ export const DANCHEONG_STAGES = [
 
 export function dancheongMission(stage) {
   return {
+    demo: { kind: 'paint' },
     kicker: i18nT('단청 · 오방색과 순서'),
     title: i18nT('단청'),
     story: i18nT('단청장은 바탕에 가칠을 하고, 도본을 대고 분주머니를 두드려(타분) 무늬를 옮긴 뒤, 청·적·황·백·흑 오색을 각기 맡은 칸에 메우고 테두리에 분선을 그어요. 그 순서를 그대로 따라 칠해 봐요.'),

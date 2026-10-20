@@ -81,7 +81,7 @@ export function Shell({ color, phase, onStart, hud, hint, children }) {
     <View style={styles.wrap}>
       {hud ? <Text style={styles.hud}>{i18nT(hud)}</Text> : null}
       {children}
-      {hint ? <Text style={styles.hint}>{i18nT(hint)}</Text> : null}
+      {/* hint: 같은 설명이 풍이 말풍선(PlayScreen의 CONTROL_HINTS)과 시범 아래 설명에 이미 있어 화면에는 다시 쓰지 않는다 */}
       {phase !== 'running' ? (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={onStart}>
           <Text style={styles.bigBtnText}>{i18nT(phase === 'ready' ? '시작하기' : '다시 하기')}</Text>

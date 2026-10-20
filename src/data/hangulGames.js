@@ -14,6 +14,7 @@ export const HANGUL_STAGES = [
 
 export function hangulMission(stage) {
   return {
+    demo: { kind: 'tetris' },
     kicker: i18nT('한글 · 자모 테트리스'),
     title: i18nT('한글 테트리스'),
     story: i18nT('한글 자음 ㄱ·ㄴ·ㄷ·ㅁ과 모음 ㅏ·ㅑ·ㅓ·ㅕ·ㅗ·ㅛ·ㅜ·ㅠ·ㅡ·ㅣ·ㅐ·ㅒ는 선과 점으로 이루어져 블록처럼 맞춰 쌓을 수 있어요. 규칙은 일반 테트리스와 똑같아요.'),

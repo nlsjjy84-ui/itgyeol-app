@@ -30,6 +30,7 @@ import { SangmoGame, MarbleGame, TopGame } from '../components/minigames/FolkGam
 import { TuhoGame, GomuGame, KiteSteerGame } from '../components/minigames/FolkGamesB';
 import { StoneFlickGame, HoopSpeedGame } from '../components/minigames/FolkGamesC';
 import { TopChaseGame, DdakjiFanGame, TuhoDialGame, JachigiSwipeGame } from '../components/minigames/FolkGamesD';
+import { YeongchaGame, TuhoPullGame, GomuJumpGame } from '../components/minigames/FolkGamesE';
 import { t as i18nT } from '../i18n';
 
 function speedComment(ms) {
@@ -42,7 +43,7 @@ function speedComment(ms) {
 // 놀이 방식(mechanic)마다 조작 방법을 정확히 알려주는 안내 문구.
 // 터치뿐 아니라 키보드(스페이스바·화살표 키)로도 똑같이 조작할 수 있다.
 const CONTROL_HINTS = {
-  race: '육상 달리기 게임처럼 왼쪽/오른쪽을 "번갈아" 눌러야 전진해요. 화살표 키(←→)나 A/D 키를 번갈아 누르거나, 왼발·오른발 버튼을 번갈아 클릭해도 되고 섞어서 눌러도 돼요. 가끔 뜨는 "영차!" 구간에서는 특히 집중해요 🔥',
+  race: '달리기 경주처럼 왼쪽/오른쪽을 "번갈아" 눌러야 전진해요. 화살표 키(←→)나 A/D 키를 번갈아 누르거나, 왼발·오른발 버튼을 번갈아 클릭해도 되고 섞어서 눌러도 돼요. 가끔 뜨는 "영차!" 구간에서는 특히 집중해요 🔥',
   rhythm: '도는 점이 위쪽 "여기!" 구간을 지나가는 순간 버튼(또는 스페이스바·Z/X 키)을 탭하거나, "여기!" 구간을 직접 클릭해도 돼요. 맞힐수록 점점 빨라져요.',
   throw: '화살표(←→)나 A/D 키로 조준, 버튼(스페이스바)을 누르고 있다가 힘이 초록 구간일 때 떼면 던져져요. 내 물체가 상대 물체를 직접 맞혀 튕겨내야 명중이에요.',
   whip: '버튼(또는 스페이스바·Z/X 키)을 빠르게 연타하거나 빙글빙글 도는 그림을 직접 클릭해서 계속 쳐 줘요. 치지 않으면 속도가 줄어들어요.',
@@ -62,6 +63,9 @@ const CONTROL_HINTS = {
   tuhoSwing: '팔이 좌우로 천천히 흔들려요. 화살이 항아리를 향한 순간(초록 불) "던지기"를 눌러요. (스페이스바도 돼요)',
   gomuPattern: '불이 켜지는 발 모양 순서를 기억했다가 같은 순서로 눌러요. 줄이 점점 길어져요. (키보드 ← ↓ →)',
   kiteSteer: '손가락(마우스)을 좌우로 움직여 연을 이끌어요. 푸른 바람 길 안에 있으면 연이 올라가요.',
+  yeongcha: '"영~" 할 때 숨을 고르고 "차!" 할 때 톡 눌러 당겨요. 놓쳐도 다음 "차!"에 다시 하면 돼요. (스페이스바도 돼요)',
+  tuhoPull: '화면을 누른 채 뒤로 당겼다가 놓으면 화살이 날아가요. 점선이 날아갈 길이에요.',
+  gomuJump: '"하나·둘·셋" 하고 "폴짝!" 할 때 톡 눌러 뛰어넘어요. 걸려도 다음 "폴짝!"에 다시 하면 돼요. (스페이스바도 돼요)',
   hoopSpeed: '화면을 꾹 누르면 빨라지고 떼면 느려져요. 오르내리는 초록 칸 안에 속도를 맞추면 굴렁쇠가 쓰러지지 않아요. (스페이스바 꾹)',
   kiteFly: '바람 게이지가 계속 움직여요. "쎈 바람" 구간일 때만 버튼(스페이스바·Z/X 키)을 탭해서 얼레를 감아요. 타이밍이 안 맞으면 연이 오히려 내려와요.',
 };
@@ -265,6 +269,12 @@ export default function PlayScreen({ navigation }) {
         return <TuhoDialGame {...common} arrows={game.arrows} need={game.need} zoneDeg={game.zoneDeg} />;
       case 'jachigiSwipe':
         return <JachigiSwipeGame {...common} targetHits={game.targetHits} maxMiss={game.maxMiss} windowMs={game.windowMs} />;
+      case 'yeongcha':
+        return <YeongchaGame {...common} beatMs={game.beatMs} />;
+      case 'tuhoPull':
+        return <TuhoPullGame {...common} need={game.need} zoneDeg={game.zoneDeg} />;
+      case 'gomuJump':
+        return <GomuJumpGame {...common} beatMs={game.beatMs} perLevel={game.perLevel} />;
       case 'hoopSpeed':
         return <HoopSpeedGame {...common} targetSec={game.targetSec} lives={game.lives} />;
       default:

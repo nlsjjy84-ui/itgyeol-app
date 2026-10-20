@@ -37,15 +37,11 @@ export const PLAY_GAMES = [
   {
     id: 'juldarigi',
     name: '줄다리기',
-    tag: '힘겨루기',
+    tag: '영차',
     description:
-      '두 편으로 나뉘어 굵은 줄을 당기며 힘을 겨루던 놀이입니다. 왼쪽·오른쪽을 번갈아 눌러 상대보다 줄을 더 당기세요. 상대도 만만치 않고, 중간에 "영차!"가 뜨면 바로 눌러야 해요.',
-    mechanic: 'race',
-    meIcon: '🙂',
-    oppIcon: '😤',
-    durationMs: 6000,
-    opponentRate: 4.3,
-    burstEnabled: true,
+      '두 편으로 나뉘어 굵은 줄을 당기며 힘을 겨루던 놀이입니다. 다 함께 "영~" 하고 숨을 고른 뒤 "차!" 소리에 맞춰 당겨 보세요. 줄 가운데 헝겊이 우리 쪽 선을 넘으면 이겨요.',
+    mechanic: 'yeongcha',
+    beatMs: 700,
     tip: '다 함께 당길 땐 "영차" 같은 구호를 미리 맞춰야 힘이 한 번에 모입니다. 허리를 다치지 않게 무릎을 살짝 굽히고 당기도록 꼭 알려주세요.',
   },
   {
@@ -111,10 +107,9 @@ export const PLAY_GAMES = [
     name: '투호',
     tag: '궁중놀이',
     description:
-      '화살을 던져 항아리 안에 넣던 궁중·양반가의 놀이입니다. 각도와 힘 두 줄을 직접 맞춘 뒤 던지세요. 항아리는 던질 때마다 다른 거리에 놓여요.',
-    mechanic: 'tuhoDial',
-    arrows: 5,
-    need: 2,
+      '화살을 던져 병 안에 넣던 궁중·양반가의 놀이입니다. 병 가운데 아가리(입)나 목 옆 구멍(귀)에 들어가면 넣은 것으로 쳐요. 화면을 누른 채 뒤로 당겼다 놓아 던져 보세요.',
+    mechanic: 'tuhoPull',
+    need: 3,
     zoneDeg: 11,
     tip: '항아리를 처음부터 멀리 두면 금방 흥미를 잃습니다. 가까이서 몇 번 넣어본 다음 거리를 늘리는 순서로 지도하면 훨씬 오래 집중합니다.',
   },
@@ -133,13 +128,12 @@ export const PLAY_GAMES = [
   {
     id: 'gomugojul',
     name: '고무줄놀이',
-    tag: '기억',
+    tag: '폴짝',
     description:
-      '고무줄을 넘으며 노래에 맞춰 발 모양을 바꾸던 놀이입니다. 불이 켜지는 순서대로 발 모양을 기억했다가 똑같이 따라 해 보세요. 노래가 점점 길어져요.',
-    mechanic: 'gomuPattern',
-    rounds: 3,
-    startLen: 3,
-    maxMistakes: 3,
+      '두 사람이 잡은 고무줄을 구령에 맞춰 뛰어넘던 놀이입니다. "하나·둘·셋" 하고 "폴짝!" 할 때 뛰어요. 고무줄은 발목에서 무릎, 허리로 점점 올라가요.',
+    mechanic: 'gomuJump',
+    beatMs: 620,
+    perLevel: 3,
     tip: '높이가 올라갈수록 무릎을 많이 써야 합니다. 발목 단계에서 박자를 충분히 익힌 다음에 높이를 올려야 다치지 않아요.',
   },
   {
@@ -274,6 +268,14 @@ export function scaleGameForTier(game, tier) {
       g.lives += 2;
       g.targetSec = 6;
       break;
+    case 'yeongcha':
+    case 'gomuJump':
+      g.beatMs = Math.round(g.beatMs * 1.15);
+      break;
+    case 'tuhoPull':
+      g.need = Math.max(2, g.need - 1);
+      g.zoneDeg = Math.round(g.zoneDeg * 1.3);
+      break;
     default:
       break;
   }
@@ -341,6 +343,13 @@ export function applySkillAdjustment(game, rating = 0) {
       break;
     case 'jachigiSwipe':
       g.windowMs = Math.max(900, Math.round(g.windowMs * speedMul));
+      break;
+    case 'yeongcha':
+    case 'gomuJump':
+      g.beatMs = Math.max(480, Math.round(g.beatMs * speedMul));
+      break;
+    case 'tuhoPull':
+      g.zoneDeg = Math.max(8, Math.round(g.zoneDeg * bandMul));
       break;
     default:
       break;
