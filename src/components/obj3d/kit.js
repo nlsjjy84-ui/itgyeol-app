@@ -95,7 +95,7 @@ export function makeMats(metalK = 1) {
     new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: Math.min(1, metal * metalK), ...extra });
   const phys = (color, rough = 0.3, metal = 0, extra = {}) =>
     new THREE.MeshPhysicalMaterial({ color, roughness: rough, metalness: metal * metalK, ...extra });
-  return {
+  const mats = {
     brass: std(0xb98a3e, 0.35, 0.75),
     gold: std(0xd9ac3f, 0.28, 0.85),
     silver: std(0xcfd4d8, 0.28, 0.85),
@@ -124,6 +124,12 @@ export function makeMats(metalK = 1) {
     mirror: std(0xe7ecef, 0.08, 1),
     cord: std(0xc23a2e, 0.6),
   };
+  // 실제 재료 이름표 — 사용자가 재료를 고르면, 몸체가 아닌 부품(장석·고리·술·옥 장식…)은 이 이름표대로 실물 재질을 입는다
+  const ID = { brass: 'yugi', gold: 'gold', silver: 'silver', bronze: 'bronze', iron: 'iron', jade: 'jade', jadeDark: 'jade', wood: 'wood', woodDark: 'wood', woodLight: 'wood', bamboo: 'bamboo',
+    lacquerRed: 'otchil', lacquerBlack: 'otchil', porcelain: 'porcelain', celadon: 'celadon', silkRed: 'silk', silkBlue: 'silk', silkYellow: 'silk', silkGreen: 'silk', silkWhite: 'silk',
+    ink: 'ink', paper: 'hanji', glass: 'glass', mirror: 'silver', cord: 'knot' };
+  Object.entries(ID).forEach(([k, id]) => { mats[k].userData.matId = id; });
+  return mats;
 }
 
 // 조각보 texture를 입힌 재료. repeat/offset으로 일부만 쓰는 것도 가능
@@ -137,7 +143,9 @@ export function texMat(tex, { rough = 0.72, repeat, offset, side } = {}) {
     t.wrapS = THREE.RepeatWrapping;
     t.wrapT = THREE.RepeatWrapping;
   }
-  return new THREE.MeshStandardMaterial({ map: t, roughness: rough, metalness: 0, side: side || THREE.FrontSide });
+  const mt = new THREE.MeshStandardMaterial({ map: t, roughness: rough, metalness: 0, side: side || THREE.FrontSide });
+  mt.userData.pattern = true; // 놀이 기록으로 생긴 무늬 — 재료를 고르면 이 자리에 기법(상감·나전·자수…)이 들어간다
+  return mt;
 }
 
 export function mesh(geo, mat, pos, rot, scale) {
@@ -533,6 +541,289 @@ export function printLook(obj) {
     if (!o.isMesh) return;
     for (let p = o; p; p = p.parent) if (p.userData && p.userData.real) return;
     o.material = Array.isArray(o.material) ? o.material.map(toResin) : toResin(o.material);
+  });
+  return obj;
+}
+
+// ───── 실제 전통 재료로 입히기 ─────
+// 사용자가 놀이 전에 고른 재료(바탕·무늬)로 결과물을 실물 기법대로 다시 만든다. 그림을 덧칠하는 게 아니라
+// 놀이로 생긴 무늬를 그 재료를 다루는 실제 기법으로 옮긴다:
+//   흙(청자·백자·분청·옹기) → 상감: 밝은 무늬는 흰 흙, 어두운 무늬는 검은 흙을 박는다
+//   옻칠 → 나전·화각·금박: 무늬 자리에 무늬 재료(자개 등) 조각을 붙인다(없으면 주칠로 그린다)
+//   쇠붙이 → 두드림·입사: 무늬는 도드라진 결로, 무늬 재료가 있으면 은·금실로 박는다
+//   실·천 → 자수: 무늬 색을 실 색으로 살리고 실 결과 광택을 준다
+//   나무·돌·옥 → 새김: 무늬를 파서 결을 내고 어두운 무늬는 조금 짙게
+//   한지·짚·가죽 → 찍기: 바탕 재료 빛에 무늬를 찍는다
+// base.id: 재료 아이디(MATERIAL_BY_ID) — 기법 안에서 재료마다 색을 달리할 때 쓴다
+const TECH = { celadon: 'sanggam', porcelain: 'sanggam', buncheong: 'sanggam', onggi: 'sanggam', earthen: 'sanggam',
+  otchil: 'inlay', najeon: 'inlay', hwagak: 'print', gilt: 'emboss',
+  gold: 'emboss', silver: 'emboss', yugi: 'emboss', bronze: 'emboss', iron: 'emboss', ipsa: 'inlay',
+  silk: 'embroider', ramie: 'embroider', hemp: 'embroider', cotton: 'embroider', knot: 'embroider', horsehair: 'embroider',
+  wood: 'carve', paulownia: 'carve', bamboo: 'carve', jade: 'carve', granite: 'carve', inkstone: 'carve', bone: 'carve', gem: 'carve', glass: 'carve',
+  hanji: 'print', straw: 'print', leather: 'print', dancheong: 'print', ink: 'inlay' };
+// 화면 색(sRGB) 그대로 — THREE.Color는 선형 색으로 바꾸므로 캔버스에 쓸 때는 직접 읽는다
+const hex = (c) => { const n = parseInt(String(c).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+// 재료 결(나뭇결·올 짜임·망치 자국·유약 잔금·가죽 오톨도톨함·돌 반점·종이 섬유)을 그림 없이 계산으로 만든다 — 자산 파일이 필요 없다.
+// 돌려주는 값: bump(0~1, 0.5가 평평), tone(색에 곱하는 값)
+const DETAIL_OF = { wood: 'wood', paulownia: 'wood', bamboo: 'bamboo', silk: 'weave', ramie: 'weave', hemp: 'weave', cotton: 'weave', knot: 'weave', horsehair: 'weave',
+  gold: 'hammer', silver: 'hammer', yugi: 'hammer', bronze: 'cast', iron: 'cast', ipsa: 'cast', celadon: 'crackle', porcelain: 'glaze', buncheong: 'crackle', onggi: 'glaze', earthen: 'stone',
+  leather: 'leather', granite: 'stone', inkstone: 'stone', jade: 'glaze', hanji: 'paper', straw: 'weave', otchil: 'glaze', najeon: 'glaze', hwagak: 'glaze', gilt: 'hammer', bone: 'glaze', gem: 'glaze', glass: 'glaze', dancheong: 'paper', ink: 'glaze' };
+const detailCache = new Map();
+function hash2(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+function vnoise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi), b = hash2(xi + 1, yi), c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+function voronoi(x, y, cell) {
+  const cx = Math.floor(x / cell), cy = Math.floor(y / cell);
+  let d1 = 1e9, d2 = 1e9;
+  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    const gx = cx + i, gy = cy + j;
+    const px = (gx + hash2(gx, gy)) * cell, py = (gy + hash2(gy, gx + 7)) * cell;
+    const d = Math.hypot(x - px, y - py);
+    if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d;
+  }
+  return [d1 / cell, (d2 - d1) / cell];
+}
+function detailField(kind, w, h) {
+  const key = kind + w + 'x' + h;
+  if (detailCache.has(key)) return detailCache.get(key);
+  const bump = new Float32Array(w * h), tone = new Float32Array(w * h), patina = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const q = y * w + x;
+    let b = 0.5, t = 1;
+    if (kind === 'wood' || kind === 'bamboo') {
+      const n = vnoise(x * 0.02, y * 0.15) * 6 + vnoise(x * 0.004, y * 0.03) * 10;
+      const ring = 0.5 + 0.5 * Math.sin(y * (kind === 'bamboo' ? 0.9 : 0.32) + n);
+      const fine = vnoise(x * 0.6, y * 3.0);
+      b = 0.5 + (ring - 0.5) * 0.25 + (fine - 0.5) * 0.15; t = 0.82 + 0.26 * ring - 0.06 * fine;
+      if (kind === 'bamboo' && (x % 128) < 3) { b = 0.3; t = 0.8; } // 대나무 마디
+    } else if (kind === 'weave') {
+      const tx = Math.sin(x * 1.2), ty = Math.sin(y * 1.2), over = ((Math.floor(x / 2.6) + Math.floor(y / 2.6)) & 1) ? tx : ty;
+      b = 0.5 + 0.22 * over + (vnoise(x * 0.3, y * 0.3) - 0.5) * 0.1; t = 0.93 + 0.08 * over;
+    } else if (kind === 'hammer' || kind === 'cast') {
+      const [d1] = voronoi(x, y, kind === 'hammer' ? 13 : 60);
+      const n = vnoise(x * 0.08, y * 0.08);
+      // 망치 자국은 잔잔하게(실제 방짜·은 공예처럼), 주물은 거의 평평하게
+      b = kind === 'hammer' ? 0.42 + 0.16 * Math.min(1, d1) : 0.45 + 0.1 * n; t = kind === 'hammer' ? 0.97 + 0.05 * Math.min(1, d1) : 0.9 + 0.15 * n;
+      if (kind === 'cast') { const pn = vnoise(x * 0.02, y * 0.02) * 0.7 + vnoise(x * 0.11, y * 0.11) * 0.3; patina[q] = Math.max(0, Math.min(1, (pn - 0.42) * 2.4)); }
+    } else if (kind === 'crackle') {
+      // 유약 잔금(빙렬): 실물처럼 가늘고 옅게, 군데군데만
+      const [, edge] = voronoi(x, y, 70);
+      const line = edge < 0.018 && vnoise(x * 0.02, y * 0.02) > 0.35 ? 1 : 0;
+      b = 0.5 - 0.03 * line; t = 1 - 0.07 * line + (vnoise(x * 0.01, y * 0.01) - 0.5) * 0.06;
+    } else if (kind === 'glaze') {
+      const n = vnoise(x * 0.01, y * 0.01); b = 0.5 + (n - 0.5) * 0.05; t = 0.97 + 0.06 * n;
+    } else if (kind === 'leather') {
+      const [d1] = voronoi(x, y, 7); b = 0.35 + 0.35 * Math.min(1, d1); t = 0.93 + 0.08 * Math.min(1, d1);
+    } else if (kind === 'stone') {
+      const n = vnoise(x * 0.05, y * 0.05) * 0.6 + vnoise(x * 0.4, y * 0.4) * 0.4, sp = hash2(x, y) > 0.985 ? 1 : 0;
+      b = 0.4 + 0.2 * n; t = 0.82 + 0.3 * n - 0.25 * sp;
+    } else if (kind === 'paper') {
+      const fib = vnoise(x * 0.9, y * 0.05) * 0.6 + vnoise(x * 0.05, y * 0.9) * 0.4; b = 0.47 + 0.08 * fib; t = 0.95 + 0.07 * fib;
+    }
+    bump[q] = b; tone[q] = t;
+  }
+  const f = { bump, tone, patina };
+  detailCache.set(key, f);
+  return f;
+}
+
+function techMaps(img, tech, base, accent) {
+  const S = 512;
+  const w = Math.min(S, img.width || S), h = Math.min(S, img.height || S);
+  const mk = () => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  const src = mk(); const sx = src.getContext('2d'); sx.drawImage(img, 0, 0, w, h);
+  const d = sx.getImageData(0, 0, w, h).data;
+  const col = mk(), rgh = mk(), met = mk(), bmp = mk(), iri = mk(), spc = mk();
+  const C = col.getContext('2d').createImageData(w, h), R = rgh.getContext('2d').createImageData(w, h), M = met.getContext('2d').createImageData(w, h), B = bmp.getContext('2d').createImageData(w, h), I = iri.getContext('2d').createImageData(w, h), SP = spc.getContext('2d').createImageData(w, h);
+  const b = hex(base.color), a = hex((accent || base).color);
+  const DF = detailField(DETAIL_OF[base.id] || 'glaze', w, h);
+  const white = [238, 234, 222], black = [40, 34, 30], cinnabar = [155, 42, 31];
+  // 색 갈래(12칸)를 세고, 작은 갈래부터 모아 화면의 30~40%만 무늬 재료로 — 조각보 전체가 자개로 덮이지 않고 조각처럼 박히게
+  const NB = 13, cnt = new Array(NB).fill(0), bucket = new Uint8Array(d.length / 4);
+  for (let k = 0, q = 0; k < d.length; k += 4, q++) {
+    const r = d[k], g = d[k + 1], bl = d[k + 2];
+    const mx = Math.max(r, g, bl), mn = Math.min(r, g, bl), sat = (mx - mn) / 255;
+    let hb = 12;
+    if (sat > 0.15) { let hh = mx === r ? (g - bl) / (mx - mn) : mx === g ? 2 + (bl - r) / (mx - mn) : 4 + (r - g) / (mx - mn); hh = ((hh * 60) + 360) % 360; hb = Math.floor(hh / 30); }
+    bucket[q] = hb; cnt[hb]++;
+  }
+  // 무늬의 테두리(색이 바뀌는 곳) — 상감·청화는 면을 채우지 않고 선으로 그린다(실제 상감 청자·청화 백자처럼)
+  const edge = new Uint8Array(w * h);
+  for (let y = 0; y < h - 1; y++) for (let x = 0; x < w - 1; x++) {
+    const k = (y * w + x) * 4, kr = k + 4, kd = k + w * 4;
+    const dr = Math.abs(d[k] - d[kr]) + Math.abs(d[k + 1] - d[kr + 1]) + Math.abs(d[k + 2] - d[kr + 2]);
+    const dd = Math.abs(d[k] - d[kd]) + Math.abs(d[k + 1] - d[kd + 1]) + Math.abs(d[k + 2] - d[kd + 2]);
+    if (dr > 90 || dd > 90) {
+      // 붓·조각칼로 그은 선처럼: 굵기가 들쭉날쭉하고 가끔 끊긴다
+      const nz = vnoise(x * 0.045, y * 0.045);
+      if (nz < 0.1) continue;
+      const th = 1 + (nz > 0.5 ? 1 : 0) + (nz > 0.78 ? 1 : 0);
+      for (let j = 0; j < th; j++) for (let i = 0; i < th; i++) { const xx = x + i, yy = y + j; if (xx < w && yy < h) edge[yy * w + xx] = 1; }
+    }
+  }
+  const total = d.length / 4, chosen = new Set();
+  // 어두운 선 기준: 그림 전체가 어두운 경우(예: 쇠 거울 면)에는 그 그림 안에서 '더 어두운 곳'만 선으로 본다 — 판 전체가 무늬 재료로 덮이지 않게
+  let meanL = 0; for (let k = 0; k < d.length; k += 4) meanL += (0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2]) / 255; meanL /= total;
+  const darkInlay = Math.min(0.16, meanL * 0.5), darkEmboss = Math.min(0.2, meanL * 0.55);
+  let acc = 0;
+  cnt.map((c, i) => [c, i]).filter(([c, i]) => c > total * 0.01 && i !== 12).sort((x, y) => x[0] - y[0]).forEach(([c, i]) => { if (acc < total * 0.34 && acc + c <= total * 0.45) { chosen.add(i); acc += c; } }); // 큰 갈래 하나가 판 전체를 덮지 않게 45%에서 멈춘다
+  let n = 0;
+  for (let k = 0; k < d.length; k += 4) {
+    const r = d[k], g = d[k + 1], bl = d[k + 2], al = d[k + 3] / 255;
+    const L = (0.299 * r + 0.587 * g + 0.114 * bl) / 255;
+    const sat = (Math.max(r, g, bl) - Math.min(r, g, bl)) / 255;
+    // 무늬 자리: 기법마다 다르게 — 박는 기법(상감·나전·입사)은 고른 색 갈래만, 나머지는 채도·밝기로
+    const picked = chosen.has(bucket[k / 4]);
+    const q0 = k / 4;
+    const ink = al > 0.2 && (tech === 'sanggam' ? edge[q0] || L < 0.12 : tech === 'inlay' ? (picked || L < darkInlay) : tech === 'emboss' && accent ? (picked || L < darkEmboss || (accent.metal > 0.5 && edge[q0])) : (sat > 0.18 || L > 0.8 || L < 0.28)) ? 1 : 0;
+    // ↑ 쇠에 다른 쇠(은·금)를 입힐 때는 무늬 테두리를 따라 실처럼 박는다(입사). 두드림에 다른 쇠를 입힐 때(청동에 은 등)는 고른 무늬 자리만 — 흰 바탕까지 덮으면 판 전체가 은처럼 보인다
+    // 청화는 선 말고도 고른 색 자리를 옅은 코발트로 물들인다(붓 번짐)
+    const wash = tech === 'sanggam' && base.id === 'porcelain' && !ink && picked ? 1 : 0;
+    let out = b, rough = base.rough, metal = base.metal || 0, bump = 0.5, ir = 0;
+    if (tech === 'sanggam') {
+      // 백자는 청화(코발트), 분청은 흰 흙을 바르고 긁어내 회색 바탕이 드러나게, 청자·옹기·토기는 흰·검은 흙 상감
+      // 옹기는 흰 흙이 아니라 잿물을 긁어 바탕 흙빛이 드러나는 손자국 무늬
+      if (ink) out = base.id === 'porcelain' ? [38, 62, 128] : base.id === 'buncheong' ? [118, 112, 100] : base.id === 'onggi' ? b.map((v) => Math.min(255, v * 1.7 + 20)) : L < 0.12 ? black : white;
+      else if (wash) out = [b[0] * 0.78 + 46 * 0.22, b[1] * 0.78 + 78 * 0.22, b[2] * 0.78 + 150 * 0.22];
+      else if (base.id === 'buncheong') out = [222, 214, 196];
+      bump = ink ? 0.42 : 0.5;
+    } else if (tech === 'inlay') {
+      if (ink && accent && accent.irid) { const pal = [[236, 222, 238], [214, 236, 226], [216, 226, 242], [240, 234, 214]]; const pc = pal[(bucket[k / 4] + ((k >> 9) & 1)) % 4]; const nz = 0.9 + 0.1 * Math.sin(k * 0.0137); out = [pc[0] * nz, pc[1] * nz, pc[2] * nz]; rough = 0.12; metal = 0.25; ir = 1; bump = 0.62; }
+      else if (ink && !accent && base.id === 'ink') { out = b.map((v) => Math.min(255, v * 2.4 + 18)); bump = 0.7; } // 먹: 무늬는 도드라진 새김으로
+      else if (ink) { out = accent ? a : cinnabar; rough = accent ? accent.rough : 0.3; metal = accent ? accent.metal || 0 : 0; ir = accent && accent.irid ? 1 : 0; bump = 0.6; }
+    } else if (tech === 'emboss') {
+      if (ink && accent) { out = a; metal = accent.metal || 0; rough = accent.rough; }
+      else out = b.map((v) => v * (0.88 + 0.24 * L));
+      bump = 0.3 + 0.5 * L;
+    } else if (tech === 'embroider') {
+      out = ink ? [r * 0.85 + b[0] * 0.15, g * 0.85 + b[1] * 0.15, bl * 0.85 + b[2] * 0.15] : b; bump = ink ? 0.7 : 0.5; rough = ink ? 0.5 : base.rough;
+    } else if (tech === 'carve') {
+      out = ink ? b.map((v) => v * (L < 0.5 ? 0.62 : 0.9)) : b; bump = ink ? 0.25 : 0.55;
+    } else {
+      out = [b[0] * (0.35 + 0.65 * r / 255), b[1] * (0.35 + 0.65 * g / 255), b[2] * (0.35 + 0.65 * bl / 255)];
+    }
+    n += ink;
+    // 재료 결: 바탕 재료 결을 입히고(무늬 재료 조각도 같은 결 위에 앉는다), 박는 기법은 무늬 자리를 조금 도드라지게
+    { const q = k / 4; out = [out[0] * DF.tone[q], out[1] * DF.tone[q], out[2] * DF.tone[q]]; bump = Math.max(0, Math.min(1, bump + (DF.bump[q] - 0.5) * 0.9));
+      // 청동·쇠: 오래된 유물처럼 푸른 녹(청동)·붉은 녹(쇠)이 군데군데 — 녹 자리는 덜 반짝인다
+      const pa = DF.patina[q] * (base.id === 'bronze' ? 0.45 : base.id === 'iron' ? 0.3 : 0) * (ink && accent ? 0.15 : 1); // 입힌 은·금에는 녹이 거의 앉지 않는다
+      if (pa > 0) { const pc = base.id === 'bronze' ? [92, 128, 104] : [120, 70, 44]; out = [out[0] * (1 - pa) + pc[0] * pa, out[1] * (1 - pa) + pc[1] * pa, out[2] * (1 - pa) + pc[2] * pa]; metal *= 1 - pa * 0.85; rough = rough + (0.9 - rough) * pa; } }
+    C.data[k] = out[0]; C.data[k + 1] = out[1]; C.data[k + 2] = out[2]; C.data[k + 3] = 255;
+    // three.js: roughness는 G, metalness는 B 채널을 읽는다
+    R.data[k] = R.data[k + 1] = R.data[k + 2] = rough * 255; R.data[k + 3] = 255;
+    M.data[k] = M.data[k + 1] = M.data[k + 2] = metal * 255; M.data[k + 3] = 255;
+    B.data[k] = B.data[k + 1] = B.data[k + 2] = bump * 255; B.data[k + 3] = 255;
+    I.data[k] = I.data[k + 1] = I.data[k + 2] = ir * 255; I.data[k + 3] = 255;
+    // 옻칠: 반짝임은 겉칠(클리어코트) 한 겹에서만 — 속 바탕이 한 번 더 비추면 검은 칠이 뿌옇게 회색으로 뜬다(three.js는 알파 채널을 읽는다)
+    SP.data[k] = SP.data[k + 1] = SP.data[k + 2] = 255; SP.data[k + 3] = base.id === 'otchil' && metal < 0.5 && !ir ? 30 : 255;
+  }
+  [[col, C], [rgh, R], [met, M], [bmp, B], [iri, I], [spc, SP]].forEach(([c, im]) => c.getContext('2d').putImageData(im, 0, 0));
+  const tex = (c, srgb) => { const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+  return { map: tex(col, true), roughnessMap: tex(rgh), metalnessMap: tex(met), bumpMap: tex(bmp), iridescenceMap: tex(iri), specularIntensityMap: tex(spc), share: n / (d.length / 4) };
+}
+
+// surfaceOnly: 인쇄·전사 굿즈(액자·잔·부채·엽서…)는 무늬가 놓이는 바탕(천·종이·자기)만 고른 재료가 되고, 틀·살 같은 구조는 원래 재료 그대로
+export function realLook(obj, base, accent, lookOf, { surfaceOnly = false } = {}) {
+  if (!base) return obj;
+  const bl = base.look, al = accent ? accent.look : null;
+  const tech = TECH[base.id] || 'print';
+  const plainTex = new Map();
+  const plain = (look, side, id) => {
+    // 무늬 없는 면(옆면·몸체)에도 같은 재료 결을 입힌다
+    const kind = DETAIL_OF[id] || 'glaze';
+    let pt = plainTex.get(kind + look.color + id);
+    if (!pt && typeof document !== 'undefined') {
+      try {
+        const W = 256, F = detailField(kind, W, W), c = hex(look.color);
+        const mc = document.createElement('canvas'), bc = document.createElement('canvas'); mc.width = bc.width = mc.height = bc.height = W;
+        const M = mc.getContext('2d').createImageData(W, W), B = bc.getContext('2d').createImageData(W, W);
+        const pcol = id === 'bronze' ? [92, 128, 104, 0.45] : id === 'iron' ? [120, 70, 44, 0.3] : null;
+        for (let q = 0; q < W * W; q++) { const k = q * 4; let r = c[0] * F.tone[q], g = c[1] * F.tone[q], bb = c[2] * F.tone[q];
+          if (pcol) { const pa = F.patina[q] * pcol[3]; r = r * (1 - pa) + pcol[0] * pa; g = g * (1 - pa) + pcol[1] * pa; bb = bb * (1 - pa) + pcol[2] * pa; }
+          M.data[k] = r; M.data[k + 1] = g; M.data[k + 2] = bb; M.data[k + 3] = 255; B.data[k] = B.data[k + 1] = B.data[k + 2] = F.bump[q] * 255; B.data[k + 3] = 255; }
+        mc.getContext('2d').putImageData(M, 0, 0); bc.getContext('2d').putImageData(B, 0, 0);
+        const mt = new THREE.CanvasTexture(mc); mt.colorSpace = THREE.SRGBColorSpace; mt.wrapS = mt.wrapT = THREE.RepeatWrapping;
+        const bt = new THREE.CanvasTexture(bc); bt.wrapS = bt.wrapT = THREE.RepeatWrapping;
+        pt = { map: mt, bump: bt }; plainTex.set(kind + look.color + id, pt);
+      } catch (e) { pt = null; }
+    }
+    const m = new THREE.MeshPhysicalMaterial({
+      color: pt ? new THREE.Color(0xffffff) : new THREE.Color(look.color), map: pt ? pt.map : null, bumpMap: pt ? pt.bump : null, bumpScale: 1.4,
+      roughness: look.rough, metalness: look.metal || 0,
+      clearcoat: look.clear || 0, clearcoatRoughness: id === 'otchil' ? 0.14 : 0.06, // 옻칠은 손으로 갈아 낸 광 — 거울처럼 날카롭지 않다 sheen: look.sheen || 0, sheenRoughness: 0.5,
+      sheenColor: new THREE.Color(look.color).lerp(new THREE.Color(0xffffff), 0.5),
+      iridescence: look.irid ? 1 : 0, iridescenceIOR: 1.6, iridescenceThicknessRange: [180, 650], side,
+      specularIntensity: id === 'otchil' ? 0.12 : 1, // 옻칠은 겉칠 한 겹만 비춘다
+    });
+    if (!pt && (look.grain || look.rough > 0.6)) m.roughnessMap = grainTexture();
+    return m;
+  };
+  // 몸체 찾기: 무늬도 고정 부품(기와·돌)도 아닌 재질 가운데 가장 넓게 쓰인 것이 몸체 → 사용자가 고른 바탕 재료.
+  // 나머지 이름표 있는 부품은 그 이름표의 실물 재질 그대로(예: 반닫이 장석은 놋쇠, 노리개 고리는 은).
+  const weight = new Map();
+  obj.traverse((o) => {
+    if (!o.isMesh || !o.geometry) return;
+    for (let p = o; p; p = p.parent) if (p.userData && p.userData.real) return;
+    (Array.isArray(o.material) ? o.material : [o.material]).forEach((mt) => {
+      if (!mt || (mt.userData && (mt.userData.pattern || mt.userData.fixed))) return;
+      if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+      const r = o.geometry.boundingSphere ? o.geometry.boundingSphere.radius * Math.max(o.scale.x, o.scale.y, o.scale.z) : 0;
+      const key = (mt.userData && mt.userData.matId) || mt.uuid;
+      weight.set(key, (weight.get(key) || 0) + r * r);
+    });
+  });
+  let bodyKey = null, best = -1;
+  weight.forEach((w, k) => { if (w > best) { best = w; bodyKey = k; } });
+  if (surfaceOnly) bodyKey = '__none__';
+  const cache = new Map();
+  const swap = (mt) => {
+    if (!mt) return mt;
+    if (cache.has(mt)) return cache.get(mt);
+    let nm;
+    const ud = mt.userData || {};
+    const key = ud.matId || mt.uuid;
+    if (!ud.pattern && key !== bodyKey && (ud.fixed || ud.matId)) {
+      // 부품: 이름표의 실물 재질(비단·나무는 원래 색을 살린다)
+      const L = ud.matId && lookOf ? lookOf(ud.matId) : null;
+      if (L) {
+        const keepColor = /^(silk|wood|otchil|knot|jade)$/.test(ud.matId) && mt.color;
+        const look = keepColor ? { ...L, color: '#' + mt.color.getHexString() } : L;
+        nm = plain(look, mt.side, ud.matId);
+      } else nm = mt; // 기와·돌처럼 따로 정한 재질은 그대로
+      cache.set(mt, nm);
+      return nm;
+    }
+    const img = ud.pattern && mt.map && mt.map.image;
+    if (img && typeof document !== 'undefined' && (img.width || img.naturalWidth)) {
+      try {
+        const T = techMaps(img, tech, { ...bl, id: base.id }, al);
+        nm = new THREE.MeshPhysicalMaterial({
+          color: 0xffffff, map: T.map, roughness: 1, roughnessMap: T.roughnessMap, metalness: 1, metalnessMap: T.metalnessMap,
+          bumpMap: T.bumpMap, bumpScale: tech === 'carve' ? 2.4 : tech === 'emboss' ? 1.4 : tech === 'embroider' ? 2.0 : 1.2,
+          clearcoat: bl.clear || (tech === 'inlay' ? 1 : 0), clearcoatRoughness: base.id === 'otchil' ? 0.14 : 0.06,
+          sheen: tech === 'embroider' ? 1 : bl.sheen || 0, sheenRoughness: 0.45, sheenColor: new THREE.Color(0xffffff),
+          iridescence: al && al.irid ? 1 : bl.irid ? 1 : 0, iridescenceMap: al && al.irid ? T.iridescenceMap : null, iridescenceIOR: 1.6, iridescenceThicknessRange: [180, 650],
+          specularIntensityMap: base.id === 'otchil' ? T.specularIntensityMap : null,
+          side: mt.side,
+        });
+      } catch (e) {
+        if (typeof console !== 'undefined') console.warn('[realLook] 무늬 재질을 만들지 못해 단색으로 대신함', e && e.message);
+        nm = null;
+      }
+    }
+    if (!nm && ud.pattern && typeof console !== 'undefined') console.warn('[realLook] 무늬 그림이 아직 없음', !!img);
+    if (!nm) nm = plain(ud.pattern && al ? al : bl, mt.side, ud.pattern && accent ? accent.id : base.id);
+    cache.set(mt, nm);
+    return nm;
+  };
+  obj.traverse((o) => {
+    if (!o.isMesh) return;
+    for (let p = o; p; p = p.parent) if (p.userData && p.userData.real) return;
+    o.material = Array.isArray(o.material) ? o.material.map(swap) : swap(o.material);
   });
   return obj;
 }

@@ -36,6 +36,11 @@ export default function TasteScreen({ navigation, route }) {
     navigation.replace('Home', { tour: true });
   };
   const goHome = () => (book && !book.prologue ? navigation.replace('Book', { part: 'prologue', then: 'Home' }) : navigation.replace('Home'));
+  // 놀이하러 가기 전에 실제 전통 재료를 고른다 — 떠오른 답에 맞는 재료를 먼저 권한다(바꾸거나 건너뛸 수 있다).
+  const goMaterials = () => {
+    const next = book && !book.prologue ? ['Book', { part: 'prologue', then: 'Home' }] : ['Home', {}];
+    navigation.replace('Materials', { mode: 'pick', then: next[0], thenParams: next[1], suggest: picks, first: true });
+  };
 
   if (step === 2) {
     return (
@@ -60,7 +65,7 @@ export default function TasteScreen({ navigation, route }) {
           <Pressable style={st.ghost} onPress={() => navigation.navigate('Gallery')}>
             <Text style={st.ghostTxt}>{t('예시 전체 둘러보기')}</Text>
           </Pressable>
-          <Pressable style={st.primary} onPress={goHome}>
+          <Pressable style={st.primary} onPress={again ? goHome : goMaterials}>
             <Text style={st.primaryTxt}>{t('놀이하러 가기')}</Text>
           </Pressable>
         </ScrollView>

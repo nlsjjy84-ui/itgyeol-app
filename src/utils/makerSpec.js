@@ -27,8 +27,31 @@ export const SPEC = {
   spoonrest: { size: '백자 수저받침(기성품)', material: '유약 위 전사(세라믹 전사지를 붙여 약 770~800℃로 다시 구움) — 3D 출력 아님', rule: '수저가 닿는 윗면 가운데는 비움', parts: [], files: ['무늬 이미지(결과 화면 이미지 저장)'] },
 };
 
+// 사용자가 고른 실제 전통 재료로 만들 때의 기법 — 결과 화면 3D(kit.js realLook)와 같은 짝
+const TECH_OF = { celadon: '상감(흰·검은 흙)', porcelain: '청화(코발트 그림)', buncheong: '박지·조화(흰 흙 긁어내기)', onggi: '잿물 위 새김', earthen: '새김',
+  gold: '두드림(타출)·새김', silver: '두드림(타출)·새김', yugi: '방짜 두드림·새김', bronze: '주물·새김', iron: '두드림', ipsa: '입사(쇠 바탕에 은실 박기)',
+  silk: '자수', ramie: '자수', hemp: '자수', cotton: '자수', knot: '매듭·자수', horsehair: '말총 엮기',
+  wood: '새김(조각)', paulownia: '새김(조각)', bamboo: '새김(낙죽)', jade: '새김', granite: '새김', inkstone: '새김', bone: '새김', gem: '새김', glass: '새김',
+  hanji: '찍기(목판·인쇄)', straw: '엮기·물들이기', leather: '찍기·새김', dancheong: '단청 채색', ink: '먹 그림' };
+const INLAY_OF = { najeon: '나전(자개 붙이기)', hwagak: '화각(쇠뿔 뒷그림)', gilt: '금박', gold: '금박', silver: '은입사' };
+export function techniqueOf(baseId, accentId) {
+  if (baseId === 'otchil') return accentId ? INLAY_OF[accentId] || '칠 위 무늬 박기' : '주칠 그림';
+  return TECH_OF[baseId] || '찍기(인쇄)';
+}
+// mat: { base: {id, name}, accent: {id, name} | null, shops: [[이름, 갈래, 주소, 전화]] }
+export function materialLines(mat) {
+  if (!mat || !mat.base) return [];
+  const names = [mat.base.name, mat.accent ? mat.accent.name : null].filter(Boolean).join(' 바탕 + 무늬 ');
+  return [
+    `고른 전통 재료: ${mat.accent ? names : mat.base.name}`,
+    `전통 기법: ${techniqueOf(mat.base.id, mat.accent && mat.accent.id)} — 무늬 자리는 출력용 파일(.glb)의 무늬를 그대로 따른다`,
+    `실물 공정: 공방 수작업(재료가 바뀌면 풀컬러 출력이 아니라 해당 재료 공방에서 만든다. 출력물은 시안으로 함께 보낼 수 있음)`,
+    mat.shops && mat.shops.length ? `맡길 수 있는 곳(예): ${mat.shops.slice(0, 3).map((x) => [x[0], x[3]].filter(Boolean).join(' ')).join(' / ')}` : null,
+  ].filter(Boolean);
+}
+
 // 사양서 글 만들기: 주문 번호·물건·크기(출력 파일에서 잰 값이 있으면 그 값)·재질·공정·부품·파일
-export function makerSpec({ product, title, variant, code, mm, made }) {
+export function makerSpec({ product, title, variant, code, mm, made, mat }) {
   const s = SPEC[product];
   if (!s) return null;
   const size = mm ? `${Math.round(mm.x)}×${Math.round(mm.y)}×${Math.round(mm.z)}mm (출력용 파일에서 잰 값)` : s.size;
@@ -37,7 +60,7 @@ export function makerSpec({ product, title, variant, code, mm, made }) {
     `주문 번호: ${code || '-'}`,
     `물건: ${title}${variant ? ` · ${variant}` : ''}`,
     `크기: ${size}`,
-    `재질·공정: ${s.material}`,
+    ...(mat && mat.base ? materialLines(mat) : [`재질·공정: ${s.material}`]),
     `제작 기준: ${s.rule}`,
     `따로 다는 부품: ${s.parts.length ? s.parts.join(', ') : '없음'}`,
     `받을 파일: ${s.files.join(', ')}`,

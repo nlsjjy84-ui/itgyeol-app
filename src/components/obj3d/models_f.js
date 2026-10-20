@@ -2,8 +2,9 @@ import { THREE, getDna, warpProfile, smoothProfile, mesh, lathe, rbox, tube, sph
 
 // 우리나라 보물 2 — 범종 · 금관 · 석탑 · 한옥 · 장독 · 방패연.
 
-const stoneMat = () => new THREE.MeshStandardMaterial({ color: 0xbdb8a8, roughness: 0.92 });
-const tileMat = () => new THREE.MeshStandardMaterial({ color: 0x3c4146, roughness: 0.55, metalness: 0.1 });
+// 기와·기단 돌은 사용자가 고른 재료와 상관없이 실물 그대로 둔다(fixed)
+const stoneMat = () => { const m = new THREE.MeshStandardMaterial({ color: 0xbdb8a8, roughness: 0.92 }); m.userData.fixed = true; m.userData.matId = 'granite'; return m; };
+const tileMat = () => { const m = new THREE.MeshStandardMaterial({ color: 0x3c4146, roughness: 0.55, metalness: 0.1 }); m.userData.fixed = true; m.userData.matId = 'earthen'; return m; };
 
 function dbl(mat) {
   const c = mat.clone();

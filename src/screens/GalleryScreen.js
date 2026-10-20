@@ -4,7 +4,10 @@ import Text from '../ui/Text';
 import { colors } from '../theme';
 import { useJourney } from '../context/JourneyContext';
 import { TASTE_GROUPS } from '../data/taste';
-import { MOCK_WORKS, matchWorks } from '../data/mockWorks';
+import { MOCK_WORKS as ALL_WORKS, matchWorks } from '../data/mockWorks';
+import { visibleWorks } from '../utils/operator';
+
+const MOCK_WORKS = visibleWorks(ALL_WORKS);
 import { MockCard, MockDetail } from '../components/MockWorks';
 import ScreenHeader from '../ui/ScreenHeader';
 import { t } from '../i18n';
