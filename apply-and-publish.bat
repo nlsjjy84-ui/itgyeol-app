@@ -8,7 +8,7 @@ if /i not "%~1"=="__run" (
 set GIT_MERGE_AUTOEDIT=no
 setlocal
 set DST=%~2
-set SRC=%DST%_apply\itgyeol-server.zip
+set SRC=%DST%_apply\itgyeol-introfirst.zip
 cd /d "%DST%"
 echo [1/6] switch to redesign-ui
 rem Drop local edits to this bat (the running copy is in TEMP) so checkout is never blocked
@@ -29,7 +29,7 @@ echo [4/6] commit and push redesign-ui
 rem Save the newest bat into the repo so every branch has the same copy
 copy /y "%~f0" "%DST%apply-and-publish.bat" >nul
 git add -A
-git commit -m "fix: stop Vercel git deploys from overwriting the order server with the app code (root vercel.json), warn in the deploy run when the order server is down" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01Pc635XgYEi1EBmYTHPBfjJ"
+git commit -m "feat: open the intro page first when the app address is visited on the web (skip for ?w= carry links, payment returns, browser tests and the phone app)" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01Pc635XgYEi1EBmYTHPBfjJ"
 git push origin redesign-ui
 if errorlevel 1 (echo PUSH FAILED - tell Claude & pause & exit /b 1)
 echo [5/6] merge into master and push
@@ -44,5 +44,5 @@ if errorlevel 1 (echo PUSH MASTER FAILED - tell Claude & pause & exit /b 1)
 echo [6/6] back to redesign-ui
 git checkout redesign-ui
 echo.
-echo [7/7] redeploy the order server (Vercel)
-call "%DST%fix-server.bat"
+echo DONE. Site updates in 2-4 min: https://nlsjjy84-ui.github.io/itgyeol-app/
+pause
