@@ -8,7 +8,7 @@ if /i not "%~1"=="__run" (
 set GIT_MERGE_AUTOEDIT=no
 setlocal
 set DST=%~2
-set SRC=%DST%_apply\itgyeol-story.zip
+set SRC=%DST%_apply\itgyeol-mix.zip
 cd /d "%DST%"
 echo [1/6] switch to redesign-ui
 rem Drop local edits to this bat (the running copy is in TEMP) so checkout is never blocked
@@ -29,7 +29,7 @@ echo [4/6] commit and push redesign-ui
 rem Save the newest bat into the repo so every branch has the same copy
 copy /y "%~f0" "%DST%apply-and-publish.bat" >nul
 git add -A
-git commit -m "story: shorten the picture book (prologue 9 to 4 pages, each board gate 4-5 to 2 pages) and add gate stories for talchum and dancheong in 4 languages; tests check page counts and a browser test opens both new gates" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01Pc635XgYEi1EBmYTHPBfjJ"
+git commit -m "fix: talchum and dancheong get their own scene slot when boards are mixed (they mixed as the same vector before); tests for all six boards" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" -m "Claude-Session: https://claude.ai/code/session_01Pc635XgYEi1EBmYTHPBfjJ"
 git push origin redesign-ui
 if errorlevel 1 (echo PUSH FAILED - tell Claude & pause & exit /b 1)
 echo [5/6] merge into master and push
