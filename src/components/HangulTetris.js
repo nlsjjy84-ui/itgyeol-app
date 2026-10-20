@@ -12,11 +12,12 @@ import { t as i18nT } from '../i18n';
 // 한글 테트리스 — 규칙은 일반 테트리스와 똑같다.
 // 블록은 한글 자모 모양: 자음 ㄱ ㄴ(4칸·짧은 3칸) ㄷ ㅁ, 모음 ㅣ ㅡ(막대), ㅏ ㅓ ㅗ ㅜ(T 블록을 돌린 모양),
 //   ㅛ ㅑ ㅠ ㅕ(가지 둘 블록을 돌린 모양), ㅐ ㅒ(세로획 둘을 잇는 큰 블록).
-//   큰 자음: ㄷ(6칸, 오른쪽이 열림)
+//   큰 자음: ㄷ(7칸, 위아래 3칸 대칭, 오른쪽이 열림), 작은 ㄷ(5칸), 큰 ㅁ(9칸), ㅅ(3칸, 모서리로 닿은 꼴)
 // 칸 안에 글자나 선을 쓰지 않는다. 블록 칸을 하나로 이어 붙여 블록 모양 자체가 글자로 보이게 한다.
 // 블록을 돌리면 모음은 실제 글자(ㅗ→ㅏ→ㅜ→ㅓ, ㅛ→ㅑ→ㅠ→ㅕ, ㅡ→ㅣ)로 바뀐다.
 const COLS = 12; // 일반 테트리스(10칸)보다 양옆 한 칸씩 넓게 — 큰 글자 블록이 들어갈 자리
 const ROWS = 18;
+const RESCUE_ROWS = 6; // 꼭대기까지 차면 아래에서 비워 주는 줄 수(판의 1/3)
 
 // 기본(처음 나올 때) 모양 — [x, y] 칸 목록. 글자 모양 그대로 시작한다.
 const BASE = {
@@ -25,7 +26,10 @@ const BASE = {
   n: { glyph: 'ㄴ', color: '#3a78c4', cells: [[0, 0], [0, 1], [0, 2], [1, 2]] }, // ㄴ
   n3: { glyph: 'ㄴ', color: '#5bb5e0', cells: [[0, 0], [0, 1], [1, 1]] }, // 짧은 ㄴ(3칸)
   m: { glyph: 'ㅁ', color: '#f2c230', cells: [[0, 0], [1, 0], [0, 1], [1, 1]] }, // ㅁ
-  d: { glyph: 'ㄷ', color: '#8e63b8', cells: [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2], [2, 2]] }, // ㄷ(6칸) — 위 2칸, 아래 3칸
+  m9: { glyph: 'ㅁ', color: '#d99a1e', cells: [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1], [0, 2], [1, 2], [2, 2]] }, // 큰 ㅁ(9칸, 3×3 네모)
+  d: { glyph: 'ㄷ', color: '#8e63b8', cells: [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2], [1, 2], [2, 2]] }, // ㄷ(7칸) — 위 3칸, 아래 3칸 대칭
+  d3: { glyph: 'ㄷ', color: '#b48fd6', cells: [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2]] }, // 작은 ㄷ(5칸) — 위 2칸, 왼쪽 세로, 아래 2칸
+  s: { glyph: 'ㅅ', color: '#d2691e', cells: [[1, 0], [0, 1], [2, 1]] }, // ㅅ(3칸) — 가운데가 솟고 양쪽이 내려간 꼴, 칸끼리 모서리로만 닿아 함께 움직인다
   i: { glyph: 'ㅣ', color: '#3fa860', cells: [[0, 0], [0, 1], [0, 2], [0, 3]], glyphs: ['ㅣ', 'ㅡ'] }, // ㅣ ↔ ㅡ
   t: { glyph: 'ㅗ', color: '#e0567f', cells: [[1, 0], [0, 1], [1, 1], [2, 1]], glyphs: ['ㅗ', 'ㅏ', 'ㅜ', 'ㅓ'] }, // ㅗ → ㅏ → ㅜ → ㅓ
   // 긴 ㅣ·ㅡ — 5칸 막대
@@ -33,20 +37,21 @@ const BASE = {
   // 긴 ㅗ·ㅏ·ㅜ·ㅓ — 가로 5칸 가운데에 가지 하나
   tl: { glyph: 'ㅗ', color: '#f28ab0', cells: [[2, 0], [0, 1], [1, 1], [2, 1], [3, 1], [4, 1]], glyphs: ['ㅗ', 'ㅏ', 'ㅜ', 'ㅓ'] },
   // 아래 셋은 큰 블록이라 드물게 나온다(어려운 블록) — ㅛ·ㅑ·ㅠ·ㅕ, ㅐ, ㅒ
-  y: { glyph: 'ㅛ', color: '#8cc63f', cells: [[1, 0], [3, 0], [0, 1], [1, 1], [2, 1], [3, 1], [4, 1]], glyphs: ['ㅛ', 'ㅑ', 'ㅠ', 'ㅕ'] }, // ㅛ → ㅑ → ㅠ → ㅕ
+  y: { glyph: 'ㅛ', color: '#8cc63f', cells: [[1, 0], [2, 0], [0, 1], [1, 1], [2, 1], [3, 1]], glyphs: ['ㅛ', 'ㅑ', 'ㅠ', 'ㅕ'] }, // ㅛ → ㅑ → ㅠ → ㅕ (아래 4칸 위 가지 둘, 6칸)
   ae: {
     glyph: 'ㅐ',
     color: '#4a55a2',
-    cells: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [1, 2], [2, 0], [2, 1], [2, 2], [2, 3], [2, 4]],
-  }, // ㅐ — 세로획 둘을 가운데 가로획 하나로 잇는다
+    cells: [[0, 0], [0, 1], [0, 2], [1, 1], [2, 0], [2, 1], [2, 2]],
+  }, // ㅐ — 세로획 둘(3칸씩)을 가운데 가로획 하나로 잇는다(7칸)
   yae: {
     glyph: 'ㅒ',
     color: '#c26dbc',
-    cells: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [1, 1], [1, 3], [2, 0], [2, 1], [2, 2], [2, 3], [2, 4]],
-  }, // ㅒ — 세로획 둘을 가로획 둘로 잇는다
+    cells: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2], [2, 3]],
+  }, // ㅒ — 세로획 둘(4칸씩)을 가로획 둘로 잇는다(10칸)
 };
 // 나오는 비율(가중치): 4칸 블록은 자주, 긴 ㅣ·ㅡ, 긴 ㅗ·ㅏ·ㅜ·ㅓ와 ㄷ은 가끔, 큰 모음(ㅛ·ㅑ·ㅠ·ㅕ, ㅐ, ㅒ)은 아주 드물게
-const WEIGHT = { g: 6, g3: 4, n: 6, n3: 4, m: 6, i: 7, il: 3, t: 8, tl: 3, d: 3, y: 2, ae: 1, yae: 1 };
+// 비율은 tools/tetris-balance.py 로 단계마다 여러 판을 두어 맞춘 값(큰 블록은 드물게, 작은 블록·막대는 자주)
+const WEIGHT = { g: 6, g3: 6, n: 6, n3: 6, m: 6, m9: 1, s: 1, i: 9, il: 3, t: 8, tl: 2, d: 2, d3: 4, y: 1, ae: 1, yae: 1 };
 const BAG = Object.entries(WEIGHT).flatMap(([k, w]) => Array(w).fill(k));
 
 function rot(cells) {
@@ -71,7 +76,7 @@ function fits(board, cells, x, y) {
   });
 }
 
-// 블록 색: 일반 테트리스처럼 블록마다 서로 다른 맑은 색 하나(13색). 탁하거나 어두운 색은 쓰지 않는다.
+// 블록 색: 일반 테트리스처럼 블록마다 서로 다른 맑은 색 하나(16색). 탁하거나 어두운 색은 쓰지 않는다.
 // 칸 처리: 블록 안 칸을 하나하나 나눠 그리고, 칸마다 위·왼쪽은 밝게, 아래·오른쪽은 어둡게 해서 도드라진 블록처럼 보이게 한다.
 const shadeCache = {};
 function shade(hex, k) {
@@ -96,10 +101,15 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
   const spawn = () => {
     const s = st.current;
     s.cur = s.next ? newPiece(s.next) : newPiece(pick());
+    s.count = (s.count || 0) + 1;
     s.next = pick();
     if (!fits(s.board, s.cur.cells, s.cur.x, s.cur.y)) {
-      setPhase('over');
-      play('geomungo');
+      // 실패 없이 끝까지: 꼭대기까지 차면 끝내지 않고 맨 아래 줄을 비워 자리를 만든다(비운 줄은 지운 줄로 세지 않음).
+      // 실패가 잦으면 다음 판을 하고 싶은 마음이 꺾인다 — 잘하면 빨리, 처음이면 조금 더 오래 걸리는 차이만 남긴다.
+      s.board = [...Array.from({ length: RESCUE_ROWS }, () => Array(COLS).fill(null)), ...s.board.slice(0, ROWS - RESCUE_ROWS)];
+      s.rescues = (s.rescues || 0) + 1;
+      s.rescueMsg = 2.5;
+      play('stamp');
     }
   };
 
@@ -108,6 +118,9 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
     s.board = emptyBoard();
     s.lines = 0;
     s.acc = 0;
+    s.count = 0;
+    s.rescues = 0;
+    s.rescueMsg = 0;
     s.next = pick();
     s.start = Date.now();
     spawn();
@@ -137,7 +150,7 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
       if (s.lines >= targetLines) {
         setTimeout(() => { st.current.flash = null; draw(); }, 600);
         setPhase('won');
-        onDone && onDone({ mistakes: Math.max(0, 3 - Math.min(3, Math.floor(s.lines / targetLines))), lines: s.lines, elapsedMs: Date.now() - s.start });
+        onDone && onDone({ mistakes: Math.min(3, s.rescues || 0), rescues: s.rescues || 0, lines: s.lines, elapsedMs: Date.now() - s.start });
         draw();
         return;
       }
@@ -189,6 +202,7 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
   useRaf((dt) => {
     const s = st.current;
     if (s.flash) { s.flash.t -= dt; if (s.flash.t <= 0) s.flash = null; }
+    if (s.rescueMsg > 0) s.rescueMsg = Math.max(0, s.rescueMsg - dt);
     if (!s.cur) return;
     // 줄을 지울수록 조금씩 빨라진다(아주 완만하게)
     const ms = Math.max(350, dropMs - s.lines * 60);
@@ -270,6 +284,7 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
       <Text style={styles.hud}>
         {i18nT('지운 줄')} {i18nT(s.lines)} / {i18nT(targetLines)}
         {i18nT(phase === 'over' ? '  ·  쌓였어요! 다시 해 봐요' : '')}
+        {s.rescueMsg > 0 ? i18nT('  ·  판이 가득 찼어요! 아래를 비워 줄게요, 계속해 보자 💪') : ''}
         {i18nT(phase === 'won' ? '  ·  성공!' : '')}
       </Text>
       <View style={styles.row}>
@@ -355,13 +370,17 @@ export default function HangulTetris({ color, targetLines = 5, dropMs = 900, onD
           </View>
         </View>
       </View>
+      {phase === 'running' && s.count <= 3 ? (
+        // 처음 세 블록: 저절로 떨어지길 기다리지 않게 '쭉 내리기'를 알려 준다(기다리면 한 판이 길어진다)
+        <Text style={[styles.tipNow, { borderColor: color }]}>{i18nT('자리를 정했으면 아래로 휙 밀거나 「쭉」을 눌러 바로 내려요 ⬇')}</Text>
+      ) : null}
       {phase === 'running' ? (
         <View style={styles.pad}>
           <Pressable style={styles.padBtn} onPress={() => move(-1)}><Text style={styles.padTxt}>◀</Text></Pressable>
           <Pressable style={[styles.padBtn, { backgroundColor: color }]} onPress={rotate}><Text style={[styles.padTxt, { color: '#fff' }]}>{i18nT('돌리기')}</Text></Pressable>
           <Pressable style={styles.padBtn} onPress={() => move(1)}><Text style={styles.padTxt}>▶</Text></Pressable>
           <Pressable style={styles.padBtn} onPress={soft}><Text style={styles.padTxt}>▼</Text></Pressable>
-          <Pressable style={styles.padBtn} onPress={hard}><Text style={styles.padTxt}>{i18nT('쭉')}</Text></Pressable>
+          <Pressable style={[styles.padBtn, s.count <= 3 && { borderColor: color, borderWidth: 2 }]} onPress={hard}><Text style={styles.padTxt}>{i18nT('쭉')}</Text></Pressable>
         </View>
       ) : (
         <Pressable style={[styles.bigBtn, { backgroundColor: color }]} onPress={start}>
@@ -394,4 +413,5 @@ const styles = StyleSheet.create({
   bigBtn: { minWidth: 200, alignItems: 'center', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 4, borderBottomWidth: 4, borderBottomColor: 'rgba(0,0,0,0.28)' },
   bigBtnText: { color: '#fff', fontWeight: '700', fontSize: 17, letterSpacing: 1 },
   hint: { fontSize: 11, color: colors.muted, textAlign: 'center' },
+  tipNow: { fontSize: 13, color: colors.ink, textAlign: 'center', borderWidth: 1.5, borderRadius: 4, paddingVertical: 6, paddingHorizontal: 10, marginTop: 6, alignSelf: 'center' },
 });
