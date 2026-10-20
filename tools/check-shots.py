@@ -22,7 +22,7 @@ for f in sorted(os.listdir(d)):
     st = ImageStat.Stat(rgb.convert('L'), mask)
     if st.count[0] < 500: bad.append((f, '그려진 부분이 거의 없음')); continue
     mean = st.mean[0]
-    if mean < (12 if BASE.get(f[:-4]) in DARK else 25): bad.append((f, '너무 어두움 %.0f' % mean))
+    if mean < (12 if (BASE.get(f[:-4]) or f[2:-4]) in DARK else 25): bad.append((f, '너무 어두움 %.0f' % mean))
     elif mean > 245: bad.append((f, '하얗게 날아감 %.0f' % mean))
 for f, why in bad: print(f[:-4], why)
 print('검사', len([x for x in os.listdir(d) if x.endswith('.png')]), '문제', len(bad), file=sys.stderr)

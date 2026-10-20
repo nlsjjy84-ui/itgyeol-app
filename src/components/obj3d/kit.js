@@ -52,6 +52,10 @@ export function lobedShape(R, lobes, amp, seg = 160) {
 // 모든 정점을 같은 함수로 옮기므로 조각보 판·장식도 몸과 같이 움직인다.
 export function deformObject(obj, d) {
   if (!d || !d.k) return obj;
+  // 실물 보물(범종·석탑·반닫이…)은 놀이에 따라 모양이 바뀌되 실물 꼴을 벗어나지 않게 세기를 줄인다(userData.deform, 0~1)
+  const s = obj.userData && typeof obj.userData.deform === 'number' ? obj.userData.deform : 1;
+  if (s === 0) return obj; // 판으로 자르는 물건(에칭 책갈피)은 정해진 크기 그대로
+  if (s !== 1) d = { ...d, belly: d.belly * s, taper: d.taper * s, lean: d.lean * s, wide: 1 + (d.wide - 1) * s, deep: 1 + (d.deep - 1) * s, tall: 1 + (d.tall - 1) * s };
   obj.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(obj.matrixWorld).invert();
   const box = new THREE.Box3().setFromObject(obj);
@@ -679,7 +683,7 @@ function techMaps(img, tech, base, accent) {
     // 무늬 자리: 기법마다 다르게 — 박는 기법(상감·나전·입사)은 고른 색 갈래만, 나머지는 채도·밝기로
     const picked = chosen.has(bucket[k / 4]);
     const q0 = k / 4;
-    const ink = al > 0.2 && (tech === 'sanggam' ? edge[q0] || L < 0.12 : tech === 'inlay' ? (picked || L < darkInlay) : tech === 'emboss' && accent ? (picked || L < darkEmboss || (accent.metal > 0.5 && edge[q0])) : (sat > 0.18 || L > 0.8 || L < 0.28)) ? 1 : 0;
+    const ink = al > 0.2 && (tech === 'sanggam' ? edge[q0] || L < 0.12 : tech === 'inlay' && base.inlay && !accent ? edge[q0] : tech === 'inlay' ? (picked || L < darkInlay) : tech === 'emboss' && accent ? (picked || L < darkEmboss || (accent.metal > 0.5 && edge[q0])) : (sat > 0.18 || L > 0.8 || L < 0.28)) ? 1 : 0;
     // ↑ 쇠에 다른 쇠(은·금)를 입힐 때는 무늬 테두리를 따라 실처럼 박는다(입사). 두드림에 다른 쇠를 입힐 때(청동에 은 등)는 고른 무늬 자리만 — 흰 바탕까지 덮으면 판 전체가 은처럼 보인다
     // 청화는 선 말고도 고른 색 자리를 옅은 코발트로 물들인다(붓 번짐)
     const wash = tech === 'sanggam' && base.id === 'porcelain' && !ink && picked ? 1 : 0;
@@ -694,6 +698,7 @@ function techMaps(img, tech, base, accent) {
     } else if (tech === 'inlay') {
       if (ink && accent && accent.irid) { const pal = [[236, 222, 238], [214, 236, 226], [216, 226, 242], [240, 234, 214]]; const pc = pal[(bucket[k / 4] + ((k >> 9) & 1)) % 4]; const nz = 0.9 + 0.1 * Math.sin(k * 0.0137); out = [pc[0] * nz, pc[1] * nz, pc[2] * nz]; rough = 0.12; metal = 0.25; ir = 1; bump = 0.62; }
       else if (ink && !accent && base.id === 'ink') { out = b.map((v) => Math.min(255, v * 2.4 + 18)); bump = 0.7; } // 먹: 무늬는 도드라진 새김으로
+      else if (ink && !accent && base.inlay) { out = hex(base.inlay); rough = 0.3; metal = 1; bump = 0.6; } // 은입사: 쇠 바탕에 은실 선
       else if (ink) { out = accent ? a : cinnabar; rough = accent ? accent.rough : 0.3; metal = accent ? accent.metal || 0 : 0; ir = accent && accent.irid ? 1 : 0; bump = 0.6; }
     } else if (tech === 'emboss') {
       if (ink && accent) { out = a; metal = accent.metal || 0; rough = accent.rough; }
@@ -786,6 +791,8 @@ export function realLook(obj, base, accent, lookOf, { surfaceOnly = false } = {}
     let nm;
     const ud = mt.userData || {};
     const key = ud.matId || mt.uuid;
+    // 장석처럼 '고른 쇠붙이로 다는 부품'(accentFit)은 무늬 재료가 쇠붙이면 그 쇠로(반닫이 무쇠 장석·놋 장석)
+    if (ud.accentFit && al && (al.metal || 0) > 0.5) { nm = plain(accent.id === 'iron' ? { ...al, color: '#3c3a37', rough: 0.55 } : al, mt.side, accent.id); cache.set(mt, nm); return nm; } // 무쇠 장석은 검게(들기름에 그을린 빛)
     if (!ud.pattern && key !== bodyKey && (ud.fixed || ud.matId)) {
       // 부품: 이름표의 실물 재질(비단·나무는 원래 색을 살린다)
       const L = ud.matId && lookOf ? lookOf(ud.matId) : null;
@@ -853,3 +860,4 @@ export async function exportPrintFile(pivot, { longMm = 50 } = {}) {
   });
   return { data, mm: { x: size.x * k, y: size.y * k, z: size.z * k }, realParts: { thread: parts.filter((x) => x === 'thread').length, metal: parts.filter((x) => x === 'metal').length } };
 }
+

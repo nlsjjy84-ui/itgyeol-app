@@ -11,6 +11,7 @@ import { MATERIAL_GROUPS, MATERIAL_BY_ID } from '../data/materialTree';
 import { MATERIAL_NAMES, suggestMaterials } from '../data/materialNames';
 import { OBJECT_TREE, SHOPS, CATALOG_STATS, itemLink } from '../data/catalog';
 import { CATALOG_IMAGES } from '../data/catalogImages';
+import { MATERIAL_SHOTS } from '../data/materialShots';
 import { allowedGroups, allowedSuggest, allowResin } from '../utils/operator';
 
 // 운영사가 받는 재료만(src/config/operator.js)
@@ -137,10 +138,15 @@ export function MaterialTab({ pick, choice, setChoice, initialLeaf }) {
                 {on ? (
                   <View style={st.detail}>
                     <View style={st.detailHead}>
-                      <Swatch look={m.look} size={64} />
+                      {MATERIAL_SHOTS[m.id] ? (
+                        <View style={st.shotBox}>
+                          <Image source={MATERIAL_SHOTS[m.id]} style={st.shot} resizeMode="contain" />
+                        </View>
+                      ) : <Swatch look={m.look} size={64} />}
                       <View style={{ flex: 1 }}>
                         <Text style={st.h2}>{matName(m.id, m.name)}</Text>
                         <Text style={st.note}>{m.note}</Text>
+                        {MATERIAL_SHOTS[m.id] ? <Text style={st.shotCap}>{t('그림은 이 재료로 만든 나만의 노리개 패예요.')}</Text> : null}
                       </View>
                     </View>
                     {pick ? (
@@ -350,6 +356,9 @@ const st = StyleSheet.create({
   leafOn: { backgroundColor: colors.paper },
   leafTxt: { flex: 1, fontSize: 14, color: colors.ink },
   leafTxtOn: { fontWeight: '800' },
+  shotBox: { width: 108, height: 108, borderRadius: 12, backgroundColor: '#f6f3ec', alignItems: 'center', justifyContent: 'center' },
+  shot: { width: 104, height: 104 },
+  shotCap: { fontSize: 11, color: colors.muted, marginTop: 4 },
   role: { fontSize: 11, color: '#fff', backgroundColor: colors.accent, paddingHorizontal: 7, paddingVertical: 1, borderRadius: 9, overflow: 'hidden' },
   detail: { paddingLeft: 22, paddingVertical: 10, gap: 4 },
   detailHead: { flexDirection: 'row', gap: 14, alignItems: 'center', marginBottom: 6 },

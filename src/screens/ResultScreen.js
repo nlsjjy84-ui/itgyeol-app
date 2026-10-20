@@ -7,6 +7,7 @@ import ResultPattern from '../components/ResultPattern';
 import MascotDuo from '../components/MascotDuo';
 import Obj3DViewer from '../components/obj3d/Obj3DViewer';
 import { exportPrintFile } from '../components/obj3d/kit';
+import { planToSvg } from '../utils/etchSvg';
 import { describeShape } from '../utils/shapeStory';
 import { makeDna, dnaSummary } from '../utils/shapeDna';
 import { CATALOG, findItem } from '../components/obj3d/catalog';
@@ -501,6 +502,28 @@ export default function ResultScreen({ navigation }) {
               }}
             >
               <Text style={styles.hookBtnText}>{t('업체에 보낼 출력용 3D 파일 (.glb)')}</Text>
+            </Pressable>
+          ) : null}
+          {Platform.OS === 'web' && group.etch ? (
+            <Pressable
+              style={styles.hookBtn}
+              onPress={() => {
+                play('tap');
+                let plan = null;
+                if (printObj.current) printObj.current.traverse((o) => { if (!plan && o.userData && o.userData.plan2d) plan = o.userData.plan2d; });
+                if (!plan) { setPrintMsg(t('3D 모델이 다 만들어진 뒤에 눌러 주세요.')); return; }
+                const url = URL.createObjectURL(new Blob([planToSvg(plan)], { type: 'image/svg+xml' }));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `itgyeol-${dna.code}-${item.id}-etch.svg`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 4000);
+                setPrintMsg(t('에칭 도안을 만들었어요 · 단위 mm · 파란 가는 선은 자르기, 검은 채움은 새김이에요.'));
+              }}
+            >
+              <Text style={styles.hookBtnText}>{t('업체에 보낼 에칭 도안 (.svg)')}</Text>
             </Pressable>
           ) : null}
           {Platform.OS === 'web' && productKey(groupId, item.id) ? (

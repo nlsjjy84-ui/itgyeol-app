@@ -656,7 +656,7 @@ export const mineBookmark = ({ m }) => {
   sh.quadraticCurveTo(-W / 2, bot, -W / 2 + r, bot);
   // 술 구멍
   const hole = new THREE.Path();
-  hole.absarc(0, top - 0.06, 0.055, 0, Math.PI * 2, true);
+  hole.absarc(0, top - 0.1, 0.055, 0, Math.PI * 2, true); // 위 가장자리와 2mm 넘게 띄운다(얇으면 부식 때 끊어짐)
   sh.holes.push(hole);
   // 진 모양 투각: 사람 자리를 몸통 안 세로 칸(폭 W*0.6, 높이 H*0.55)에 맞춰 뚫는다
   if (pts.length) {
@@ -688,23 +688,28 @@ export const mineBookmark = ({ m }) => {
   g.add(plate);
   // 부식선: 테두리 안쪽 선 + 놀이 가짓수만큼 아래쪽 가로 마디(짙게 삭은 금속 색)
   const etch = new THREE.MeshStandardMaterial({ color: 0x6b5220, roughness: 0.6, metalness: 0.5 });
+  etch.userData.fixed = true; // 부식(새김) 자리는 어떤 쇠를 골라도 짙게 삭은 빛으로 남는다
   const z = 0.0255;
   const inW = W - 0.1;
   const inTop = top - 0.2;
   const inBot = bot + 0.05;
-  [[0, inBot, inW, 0.008], [-inW / 2, (inTop + inBot) / 2, 0.008, inTop - inBot], [inW / 2, (inTop + inBot) / 2, 0.008, inTop - inBot]].forEach(([x, y, w, h]) =>
-    g.add(mesh(new THREE.BoxGeometry(w, h, 0.002), etch, [x, w > 0.01 ? y : y, z]))
-  );
+  const LW = 0.016; // 새김선 폭: 실물 약 0.77mm(에칭 최소 0.7mm 이상)
+  const etchRects = [[0, inBot, inW, LW], [-inW / 2, (inTop + inBot) / 2, LW, inTop - inBot], [inW / 2, (inTop + inBot) / 2, LW, inTop - inBot]];
   const n = Math.max(1, Math.min(6, games.length || 1));
-  for (let i = 0; i < n; i += 1) {
-    const y = bot + 0.18 + i * 0.09;
-    g.add(mesh(new THREE.BoxGeometry(inW * 0.7, 0.008, 0.002), etch, [0, y, z]));
-  }
+  for (let i = 0; i < n; i += 1) etchRects.push([0, bot + 0.18 + i * 0.09, inW * 0.7, LW]);
+  etchRects.forEach(([x, y, w, h]) => g.add(mesh(new THREE.BoxGeometry(w, h, 0.002), etch, [x, y, z])));
+  // 에칭 도안(2D): 자르는 윤곽·구멍과 새김 칸을 그대로 넘긴다 — 출력용 파일을 만들 때 .svg(mm)로 함께 나온다
+  g.userData.plan2d = {
+    mmPerUnit: 30 / W,
+    outline: sh.getPoints(24).map((p) => [p.x, p.y]),
+    holes: sh.holes.map((hp) => hp.getPoints(24).map((p) => [p.x, p.y])),
+    etch: etchRects,
+  };
   // 맨 위 구멍의 진짜 술(고리 → 매듭 → 술)
   const cord = new THREE.Group();
   // 구멍에서 위로 올라 고리를 만든 뒤 옆으로 늘어진다(실처럼 아래로 처지게)
   const sx = W / 2 + 0.16;
-  cord.add(tube([[0, top - 0.06, 0.012], [0.04, top + 0.16, 0.02], [0.2, top + 0.24, 0.02], [sx - 0.03, top + 0.12, 0.01], [sx, top - 0.08, 0]], 0.016, m.silkRed, 24));
+  cord.add(tube([[0, top - 0.1, 0.012], [0.04, top + 0.16, 0.02], [0.2, top + 0.24, 0.02], [sx - 0.03, top + 0.12, 0.01], [sx, top - 0.08, 0]], 0.016, m.silkRed, 24));
   const ts = tassel(0.75, 0.2, m.silkRed, m.gold, 22);
   ts.position.set(sx, top - 0.08, 0);
   cord.add(ts);
@@ -712,7 +717,9 @@ export const mineBookmark = ({ m }) => {
   g.add(cord);
   g.rotation.z = -0.18;
   g.rotation.y = 0.35;
-  return wrap(g);
+  const w = wrap(g);
+  w.userData.deform = 0; // 황동 판은 정해진 크기(30×120mm)로 자른다 — 모양은 꽃잎 수·물결·투각·마디로 달라진다
+  return w;
 };
 
 // ───── 나만의 문진 ─────

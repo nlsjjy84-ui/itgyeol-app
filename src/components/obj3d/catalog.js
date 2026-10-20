@@ -206,6 +206,7 @@ export const CATALOG = [
     id: 'bookmark',
     label: '책갈피',
     print3d: false,
+    etch: true, // 업체에 보낼 2D 에칭 도안(.svg)을 내려받을 수 있다
     intro: '얇은 황동 판을 부식·레이저로 잘라 만드는 책갈피예요. 3D 출력으로는 너무 얇아 금속으로 만들어요. 술은 진짜 실이에요.',
     items: [
       {

@@ -1,5 +1,6 @@
 // 예시 작품 450점을 실제 전통 재료로 다시 찍는다 — 앱의 결과 화면(같은 3D 코드)을 그대로 쓴다.
 // (웹 빌드를 localhost:8777 에 띄운 뒤) node tools/shoot-examples.mjs [시작번호] [끝번호]   · 이미 찍은 것은 건너뛴다(중간에 끊겨도 이어서)
+// SHOT_MATERIALS=1 이면 재료 견본(같은 '나만의 패'를 재료마다 하나씩)을 찍는다 → 파일 이름 m_<재료>.png
 import { chromium } from 'playwright';
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 const carrySrc = readFileSync(new URL('../src/utils/carry.js', import.meta.url), 'utf8');
@@ -31,6 +32,11 @@ const shoot = async (w) => {
   } catch (e) { console.log('fail', w.id, String(e).slice(0, 120)); }
   await p.close();
 };
-const list = works.slice(from, to);
+// 재료 견본: 무늬 재료로 주로 쓰이는 것(자개·금박·보석·매듭)은 실제로 얹히는 바탕과 함께 찍는다
+const ACCENT_ON = { najeon: 'otchil', gilt: 'otchil', gem: 'silver', knot: 'silk' };
+const matIds = () => [...readFileSync(new URL('../src/data/materialTree.js', import.meta.url), 'utf8').matchAll(/\{"id":"([a-z]+)","name":"[^"]*","note":"[^"]*","look"/g)].map((x) => x[1]); // 재료(갈래 제외)
+const list = process.env.SHOT_MATERIALS
+  ? matIds().map((id) => ({ ...works[0], id: 'm_' + id, group: 'keyring', item: 'mypae', variant: 'mine', mat: ACCENT_ON[id] ? [ACCENT_ON[id], id] : [id, null] }))
+  : works.slice(from, to);
 for (let i = 0; i < list.length; i += 2) await Promise.all(list.slice(i, i + 2).map(shoot));
 await b.close();
