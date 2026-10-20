@@ -14,7 +14,7 @@ export const SPEC = {
   sumak: { size: '지름 약 45mm', material: PRINT, rule: PRINT_RULE, parts: ['뒷면 네오디뮴 자석(지름 10mm 안팎) 접착'], files: ['출력용 3D 파일(.glb)'] },
   paperweight: { size: '높이 약 70mm', material: PRINT, rule: `${PRINT_RULE}, 속을 꽉 채워 출력(문진 무게)`, parts: ['바닥 미끄럼 방지 펠트'], files: ['출력용 3D 파일(.glb)'] },
   coaster: { size: '지름 약 90mm, 두께 약 4mm', material: PRINT, rule: `${PRINT_RULE}, 컵이 닿는 가운데는 평평하게`, parts: ['바닥 미끄럼 방지 패드'], files: ['출력용 3D 파일(.glb)'] },
-  bookmark: { size: '약 30×120mm, 두께 0.5mm', material: '황동 판 0.5mm — 사진 부식(에칭)으로 윤곽 절단과 선 새김을 한 번에. 여러 사람의 책갈피를 한 판에 모아 부식', rule: '구멍 지름은 판 두께의 1.4배(0.7mm) 이상(화면 모양은 약 3mm), 가는 선 폭도 0.7mm 이상', parts: ['술: 붉은 명주실(맨 위 구멍)'], files: ['윤곽 참고용 3D 파일(.glb)', '결과 화면 이미지'] },
+  bookmark: { size: '약 30×120mm, 두께 0.5mm', material: '황동 판 0.5mm — 사진 부식(에칭)으로 윤곽 절단과 선 새김을 한 번에. 여러 사람의 책갈피를 한 판에 모아 부식', rule: '구멍 지름은 판 두께의 1.4배(0.7mm) 이상(화면 모양은 약 3mm), 가는 선 폭도 0.7mm 이상', parts: ['술: 붉은 명주실(맨 위 구멍)'], files: ['에칭 도안(.svg, mm) — 파란 가는 선은 자르기, 검은 채움은 새김', '윤곽 참고용 3D 파일(.glb)', '결과 화면 이미지'] },
   model: { size: '높이 약 50mm', material: PRINT, rule: PRINT_RULE, parts: [], files: ['출력용 3D 파일(.glb)'] },
   fan: { size: '한지 접부채(기성품 살)', material: '한지에 디지털 인쇄 후 대나무 살에 붙임', rule: '무늬 이미지 300dpi 이상', parts: [], files: ['무늬 이미지(결과 화면 이미지 저장)'] },
   towel: { size: '34×80cm 면 수건', material: '면 디지털 날염', rule: '무늬 이미지 300dpi 이상', parts: [], files: ['무늬 이미지(결과 화면 이미지 저장)'] },

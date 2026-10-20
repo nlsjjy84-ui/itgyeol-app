@@ -34,6 +34,7 @@ export const treasureMoonJar = ({ tex, m }) => {
   g.add(mesh(new THREE.TorusGeometry(prof[6][0] + 0.002, 0.007, 8, 96), m.porcelain, [0, prof[6][1], 0], [Math.PI / 2, 0, 0]));
   g.add(mesh(new THREE.TorusGeometry(prof[12][0] - 0.04, 0.012, 8, 64), m.gold, [0, prof[12][1], 0], [Math.PI / 2, 0, 0]));
   g.position.y = -1.1;
+  g.userData.deform = 0.35; // 실물 꼴 유지
   return g;
 };
 
@@ -48,29 +49,64 @@ export const treasureMaebyeong = ({ tex, m }) => {
   g.add(body);
   g.add(patchOnLathe(prof, 4, 9, -0.9, 1.8, texMat(tex), 1.01));
   g.position.y = -1.5;
+  g.userData.deform = 0.35; // 실물 꼴 유지
   return g;
 };
 
 export const treasureBandaji = ({ tex, m }) => {
-  // 반닫이: 앞판이 위아래로 열리는 전통 궤. 앞판에 조각보를 덧대고 놋쇠 장식
+  // 반닫이: 앞판 위쪽 절반이 문이 되어 아래로 젖혀 여는 궤(강화·박천 반닫이 꼴).
+  // 반듯한 상자 몸 · 살짝 내민 천판 · 아래 받침과 짧은 발 · 앞면 기둥과 쇠목(가로대).
+  // 문판에 조각보를 대고, 장석(경첩·앞바탕과 자물쇠·귀장식·감잡이·광두정·들쇠)을 단다 — 장석은 고른 쇠붙이로.
   const g = new THREE.Group();
-  g.add(rbox(2.4, 1.6, 1.15, m.wood, 0.06));
-  g.add(mesh(new THREE.BoxGeometry(2.46, 0.05, 1.2), m.woodDark, [0, 0.35, 0]));
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(1.85, 1.15), texMat(tex));
-  face.position.set(0, -0.12, 0.5885);
+  const W = 2.4, H = 1.7, D = 1.12, F = D / 2;
+  const fit = m.brass.clone(); fit.userData = { ...m.brass.userData, accentFit: true };
+  const wood = m.wood;
+  g.add(mesh(new THREE.BoxGeometry(W, H, D), wood, [0, 0, 0]));
+  g.add(mesh(new THREE.BoxGeometry(W + 0.08, 0.07, D + 0.06), wood, [0, H / 2 + 0.035, 0])); // 천판
+  g.add(mesh(new THREE.BoxGeometry(W + 0.04, 0.14, D + 0.04), wood, [0, -H / 2 - 0.07, 0])); // 받침
+  [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([sx, sz]) => g.add(mesh(new THREE.BoxGeometry(0.16, 0.12, 0.16), wood, [sx * (W / 2 - 0.06), -H / 2 - 0.2, sz * (F - 0.06)])));
+  // 앞면 틀: 양쪽 기둥, 위·가운데·아래 쇠목
+  const yMid = 0.02, yTop = H / 2 - 0.09, yBot = -H / 2 + 0.08;
+  [-1, 1].forEach((sx) => g.add(mesh(new THREE.BoxGeometry(0.2, H, 0.04), wood, [sx * (W / 2 - 0.1), 0, F + 0.02])));
+  [[yTop, 0.18], [yMid, 0.12], [yBot, 0.16]].forEach(([y, h]) => g.add(mesh(new THREE.BoxGeometry(W - 0.4, h, 0.04), wood, [0, y, F + 0.02])));
+  // 문판(위 칸)에 조각보, 아래 칸은 나무 그대로
+  const doorH = yTop - 0.09 - (yMid + 0.06), doorY = (yTop - 0.09 + yMid + 0.06) / 2;
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.4, doorH), texMat(tex));
+  face.position.set(0, doorY, F + 0.005);
   g.add(face);
-  g.add(mesh(new THREE.BoxGeometry(1.95, 1.25, 0.01), m.gold, [0, -0.12, 0.577]));
-  // 앞 장식: 자물쇠판(윗칸)과 경첩
-  g.add(mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 24), m.brass, [0, 0.6, 0.585], [Math.PI / 2, 0, 0]));
-  g.add(mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.04, 14), m.ink, [0, 0.6, 0.6], [Math.PI / 2, 0, 0]));
-  [-0.9, 0.9].forEach((x) => g.add(mesh(new THREE.BoxGeometry(0.4, 0.18, 0.02), m.brass, [x, 0.68, 0.585])));
-  [[-1.22, 0.1], [1.22, 0.1]].forEach(([x, y]) => {
-    g.add(mesh(new THREE.TorusGeometry(0.14, 0.025, 10, 24), m.brass, [x, y, 0], [0, Math.PI / 2, 0]));
-    g.add(mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.05, 12), m.brass, [x * 0.995, y + 0.14, 0], [0, 0, Math.PI / 2]));
+  // 경첩: 문 아래쪽, 가운데 쇠목에 걸친 나비 모양 두 쌍
+  [-0.62, 0.62].forEach((x) => {
+    [[0.11, 1], [-0.07, -1]].forEach(([dy, s]) => {
+      const leaf = mesh(new THREE.BoxGeometry(0.18, 0.18, 0.012), fit, [x, yMid + dy, F + 0.046]);
+      leaf.rotation.z = Math.PI / 4; leaf.scale.set(1, 0.75, 1); g.add(leaf);
+    });
+    g.add(mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.22, 10), fit, [x, yMid + 0.02, F + 0.05], [0, 0, Math.PI / 2]));
   });
-  [[-1.2, -0.8], [1.2, -0.8]].forEach(([x, y]) => g.add(mesh(new THREE.BoxGeometry(0.18, 0.22, 1.22), m.woodDark, [x, y + 0.45, 0])));
-  [-0.9, 0.9].forEach((x) => g.add(mesh(new THREE.BoxGeometry(0.28, 0.16, 0.9), m.woodDark, [x, -0.88, 0])));
+  // 앞바탕(둥근 자물쇠 바탕)·배목·자물쇠: 문 위 가운데, 위 쇠목에 걸쳐
+  g.add(mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.012, 40), fit, [0, yTop - 0.12, F + 0.046], [Math.PI / 2, 0, 0]));
+  g.add(mesh(new THREE.TorusGeometry(0.2, 0.012, 6, 40), fit, [0, yTop - 0.12, F + 0.053]));
+  g.add(mesh(new THREE.TorusGeometry(0.045, 0.012, 8, 16), fit, [0, yTop - 0.06, F + 0.07], [0, Math.PI / 2, 0]));
+  g.add(mesh(new THREE.BoxGeometry(0.2, 0.07, 0.05), fit, [0, yTop - 0.19, F + 0.08]));
+  g.add(mesh(new THREE.TorusGeometry(0.05, 0.012, 6, 16, Math.PI), fit, [0, yTop - 0.155, F + 0.08]));
+  // 귀장식: 앞면 네 귀의 ㄱ자 쇠
+  [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(([sx, sy]) => {
+    const x = sx * (W / 2 - 0.12), y = sy * (H / 2 - 0.12);
+    g.add(mesh(new THREE.BoxGeometry(0.26, 0.06, 0.012), fit, [x - sx * 0.06, y + sy * 0.09, F + 0.046]));
+    g.add(mesh(new THREE.BoxGeometry(0.06, 0.26, 0.012), fit, [x + sx * 0.09, y - sy * 0.06, F + 0.046]));
+  });
+  // 감잡이: 기둥과 가운데 쇠목이 만나는 곳, 광두정(둥근 못)
+  [-1, 1].forEach((sx) => {
+    g.add(mesh(new THREE.BoxGeometry(0.22, 0.08, 0.012), fit, [sx * (W / 2 - 0.2), yMid, F + 0.046]));
+    for (let k = 0; k < 6; k += 1) g.add(mesh(new THREE.SphereGeometry(0.022, 8, 6), fit, [sx * (W / 2 - 0.1), -H / 2 + 0.2 + k * 0.26, F + 0.045], null, [1, 1, 0.5]));
+  });
+  // 들쇠: 양 옆면 위쪽 손잡이
+  [-1, 1].forEach((sx) => {
+    g.add(mesh(new THREE.BoxGeometry(0.012, 0.1, 0.22), fit, [sx * (W / 2 + 0.006), 0.42, 0]));
+    g.add(mesh(new THREE.TorusGeometry(0.12, 0.016, 8, 24, Math.PI), fit, [sx * (W / 2 + 0.03), 0.38, 0], [0, Math.PI / 2, Math.PI]));
+  });
   g.rotation.y = 0.4;
+  g.position.y = 0.1;
+  g.userData.deform = 0.35; // 실물 꼴 유지
   return g;
 };
 
@@ -136,27 +172,38 @@ export const treasureGat = ({ tex, m }) => {
   });
   g.position.y = -0.4;
   g.rotation.x = 0.15;
+  g.userData.deform = 0.35; // 실물 꼴 유지
   return g;
 };
 
 export const treasureSoban = ({ tex, m }) => {
-  // 소반: 작은 밥상. 상판에 조각보를 깔고, 굽은 다리가 받친다
+  // 소반(호족반): 둥근 상판 가장자리에 턱(전)을 두르고, 그 아래 운각(장식 판)을 두른 뒤,
+  // 범 다리처럼 위는 밖으로 불룩하고 아래로 모였다 발끝이 살짝 벌어지는 네 다리가 바닥의 족대(가락지)에 선다.
   const g = new THREE.Group();
-  const top = plaque(1.45, 0.1, texMat(tex), m.woodDark, m.wood);
+  const R = 1.3;
+  const top = plaque(R, 0.07, texMat(tex), m.wood, m.wood);
   top.rotation.x = -Math.PI / 2;
   top.position.y = 0.95;
   g.add(top);
-  g.add(mesh(new THREE.TorusGeometry(1.45, 0.07, 12, 96), m.wood, [0, 0.98, 0], [Math.PI / 2, 0, 0]));
-  g.add(mesh(new THREE.CylinderGeometry(1.35, 1.3, 0.18, 96, 1, true), m.woodDark, [0, 0.82, 0]));
+  g.add(mesh(new THREE.TorusGeometry(R, 0.045, 10, 96), m.wood, [0, 0.99, 0], [Math.PI / 2, 0, 0], [1, 1, 1.3])); // 전
+  // 운각: 상판 밑을 두른 판, 아래 가장자리가 물결(구름) 모양
+  const apron = new THREE.CylinderGeometry(R * 0.86, R * 0.86, 0.2, 96, 1, true);
+  const pa = apron.attributes.position;
+  for (let i = 0; i < pa.count; i += 1) if (pa.getY(i) < 0) { const a = Math.atan2(pa.getZ(i), pa.getX(i)); pa.setY(i, -0.1 + 0.05 * Math.max(0, Math.cos(a * 8))); }
+  apron.computeVertexNormals();
+  const apronMat = m.wood.clone(); apronMat.side = THREE.DoubleSide;
+  g.add(mesh(apron, apronMat, [0, 0.82, 0]));
+  // 호족 다리 넷
   for (let i = 0; i < 4; i += 1) {
-    const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
-    const x = Math.cos(a) * 1.0;
-    const z = Math.sin(a) * 1.0;
-    g.add(tube([[x, 0.8, z], [x * 1.08, 0.4, z * 1.08], [x * 1.0, -0.1, z * 1.0], [x * 1.12, -0.5, z * 1.12]], 0.075, m.woodDark, 24));
-    g.add(mesh(new THREE.SphereGeometry(0.1, 12, 10), m.gold, [x * 1.12, -0.5, z * 1.12]));
+    const a = (i / 4) * Math.PI * 2 + Math.PI / 4, c = Math.cos(a), s = Math.sin(a);
+    const P = (r, y) => [c * r, y, s * r];
+    g.add(tube([P(0.98, 0.84), P(1.1, 0.62), P(1.06, 0.3), P(0.9, 0.0), P(0.86, -0.26), P(0.94, -0.42)], 0.07, m.wood, 32));
+    g.add(mesh(new THREE.SphereGeometry(0.075, 12, 10), m.wood, P(0.95, -0.44), null, [1.2, 0.6, 1.2]));
   }
-  g.add(mesh(new THREE.TorusGeometry(1.12, 0.05, 10, 72), m.wood, [0, -0.45, 0], [Math.PI / 2, 0, 0]));
+  // 족대(가락지): 바닥에 놓인 둥근 테
+  g.add(mesh(new THREE.TorusGeometry(0.95, 0.055, 10, 96), m.wood, [0, -0.5, 0], [Math.PI / 2, 0, 0], [1, 1, 0.7]));
   g.rotation.x = 0.35;
   g.position.y = -0.1;
+  g.userData.deform = 0.35; // 실물 꼴 유지
   return g;
 };
