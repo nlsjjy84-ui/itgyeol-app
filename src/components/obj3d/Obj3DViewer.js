@@ -3,7 +3,9 @@ import { View, StyleSheet, PanResponder, Platform, Pressable } from 'react-nativ
 import Text from '../../ui/Text';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { THREE, makeMats, addKeyringHook, dnaRef, deformObject, printSafe, printLook } from './kit';
+import { THREE, makeMats, addKeyringHook, dnaRef, deformObject, printSafe, printLook, realLook } from './kit';
+import { JourneyContext } from '../../context/JourneyContext';
+import { MATERIAL_BY_ID } from '../../data/materialTree';
 import { recordRef } from './models_mine';
 import { colors } from '../../theme';
 import { t } from '../../i18n';
@@ -14,6 +16,12 @@ import { t } from '../../i18n';
 // 준비에 실패하거나 12초가 지나도 안 뜨면, 그림을 그대로 보여 주는 안전 화면으로 바뀐다.
 
 const PAPER = '#fffbf3';
+// 촬영 시험용: 주소에 envyaw=숫자 가 있으면 그 각도로(웹에서만)
+// 조명 방향: 스튜디오 사진의 밝은 창(소프트박스)이 카메라 쪽 옆에서 비치도록 90° 돌린다 — 평평한 은·놋 판이 까맣게 비치지 않는다.
+// (촬영·비교용으로 웹 주소에 ?envyaw=값 을 붙이면 바꿀 수 있다)
+const ENV_YAW = (() => { try { const v = typeof location !== 'undefined' && new URLSearchParams(location.search).get('envyaw'); return v ? parseFloat(v) : 1.57; } catch (e) { return 1.57; } })();
+// 촬영용(웹): 주소에 still=1 이 있으면 3D가 돌지 않는다(앱이 주소를 지우기 전에 미리 읽어 둔다)
+const SHOT_STILL = Platform.OS === 'web' && typeof location !== 'undefined' && /[?&]still=1/.test(location.search || '');
 
 async function snap(ref, w, h) {
   if (Platform.OS === 'web') {
@@ -64,7 +72,7 @@ function shadowTexture() {
   return t;
 }
 
-function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, ctl, onBuilt, onFail }) {
+function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, ctl, onBuilt, onFail, real, surfaceOnly }) {
   const root = useRef();
   const { gl, scene } = useThree();
   const [envOk, setEnvOk] = useState(null);
@@ -73,12 +81,28 @@ function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, c
     let disposed = false;
     (async () => {
       try {
-        const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js');
+        // 실제 사진 스튜디오(소프트박스·흰 배경) 전경 사진으로 빛을 받는다 — Poly Haven studio_small_09(CC0)를 앱용으로 줄인 것.
+        // 반사에 실제 조명 모양이 비쳐 옻칠·청자 유약·놋쇠가 실물처럼 보인다. 못 불러오면 예전 방 조명으로.
         const pm = new THREE.PMREMGenerator(gl);
-        const env = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+        let env = null;
+        try {
+          const { Asset } = await import('expo-asset');
+          const a = Asset.fromModule(require('../../../assets/env/studio.jpg'));
+          if (!a.localUri && a.downloadAsync) await a.downloadAsync();
+          const t = await new THREE.TextureLoader().loadAsync(a.localUri || a.uri);
+          t.mapping = THREE.EquirectangularReflectionMapping;
+          t.colorSpace = THREE.SRGBColorSpace;
+          env = pm.fromEquirectangular(t).texture;
+          t.dispose();
+        } catch (e) {
+          const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js');
+          env = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+        }
         if (disposed) return;
         scene.environment = env;
-        scene.environmentIntensity = 0.8;
+        scene.environmentIntensity = 1.05;
+        // 카메라 뒤쪽에 스튜디오의 흰 배경막이 오도록 돌린다(납작한 쇠붙이·옻칠 면이 검게 비치지 않게)
+        scene.environmentRotation = new THREE.Euler(0, ENV_YAW, 0);
         setEnvOk(true);
       } catch (e) {
         if (!disposed) setEnvOk(false);
@@ -99,7 +123,8 @@ function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, c
       // 화면에 보이는 모양 = 출력하는 모양: 1.5mm보다 얇은 곳을 먼저 두껍게 다듬는다
       if (printable) obj = printSafe(obj, { longMm, dna });
       obj = deformObject(obj, dna);
-      if (printable) obj = printLook(obj); // 업체 출력물과 같은 수지 재질(인쇄 굿즈는 원래 재료 그대로)
+      if (real && real.base) obj = realLook(obj, real.base, real.accent, (id) => (MATERIAL_BY_ID[id] ? MATERIAL_BY_ID[id].look : null), { surfaceOnly }); // 사용자가 고른 실제 전통 재료
+      else if (printable) obj = printLook(obj); // 업체 출력물과 같은 수지 재질(인쇄 굿즈는 원래 재료 그대로)
       if (hook) addKeyringHook(obj, m);
       const box = new THREE.Box3().setFromObject(obj);
       const size = box.getSize(new THREE.Vector3());
@@ -115,7 +140,7 @@ function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, c
     } catch (e) {
       return { error: e };
     }
-  }, [envOk, tex, build, hook, dna, record, printable, longMm]);
+  }, [envOk, tex, build, hook, dna, record, printable, longMm, real, surfaceOnly]);
 
   const shadowTex = useMemo(() => shadowTexture(), []);
 
@@ -124,7 +149,11 @@ function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, c
     else if (built) onBuilt && onBuilt(built.pivot);
   }, [built, onFail, onBuilt]);
 
+  // 촬영용: 모델이 다 만들어진 뒤 20장면을 더 그리면 '다 그려짐' 표시(예시 작품 촬영 도구가 이걸 기다렸다가 찍는다)
+  const shotFrames = useRef(0);
+  useEffect(() => { shotFrames.current = 0; if (SHOT_STILL && typeof window !== 'undefined') window.__shotReady = false; }, [built]);
   useFrame((_, dt) => {
+    if (SHOT_STILL && built && !built.error && typeof window !== 'undefined') { shotFrames.current += 1; if (shotFrames.current === 20) window.__shotReady = true; }
     const c = ctl.current;
     if (!root.current) return;
     if (c.auto && !c.drag) c.yaw += dt * 0.6;
@@ -170,13 +199,23 @@ const VIEWS = [
   { id: 'bottom', label: '아래', yaw: 0, pitch: -1.15 },
 ];
 
-export default function Obj3DViewer({ art, artSize = 280, build, hook = false, dna, width = 320, height = 340, resetKey, onReady, record, printable = true, longMm }) {
+export default function Obj3DViewer({ art, artSize = 280, build, hook = false, dna, width = 320, height = 340, resetKey, onReady, record, printable = true, longMm, surfaceOnly = false }) {
+  const jr = React.useContext(JourneyContext);
+  const mats = jr && jr.materials;
+  const real = React.useMemo(() => {
+    const b = mats && mats.base && MATERIAL_BY_ID[mats.base];
+    if (!b) return null;
+    const a = mats.accent && MATERIAL_BY_ID[mats.accent];
+    return { base: b, accent: a || null };
+  }, [mats && mats.base, mats && mats.accent]);
   const shotRef = useRef(null);
   const [tex, setTex] = useState(null);
   const [failed, setFailed] = useState(false);
-  const [auto, setAuto] = useState(true);
+  const [auto, setAuto] = useState(!SHOT_STILL);
   const [activeView, setActiveView] = useState(null);
-  const ctl = useRef({ yaw: -0.45, pitch: 0.18, vel: 0, drag: false, auto: true, goto: null });
+  // 촬영용(웹): 주소에 still=1 이 있으면 돌지 않고 같은 각도로 멈춰 있다
+  const still = SHOT_STILL;
+  const ctl = useRef({ yaw: -0.45, pitch: 0.18, vel: 0, drag: false, auto: !still, goto: null });
 
   useEffect(() => {
     ctl.current.auto = auto;
@@ -254,10 +293,10 @@ export default function Obj3DViewer({ art, artSize = 280, build, hook = false, d
             dpr={[1, 2]}
             style={{ width, height, backgroundColor: 'transparent' }}
             camera={{ position: [0, 0.35, 6.4], fov: 32 }}
-            gl={{ alpha: true, antialias: true }}
+            gl={{ alpha: true, antialias: true, preserveDrawingBuffer: SHOT_STILL }}
             onCreated={({ gl }) => { gl.setClearColor(0x000000, 0); gl.toneMappingExposure = 0.9; }}
           >
-            <Scene tex={tex} build={build} hook={hook} dna={dna} record={record} printable={printable} longMm={longMm || (hook ? 45 : 50)} ctl={ctl} onFail={() => setFailed(true)} onBuilt={onReady} />
+            <Scene tex={tex} build={build} hook={hook} dna={dna} record={record} printable={printable} real={real} surfaceOnly={surfaceOnly} longMm={longMm || (hook ? 45 : 50)} ctl={ctl} onFail={() => setFailed(true)} onBuilt={onReady} />
           </Canvas>
         ) : (
           <View style={[styles.fallback, { width, height }]}>

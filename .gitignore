@@ -51,3 +51,11 @@ yarn-error.*
 dist-e2e/
 test-results/
 playwright-report/
+
+# 소재 목록 원본·중간 결과(용량이 커서 올리지 않는다 — docs/MATERIALS.md 참고)
+tools/catalog/raw/
+tools/catalog/work/
+tools/catalog/__pycache__/
+dist-new/
+dist-old/
+shots/

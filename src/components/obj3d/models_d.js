@@ -22,7 +22,7 @@ function patchOnLathe(prof, j0, j1, phiStart, phiLength, mat, grow = 1.006) {
 
 export const treasureMoonJar = ({ tex, m }) => {
   // 백자 달항아리 (보물 제1438호 같은 둥근 항아리)
-  const prof = warpProfile([[0.0, 0], [0.45, 0], [0.48, 0.06], [0.6, 0.2], [0.82, 0.45], [1.02, 0.8], [1.1, 1.2], [1.07, 1.5], [0.92, 1.78], [0.7, 1.98], [0.54, 2.08], [0.52, 2.16], [0.58, 2.24], [0.52, 2.3]]);
+  const prof = warpProfile([[0.0, 0], [0.45, 0], [0.48, 0.06], [0.6, 0.2], [0.82, 0.45], [1.02, 0.8], [1.1, 1.2], [1.07, 1.5], [0.92, 1.78], [0.7, 1.98], [0.54, 2.08], [0.52, 2.16], [0.58, 2.24], [0.52, 2.3]], 0.5); // 달항아리는 실물처럼 둥근 꼴을 크게 벗어나지 않게(놀이에 따른 변형은 절반만)
   const g = new THREE.Group();
   const body = lathe(prof, m.porcelain, 96);
   body.material = m.porcelain.clone();
@@ -39,14 +39,14 @@ export const treasureMoonJar = ({ tex, m }) => {
 
 export const treasureMaebyeong = ({ tex, m }) => {
   // 청자 매병: 어깨가 넓고 허리가 가는 병
-  const prof = warpProfile([[0.0, 0], [0.46, 0], [0.5, 0.06], [0.46, 0.4], [0.4, 0.9], [0.46, 1.4], [0.64, 1.9], [0.74, 2.3], [0.68, 2.7], [0.46, 2.92], [0.3, 3.04], [0.28, 3.14], [0.34, 3.22], [0.27, 3.27]]);
+  // 실물(고려 청자 매병) 비율: 높이 대비 가장 넓은 어깨 지름 약 0.58, 어깨는 위에서 1/4 지점, 굽은 어깨의 절반 남짓, 입은 작고 두툼하게 말린다
+  const prof = warpProfile([[0.0, 0], [0.5, 0], [0.53, 0.05], [0.5, 0.25], [0.5, 0.6], [0.56, 1.1], [0.7, 1.6], [0.86, 2.05], [0.93, 2.35], [0.88, 2.62], [0.66, 2.86], [0.36, 3.0], [0.22, 3.06], [0.25, 3.13], [0.24, 3.2], [0.18, 3.22]], 0.5);
   const g = new THREE.Group();
   const body = lathe(prof, m.celadon, 96);
   body.material = m.celadon.clone();
   body.material.side = THREE.DoubleSide;
   g.add(body);
-  g.add(patchOnLathe(prof, 3, 8, -0.9, 1.8, texMat(tex), 1.01));
-  g.add(mesh(new THREE.TorusGeometry(prof[12][0] - 0.04, 0.012, 8, 56), m.gold, [0, 3.2, 0], [Math.PI / 2, 0, 0]));
+  g.add(patchOnLathe(prof, 4, 9, -0.9, 1.8, texMat(tex), 1.01));
   g.position.y = -1.5;
   return g;
 };

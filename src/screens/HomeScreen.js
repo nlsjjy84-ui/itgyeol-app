@@ -18,6 +18,8 @@ import { PART_OF_CARD } from '../data/book';
 import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
 import HomeNumbers from '../components/HomeNumbers';
+import { MATERIAL_BY_ID } from '../data/materialTree';
+import { Swatch, matName, MATERIAL_COUNT } from './MaterialScreen';
 
 // 판 도장 — 그림(누구나 알아봄) + 우리말 한 글자(도장 귀퉁이)
 const SEAL = { jinbeop: ['circle', '진'], print: ['type', '글'], tbd: ['top', '놀'], hangul: ['blocks', '쌓'], talchum: ['mask', '탈'], mask: ['mask', '탈'], dancheong: ['colors', '색'], pattern: ['colors', '색'] };
@@ -82,7 +84,9 @@ const CARDS = [
 ];
 
 export default function HomeScreen({ navigation, route }) {
-  const { skills, book, attempts, exhibit, carried } = useJourney();
+  const { skills, book, attempts, exhibit, carried, materials } = useJourney();
+  const mBase = materials && materials.base ? MATERIAL_BY_ID[materials.base] : null;
+  const mAccent = materials && materials.accent ? MATERIAL_BY_ID[materials.accent] : null;
   const { width: winW } = useWindowDimensions();
   // 넓은 화면(키오스크·태블릿)에서는 맨 위에 "내 폰으로" QR을 띄워 줄을 줄인다.
   const kiosk = winW >= 700;
@@ -170,6 +174,20 @@ export default function HomeScreen({ navigation, route }) {
         size={52}
         style={{ marginTop: 14 }}
       />
+
+      {/* 놀이 전에 실제 전통 재료를 고른다 — 고른 재료가 결과물의 재질이 된다(장난감 수지가 아니라 옻칠·자개·놋쇠·청자…). */}
+      <Pressable onPress={() => { play('tap'); navigation.navigate('Materials', { mode: 'pick', then: 'Home' }); }}>
+        <Frame accent={colors.accent} style={{ marginTop: 16 }}>
+          <View style={styles.matRow}>
+            {mBase ? <Swatch look={mBase.look} size={40} /> : null}
+            {mAccent ? <View style={{ marginLeft: -14 }}><Swatch look={mAccent.look} size={40} /></View> : null}
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.carryTitle}>{mBase ? t('고른 재료') + ': ' + [mBase, mAccent].filter(Boolean).map((m) => matName(m.id, m.name)).join(' + ') : t('먼저 재료를 골라 보세요')}</Text>
+              <Text style={styles.carryText}>{t('옻칠·자개·놋쇠·청자·비단… 실제 전통 재료 {n}가지 중에서 고르면, 놀이로 만든 작품이 그 재료로 나와요 ›', { n: MATERIAL_COUNT })}</Text>
+            </View>
+          </View>
+        </Frame>
+      </Pressable>
 
       <Text style={styles.sectionLabel}>{t('여섯 개의 판 — 어디부터 가도 돼요')}</Text>
       <View style={styles.list}>
@@ -280,6 +298,7 @@ const styles = StyleSheet.create({
   exploreBtn: { width: '48.5%', flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 4, borderWidth: 1.5, borderBottomWidth: 3, borderColor: colors.ink, backgroundColor: colors.paper },
   exploreIcon: { fontSize: 24, color: colors.accent, lineHeight: 28, width: 26, textAlign: 'center' },
   exploreTxt: { flex: 1, fontSize: 13, fontWeight: '700', color: colors.ink, lineHeight: 18 },
+  matRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   sectionLabel: { marginTop: 22, fontSize: 13.5, fontWeight: '800', color: colors.ink, letterSpacing: 0.5 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   logo: { fontSize: 54, color: colors.accent, lineHeight: 60 },

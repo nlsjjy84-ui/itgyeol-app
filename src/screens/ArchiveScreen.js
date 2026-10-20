@@ -7,6 +7,8 @@ import { colors, fonts } from '../theme';
 import { t, getLang } from '../i18n';
 import { ARCHIVE_NAMES } from '../data/archiveNames';
 import { play } from '../utils/sound';
+import { MaterialTab, ObjectTab, ShopTab } from './MaterialScreen';
+import { CATALOG_STATS } from '../data/catalog';
 
 // 전통 자료실 — 창작의 바탕이 되는 실제 전통(유물·문양·재료)을 모아 둔 곳.
 // 이름·시대·재료는 박물관 기록에서만 가져오고, 사진마다 출처와 이용 조건을 붙인다.
@@ -89,8 +91,10 @@ export function ArchiveDetail({ entry, onClose }) {
   );
 }
 
-export default function ArchiveScreen({ navigation }) {
+export default function ArchiveScreen({ navigation, route }) {
+  const rp = (route && route.params) || {};
   const en = getLang() !== 'ko';
+  const [view, setView] = useState(rp.view || 'photo'); // photo(자료 사진) | mat(재료) | obj(물건 갈래) | shop(만드는 곳)
   const [mode, setMode] = useState('cat'); // cat | mot | mat
   const [pick, setPick] = useState(null);
   const [open, setOpen] = useState(null);
@@ -113,6 +117,19 @@ export default function ArchiveScreen({ navigation }) {
     <SafeAreaView style={st.safe}>
       <ScreenHeader title="전통 자료실" sub={t('창작의 바탕이 되는 실제 전통 {n}점', { n: ARCHIVE.length })} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={st.wrap}>
+        {/* 자료실 하나 안에서: 대표 사진 / 재료(재료 갈래 › 재료 › 실물·만드는 곳) / 물건 갈래(폴더 안의 폴더) / 만드는 곳 */}
+        <View style={[st.modeRow, { marginBottom: 12 }]}>
+          {[['photo', t('대표 사진')], ['mat', t('재료')], ['obj', t('물건 갈래')], ['shop', t('만드는 곳')]].map(([id, label]) => (
+            <Pressable key={id} style={[st.mode, view === id && st.modeOn]} onPress={() => { play('tap'); setView(id); }}>
+              <Text style={[st.modeTxt, view === id && st.modeTxtOn]}>{label}</Text>
+            </Pressable>
+          ))}
+        </View>
+        {view !== 'photo' ? <Text style={st.intro}>{t('문화유산 {a} · 박물관 소장품 {b} · 만드는 곳 {c}', { a: (CATALOG_STATS.wd + CATALOG_STATS.kowiki).toLocaleString(), b: CATALOG_STATS.em.toLocaleString(), c: CATALOG_STATS.shops.toLocaleString() })}</Text> : null}
+        {view === 'mat' ? <MaterialTab initialLeaf={rp.leaf} pick={false} choice={{ base: null, accent: null }} setChoice={() => {}} /> : null}
+        {view === 'obj' ? <ObjectTab /> : null}
+        {view === 'shop' ? <ShopTab /> : null}
+        {view === 'photo' ? (<>
         <Text style={st.intro}>
           {t('잇결의 작품은 이 자료들에서 출발해요. 유물의 모양, 문양, 재료를 직접 보고 비교해 보세요. 사진은 모두 박물관·국가기관이 자유 이용을 허락한 것이에요.')}
         </Text>
@@ -145,6 +162,7 @@ export default function ArchiveScreen({ navigation }) {
             </Pressable>
           ))}
         </View>
+        </>) : null}
       </ScrollView>
       <ArchiveDetail entry={open} onClose={() => setOpen(null)} />
     </SafeAreaView>
@@ -155,7 +173,7 @@ const st = StyleSheet.create({
   safe: { flex: 1 },
   wrap: { padding: 18, paddingTop: 6, paddingBottom: 60, maxWidth: 940, width: '100%', alignSelf: 'center' },
   intro: { fontSize: 12.5, color: colors.muted, lineHeight: 19, marginBottom: 10 },
-  modeRow: { flexDirection: 'row', gap: 6, marginBottom: 8 },
+  modeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
   mode: { paddingVertical: 7, paddingHorizontal: 16, borderRadius: 16, borderWidth: 1.5, borderColor: colors.ink },
   modeOn: { backgroundColor: colors.ink },
   modeTxt: { fontSize: 13, fontWeight: '700', color: colors.ink },

@@ -22,6 +22,8 @@ const PLAYLOG_KEY = 'itgyeol_playlog_v1';
 // 그림책: 프롤로그를 봤는지, 판마다 입구 이야기를 봤는지, 이야기 중에 고른 반응.
 const BOOK_KEY = 'itgyeol_book_v1';
 const BOOK_EMPTY = { prologue: false, gates: {}, choice: {} };
+// 놀이 전에 고른 실제 전통 재료 — {base: 바탕 재료 id, accent: 무늬 재료 id}. 결과물 3D가 이 재질로 나온다.
+const MATERIAL_KEY = 'itgyeol_material_v1';
 // 전시해도 된다고 동의한 작품 목록 — [{code, attempts, nick, country, at}].
 // 결과 화면에서 켜고 끄고, 전시관 화면과 홈의 "내 기록"에 보인다. 이름은 받지 않고 별명·나라만.
 const EXHIBIT_KEY = 'itgyeol_exhibit_v1';
@@ -66,6 +68,7 @@ export function JourneyProvider({ children }) {
   const [book, setBookState] = useState(null);
   const [exhibit, setExhibitState] = useState([]);
   const [myCodes, setMyCodes] = useState([]);
+  const [materials, setMaterialsState] = useState({ base: null, accent: null });
   const exhibitRef = React.useRef([]);
   const pendingRef = React.useRef(new Set());
   useEffect(() => {
@@ -107,6 +110,15 @@ export function JourneyProvider({ children }) {
       try {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') setSolvedIds(parsed);
+      } catch (e) {
+        // 손상된 값은 무시
+      }
+    });
+    safeGetItem(MATERIAL_KEY).then((raw) => {
+      if (!mounted || !raw) return;
+      try {
+        const v = JSON.parse(raw);
+        if (v && typeof v === 'object') setMaterialsState({ base: v.base || null, accent: v.accent || null });
       } catch (e) {
         // 손상된 값은 무시
       }
@@ -194,6 +206,12 @@ export function JourneyProvider({ children }) {
       AsyncStorage.setItem(SKILL_KEY, JSON.stringify(nextMap)).catch(() => {});
       return nextMap;
     });
+  }, []);
+
+  const setMaterials = useCallback((v) => {
+    const next = { base: (v && v.base) || null, accent: (v && v.accent) || null };
+    setMaterialsState(next);
+    AsyncStorage.setItem(MATERIAL_KEY, JSON.stringify(next)).catch(() => {});
   }, []);
 
   const setTaste = useCallback((picks) => {
@@ -301,7 +319,7 @@ export function JourneyProvider({ children }) {
 
   return (
     <JourneyContext.Provider
-      value={{ attempts, addResult, addSenses, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds), exhibit, setExhibit, refreshExhibit, myExhibit: mineOnly(exhibit, myCodes), carried: !!(carried && carried.attempts.length) }}
+      value={{ materials, setMaterials, attempts, addResult, addSenses, resetJourney, loaded, taste, setTaste, playLog, book, markBook, skills, recordSkill, ohangKey, setOhangKey, solvedIds, progress: computeProgress(solvedIds), exhibit, setExhibit, refreshExhibit, myExhibit: mineOnly(exhibit, myCodes), carried: !!(carried && carried.attempts.length) }}
     >
       {children}
     </JourneyContext.Provider>

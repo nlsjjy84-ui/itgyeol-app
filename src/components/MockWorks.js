@@ -4,17 +4,28 @@ import Text from '../ui/Text';
 import { colors } from '../theme';
 import { MOCK_IMAGES } from '../data/mockWorks';
 import { TASTE_KEYWORDS } from '../data/taste';
-import { t } from '../i18n';
+import { t, getLang } from '../i18n';
 import { CATALOG } from './obj3d/catalog';
 import { GAME_NAMES, SCENE_NAMES } from '../data/taste';
 import { traitText } from '../utils/shapeDna';
 import { describeShape } from '../utils/shapeStory';
+import { MATERIAL_BY_ID } from '../data/materialTree';
+import { MATERIAL_NAMES } from '../data/materialNames';
+import { techniqueOf } from '../utils/makerSpec';
 
 // 글자는 렌더할 때 지금 언어로 만든다(예시 자료에는 물건·놀이 id와 횟수만 있다).
 const kwLabel = (id) => (TASTE_KEYWORDS.find((k) => k.id === id) || {}).label || '';
 function findItem(itemId) {
   for (const g of CATALOG) for (const it of g.items) if (it.id === itemId) return it;
   return null;
+}
+// 예시 작품의 실제 전통 재료 — "옻칠 + 자개(나전) · 나전(자개 붙이기)"
+export function workMaterial(w) {
+  if (!w.mat || !w.mat[0]) return '';
+  const l = getLang();
+  const nm = (id) => { const m = MATERIAL_BY_ID[id]; if (!m) return id; return l === 'ko' || !MATERIAL_NAMES[id] ? m.name : MATERIAL_NAMES[id][{ en: 0, zh: 1, ja: 2 }[l]]; };
+  const names = [w.mat[0], w.mat[1]].filter(Boolean).map(nm).join(' + ');
+  return l === 'ko' ? `${names} · ${techniqueOf(w.mat[0], w.mat[1])}` : names;
 }
 export function workTitle(w) {
   const it = findItem(w.item);
@@ -66,6 +77,7 @@ export function MockDetail({ work, onClose }) {
             </View>
             <Text style={st.h}>{workTitle(work)}</Text>
             <Text style={st.badge}>{t('예시 작품 · 가상의 놀이 기록으로 빚은 모양이에요')} · #{work.code}</Text>
+            {workMaterial(work) ? (<><Text style={st.sec}>{t('재료와 기법')}</Text><Text style={st.body}>{workMaterial(work)}</Text></>) : null}
             <Text style={st.sec}>{t('이 모양이 나온 기록')}</Text>
             <Text style={st.body}>{workPlays(work).join(' · ')}</Text>
             {workTraits(work).length ? (

@@ -30,6 +30,9 @@ import { getLang } from '../i18n';
 import { linkedArchive } from '../data/archiveLinks';
 import { ArchiveDetail, entryName } from './ArchiveScreen';
 import TakeHome from '../components/TakeHome';
+import { MaterialStrip } from './MaterialScreen';
+import { MATERIAL_BY_ID } from '../data/materialTree';
+import { SHOPS } from '../data/catalog';
 import useLive from '../utils/useLive';
 import { productKey } from '../utils/order';
 import { makerSpec } from '../utils/makerSpec';
@@ -101,8 +104,27 @@ function TextureArt({ mode, attempts, size, craft, plain }) {
   return <ResultPattern attempts={attempts} size={size} />;
 }
 
+// 예시 작품 촬영용(웹): 앱이 QR 기록을 읽으며 주소를 지우기 전에, 파일을 불러올 때 한 번 읽어 둔다
+const SHOT_PICK = (() => {
+  try {
+    if (Platform.OS !== 'web' || typeof location === 'undefined') return null;
+    const v = new URLSearchParams(location.search).get('pick');
+    return v ? v.split('.') : null;
+  } catch (e) {
+    return null;
+  }
+})();
+
 export default function ResultScreen({ navigation }) {
-  const { attempts, skills, progress, playLog, exhibit, setExhibit, refreshExhibit } = useJourney();
+  const { attempts, skills, progress, playLog, exhibit, setExhibit, refreshExhibit, materials } = useJourney();
+  // 사양서에 넣을 고른 재료·기법·맡길 공방
+  const specMat = useMemo(() => {
+    const b = materials && materials.base ? MATERIAL_BY_ID[materials.base] : null;
+    if (!b) return null;
+    const a = materials.accent ? MATERIAL_BY_ID[materials.accent] : null;
+    const shops = SHOPS.filter((x) => b.shopKinds.includes(x[1]) || (a && a.shopKinds.includes(x[1]))).map((x) => [x[0], x[1], x[2], x[3]]);
+    return { base: { id: b.id, name: b.name }, accent: a ? { id: a.id, name: a.name } : null, shops };
+  }, [materials && materials.base, materials && materials.accent]);
   useLive(refreshExhibit, 8000);
   const shotRef = useRef(null);
   // 화면에 보이는 3D 물체(출력 파일로 그대로 내보낸다). 상태가 아니라 ref라 다시 그리지 않는다.
@@ -145,9 +167,11 @@ export default function ResultScreen({ navigation }) {
   }));
   const { width: winW } = useWindowDimensions();
   const viewerW = Math.min(360, Math.max(260, winW - 44));
-  const [groupId, setGroupId] = useState('keyring');
-  const [itemId, setItemId] = useState('mypae');
-  const [variantId, setVariantId] = useState(null);
+  // 예시 작품 촬영용(웹): 주소에 ?pick=묶음.물건.모양 이 있으면 그 물건으로 연다 — 예시 450점을 실제 재료로 다시 찍을 때 쓴다
+  const shotPick = SHOT_PICK;
+  const [groupId, setGroupId] = useState(shotPick ? shotPick[0] : 'keyring');
+  const [itemId, setItemId] = useState(shotPick ? shotPick[1] : 'mypae');
+  const [variantId, setVariantId] = useState(shotPick ? shotPick[2] || null : null);
   const [hookOn, setHookOn] = useState(true);
   const { group, item } = findItem(groupId, itemId);
   const variant = item.variants.find((v) => v.id === variantId) || item.variants[0];
@@ -449,7 +473,9 @@ export default function ResultScreen({ navigation }) {
             record={printRecord}
             printable={group.print3d !== false}
             longMm={item.longMm || group.longMm || 50}
+            surfaceOnly={group.id === 'daily'}
           />
+          <MaterialStrip />
           {Platform.OS === 'web' && group.print3d !== false ? (
             <Pressable
               style={styles.hookBtn}
@@ -489,6 +515,7 @@ export default function ResultScreen({ navigation }) {
                   code: dna.code,
                   mm: group.print3d !== false ? printMm.current : null,
                   made: new Date().toISOString().slice(0, 10),
+                  mat: specMat,
                 });
                 if (!text) return;
                 const url = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/plain;charset=utf-8' }));
@@ -634,6 +661,7 @@ export default function ResultScreen({ navigation }) {
                 code,
                 mm: group.print3d !== false ? printMm.current : null,
                 made: new Date().toISOString().slice(0, 10),
+                mat: specMat,
               }) : null}
               entry={(exhibit || []).find((e) => e.code === code) || null}
               onExhibit={(patch) => setExhibit(code, patch ? { ...patch, attempts: selectedAttempts } : null)}
