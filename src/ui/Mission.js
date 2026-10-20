@@ -5,6 +5,7 @@ import Frame from './Frame';
 import SealButton from './SealButton';
 import { CloudBand } from './Motifs';
 import StoryScene from './StoryScene';
+import HowToDemo from './HowToDemo';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
@@ -68,13 +69,15 @@ export function MissionCard({ info, onStart, onStartFree, startLabel }) {
         <Text style={styles.missionLabel}>{t('이번 미션')}</Text>
         <Text style={styles.mission}>{i18nT(info.mission)}</Text>
       </View>
+      {/* 시범: 손가락 그림이 직접 해 보이고, 지금 하는 줄이 아래 설명에서 밝아진다 */}
+      {info.demo ? <HowToDemo demo={info.demo} steps={info.steps} /> : null}
       {info.example ? (
         <View style={styles.exampleWrap}>
           <Text style={styles.exampleLabel}>{t('완성하면 이렇게 돼요')}</Text>
           <View style={styles.example}>{info.example}</View>
         </View>
       ) : null}
-      {info.steps && info.steps.length ? (
+      {!info.demo && info.steps && info.steps.length ? (
         <View style={styles.steps}>
           {info.steps.map((s, i) => (
             <View key={i} style={styles.stepRow}>
@@ -127,11 +130,32 @@ export default function MissionGate({ info, resetKey, children, startLabel, onMo
       </ScrollView>
     );
   }
-  return <TimeContext.Provider value={makeTime(mode === 'timed')}>{children}</TimeContext.Provider>;
+  return (
+    <TimeContext.Provider value={makeTime(mode === 'timed')}>
+      {info.demo ? <ReplayDemo info={info} /> : null}
+      {children}
+    </TimeContext.Provider>
+  );
+}
+
+// 놀이 중에도 언제든 시범을 다시 볼 수 있다(펼치면 판 위에 짧게 보이고, 다시 누르면 접힌다)
+function ReplayDemo({ info }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={styles.replay}>
+      <Pressable onPress={() => { play('tap'); setOpen((v) => !v); }} hitSlop={6} style={styles.replayBtn}>
+        <Text style={styles.replayTxt}>{open ? t('▲ 하는 방법 접기') : t('▶ 하는 방법 다시 보기')}</Text>
+      </Pressable>
+      {open ? <HowToDemo demo={info.demo} steps={info.steps} /> : null}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   gateScroll: { paddingBottom: 24 },
+  replay: { marginBottom: 6 },
+  replayBtn: { alignSelf: 'flex-end', paddingVertical: 4, paddingHorizontal: 10, borderWidth: 1, borderColor: colors.border, borderRadius: 999, backgroundColor: colors.paper },
+  replayTxt: { fontSize: 12, color: colors.ink, fontWeight: '700' },
   card: { marginTop: 6 },
   kicker: { fontSize: 12, color: colors.accent, fontWeight: '700', letterSpacing: 2, textAlign: 'center' },
   title: { fontSize: 38, color: colors.ink, textAlign: 'center', marginTop: 2, lineHeight: 46 },

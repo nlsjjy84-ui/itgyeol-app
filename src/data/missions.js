@@ -4,6 +4,7 @@ import { t as i18nT } from '../i18n';
 
 export const JINBEOP_MISSIONS = {
   wonjin: {
+    demo: { kind: 'swap', a: '3', b: '1' },
     kicker: '풍물 · 원진',
     title: '둥글게 둥글게',
     story: '풍물패는 마당 한가운데에서 둥글게 모여 서서 서로의 소리를 들으며 장단을 맞춥니다.',
@@ -15,6 +16,7 @@ export const JINBEOP_MISSIONS = {
     ],
   },
   eulja: {
+    demo: { kind: 'trace', shape: 'snake' },
     kicker: '풍물 · 을자진',
     title: '구불구불 한 줄로',
     story: '풍물패는 앞사람을 따라 길게 이어 서서, 한자 ‘을(乙)’ 모양을 그리며 돌기도 합니다.',
@@ -26,6 +28,7 @@ export const JINBEOP_MISSIONS = {
     ],
   },
   iljajin: {
+    demo: { kind: 'drag', label: '2' },
     kicker: '역사 진법 · 일자진',
     title: '한 줄로 나란히',
     story: '일자진은 사람들이 가로로 한 줄로 나란히 서는 대형이에요. 간격이 똑같아야 흐트러져 보이지 않아요.',
@@ -37,6 +40,7 @@ export const JINBEOP_MISSIONS = {
     ],
   },
   gosari: {
+    demo: { kind: 'tapSeq', n: 4 },
     kicker: '강강술래 · 고사리꺾기',
     title: '고사리처럼 돌돌',
     story: '강강술래에서 줄의 맨 앞사람이 안쪽으로 돌아 들어가면, 줄이 고사리 순처럼 돌돌 말려요.',
@@ -48,6 +52,7 @@ export const JINBEOP_MISSIONS = {
     ],
   },
   giwa: {
+    demo: { kind: 'trace', shape: 'roof' },
     kicker: '강강술래 · 기와밟기',
     title: '기와 지붕 모양 그리기',
     story: '기와밟기는 줄지어 선 사람들이 기와 지붕처럼 둥근 곡선을 이루는 강강술래 놀이예요.',
@@ -59,6 +64,7 @@ export const JINBEOP_MISSIONS = {
     ],
   },
   hagikjin: {
+    demo: { kind: 'wing' },
     kicker: '역사 진법 · 학익진',
     title: '학이 날개를 펴듯',
     story: '1592년 한산도 앞바다. 이순신 장군은 학이 날개를 펼친 모양으로 배를 벌려 적을 에워쌌어요.',
@@ -70,6 +76,7 @@ export const JINBEOP_MISSIONS = {
     ],
   },
   bangjin: {
+    demo: { kind: 'drag', label: '4' },
     kicker: '역사 진법 · 방진',
     title: '네모나게 에워싸기',
     story: '방진은 네모꼴로 둘러서서 사방을 지키는 대형이에요. 네 변에 선 사람 수가 같아야 해요.',
@@ -102,6 +109,7 @@ export function printMission(type) {
   const j = JAMO_WORDS[type.id];
   if (j) {
     return {
+      demo: { kind: 'drag', label: 'ㄱ', color: '#2b5f8e' },
       kicker: i18nT('훈민정음 · 자모 맞추기'),
       title: i18nT('‘{p0}’ 짓기', { p0: j.word }),
       story: i18nT('세종대왕은 1443년에 훈민정음을 만들고 1446년에 널리 알렸어요. 한글은 자음과 모음을 모아 한 글자를 짓습니다. {p0}', { p0: i18nT(j.note) }),
@@ -116,6 +124,7 @@ export function printMission(type) {
   }
   if (type.id === 'mirror') {
     return {
+      demo: { kind: 'mirror', glyph: '가' },
       kicker: i18nT('금속활자 · 거울 글자'),
       title: i18nT('거꾸로 새기고 바로 찍기'),
       story: i18nT('활자와 목판의 글자는 거울에 비친 모양으로 새겨요. 먹을 묻혀 종이에 찍으면 글자가 바로 읽히지요.'),
@@ -125,6 +134,7 @@ export function printMission(type) {
   }
   if (type.id === 'sentence') {
     return {
+      demo: { kind: 'tapSeq', n: 4, labels: ['나', '랏', '말', '씀'] },
       kicker: i18nT('훈민정음 · 서문 조판'),
       title: i18nT('활자로 한 줄 짜기'),
       story: i18nT('세종대왕은 훈민정음 서문에서 “우리말은 한자와 달라 백성이 뜻을 펴기 어렵다”고 말했어요. 그 첫머리를 활자로 짜 봐요.'),
@@ -134,6 +144,7 @@ export function printMission(type) {
   }
   if (type.id === 'shape') {
     return {
+      demo: { kind: 'swap', match: true, a: 'ㄱ', b: '혀뿌리' },
       kicker: i18nT('훈민정음 · 상형 원리'),
       title: i18nT('입 모양을 본뜬 글자'),
       story: i18nT('한글 자음은 소리를 낼 때의 입·혀·이·목구멍 모양을 본떠 만들었어요. 그래서 소리를 내면서 글자를 익힐 수 있어요.'),
@@ -143,6 +154,7 @@ export function printMission(type) {
   }
   if (type.id === 'metaltype') {
     return {
+      demo: { kind: 'drag', label: '직', color: '#8a7a55' },
       kicker: i18nT('금속활자 · 식자'),
       title: i18nT('활자를 한 줄로'),
       story: i18nT('고려는 1377년 청주 흥덕사에서 금속활자로 『직지심체요절』을 찍었어요. 글자 하나하나를 낱개로 만들어 줄에 가지런히 심었지요.'),
@@ -151,7 +163,8 @@ export function printMission(type) {
     };
   }
   return {
-    kicker: i18nT('팔만대장경 · 목판'),
+    demo: { kind: 'drag', label: '팔', color: '#a07c4f' },
+      kicker: i18nT('팔만대장경 · 목판'),
     title: i18nT('목판을 순서대로'),
     story: i18nT('고려 시대에 만든 팔만대장경은 8만 장이 넘는 목판에 글자를 새긴 거대한 기록이에요. 판의 순서가 틀리면 글이 이어지지 않아요.'),
     mission: i18nT('흩어진 목판 5장을 순서대로 늘어놓아 ‘팔만대장경’을 완성해 보자 🪵'),
@@ -168,7 +181,7 @@ const PLAY_STORY = {
   paengi: '채로 팽이를 쳐서 오래 돌리는 놀이예요. 멈추지 않게 계속 쳐 줘야 해요.',
   jachigi: '작은 막대(알)를 긴 막대로 쳐서 멀리 보내는 놀이예요.',
   biseok: '돌을 던져 세워 둔 돌(비석)을 쓰러뜨리는 놀이예요.',
-  tuho: '화살을 던져 항아리에 넣는 놀이예요. 옛 선비들도 즐겼어요.',
+  tuho: '화살을 던져 병(투호병)에 넣는 놀이예요. 조선의 궁중과 양반가에서 즐겼어요.',
   ddakji: '종이로 접은 딱지를 내리쳐 상대 딱지를 뒤집는 놀이예요.',
   gomugojul: '고무줄을 점점 높이 올려 가며 뛰어넘는 놀이예요.',
   yeonnaligi: '바람을 타고 연을 하늘 높이 띄우는 놀이예요.',
@@ -177,10 +190,12 @@ const PLAY_STORY = {
 
 const PLAY_BY_MECHANIC = {
   race: {
+    demo: { kind: 'alt' },
     mission: '왼쪽·오른쪽을 번갈아 눌러서 먼저 결승선에 닿아 보자 🏁',
     steps: ['왼쪽, 오른쪽을 번갈아 빠르게 눌러요. (키보드는 ← → 또는 A·D)', '같은 쪽만 연달아 누르면 느려져요.', '“영차!” 구간에서는 더 힘차게 눌러요.'],
   },
   rhythm: {
+    demo: { kind: 'beat' },
     mission: '도는 점이 “여기!”를 지나는 순간, 톡! 🎯',
     steps: ['점이 도는 모습을 눈으로 따라가요.', '“여기!” 구간에 들어오는 순간 단추를 눌러요. (스페이스바·Z·X)', '맞힐수록 점이 빨라져요.'],
   },
@@ -205,18 +220,22 @@ const PLAY_BY_MECHANIC = {
     steps: ['게이지가 “팝!” 구간에 있을 때 눌러 막대를 띄워요.', '막대가 공중에 뜨면 곧바로 한 번 더 눌러 쳐요.', '타이밍이 좋을수록 멀리 날아가요.'],
   },
   ddakjiSlam: {
+    demo: { kind: 'holdRelease' },
     mission: '딱지를 힘껏 내리쳐서 상대 딱지를 뒤집어 보자 💥',
     steps: ['방향은 맞추지 않아도 돼요.', '단추를 꾹 눌러 힘을 모아요.', '힘이 초록 구간일 때 떼면 내리쳐요.'],
   },
   rhythmJump: {
+    demo: { kind: 'beat', label: '줄이 발밑을 지날 때 톡' },
     mission: '줄이 발밑을 지나는 순간, 폴짝! 🦘',
     steps: ['돌아가는 줄(고무줄)의 움직임을 지켜봐요.', '발밑을 지나는 순간 단추를 눌러요. (스페이스바·Z·X)', '아무 때나 누르면 걸려요.'],
   },
   sangmoCircle: {
+    demo: { kind: 'circle' },
     mission: '빛나는 점을 따라 손가락으로 빙글빙글, 상모를 돌려 보자 💫',
     steps: ['동그라미 위에 손가락(마우스)을 대요.', '빛나는 점을 따라 같은 방향으로 빙글빙글 돌려요.', '점을 잘 따라가면 상모 게이지가 차올라요.'],
   },
   marbleSling: {
+    demo: { kind: 'sling' },
     mission: '내 구슬을 튕겨서 동그라미 안 구슬을 전부 밖으로 내보내 보자 🔮',
     steps: ['아래의 내 구슬을 눌러 뒤로 끌어요.', '놓으면 반대 방향으로 튕겨 나가요. 멀리 끌수록 세요.', '구슬끼리 부딪혀 밖으로 나가면 따먹어요.'],
   },
@@ -225,22 +244,42 @@ const PLAY_BY_MECHANIC = {
     steps: ['팽이가 기우는 쪽을 확인해요.', '같은 쪽 화면을 눌러 채로 쳐요.', '너무 기울면 쓰러져요. 기회는 세 번이에요.'],
   },
   topChase: {
+    demo: { kind: 'tapTarget' },
     mission: '여기저기 돌아다니는 팽이를 콕콕 쳐서 힘을 보태 주자 🌀',
     steps: ['팽이가 어디 있는지 눈으로 찾아요.', '팽이 위를 정확히 눌러(터치) 채로 쳐요.', '힘 막대가 비거나 팽이가 선 밖으로 나가면 쓰러져요. 기회는 세 번이에요.'],
   },
   ddakjiFan: {
+    demo: { kind: 'holdRelease' },
     mission: '내 딱지를 내리쳐서 바닥의 상대 딱지를 뒤집어 따 보자 💥',
     steps: ['손가락으로 끌어 상대 딱지의 가장자리를 겨눠요.', '아래 단추를 꾹 눌러 딱지를 들어 올려요. 높을수록 세지만 손이 흔들려요.', '손을 떼면 내리쳐요. 빨간 선보다 높이 들어 가장자리를 맞히면 넘어가요.'],
   },
+  yeongcha: {
+    demo: { kind: 'pull' },
+    mission: '"영~ 차!" 구령에 맞춰 줄을 당겨, 헝겊을 우리 쪽 선 너머로 끌어오자 💪',
+    steps: ['"영~" 소리가 나면 숨을 골라요. 위의 동그라미가 줄어들어요.', '동그라미가 "차!"에 닿는 순간 화면이나 단추를 톡 눌러 당겨요.', '헝겊이 우리 쪽 선을 넘으면 이겨요. 놓쳐도 다음 "차!"에 다시 당기면 돼요.'],
+  },
+  tuhoPull: {
+    demo: { kind: 'tuho' },
+    mission: '화살을 뒤로 당겼다 놓아서 병에 쏙 넣어 보자 🏺',
+    steps: ['화면을 누른 채 뒤(왼쪽 아래)로 쭉 당겨요. 점선이 화살이 날아갈 길이에요.', '점선이 병 쪽을 향하면 손을 떼요. 많이 당길수록 멀리 날아가요.', '병 입이나 귀에 들어가면 성공! 빗나가면 빨간 점을 보고 조금 더(덜) 당겨요.'],
+  },
+  gomuJump: {
+    demo: { kind: 'gomu' },
+    mission: '"하나·둘·셋·폴짝!" 구령에 맞춰 고무줄을 넘자. 발목 → 무릎 → 허리 🎀',
+    steps: ['"하나·둘·셋" 구령을 들으며 기다려요.', '"폴짝!" 칸에 불이 들어오는 순간 톡 눌러 뛰어넘어요.', '높이마다 세 번 넘으면 줄이 올라가요. 허리까지 넘으면 성공이에요.'],
+  },
   tuhoDial: {
+    demo: { kind: 'sliders' },
     mission: '각도랑 힘을 맞춰서 화살을 항아리에 넣어 보자 🏺',
     steps: ['아래 두 줄에서 각도와 힘을 눌러 끌어 정해요.', '“던지기”를 눌러요. 지난 화살이 떨어진 빨간 점을 보고 고쳐요.', '항아리는 던질 때마다 다른 거리에 놓여요. 위에 나온 수만큼 넣으면 성공이에요.'],
   },
   jachigiSwipe: {
+    demo: { kind: 'swipeUpSide' },
     mission: '알을 튀겨 올리고 공중에서 쳐서 멀리 보내 보자. 거리는 자로 재요 🏏',
     steps: ['화면을 위로 휙 쓸어 구멍 위의 알을 튀겨 올려요.', '알이 떠 있을 때 옆으로 휙 쓸어 쳐요. 가장 높이 떴다가 조금 내려올 때가 좋아요.', '날아간 거리를 자로 재어 모아요. 낮게 날아가면 수비가 받을 수 있어요.'],
   },
   stoneFlick: {
+    demo: { kind: 'flick' },
     mission: '돌을 던져서 세워 둔 비석을 다 쓰러뜨려 보자 🪨',
     steps: ['아래의 내 돌을 눌러요.', '위쪽으로 쓸어 올리며 손을 놓으면 던져져요. 점선 끝이 떨어질 자리예요.', '정해진 횟수 안에 비석을 모두 맞히면 성공이에요.'],
   },
@@ -249,14 +288,17 @@ const PLAY_BY_MECHANIC = {
     steps: ['팔이 좌우로 흔들리는 걸 지켜봐요.', '항아리 쪽을 향해 초록 불이 켜질 때 던져요.', '정해진 횟수 안에 위에 나온 수만큼 넣으면 성공이에요.'],
   },
   gomuPattern: {
+    demo: { kind: 'memory' },
     mission: '노래에 맞춰 켜지는 발 모양을 기억했다가 똑같이 따라 해 보자 🎶',
     steps: ['불이 켜지는 순서를 눈으로 따라가요.', '“이제 따라 해 볼까?”가 뜨면 같은 순서로 눌러요.', '노래가 점점 길어져요. 세 번 틀리면 끝이에요.'],
   },
   kiteSteer: {
+    demo: { kind: 'steer' },
     mission: '푸른 바람 길을 타고 연을 하늘 끝까지 올려 보자 🪁',
     steps: ['손가락(마우스)을 좌우로 움직여 연을 이끌어요.', '푸른 바람 길 안에 있으면 연이 올라가요.', '높이 100%에 닿으면 성공이에요.'],
   },
   hoopSpeed: {
+    demo: { kind: 'hold' },
     mission: '속도를 초록 칸에 맞춰서 굴렁쇠를 끝까지 굴려 보자 🛞',
     steps: ['화면을 꾹 누르면 빨라지고, 떼면 느려져요.', '오른쪽 초록 칸은 오르내려요. 속도 바늘을 칸 안에 두면 돼요.', '벗어나면 비틀거려요. 기회는 세 번이에요.'],
   },
@@ -274,5 +316,6 @@ export function playMission(game) {
     story: PLAY_STORY[game.id] || game.description,
     mission: by.mission,
     steps: by.steps,
+    demo: by.demo,
   };
 }

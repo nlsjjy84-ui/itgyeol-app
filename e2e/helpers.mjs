@@ -107,10 +107,16 @@ export async function paintDancheongStage1(page) {
   const board = page.locator('svg[viewBox="0 0 240 100"]');
   const box = await board.boundingBox();
   for (let i = 0; i < 3; i += 1) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  for (let pass = 0; pass < 4; pass += 1) {
-    if (await page.getByText('다 칠했어요! 단청 한 부재가 완성됐어요.').isVisible().catch(() => false)) return;
-    for (let gy = 0.5; gy < 100; gy += 2) {
-      for (let gx = 0.5; gx < 240; gx += 3) await page.mouse.click(box.x + (gx / 240) * box.width, box.y + (gy / 100) * box.height);
+  const done = () => page.getByText('다 칠했어요! 단청 한 부재가 완성됐어요.').isVisible().catch(() => false);
+  // 칸 가운데를 한 번씩 누르고(바탕칠·채색), 선 단계는 촘촘히 — 줄마다 끝났는지 본다(누르는 횟수를 줄여 브라우저가 지치지 않게)
+  for (let pass = 0; pass < 6; pass += 1) {
+    if (await done()) return;
+    const step = pass < 2 ? [5, 10] : [2, 3];
+    for (let gy = step[0] / 2; gy < 100; gy += step[0]) {
+      if (await done()) return;
+      for (let gx = step[1] / 2; gx < 240; gx += step[1]) await page.mouse.click(box.x + (gx / 240) * box.width, box.y + (gy / 100) * box.height);
+      await page.waitForTimeout(30);
     }
+    await page.waitForTimeout(800); // 단계가 바뀐 뒤 잠깐(0.7초)은 누름을 받지 않는다
   }
 }

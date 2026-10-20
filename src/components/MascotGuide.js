@@ -1,3 +1,4 @@
+import { forDevice } from '../utils/touchText';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Text from '../ui/Text';
@@ -12,7 +13,7 @@ export default function MascotGuide({ which = 'pung', message, style }) {
       <Mascot which={which} size={46} />
       <View style={styles.bubble}>
         <Text style={styles.name}>{i18nT(MASCOT_NAMES[which])}</Text>
-        <Text style={styles.message}>{i18nT(message)}</Text>
+        <Text style={styles.message}>{forDevice(i18nT(message))}</Text>
       </View>
     </View>
   );
