@@ -17,10 +17,11 @@ import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 import { t as i18nT } from '../i18n';
 
-function speedComment(ms) {
+function speedComment(ms, rescues) {
   const sec = ms / 1000;
-  if (sec < 40) return i18nT('순식간에 쌓아 올렸어요.');
-  if (sec < 100) return i18nT('리듬을 타며 차곡차곡 쌓았어요.');
+  if (rescues) return i18nT('판이 가득 차도 멈추지 않고 끝까지 쌓았어요.');
+  if (sec < 60) return i18nT('순식간에 쌓아 올렸어요.');
+  if (sec < 180) return i18nT('리듬을 타며 차곡차곡 쌓았어요.');
   return i18nT('끈기 있게 끝까지 해냈어요.');
 }
 
@@ -46,13 +47,13 @@ export default function HangulScreen({ navigation }) {
     doneRef.current = false;
   };
 
-  const onDone = ({ mistakes, elapsedMs }) => {
+  const onDone = ({ mistakes, elapsedMs, rescues }) => {
     if (doneRef.current) return;
     doneRef.current = true;
     recordSkill(`hangul:${stage.id}`, true);
     play('gayageum');
     setTimeout(() => play('haegeum'), 700);
-    setComment(speedComment(elapsedMs));
+    setComment(speedComment(elapsedMs, rescues));
     setCompleted(true);
     addResult(
       buildAttemptResult({
