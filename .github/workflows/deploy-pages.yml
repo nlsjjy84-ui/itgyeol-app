@@ -64,3 +64,8 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Check order server (잇결 주문·전시 서버가 살아 있는지 — 죽어 있으면 경고만 띄움)
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://itgyeol-gift.vercel.app/api/pay || echo 000)
+          echo "itgyeol-gift /api/pay -> $code"
+          if [ "$code" != "200" ]; then echo "::warning::잇결 주문 서버(/api/pay)가 $code 입니다. fix-server.bat 로 서버를 다시 올려 주세요."; fi
