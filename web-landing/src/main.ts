@@ -65,7 +65,7 @@ function html() {
   <main class="ig-flow">
     <section class="ig-sec ig-sec-hero">
       <div class="ig-col">
-        <p class="ig-kicker" data-reveal="0">사물놀이 · 농악에서 찾은 행동 → 관계 → 흔적</p>
+        <p class="ig-kicker" data-reveal="0">잇다 + 결 · 전통의 결을 따라, 놀이로 사람과 사람을 잇다</p>
         <h1 data-reveal="1">놀이가 흔적이 되고,<br>흔적이 작품이 됩니다</h1>
         <p data-reveal="2">장단에 맞춰 놀고, 노는 방식대로 나만의 전통 작품이 빚어지는 앱. 설치 없이 폰과 컴퓨터 브라우저에서 바로 열립니다.</p>
         <div class="ig-actions" data-reveal="3"><a class="ig-action" href="${app}"><span>3분 둘러보기</span><i aria-hidden="true">↗</i></a><a class="ig-link" href="#ig-play">어떤 놀이가 있나요</a></div>
@@ -82,7 +82,7 @@ function html() {
 
     <section class="ig-sec ig-sec-process">
       <div class="ig-col ig-col-center">
-        <p class="ig-kicker" data-reveal="0">과정</p>
+        <p class="ig-kicker" data-reveal="0">과정 · 사물놀이 · 농악에서 찾은 행동 → 관계 → 흔적</p>
         <h2 data-reveal="1">실제 유물에서 짜임을 빌려 오고,<br><em>놀이 기록이 모양과 무늬가 됩니다.</em></h2>
         <p data-reveal="2">어떤 판에서 무엇을 몇 번 했는지가 그대로 색과 무늬와 모양이 됩니다. 정답도 순위도 없습니다.</p>
         <div class="ig-steps">${steps}</div>
@@ -117,7 +117,8 @@ function html() {
     <section class="ig-sec ig-sec-final">
       <div class="ig-col ig-col-center">
         <h2 class="ig-huge" data-reveal="0">손끝의 장단이,<br><em>나만의 전통 작품이 됩니다.</em></h2>
-        <div class="ig-actions" data-reveal="1"><a class="ig-action" href="${app}"><span>바로 해 보기</span><i aria-hidden="true">↗</i></a><a class="ig-link" href="https://github.com/nlsjjy84-ui/itgyeol-app">GitHub</a></div>
+        <p data-reveal="1">잇결 — 전통의 결을 따라, 놀이로 사람과 사람을 잇다. 우리가 숨 쉬는 숨결처럼, 저마다 다른 나뭇결처럼 사람마다 다른 결이 남습니다.</p>
+        <div class="ig-actions" data-reveal="2"><a class="ig-action" href="${app}"><span>바로 해 보기</span><i aria-hidden="true">↗</i></a><a class="ig-link" href="https://github.com/nlsjjy84-ui/itgyeol-app">GitHub</a></div>
       </div>
     </section>
   </main>
