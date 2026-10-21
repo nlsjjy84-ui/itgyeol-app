@@ -179,7 +179,9 @@ export class ItgyeolScene {
       sp.scale.setScalar(1.35);
       sp.visible = false;
       scene.add(sp);
-      return { sp, a: (i / Math.max(1, gallery.length)) * Math.PI * 2, bob: i * 0.7 };
+      const ring = i % 2; // 두 줄: 위 줄과 아래 줄이 서로 반대로 돈다
+      const per = Math.ceil(gallery.length / 2);
+      return { sp, ring, a: (Math.floor(i / 2) / per) * Math.PI * 2 + ring * (Math.PI / per), bob: i * 0.7 };
     });
 
     const resize = () => {
@@ -315,11 +317,13 @@ export class ItgyeolScene {
         const show = span(p, 0.58, 0.64) * (1 - span(p, 0.8, 0.86));
         const R = this.narrow ? 3.2 : 4.3;
         gallerySprites.forEach((g) => {
-          const a = g.a + t * 0.18;
-          g.sp.position.set(Math.sin(a) * R, 1.3 + Math.sin(t * 0.9 + g.bob) * 0.18 + 0.4 * Math.cos(a), Math.cos(a) * R);
+          const a = g.a + t * (g.ring ? -0.14 : 0.18);
+          const r = g.ring ? R * 0.86 : R;
+          const y = g.ring ? 0.35 : 2.15;
+          g.sp.position.set(Math.sin(a) * r, y + Math.sin(t * 0.9 + g.bob) * 0.14 + 0.32 * Math.cos(a), Math.cos(a) * r);
           const front = 0.55 + 0.45 * Math.cos(a - ang0);
           (g.sp.material as THREE.SpriteMaterial).opacity = show * front;
-          g.sp.scale.setScalar((1.05 + 0.45 * front) * (0.6 + 0.4 * show));
+          g.sp.scale.setScalar((0.9 + 0.4 * front) * (0.6 + 0.4 * show));
           g.sp.visible = show > 0.01;
         });
       }

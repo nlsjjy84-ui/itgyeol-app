@@ -94,7 +94,7 @@ function html() {
       <div class="ig-col ig-col-center">
         <p class="ig-kicker" data-reveal="0">결과물</p>
         <h2 class="ig-huge" data-reveal="1">같은 놀이도,<br><em>사람마다 다른 작품</em></h2>
-        <p data-reveal="2">노리개 · 비녀 · 달항아리 · 범종 · 부채… 놀이가 모양을 빚는 결과물 49가지. 뒤에 도는 것들은 가상의 놀이 기록으로 빚은 예시 작품입니다.</p>
+        <p data-reveal="2">노리개 · 비녀 · 달항아리 · 범종 · 부채… 놀이가 모양을 빚는 결과물 49가지를 청자 · 나전 · 옻칠 · 유기 같은 실제 전통 재료 35가지로 빚습니다. 뒤에 도는 35점은 결과물 종류마다 하나씩, 가상의 놀이 기록으로 빚은 예시 작품입니다.</p>
       </div>
     </section>
 
