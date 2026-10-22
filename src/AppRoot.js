@@ -23,6 +23,7 @@ import MakerScreen from './screens/MakerScreen';
 import ExhibitWallScreen from './screens/ExhibitWallScreen';
 import MaterialScreen from './screens/MaterialScreen';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
+import { takeTourFlag } from './tourFlag';
 import { colors, getThemeMode } from './theme';
 import { loadLang, setLang } from './i18n';
 import { loadVoice } from './utils/voice';
@@ -65,8 +66,15 @@ const MaterialH = withHanji(MaterialScreen);
 
 // 처음 열면 "전통문화 하면 떠오르는 것" 질문부터, 한 번 답하거나 건너뛰었으면 바로 홈으로.
 function Nav() {
-  const { taste, book, carried, addSenses, attempts } = useJourney();
+  const { taste, book, carried, addSenses, attempts, setTaste, markBook } = useJourney();
   const [payBack] = useState(() => isPayReturn() && attempts !== undefined);
+  // 소개 화면의 「3분 둘러보기」로 왔으면 질문·그림책을 본 것으로 두고 홈의 둘러보기 카드로 바로 간다
+  const [tour] = useState(() => !payBack && takeTourFlag());
+  useEffect(() => {
+    if (!tour || taste === null || book === null) return;
+    if (!taste.done) setTaste([]);
+    if (!book.prologue) markBook({ prologue: true });
+  }, [tour, taste === null, book === null]);
   useEffect(() => {
     finishTossPay();
   }, []);
@@ -89,7 +97,7 @@ function Nav() {
   // 처음이면 질문 → 그림책 프롤로그 → 홈. 질문만 끝낸 사람은 바로 프롤로그부터.
   // QR로 집에서 이어서 여는 사람은 질문·그림책을 건너뛰고 바로 홈(가져온 작품)으로.
   // 토스 결제창에서 돌아왔으면 결과 화면(주문 진행)으로 바로 간다.
-  const first = payBack ? 'Result' : carried ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
+  const first = payBack ? 'Result' : carried || tour ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
   return (
     <NavigationContainer onStateChange={onRoute}>
       <Stack.Navigator initialRouteName={first} screenOptions={{ headerShown: false }}>
@@ -102,7 +110,7 @@ function Nav() {
         <Stack.Screen name="Maker" component={MakerH} />
         <Stack.Screen name="Materials" component={MaterialH} />
         <Stack.Screen name="ExhibitWall" component={ExhibitWallScreen} />
-        <Stack.Screen name="Home" component={HomeH} />
+        <Stack.Screen name="Home" component={HomeH} initialParams={tour ? { tour: true } : undefined} />
         <Stack.Screen name="Jinbeop" component={JinbeopH} />
         <Stack.Screen name="Print" component={PrintH} />
         <Stack.Screen name="Play" component={PlayH} />
