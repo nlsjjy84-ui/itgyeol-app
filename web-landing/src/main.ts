@@ -68,7 +68,7 @@ function html() {
         <p class="ig-kicker" data-reveal="0">잇다 + 결 · 전통의 결을 따라, 놀이로 사람과 사람을 잇다</p>
         <h1 data-reveal="1">놀이가 흔적이 되고,<br>흔적이 작품이 됩니다</h1>
         <p data-reveal="2">장단에 맞춰 놀고, 노는 방식대로 나만의 전통 작품이 빚어지는 앱. 설치 없이 폰과 컴퓨터 브라우저에서 바로 열립니다.</p>
-        <div class="ig-actions" data-reveal="3"><a class="ig-action" href="${app}"><span>3분 둘러보기</span><i aria-hidden="true">↗</i></a><a class="ig-link" href="#ig-play">어떤 놀이가 있나요</a></div>
+        <div class="ig-actions" data-reveal="3"><a class="ig-action" href="${app}?start&tour"><span>3분 둘러보기</span><i aria-hidden="true">↗</i></a><a class="ig-link" href="#ig-play">어떤 놀이가 있나요</a></div>
       </div>
       <span class="ig-scrollcue" aria-hidden="true"><i></i></span>
     </section>
