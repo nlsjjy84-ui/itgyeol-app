@@ -159,8 +159,6 @@ export default function HomeScreen({ navigation, route }) {
           </Frame>
         </Pressable>
       ) : null}
-      {/* 숫자를 먼저 — 한 판 시간, 놀이 수, 자료 수, 언어 수, 예시 작품 그래프 */}
-      <HomeNumbers attempts={attempts} exhibit={exhibit} onGallery={() => navigation.navigate('Gallery')} onResult={() => navigation.navigate('Result')} onHall={() => navigation.navigate('Exhibit')} />
       {route && route.params && route.params.tour ? (
         <QuickTourCard navigation={navigation} onClose={() => navigation.setParams({ tour: false })} />
       ) : null}
@@ -216,6 +214,9 @@ export default function HomeScreen({ navigation, route }) {
         ))}
       </View>
 
+
+      {/* 숫자로 보는 잇결 — 판·자료·언어·예시 작품. 판을 먼저 보여 준 뒤 아래에 둔다(정리 2026-10-26). */}
+      <HomeNumbers attempts={attempts} exhibit={exhibit} onGallery={() => navigation.navigate('Gallery')} onResult={() => navigation.navigate('Result')} onHall={() => navigation.navigate('Exhibit')} />
 
       {/* 이 앱이 왜 만들어졌는지 — 마스코트의 말이 아니라 만든 사람의 실제 이력으로
           직접 말한다. 국악(사물놀이·풍물) 전공, 인천에서 10년 넘게 운영한 국악연구소,
