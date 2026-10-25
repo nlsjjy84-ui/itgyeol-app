@@ -291,8 +291,30 @@ export const OHANG = [
   { key: 'su', label: '수(水)', color: '#3f6f8f', hint: '유연한' },
 ];
 
-export function pickTodayOhang() {
-  return OHANG[Math.floor(Math.random() * OHANG.length)];
+// [오늘의 기운] 날짜+시간 → 일진/시주 오행 (전통 계산; 일진 (JDN+49)%60·甲子=0, 시주 오자둔법)
+// 천간 오행: 갑을 木, 병정 火, 무기 土, 경신 金, 임계 水
+const _CHEON_OH = ['목', '목', '화', '화', '토', '토', '금', '금', '수', '수'];
+function _jdn(y, m, d) {
+  const a = ((14 - m) / 12) | 0, yy = y + 4800 - a, mm = m + 12 * a - 3;
+  return d + (((153 * mm + 2) / 5) | 0) + 365 * yy + ((yy / 4) | 0) - ((yy / 100) | 0) + ((yy / 400) | 0) - 32045;
+}
+function _dayGan(date) {
+  const J = _jdn(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  return ((((J + 49) % 60) + 60) % 60) % 10; // 일간(日干) index, 갑=0
+}
+const _OH2KEY = { 목: 'mok', 화: 'hwa', 토: 'to', 금: 'geum', 수: 'su' };
+
+// [오늘의 기운] 지금 이 시각의 기운 — 로그인한 시각(시주)이 반영된다. 안 바꾸면 이 값이 기본값.
+export function nowOhangKey(date = new Date()) {
+  const dgan = _dayGan(date);
+  const s = Math.floor((date.getHours() + 1) / 2) % 12; // 시지(자시 = 23~01시)
+  const jaGan = ((dgan % 5) * 2) % 10; // 오자둔법: 일간으로 정해지는 자시 천간
+  const sgan = (jaGan + s) % 10; // 이 시의 천간
+  return _OH2KEY[_CHEON_OH[sgan]];
+}
+
+export function pickTodayOhang(date = new Date()) {
+  return ohangByKey(nowOhangKey(date));
 }
 
 // [오늘의 기운 선택 기능] key로 OHANG 항목을 찾는다 — 못 찾으면(저장된 값이 없거나
