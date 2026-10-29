@@ -4,6 +4,10 @@
 
 const ui = {
   // AI 길 안내(웹, 2026-10-29)
+  "가져갈 물건을 위에서 하나 골라 주세요.": "Pick at least one item above to take home.",
+  "위 (필수) 확인 칸을 눌러 주세요. 확인해야 결제할 수 있어요.": "Tick the (required) box above first. You can pay once it's checked.",
+  "아래에서 바탕 재료를 하나 골라 주세요.": "Pick a base material below first.",
+  "먼저 위에서 작품을 하나 골라 주세요.": "Choose a work above first.",
   "잇결 AI": "Itgyeol AI",
   "잇결 AI · 길 안내": "Itgyeol AI · Guide",
   "데모 둘러보기": "Demo tour",

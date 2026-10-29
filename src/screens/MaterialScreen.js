@@ -286,6 +286,7 @@ export default function MaterialScreen({ navigation, route }) {
   const [choice, setChoice] = useState(() => (materials && materials.base ? materials : suggested));
   const finish = (v) => { setMaterials(v); if (first) navigation.replace(then, params.thenParams || {}); else navigation.navigate(then, params.thenParams || {}); };
   const [tab, setTab] = useState('mat');
+  const [goHint, setGoHint] = useState('');
   const tabs = pick ? [['mat', t('재료')]] : [['mat', t('재료')], ['obj', t('물건 갈래')], ['shop', t('만드는 곳')]];
   const base = choice.base ? MATERIAL_BY_ID[choice.base] : null;
   const accent = choice.accent ? MATERIAL_BY_ID[choice.accent] : null;
@@ -304,9 +305,15 @@ export default function MaterialScreen({ navigation, route }) {
             {accent ? <Swatch look={accent.look} size={26} /> : null}
             <Text style={st.choiceName} numberOfLines={1}>{accent ? matName(accent.id, accent.name) : t('고르지 않음')}</Text>
           </View>
-          <Pressable style={[st.go, !base && st.goOff]} disabled={!base} onPress={() => { play('stamp'); finish(choice); }}>
+          {/* 막지 않는다: 바탕을 안 골랐으면 추천 재료로 바로 시작하고, 추천도 없으면 무엇을 고르면 되는지 알려 준다 */}
+          <Pressable style={[st.go, !base && st.goOff]} onPress={() => {
+            if (base) { play('stamp'); finish(choice); return; }
+            if (suggested && suggested.base) { play('stamp'); finish(suggested); return; }
+            play('tap'); setGoHint(t('아래에서 바탕 재료를 하나 골라 주세요.'));
+          }}>
             <Text style={st.goTxt}>{t('이 재료로 놀기')}</Text>
           </Pressable>
+          {goHint && !base ? <Text style={st.choiceLab}>{goHint}</Text> : null}
         </View>
       ) : null}
       <ScrollView contentContainerStyle={st.wrap}>

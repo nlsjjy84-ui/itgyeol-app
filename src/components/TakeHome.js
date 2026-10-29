@@ -56,6 +56,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
   const [toss, setToss] = useState(false);
   const [busy, setBusy] = useState(false);
   const [payMsg, setPayMsg] = useState(null);
+  const [hint, setHint] = useState(''); // 막힌 버튼 대신 무엇을 하면 되는지 한 줄로
   useEffect(() => {
     let live = true;
     tossKey().then((k) => live && setToss(!!k));
@@ -186,9 +187,8 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
 
       {/* 아무것도 고르지 않으면 무료로 그림만 저장해 가져간다(사지 않아도 됨) */}
       <Pressable
-        disabled={total === 0 && !onSaveFree}
         onPress={() => {
-          if (total === 0) { play('tap'); if (onSaveFree) onSaveFree(); return; }
+          if (total === 0) { play('tap'); if (onSaveFree) onSaveFree(); else setHint(t('가져갈 물건을 위에서 하나 골라 주세요.')); return; }
           play('stamp');
           setSheet(true);
         }}
@@ -197,6 +197,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
         <Text style={styles.btnText}>{total === 0 ? t('무료로 가져가기 · 이미지 저장') : t('주문표 만들기')}</Text>
       </Pressable>
       {total === 0 && freeStatus ? <Text style={styles.small}>{freeStatus}</Text> : null}
+      {hint && !sheet ? <Text style={[styles.small, { color: colors.accent }]}>{hint}</Text> : null}
 
       {sheet && total > 0 ? (
         <Frame style={{ marginTop: 12, alignSelf: 'stretch' }}>
@@ -246,13 +247,16 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
               ))}
             </View>
             {how === 'post' ? <Text style={styles.small}>{t('받을 주소는 결제사 화면에서 적어요. 잇결은 주소를 저장하지 않아요.')}</Text> : null}
-            <Pressable onPress={() => { play('tap'); setAgreed((v) => !v); }} style={styles.agreeRow} accessibilityRole="checkbox" accessibilityState={{ checked: agreed }}>
+            <Pressable onPress={() => { play('tap'); setAgreed((v) => !v); setHint(''); }} style={styles.agreeRow} accessibilityRole="checkbox" accessibilityState={{ checked: agreed }}>
               <View style={[styles.box, agreed && styles.boxOn]}><Text style={styles.boxMark}>{agreed ? '✓' : ''}</Text></View>
               <Text style={styles.agreeTxt}>{t('(필수) 내 놀이로 만든 하나뿐인 맞춤 제작품이라, 업체가 만들기 시작한 뒤에는 단순 변심으로 취소할 수 없다는 것을 확인했어요. 만들기 전까지는 전액 취소돼요.')}</Text>
             </Pressable>
             <Pressable
-              disabled={!agreed || busy}
+              disabled={busy}
               onPress={async () => {
+                // 막지 않는다: 확인 칸을 안 눌렀으면 무엇을 하면 되는지 알려 준다
+                if (!agreed) { play('tap'); setHint(t('위 (필수) 확인 칸을 눌러 주세요. 확인해야 결제할 수 있어요.')); return; }
+                setHint('');
                 const m = how === 'post' && method === 'counter' ? 'card' : method;
                 const r = placeOrder({ code, pick, how, method: m, agreed, spec: product && pick[product] ? spec || null : null, seq: orders.length + 1 });
                 if (r.error) return;
@@ -279,6 +283,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
                 {toss && method !== 'counter' ? t('{n} 결제 (테스트)', { n: won(q.total) }) : t('{n} 결제 (모의)', { n: won(q.total) })}
               </Text>
             </Pressable>
+            {hint && !agreed ? <Text style={[styles.small, { color: colors.accent }]}>{hint}</Text> : null}
             <Text style={styles.demo}>
               {toss && method !== 'counter'
                 ? t('토스페이먼츠 테스트 결제창이 열려요. 실제 돈은 나가지 않아요.')

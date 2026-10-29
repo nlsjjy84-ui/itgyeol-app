@@ -229,6 +229,7 @@ export default function ResultScreen({ navigation }) {
   };
 
   const handleSaveImage = async () => {
+    if (!selected) { setSaveStatus(t('먼저 위에서 작품을 하나 골라 주세요.')); return; }
     setSaveStatus(t('저장 중...'));
     try {
       if (Platform.OS === 'web') {
@@ -391,7 +392,6 @@ export default function ResultScreen({ navigation }) {
         <Pressable
           style={[styles.primaryBtn, !selected && styles.btnDisabled]}
           onPress={handleSaveImage}
-          disabled={!selected}
         >
           <Text style={styles.primaryBtnText}>{t('이미지로 저장하기')}</Text>
         </Pressable>
