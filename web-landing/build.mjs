@@ -32,7 +32,8 @@ if (preview) {
   fs.rmSync(site, { recursive: true, force: true });
   fs.mkdirSync(path.join(site, 'img'), { recursive: true });
   for (const f of fs.readdirSync(imgDir)) fs.copyFileSync(path.join(imgDir, f), path.join(site, 'img', f));
-  const html = `<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>잇결 — 놀이가 흔적이 되고, 흔적이 작품이 됩니다</title>\n<meta name="description" content="사물놀이 · 농악에서 찾은 행동 → 관계 → 흔적을 놀이로 옮긴 앱. 노는 방식대로 나만의 전통 작품이 빚어집니다.">\n<meta name="theme-color" content="#f1f4f3">\n${fonts}\n<style>html,body{margin:0;background:#f1f4f3}${css}</style>\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
+  fs.copyFileSync(path.join(here, 'pf-back.js'), path.join(site, 'pf-back.js')); // 포트폴리오로 돌아가기
+  const html = `<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>잇결 — 놀이가 흔적이 되고, 흔적이 작품이 됩니다</title>\n<meta name="description" content="사물놀이 · 농악에서 찾은 행동 → 관계 → 흔적을 놀이로 옮긴 앱. 노는 방식대로 나만의 전통 작품이 빚어집니다.">\n<meta name="theme-color" content="#f1f4f3">\n${fonts}\n<style>html,body{margin:0;background:#f1f4f3}${css}</style>\n</head>\n<body>\n${body}\n<script src="pf-back.js" defer></script>\n</body>\n</html>\n`;
   fs.writeFileSync(path.join(site, 'index.html'), html);
   console.log('site/index.html', html.length);
 }

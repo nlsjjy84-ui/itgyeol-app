@@ -35,7 +35,24 @@ function introFirst() {
   }
 }
 
+// 웹 데모 어느 화면에서든 장주영 포트폴리오(노션)로 돌아가는 작은 버튼(「← 포트폴리오로」)을 붙인다.
+// 버튼은 소개 화면과 같은 파일(intro/pf-back.js)을 쓴다. 자동 테스트와 폰 앱(APK)에는 붙이지 않는다.
+function portfolioBack() {
+  try {
+    if (typeof window === 'undefined' || typeof document === 'undefined' || !window.location) return;
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return;
+    const m = /^(.*\/itgyeol-app)(\/|$)/.exec(window.location.pathname || '');
+    if (!m || document.getElementById('pf-back-script')) return;
+    const s = document.createElement('script');
+    s.id = 'pf-back-script';
+    s.src = m[1] + '/intro/pf-back.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  } catch (e) {}
+}
+
 if (!introFirst()) {
+  portfolioBack();
   // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
   // It also ensures that whether you load the app in Expo Go or in a native build,
   // the environment is set up appropriately
