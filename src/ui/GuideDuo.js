@@ -26,7 +26,7 @@ const HIDDEN = (() => {
 })();
 
 // 화면 이름(지금 위치를 말할 때)
-const PLACE = {
+export const PLACE = {
   Home: '홈',
   Jinbeop: '진법 판',
   Print: '훈민정음·인쇄 판',

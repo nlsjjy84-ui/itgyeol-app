@@ -3,6 +3,21 @@
 // Game screens and mission details come in phase 2.
 
 const ui = {
+  // AI 길 안내(웹, 2026-10-29)
+  "잇결 AI": "Itgyeol AI",
+  "잇결 AI · 길 안내": "Itgyeol AI · Guide",
+  "데모 둘러보기": "Demo tour",
+  "화면을 불러오는 중이라 이 곳은 건너뛸게.": "This screen is still loading, so let's skip this stop.",
+  "데모 둘러보기 끝! 열두 곳을 다 돌았어. 이제 마음 가는 판부터 놀아 봐. 아무 버튼에나 마우스를 올리면 뭔지 알려 줄게.": "Demo tour done! You've visited all twelve places. Now play whichever board you like. Hover over any button and I'll tell you what it is.",
+  "잇결 AI · 오늘의 길 결산": "Itgyeol AI · Today's tour",
+  "마음대로 놀아 볼게": "I'll play on my own",
+  "처음이야? 잇결을 같이 둘러볼까?": "First time? Shall we look around Itgyeol together?",
+  "여섯 판부터 전시까지 같이 걸어 · 언제든 그만 볼 수 있어": "From the six boards to the exhibition · stop any time",
+  "설명은 끌게. 마음대로 놀아 봐. 다시 보고 싶으면 오른쪽 위 「✦ 데모 길 안내 켜기」를 눌러.": "I'll turn the explanations off. Play as you like. To see them again, press 「✦ Turn on demo guide」 at the top right.",
+  "설명 없이 둘러볼게": "Look around without explanations",
+  "설명 글은 끄고 바로 놀아 보기": "Turn off explanations and just play",
+  "데모 길 안내 켜기": "Turn on demo guide",
+  "데모 길 안내": "Demo guide",
   // 풍이와 결이의 길 안내(2026-10-28)
   "10분 자세히": "10-minute full tour",
   "10분 자세히 이어 가기": "Continue to the 10-minute tour",

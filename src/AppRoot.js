@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
-import GuideDuo from './ui/GuideDuo';
+import AiGuide from './ui/AiGuide'; // 웹: 꺾쇠 커서·오방색 리본·글자 설명 / 앱: 예전 길 안내
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Hanji from './ui/Hanji';
 import ConsentScreen from './screens/ConsentScreen';
@@ -132,7 +132,7 @@ function Nav() {
       </Stack.Navigator>
       <StatusBar style={getThemeMode() === 'dark' ? 'light' : 'dark'} backgroundColor={colors.bg} />
       <SenseLayer />
-      <GuideDuo routeName={routeName} navigate={(name) => navRef.isReady() && navRef.navigate(name)} greet={!carried && !payBack} />
+      <AiGuide routeName={routeName} navigate={(name) => navRef.isReady() && navRef.navigate(name)} greet={!carried && !payBack} />
     </NavigationContainer>
   );
 }
