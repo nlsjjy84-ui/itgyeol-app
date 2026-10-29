@@ -17,7 +17,7 @@ const shoot = async (w) => {
   if (existsSync(out)) return;
   const attempts = (w.a || []).map(([sceneId, formationId], i) => ({ sceneId, formationId, mappingCode: `m${i}`, ohangKey: OH[(w.ohang || '목')[0]] || 'mok', speed: 'mid', seed: (hash(w.id + i) >>> 0) }));
   const playLog = { byGame: Object.fromEntries((w.raw && w.raw.g) || []), byScene: Object.fromEntries((w.raw && w.raw.s) || []) };
-  const url = `http://localhost:8777/?w=${packJourney({ attempts, playLog })}&pick=${w.group}.${w.item}.${w.variant}&still=1`;
+  const url = `http://localhost:8777/?w=${packJourney({ attempts, playLog })}&pick=${w.group}.${w.item}.${w.variant}&still=1${process.env.SHOT_DPR ? '&shotdpr=' + process.env.SHOT_DPR : ''}${process.env.SHOT_NOSHADOW ? '&noshadow=1' : ''}`;
   const p = await b.newPage({ viewport: { width: 430, height: 900 }, deviceScaleFactor: 1.4 });
   try {
     await p.addInitScript(([base, accent]) => { localStorage.setItem('itgyeol_consent_v1', 'yes'); localStorage.setItem('itgyeol_taste_v1', JSON.stringify({ done: true, picks: [] })); localStorage.setItem('itgyeol_book_v1', JSON.stringify({ prologue: true, gates: {}, choice: {} })); localStorage.setItem('itgyeol_material_v1', JSON.stringify({ base, accent })); }, w.mat || [null, null]);
@@ -37,6 +37,6 @@ const ACCENT_ON = { najeon: 'otchil', gilt: 'otchil', gem: 'silver', knot: 'silk
 const matIds = () => [...readFileSync(new URL('../src/data/materialTree.js', import.meta.url), 'utf8').matchAll(/\{"id":"([a-z]+)","name":"[^"]*","note":"[^"]*","look"/g)].map((x) => x[1]); // 재료(갈래 제외)
 const list = process.env.SHOT_MATERIALS
   ? matIds().map((id) => ({ ...works[0], id: 'm_' + id, group: 'keyring', item: 'mypae', variant: 'mine', mat: ACCENT_ON[id] ? [ACCENT_ON[id], id] : [id, null] }))
-  : works.slice(from, to);
+  : process.env.SHOT_IDS ? works.filter((w) => process.env.SHOT_IDS.split(',').includes(w.id)) : works.slice(from, to);
 for (let i = 0; i < list.length; i += 2) await Promise.all(list.slice(i, i + 2).map(shoot));
 await b.close();

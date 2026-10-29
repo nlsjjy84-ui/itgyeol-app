@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import GuideDuo from './ui/GuideDuo';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Hanji from './ui/Hanji';
 import ConsentScreen from './screens/ConsentScreen';
@@ -37,6 +38,8 @@ import { LangContext } from './i18n/LangContext';
 import './i18n/register';
 
 const Stack = createNativeStackNavigator();
+// 풍이와 결이의 길 안내가 지금 화면을 알고, 다음 목적지로 데려다주는 데 쓴다.
+const navRef = createNavigationContainerRef();
 
 // 모든 화면 뒤에 한지 질감 바탕을 깐다.
 const withHanji = (Screen) =>
@@ -79,6 +82,7 @@ function Nav() {
     finishTossPay();
   }, []);
   const sceneRef = React.useRef(null);
+  const [routeName, setRouteName] = useState(null);
   // 화면이 바뀔 때: 놀이 화면을 나가면 잰 값을 기록에 더하고, 놀이 화면에 들어가면 켠다(처음이면 먼저 묻는다)
   const onRoute = React.useCallback(
     (state) => {
@@ -99,7 +103,14 @@ function Nav() {
   // 토스 결제창에서 돌아왔으면 결과 화면(주문 진행)으로 바로 간다.
   const first = payBack ? 'Result' : carried || tour ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
   return (
-    <NavigationContainer onStateChange={onRoute}>
+    <NavigationContainer
+      ref={navRef}
+      onReady={() => setRouteName(navRef.getCurrentRoute() ? navRef.getCurrentRoute().name : first)}
+      onStateChange={(state) => {
+        onRoute(state);
+        if (navRef.getCurrentRoute()) setRouteName(navRef.getCurrentRoute().name);
+      }}
+    >
       <Stack.Navigator initialRouteName={first} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Taste" component={TasteH} />
         <Stack.Screen name="Book" component={BookH} initialParams={{ part: 'prologue', then: 'Home' }} />
@@ -121,6 +132,7 @@ function Nav() {
       </Stack.Navigator>
       <StatusBar style={getThemeMode() === 'dark' ? 'light' : 'dark'} backgroundColor={colors.bg} />
       <SenseLayer />
+      <GuideDuo routeName={routeName} navigate={(name) => navRef.isReady() && navRef.navigate(name)} greet={!carried && !payBack} />
     </NavigationContainer>
   );
 }

@@ -22,6 +22,10 @@ const PAPER = '#fffbf3';
 const ENV_YAW = (() => { try { const v = typeof location !== 'undefined' && new URLSearchParams(location.search).get('envyaw'); return v ? parseFloat(v) : 1.57; } catch (e) { return 1.57; } })();
 // 촬영용(웹): 주소에 still=1 이 있으면 3D가 돌지 않는다(앱이 주소를 지우기 전에 미리 읽어 둔다)
 const SHOT_STILL = Platform.OS === 'web' && typeof location !== 'undefined' && /[?&]still=1/.test(location.search || '');
+// 촬영용(웹): 주소에 shotdpr=숫자 가 있으면 그 배율로 크게 그린다(예: 5 → 가로 1,600px 안팎). 크게 그린 뒤 줄이면 가장자리가 계단 없이 매끈해진다.
+// 촬영용(웹): noshadow=1 이면 바닥 그림자를 빼고 찍는다(사진 합성 때 물건 바로 아래에 부드러운 그림자를 따로 깐다).
+const SHOT_NOSHADOW = SHOT_STILL && typeof location !== 'undefined' && /[?&]noshadow=1/.test(location.search || '');
+const SHOT_DPR = (() => { try { const v = SHOT_STILL && new URLSearchParams(location.search).get('shotdpr'); return v ? Math.min(8, Math.max(1, parseFloat(v))) : null; } catch (e) { return null; } })();
 
 async function snap(ref, w, h) {
   if (Platform.OS === 'web') {
@@ -179,10 +183,10 @@ function Scene({ tex, build, hook, dna, record, printable = true, longMm = 50, c
       <directionalLight position={[3, 5, 4]} intensity={envOk ? 1.9 : 2.0} color={0xfff1df} />
       <directionalLight position={[-3.5, 2.5, -4]} intensity={0.9} color={0xdfe8ff} />
       <directionalLight position={[-4, 0.5, 3]} intensity={0.45} color={0xffffff} />
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -built.height / 2 - 0.12, 0]}>
+      {!SHOT_NOSHADOW && <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -built.height / 2 - 0.12, 0]}>
         <planeGeometry args={[3.2, 3.2]} />
         <meshBasicMaterial map={shadowTex} transparent depthWrite={false} />
-      </mesh>
+      </mesh>}
       <group ref={root}>
         <primitive object={built.pivot} />
       </group>
@@ -290,7 +294,7 @@ export default function Obj3DViewer({ art, artSize = 280, build, hook = false, d
           <View style={[styles.fallback, { width, height }]}>{art}</View>
         ) : tex ? (
           <Canvas
-            dpr={[1, 2]}
+            dpr={SHOT_DPR || [1, 2]}
             style={{ width, height, backgroundColor: 'transparent' }}
             camera={{ position: [0, 0.35, 6.4], fov: 32 }}
             gl={{ alpha: true, antialias: true, preserveDrawingBuffer: SHOT_STILL }}
