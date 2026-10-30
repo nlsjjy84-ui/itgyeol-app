@@ -209,8 +209,8 @@ function Guide({ routeName, navigate, greet = true }) {
           <button type="button" className="aig-menu-later" onClick={() => setMenuOpen(false)}>{t('나중에 볼게')}</button>
         </div>
       ) : null}
-      <button type="button" className="aig-launch" aria-expanded={menuOpen} onClick={() => { if (resume && !menuOpen) { drive(); return; } if (quiet) setQuiet(false); setMenuOpen((o) => !o); }}>
-        ✦ {resume ? t('이어서 안내') : quiet ? t('데모 길 안내 켜기') : t('데모 길 안내')}
+      <button type="button" className="aig-launch" aria-expanded={menuOpen} aria-label={resume ? t('이어서 안내') : t('데모 길 안내')} title={resume ? t('이어서 안내') : t('데모 길 안내')} onClick={() => { if (resume && !menuOpen) { drive(); return; } if (quiet) setQuiet(false); setMenuOpen((o) => !o); }}>
+        ✦<span className="aig-launch-t"> {resume ? t('이어서 안내') : quiet ? t('데모 길 안내 켜기') : t('데모 길 안내')}</span>
       </button>
     </div>,
     document.body,
@@ -237,4 +237,19 @@ const CSS = `
 .aig-light .aig-menu button small,.aig-light .aig-menu .aig-menu-later{color:#5b4c42}
 .aig-light .aig-launch:hover,.aig-light .aig-menu button:hover{color:#2c62c9}
 @media (prefers-reduced-motion:reduce){.aig-launch{animation:none}}
+/* 휴대폰: 위쪽은 언어 단추·3분 둘러보기 같은 내용이 꽉 차서 글자가 겹친다. 오른쪽 가장자리의 작은 탭(✦)으로 옮기고,
+   메뉴는 탭 바로 위에 불투명한 판으로 연다(왼쪽 가장자리의 「← 포트폴리오로」와 마주 보는 자리). */
+@media (max-width:640px){
+  .aig-launch-wrap{top:auto;right:0;bottom:calc(92px + env(safe-area-inset-bottom,0px));gap:8px}
+  .aig-launch{order:2;background:rgba(20,16,14,.86);border:1px solid rgba(255,255,255,.16);border-right:0;border-radius:999px 0 0 999px;
+    padding:8px max(10px,env(safe-area-inset-right,0px)) 8px 11px;font-size:13px;color:#f2c230;text-shadow:none;animation:none;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+  .aig-launch-t{display:none}
+  .aig-launch[aria-expanded="true"] .aig-launch-t{display:inline}
+  .aig-menu{pointer-events:auto;background:rgba(20,16,14,.94);border-radius:14px 0 0 14px;padding:14px 16px 14px 18px;max-width:min(300px,86vw);
+    text-shadow:none;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+  .aig-light .aig-launch{background:rgba(255,255,255,.95);border-color:rgba(0,0,0,.12);color:#b3322a;text-shadow:none}
+  .aig-light .aig-menu{background:rgba(255,255,255,.97);text-shadow:none;border:1px solid rgba(0,0,0,.08);border-right:0}
+  .aig-light .aig-menu button{text-shadow:none}
+  .aig .hud{top:auto;bottom:calc(136px + env(safe-area-inset-bottom,0px));right:12px}
+}
 `;
