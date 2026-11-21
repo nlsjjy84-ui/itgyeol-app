@@ -4,6 +4,13 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "진짜 유물 찾기": "Find the real artifact",
+  "박물관에서 진열장 설명판의 소장품번호(예: 덕수1496)를 넣으면 바로 그 유물 조각을 얻어요.": "At the museum, type the collection number on the display label (e.g. 덕수1496) to get that very artifact as a piece.",
+  "소장품번호": "Collection number",
+  "찾기": "Find",
+  "그 번호의 조각은 아직 잇결에 없어요. 번호를 다시 확인해 주세요.": "That number isn't in Itgyeol yet. Please check the number again.",
+  "이미 찾은 유물이에요.": "You already found this artifact.",
+  "진짜 유물을 찾았어요! 눈앞의 그 유물이 조각이 되어 도감에 들어갔어요.": "You found the real artifact! The one in front of you became a piece in your collection.",
   "이달의 시리즈": "This month's series",
   "이 시리즈 조각이 더 잘 나와요. 모은 조각 {a} / {b}": "Pieces from this series show up more often. Collected {a} / {b}",
   "시크릿 조각이 72번에 한 번꼴로 숨어 있어요": "A secret piece hides in about 1 of 72 draws",

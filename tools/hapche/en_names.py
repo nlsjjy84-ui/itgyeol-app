@@ -22,6 +22,24 @@ def en_name(name):
     parts = [mat, (mot + '-pattern') if mot and 'face' not in mot and mot not in ('dragon','tiger','lion','turtle','frog','duck','bird','fish','qilin','phoenix','crane','peach') else mot, obj]
     s = ' '.join(p for p in parts if p).strip()
     return s[:1].upper() + s[1:]
+# 2026-11-22 개선판 — 더 구체적인 낱말(보살입상·보자기·총통…)을 먼저 보고, 한 글자 낱말은 이름 끝에서만 쓴다.
+_en_old = en_name
+PRE=[('보살입상','standing bodhisattva'),('보살좌상','seated bodhisattva'),('불입상','standing Buddha'),('불좌상','seated Buddha'),('사유상','pensive statue'),('신장상','guardian figure'),('여인상','female figure'),('인물상','figure'),('보자기','wrapping cloth'),('등잔대','oil lamp stand'),('등잔','oil lamp'),('주머니','pouch'),('허리띠 고리','belt hook'),('허리띠 장식','belt ornament'),('편종','bell chime'),('편경','stone chime'),('초롱잠','lantern hairpin'),('족반','small table'),('소반','small table'),('보개','canopy'),('총통','gun barrel'),('화살통','quiver'),('화약통','powder flask'),('먹통','ink pot'),('포탄','cannonball'),('구포탄','cannonball'),('포백척','cloth ruler'),('안장 꾸미개','saddle ornament'),('안장꾸미개','saddle ornament'),('안장','saddle'),('코등이','sword guard'),('손잡이 머리','pommel'),('베갯모','pillow end'),('묘지명','epitaph tablet'),('업경대','mirror stand'),('세반','basin'),('푼주','wide bowl'),('요패','waist pendant'),('자격루','water clock'),('용상','throne'),('태극장','Order of the Taegeuk'),('팔괘장','Order of the Palgwae'),('대장패','commander tag'),('낙인','branding iron'),('윷','yut sticks'),('입각대','lamp stand'),('일월연','sun-moon inkstone'),('사각연','square inkstone'),('토제품','clay object'),('물고기 뼈','fish bone'),('사리 통','sarira case')]
+END=[('인','seal')]
+def en_name(name):
+    n = re.sub(r'\(.*?\)', '', name).strip()
+    mat = next((e for k, e in MAT if k in n), '')
+    mot = '' if '포도청' in n or '포도대장' in n else next((e for k, e in MOTIF if k in n), '')
+    obj = next((e for k, e in PRE if re.search(re.escape(k) + r'(?![가-힣])', n)), '')
+    if not obj and re.search(r'[^형물]인$', n.replace("'",'')) and not n.endswith('부인상'): obj='seal'
+    if not obj: obj = next((e for k, e in OBJ if n.endswith(k) or (' ' + k) in n or k in n.split()[-1:]), '')
+    if not obj: obj = next((e for k, e in OBJ if len(k)>1 and k in n), '')
+    if not obj: return ''
+    if mot and mot.lower() in obj.lower(): mot=''
+    parts=[mat,(mot+'-pattern') if mot and 'face' not in mot and mot not in ('dragon','tiger','lion','turtle','frog','duck','bird','fish','qilin','phoenix','crane','peach') else mot,obj]
+    if mat and mat.lower().split()[-1] in obj.lower(): parts[0]=''
+    r=' '.join(p for p in parts if p).strip(); return r[:1].upper()+r[1:]
+
 if __name__ == '__main__':
     for x in ['백자청화동채복숭아형연적','청동 주전자','연꽃무늬 수막새','짐승얼굴무늬 기와','쇠 띠고리','돌 저울추','가락바퀴','칼','분청사기 도장무늬 발','나무로 만든 호랑이를 타고 있는 사람','금 가는 고리 귀걸이']:
         print(x, '→', en_name(x))

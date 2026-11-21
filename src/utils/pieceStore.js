@@ -191,6 +191,23 @@ export function enterCode(text) {
   return c;
 }
 
+// 진짜 유물 찾기 — 박물관 진열장 설명판의 소장품번호(예: 덕수1496, 본관14328, 1918.501)를 넣으면
+// 그 유물 조각을 바로 얻는다. 같은 번호는 한 번만.
+const normNo = (x) => String(x || '').replace(/[\s\-–]/g, '').toLowerCase();
+let NO_INDEX = null;
+export function findByNo(text) {
+  const q = normNo(text);
+  if (!q || !/\d/.test(q)) return [];
+  if (!NO_INDEX) {
+    NO_INDEX = {};
+    PIECES.forEach((p) => {
+      const n = normNo(p.no);
+      if (n && /\d/.test(n)) (NO_INDEX[n] = NO_INDEX[n] || []).push(p.k);
+    });
+  }
+  return (NO_INDEX[q] || []).slice(0, 3);
+}
+
 export function saveWork(work) {
   if (!state) state = { ...EMPTY };
   const w = { ...work, id: work.id || 'W' + Date.now().toString(36), at: Date.now() };

@@ -9,7 +9,7 @@ import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, dailyState, takeDaily, currentSeries } from '../utils/pieceStore';
+import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, findByNo, dailyState, takeDaily, currentSeries } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
@@ -61,6 +61,25 @@ export default function PackScreen({ navigation, route }) {
   const [opened, setOpened] = useState(null); // {keys, fresh, starter}
   const [code, setCode] = useState('');
   const [codeMsg, setCodeMsg] = useState('');
+  const [no, setNo] = useState('');
+  const [noMsg, setNoMsg] = useState('');
+  const scan = async () => {
+    await loadPieces();
+    const ks = findByNo(no);
+    if (!ks.length) {
+      setNoMsg(t('그 번호의 조각은 아직 잇결에 없어요. 번호를 다시 확인해 주세요.'));
+      return;
+    }
+    const key = 'scan:' + ks.join(',');
+    if (isClaimed(key)) {
+      setNoMsg(t('이미 찾은 유물이에요.'));
+      return;
+    }
+    const fresh = addPieces(ks);
+    markClaimed(key);
+    setNoMsg('');
+    setOpened({ keys: ks, fresh, starter: false, scan: true });
+  };
   const shake = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
@@ -150,6 +169,15 @@ export default function PackScreen({ navigation, route }) {
               );
             })()}
             <View style={st.codeBox}>
+              <Text style={st.codeH}>{t('진짜 유물 찾기')}</Text>
+              <Text style={st.small}>{t('박물관에서 진열장 설명판의 소장품번호(예: 덕수1496)를 넣으면 바로 그 유물 조각을 얻어요.')}</Text>
+              <View style={st.codeRow}>
+                <TextInput testID="scan-no" value={no} onChangeText={setNo} placeholder={t('소장품번호')} style={st.codeInput} />
+                <SealButton small label={t('찾기')} onPress={scan} />
+              </View>
+              {!!noMsg && <Text style={st.codeMsg}>{noMsg}</Text>}
+            </View>
+            <View style={st.codeBox}>
               <Text style={st.codeH}>{t('박물관에서 받은 암호')}</Text>
               <Text style={st.small}>{t('박물관 현장에서 받은 암호를 넣으면 그곳에서만 나오는 「한정 조각」이 보따리에 섞여요.')}</Text>
               <View style={st.codeRow}>
@@ -178,6 +206,8 @@ export default function PackScreen({ navigation, route }) {
                 ? gift
                   ? t('이 선물은 이미 받았어요.')
                   : t('이 놀이의 보따리는 이미 받았어요. 다른 놀이를 마치면 또 받을 수 있어요.')
+                : opened.scan
+                ? t('진짜 유물을 찾았어요! 눈앞의 그 유물이 조각이 되어 도감에 들어갔어요.')
                 : opened.gift
                 ? t('선물 받은 조각이에요! 도감에 들어갔어요.')
                 : opened.starter

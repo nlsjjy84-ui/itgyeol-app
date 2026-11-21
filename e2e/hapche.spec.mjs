@@ -110,3 +110,12 @@ test('유물 합체: 합체 전시관이 예시 작품을 틀고 QR을 보여 �
   await expect(page.getByText('이 영상을 내 폰으로')).toBeVisible();
   await expect(page.getByText(/작품 1 \/ \d+/)).toBeVisible();
 });
+
+test('유물 합체: 박물관 소장품번호로 진짜 유물 조각을 찾는다', async ({ page }) => {
+  await openHome(page);
+  await page.getByText('첫 보따리 받기').filter({ visible: true }).first().click();
+  await page.getByTestId('scan-no').fill('덕수 1496');
+  await page.getByText('찾기', { exact: true }).click();
+  await expect(page.getByText(/진짜 유물을 찾았어요!/)).toBeVisible();
+  await expect(page.getByText(/백자청화동채복숭아형연적|복숭아/).first()).toBeVisible();
+});
