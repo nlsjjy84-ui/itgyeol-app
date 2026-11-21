@@ -40,7 +40,9 @@ export function powerTag(power) {
 export function workTitle(frame, bodyPiece) {
   const tag = powerTag(bodyPiece ? bodyPiece.power : '');
   const short = bodyPiece ? pieceShort(bodyPiece).slice(0, getLang() === 'ko' ? 4 : 12) : '잇결';
-  return { full: `${t(tag)} ${t(frame.name)} 「${short}${t('호')}」`, tag, short };
+  // 영어 화면은 「」·'호' 대신 따옴표만 쓴다(번역이 빈 글자라 한글 '호'가 새어 나오던 것 고침)
+  const full = getLang() === 'en' ? `${t(tag)} ${t(frame.name)} “${short}”` : `${t(tag)} ${t(frame.name)} 「${short}${t('호')}」`;
+  return { full, tag, short };
 }
 
 // 틀마다 작품이 하는 일 — 끝 장면 자막
