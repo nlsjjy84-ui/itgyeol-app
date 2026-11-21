@@ -6,6 +6,7 @@ import Text from '../ui/Text';
 import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
 import HapcheStage from '../components/HapcheStage';
+import FreeBuilder from '../components/FreeBuilder';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
@@ -28,7 +29,7 @@ export default function WorkshopScreen({ navigation, route }) {
   const { width } = useWindowDimensions();
   const store = usePieces();
   const params = route.params || {};
-  const [mode, setMode] = useState(params.mode === 'transform' ? 'transform' : 'hapche');
+  const [mode, setMode] = useState(params.mode === 'transform' ? 'transform' : params.mode === 'free' ? 'free' : 'hapche');
   const [frameId, setFrameId] = useState(params.mode === 'transform' ? 'rocket' : 'guardian');
   const [assign, setAssign] = useState({});
   const [picking, setPicking] = useState(null); // 슬롯 key
@@ -86,13 +87,14 @@ export default function WorkshopScreen({ navigation, route }) {
           {[
             ['hapche', t('합체 — 여러 조각을 하나로')],
             ['transform', t('변형 — 조각 하나로 새 모양')],
+            ['free', t('자유 합체 — 내 마음대로')],
           ].map(([id, label]) => (
             <Pressable
               key={id}
               onPress={() => {
                 play('tap');
                 setMode(id);
-                setFrameId(id === 'transform' ? 'rocket' : 'guardian');
+                if (id !== 'free') setFrameId(id === 'transform' ? 'rocket' : 'guardian');
               }}
               style={[st.mode, mode === id && st.modeOn]}
             >
@@ -100,6 +102,10 @@ export default function WorkshopScreen({ navigation, route }) {
             </Pressable>
           ))}
         </View>
+        {mode === 'free' ? (
+          <FreeBuilder ownedKeys={ownedKeys} size={stage} onDone={(layout) => navigation.navigate('Movie', { frameId: 'free', assign: {}, layout, seed: Math.floor(Math.random() * 99999) + 1, scene: params.scene || '' })} />
+        ) : (
+        <>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.frames}>
           {list.map((f) => (
             <Pressable
@@ -148,6 +154,8 @@ export default function WorkshopScreen({ navigation, route }) {
           <SealButton label={t('자동으로 다시 채우기')} variant="paper" onPress={() => setAssign(autoAssign(frameId, [...ownedKeys].sort(() => Math.random() - 0.5)))} />
           <SealButton label={t('조각 더 받기')} variant="ink" onPress={() => navigation.navigate('Pack')} />
         </View>
+        </>
+        )}
       </ScrollView>
       {picking && (
         <Modal transparent animationType="fade" visible onRequestClose={() => setPicking(null)}>
@@ -192,7 +200,7 @@ const st = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 16, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },
   modeRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
-  mode: { flex: 1, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
+  mode: { flex: 1, padding: 8, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
   modeOn: { backgroundColor: colors.ink, borderColor: colors.ink },
   modeTxt: { fontSize: 13, color: colors.ink, textAlign: 'center' },
   modeTxtOn: { color: colors.baek, fontWeight: '700' },

@@ -40,3 +40,20 @@ test('유물 합체: 공유 링크(?m=)로 열면 같은 영상이 바로 나온
   await expect(page.getByText('누군가 보낸 합체 영상이에요. 진짜 박물관 유물 조각으로 만들었어요.')).toBeVisible();
   await expect(page.getByText('변형 영상').filter({ visible: true }).first()).toBeVisible();
 });
+
+test('유물 합체: 자유 합체로 직접 놓고 영상 만들기', async ({ page }) => {
+  await openHome(page);
+  await page.getByText('첫 보따리 받기').filter({ visible: true }).first().click();
+  await page.getByLabel('보따리 풀기').click();
+  await page.getByText('작업대에서 합체하기').filter({ visible: true }).first().click();
+  await page.getByText('자유 합체 — 내 마음대로').filter({ visible: true }).first().click();
+  await expect(page.getByText('조각을 올려 보세요')).toBeVisible();
+  await page.getByTestId('tray-0').click();
+  await page.getByTestId('tray-1').click();
+  await page.getByTestId('tray-2').click();
+  await page.getByLabel('크게').click();
+  await page.getByLabel('오른쪽으로').click();
+  await page.getByText('합체!', { exact: true }).filter({ visible: true }).first().click();
+  await expect(page.getByText('합체 영상').filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText(/자유 합체/).filter({ visible: true }).first()).toBeVisible();
+});

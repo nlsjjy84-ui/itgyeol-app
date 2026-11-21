@@ -45,6 +45,7 @@ export function workTitle(frame, bodyPiece) {
 // 틀마다 작품이 하는 일 — 끝 장면 자막
 const MISSION = {
   guardian: '밤새 박물관 문을 지키기로 했어',
+  free: '세상에 하나뿐인 모양으로 박물관 밤하늘을 날아올랐어',
   skyship: '구름 위로 날아올라 조각들의 고향을 한 바퀴 돌아보기로 했어',
   turtle: '바퀴를 굴려 전시실 구석구석 길을 닦기로 했어',
   beast: '네 다리로 달려 잠든 유물들을 깨우러 갔어',
@@ -110,8 +111,32 @@ const easeOutBack = (x) => {
 const easeOut = (x) => 1 - Math.pow(1 - x, 3);
 
 // frameId: 틀 id, assign: {슬롯key: 조각k} (변형은 {core: 조각k}), opts: {scene, seed}
+// 자유 합체 — 사용자가 직접 놓은 자리(layout)로 틀을 만든다. 가장 큰 조각이 몸통처럼 먼저, 가장 위 조각이 머리처럼 마지막에.
+export function freeFrame(layout = []) {
+  const items = layout.filter((it) => PIECE_BY_K[it.k]);
+  const bigI = items.reduce((b, it, i) => (it.w > (items[b] || {}).w ? i : b), 0);
+  const topI = items.reduce((b, it, i) => (it.y < (items[b] || {}).y ? i : b), 0);
+  const slots = items.map((it, i) => {
+    const d = Math.hypot(it.x - (items[bigI] || it).x, it.y - (items[bigI] || it).y);
+    return {
+      key: 'p' + i,
+      k: it.k,
+      slot: PIECE_BY_K[it.k].slots[0],
+      x: it.x,
+      y: it.y,
+      w: it.w,
+      axis: 'a',
+      rot: it.rot || 0,
+      flip: !!it.flip,
+      z: it.z || 1,
+      order: i === bigI ? 0 : i === topI && items.length > 2 ? 9 : 1 + Math.min(7, Math.floor(d / 90)),
+    };
+  });
+  return { id: 'free', name: '자유 합체', kind: '내 설계', desc: '내가 직접 놓은 자리대로 합체한다.', bg: '#22303a', slots };
+}
+
 export function buildTimeline(frameId, assign, opts = {}) {
-  const frame = FRAME_BY_ID[frameId];
+  const frame = frameId === 'free' ? freeFrame(opts.layout) : FRAME_BY_ID[frameId];
   const isTransform = !!frame.parts;
   const seed = opts.seed || 1;
   const r = seeded(seed);
@@ -119,7 +144,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
   const coreK = isTransform ? assign.core : null;
   const items = specs
     .map((sp) => {
-      const k = isTransform ? coreK : assign[sp.key];
+      const k = isTransform ? coreK : frameId === 'free' ? sp.k : assign[sp.key];
       const piece = PIECE_BY_K[k];
       if (!piece) return null;
       const fit = fitPiece(piece, sp);

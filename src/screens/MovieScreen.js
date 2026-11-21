@@ -28,18 +28,18 @@ const GOODS = [
 export default function MovieScreen({ navigation, route }) {
   const { width } = useWindowDimensions();
   const store = usePieces();
-  const { frameId, assign, seed = 1, scene = '', saved, shared } = route.params || {};
-  const tl = useMemo(() => buildTimeline(frameId, assign, { seed, scene }), [frameId, assign, seed, scene]);
+  const { frameId, assign = {}, seed = 1, scene = '', saved, shared, layout } = route.params || {};
+  const tl = useMemo(() => buildTimeline(frameId, assign, { seed, scene, layout }), [frameId, assign, seed, scene, layout]);
   const [savedId, setSavedId] = useState(saved || null);
   const [rec, setRec] = useState(null); // null | number(진행률) | {url, ext} | 'fail'
   const size = Math.min(width - 24, 620);
   const parts = [...new Set(tl.events.map((e) => e.k))].map((k) => ({ k, p: PIECE_BY_K[k], slots: [...new Set(tl.events.filter((e) => e.k === k).map((e) => e.slot).filter(Boolean))] }));
 
   const onSave = () => {
-    const w = saveWork({ id: savedId || undefined, frameId, assign, seed, scene, title: tl.title.full });
+    const w = saveWork({ id: savedId || undefined, frameId, assign: frameId === 'free' ? Object.fromEntries((layout || []).map((it, i) => ['p' + i, it.k])) : assign, layout, seed, scene, title: tl.title.full });
     setSavedId(w.id);
   };
-  const link = movieUrl({ frameId, assign, seed });
+  const link = movieUrl({ frameId, assign, seed, layout });
   const [copied, setCopied] = useState(false);
   const back = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'));
   const onExport = async (vertical) => {
@@ -148,7 +148,7 @@ export default function MovieScreen({ navigation, route }) {
         <Text style={st.lic}>{t('실제 제작·판매는 박물관 상품관과 제작 업체가 맡아요. 잇결은 작품과 설계까지 만들어요.')}</Text>
 
         <View style={[st.btns, { marginTop: 18 }]}>
-          <SealButton label={t('다른 틀로 다시 합체')} onPress={() => navigation.navigate('Workshop', { mode: tl.isTransform ? 'transform' : 'hapche' })} />
+          <SealButton label={t('다른 틀로 다시 합체')} onPress={() => navigation.navigate('Workshop', { mode: frameId === 'free' ? 'free' : tl.isTransform ? 'transform' : 'hapche' })} />
           <SealButton label={t('조각 도감')} variant="ink" onPress={() => navigation.navigate('Dex')} />
           <SealButton label={t('홈으로')} variant="paper" onPress={() => navigation.navigate('Home')} />
         </View>

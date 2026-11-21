@@ -8,7 +8,11 @@ import { SITE_URL } from './carry';
 const short = (k) => (k.startsWith('nmk_') ? 'n' + k.slice(4) : k.startsWith('gogung_') ? 'g' + k.slice(7) : k);
 const long = (s) => (s[0] === 'n' ? 'nmk_' + s.slice(1) : s[0] === 'g' ? 'gogung_' + s.slice(1) : s);
 
-export function packMovie({ frameId, assign, seed }) {
+export function packMovie({ frameId, assign, seed, layout }) {
+  if (frameId === 'free') {
+    const r = (v) => Math.round(v);
+    return `free~${seed || 1}~${(layout || []).map((it) => [short(it.k), r(it.x), r(it.y), r(it.w), r(it.rot || 0), it.flip ? 1 : 0].join(',')).join('_')}`;
+  }
   const f = FRAME_BY_ID[frameId];
   if (!f) return '';
   const keys = f.parts ? [assign.core] : f.slots.map((s) => assign[s.key]);
@@ -17,6 +21,14 @@ export function packMovie({ frameId, assign, seed }) {
 export function unpackMovie(code) {
   try {
     const [frameId, seedS, list] = String(code).split('~');
+    if (frameId === 'free') {
+      const layout = (list || '')
+        .split('_')
+        .map((x) => x.split(','))
+        .map(([k, x, y, w, rot, fl]) => ({ k: long(k), x: +x, y: +y, w: +w, rot: +rot, flip: fl === '1' }))
+        .filter((it) => PIECE_BY_K[it.k]);
+      return layout.length ? { frameId: 'free', assign: {}, layout, seed: parseInt(seedS, 10) || 1, shared: true } : null;
+    }
     const f = FRAME_BY_ID[frameId];
     if (!f || !list) return null;
     const keys = list.split('.').map(long);

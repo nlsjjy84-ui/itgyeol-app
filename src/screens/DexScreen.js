@@ -99,12 +99,50 @@ export default function DexScreen({ navigation }) {
     return m;
   }, [store]);
 
+  // 모음 목표(배지) — 띠부씰 도감처럼, 채울수록 목표가 열린다
+  const goals = useMemo(() => {
+    const mine = PIECES.filter((p) => owned[p.k]);
+    const slotsHave = new Set(mine.flatMap((p) => p.slots));
+    const eras = new Set(mine.map((p) => p.era).filter(Boolean));
+    const powers = new Set(mine.map((p) => p.power));
+    const veryRare = mine.filter((p) => p.rare === 2).length;
+    const palace = mine.filter((p) => p.by === '국립고궁박물관').length;
+    const works = (store.works || []).length;
+    return [
+      { id: 'slots', icon: '◎', name: '자리 박사', note: '자리 20가지를 모두 채우기', cur: slotsHave.size, max: 20 },
+      { id: 'eras', icon: '⌛', name: '시간 여행자', note: '서로 다른 시대 6곳의 조각 모으기', cur: eras.size, max: 6 },
+      { id: 'powers', icon: '✦', name: '재료 장인', note: '흙·쇠·돌·옥·나무·천·종이·금·뼈 9가지 재료 모으기', cur: powers.size, max: 9 },
+      { id: 'rare', icon: '★', name: '보물 사냥꾼', note: '「아주 귀함」 조각 3개 모으기', cur: veryRare, max: 3 },
+      { id: 'palace', icon: '⛩', name: '궁궐 손님', note: '국립고궁박물관 조각 10개 모으기', cur: palace, max: 10 },
+      { id: 'works', icon: '⚙', name: '합체 장인', note: '합체 작품 5개 만들기', cur: works, max: 5 },
+      { id: 'hundred', icon: '百', name: '백 조각', note: '조각 100개 모으기', cur: mine.length, max: 100 },
+    ];
+  }, [store]);
+
   const header = (
     <View>
       <ScreenHeader title={t('조각 도감')} sub={t('실제 유물 {n}점 중 {m}점을 모았어요', { n: PIECES.length, m: ownedN })} onBack={() => navigation.goBack()} />
       <View style={st.progress}>
         <View style={[st.progressFill, { width: `${(ownedN / PIECES.length) * 100}%` }]} />
       </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.goals}>
+        {goals.map((g) => {
+          const done = g.cur >= g.max;
+          return (
+            <View key={g.id} style={[st.goal, done && st.goalDone]}>
+              <Text style={[st.goalIc, done && { color: '#fff' }]}>{g.icon}</Text>
+              <Text style={[st.goalName, done && { color: '#fff' }]}>{t(g.name)}</Text>
+              <Text style={[st.goalNote, done && { color: '#ffffffcc' }]} numberOfLines={2}>
+                {t(g.note)}
+              </Text>
+              <View style={st.goalBar}>
+                <View style={[st.goalFill, { width: `${Math.min(100, (g.cur / g.max) * 100)}%` }]} />
+              </View>
+              <Text style={[st.goalNum, done && { color: '#fff' }]}>{done ? t('달성!') : `${Math.min(g.cur, g.max)} / ${g.max}`}</Text>
+            </View>
+          );
+        })}
+      </ScrollView>
       <View style={st.tabs}>
         {[
           ['pieces', t('조각')],
@@ -166,14 +204,14 @@ export default function DexScreen({ navigation }) {
             const f = FRAME_BY_ID[w.frameId];
             const ks = [...new Set(Object.values(w.assign || {}))].slice(0, 6);
             return (
-              <Pressable key={w.id} style={st.work} onPress={() => navigation.navigate('Movie', { frameId: w.frameId, assign: w.assign, seed: w.seed, scene: w.scene, saved: w.id })}>
+              <Pressable key={w.id} style={st.work} onPress={() => navigation.navigate('Movie', { frameId: w.frameId, assign: w.assign, layout: w.layout, seed: w.seed, scene: w.scene, saved: w.id })}>
                 <View style={st.workImgs}>
                   {ks.map((k) => (PIECE_BY_K[k] ? <Image key={k} source={PIECE_BY_K[k].img} style={st.workImg} resizeMode="contain" /> : null))}
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={st.workTitle}>{w.title}</Text>
                   <Text style={st.workMeta}>
-                    {f ? t(f.name) : ''} · {new Date(w.at).toLocaleDateString()}
+                    {f ? t(f.name) : w.frameId === 'free' ? t('자유 합체') : ''} · {new Date(w.at).toLocaleDateString()}
                   </Text>
                 </View>
                 <Pressable onPress={() => removeWork(w.id)} hitSlop={8}>
@@ -242,6 +280,15 @@ const st = StyleSheet.create({
   progress: { height: 8, borderRadius: 4, backgroundColor: colors.borderSoft, overflow: 'hidden', marginTop: 4 },
   progressFill: { height: 8, backgroundColor: colors.hwang },
   tabs: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  goals: { gap: 8, paddingTop: 12 },
+  goal: { width: 128, backgroundColor: colors.paper, borderRadius: 12, padding: 8, borderWidth: 1, borderColor: colors.borderSoft },
+  goalDone: { backgroundColor: '#b9781a', borderColor: '#b9781a' },
+  goalIc: { fontSize: 18, color: '#b9781a' },
+  goalName: { fontSize: 13, fontWeight: '700', color: colors.ink, marginTop: 2 },
+  goalNote: { fontSize: 10.5, color: colors.muted, marginTop: 2, minHeight: 28 },
+  goalBar: { height: 5, borderRadius: 3, backgroundColor: colors.borderSoft, marginTop: 6, overflow: 'hidden' },
+  goalFill: { height: 5, backgroundColor: colors.hwang },
+  goalNum: { fontSize: 11, color: colors.ink, marginTop: 3 },
   tab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, borderWidth: 1, borderColor: colors.border },
   tabOn: { backgroundColor: colors.ink, borderColor: colors.ink },
   tabTxt: { color: colors.ink, fontSize: 14 },

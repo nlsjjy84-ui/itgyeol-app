@@ -57,11 +57,23 @@ export function rng(seed) {
 
 // 보따리 하나 뽑기: 보통 70% · 귀함 25% · 아주 귀함 5%.
 // 아직 없는 조각이 조금 더 잘 나오게(도감 채우는 재미), 「궁궐 한정」 조각은 박물관에서 받은 암호가 있어야 나온다.
-export function drawPack(n, seed, owned = {}, codes = []) {
+// 놀이와 이어진 조각 — 그 놀이를 마치면 관련 유물이 더 잘 나온다(60%)
+export const SCENE_BIAS = {
+  진법: /칼|검|창|화살|촉|투구|갑|방패|깃발|총통|활|기마|말/,
+  '훈민정음·인쇄': /연적|벼루|먹|붓|인장|인$|필통|도장/,
+  전래놀이: /팽이|구슬|공기|윷|투호|방울|토우|놀이|바둑|주사위/,
+  '한글 테트리스': /인장|연적|필통|인$|벼루/,
+  탈춤: /귀면|도깨비|얼굴|짐승|탈|가면/,
+  단청: /막새|치미|기와|용머리|단청|잡상/,
+};
+export function drawPack(n, seed, owned = {}, codes = [], scene = '') {
   const r = rng(seed);
-  const pool = PIECES.filter((p) => !p.only || codes.includes(p.only));
+  const all = PIECES.filter((p) => !p.only || codes.includes(p.only));
+  const bias = SCENE_BIAS[scene] ? all.filter((p) => SCENE_BIAS[scene].test(p.name)) : [];
+  let pool = all;
   const out = [];
   for (let i = 0; i < n; i++) {
+    pool = bias.length > 6 && r() < 0.6 ? bias : all;
     const roll = r();
     const tier = roll < 0.05 ? 2 : roll < 0.3 ? 1 : 0;
     let cand = pool.filter((p) => p.rare === tier && !out.includes(p.k));

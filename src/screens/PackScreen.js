@@ -79,7 +79,7 @@ export default function PackScreen({ navigation, route }) {
       setOpened({ keys: [], fresh: [], starter: false, already: true });
       return;
     }
-    const keys = drawPack(count, Date.now() % 1000003, s.owned, s.codes);
+    const keys = drawPack(count, Date.now() % 1000003, s.owned, s.codes, scene);
     const fresh = addPieces(keys);
     markClaimed(claim);
     setOpened({ keys, fresh, starter: false });
