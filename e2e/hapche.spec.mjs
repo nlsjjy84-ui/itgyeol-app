@@ -119,3 +119,25 @@ test('유물 합체: 박물관 소장품번호로 진짜 유물 조각을 찾는
   await expect(page.getByText(/진짜 유물을 찾았어요!/)).toBeVisible();
   await expect(page.getByText(/백자청화동채복숭아형연적|복숭아/).first()).toBeVisible();
 });
+
+test('유물 합체: 하루 빠져도 쉼표 부적이 이어 오기를 지켜 준다', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    const f = (n) => {
+      const d = new Date();
+      d.setDate(d.getDate() - n);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+    localStorage.setItem(
+      'itgyeol_pieces_v1',
+      JSON.stringify({ owned: { nmk_42506: 1 }, order: ['nmk_42506'], works: [], packs: 1, starter: true, codes: [], claimed: [], daily: { last: f(2), streak: 6, charms: 1, days: [f(7), f(6), f(5), f(4), f(3), f(2)] } })
+    );
+  });
+  await openHome(page);
+  await expect(page.getByText(/빠진 날을 부적이 지켜 줄 거예요/).filter({ visible: true }).first()).toBeVisible();
+  await page.getByText(/오늘의 보따리 받기 — 7일째/).filter({ visible: true }).first().click();
+  await page.getByLabel('보따리 풀기').click();
+  await expect(page.getByText(/빠진 1일은 쉼표 부적이 지켜 줬어요/)).toBeVisible();
+  await expect(page.getByText(/쉼표 부적 하나를 받았어요/)).toBeVisible();
+});

@@ -100,7 +100,7 @@ export default function PackScreen({ navigation, route }) {
         setOpened({ keys: [], fresh: [], starter: false, already: true, daily: true });
         return;
       }
-      setOpened({ keys: d.keys, fresh: d.fresh, starter: false, daily: true, streak: d.streak });
+      setOpened({ keys: d.keys, fresh: d.fresh, starter: false, daily: true, streak: d.streak, usedCharms: d.usedCharms, gotCharm: d.gotCharm });
       return;
     }
     if (gift) {
@@ -199,7 +199,7 @@ export default function PackScreen({ navigation, route }) {
           <View>
             <Text style={st.lead}>
               {opened.daily && !opened.already
-                ? t('오늘의 보따리! {n}일째 이어서 왔어요. 조각 {m}개.', { n: opened.streak, m: opened.keys.length }) + (opened.streak % 7 === 0 ? ' ' + t('7일째 선물 — 「아주 귀함」 조각이 들어 있어요!') : '')
+                ? t('오늘의 보따리! {n}일째 이어서 왔어요. 조각 {m}개.', { n: opened.streak, m: opened.keys.length }) + (opened.streak % 7 === 0 ? ' ' + t('7일째 선물 — 「아주 귀함」 조각이 들어 있어요!') : '') + (opened.usedCharms ? ' ' + t('빠진 {n}일은 쉼표 부적이 지켜 줬어요.', { n: opened.usedCharms }) : '') + (opened.gotCharm ? ' ' + t('쉼표 부적 하나를 받았어요!') : '')
                 : opened.already && opened.daily
                 ? t('오늘의 보따리는 이미 받았어요. 내일 또 와요!')
                 : opened.already

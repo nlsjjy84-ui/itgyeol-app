@@ -16,6 +16,34 @@ import { FRAMES, TRANSFORMS } from '../data/frames';
 const STILL = typeof navigator !== 'undefined' && !!navigator.webdriver;
 const DEMO = ['guardian', 'skyship', 'dragon', 'jet', 'suit', 'flower', 'turtle', 'haechi'];
 
+// 이번 주 이어 오기 줄 — 지난 7일 중 보따리를 받은 날은 채운 동그라미, 쉼표 부적 수
+function StreakRow() {
+  const ds = dailyState();
+  const cells = [];
+  for (let i = 6; i >= 0; i -= 1) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    cells.push({ key, on: ds.days.includes(key), today: i === 0 });
+  }
+  const left = 7 - (ds.nextStreak % 7 || 7);
+  return (
+    <View style={st.streak} testID="streak-row">
+      <View style={st.dots}>
+        {cells.map((c) => (
+          <View key={c.key} style={[st.dot, c.on && st.dotOn, c.today && st.dotToday]} />
+        ))}
+      </View>
+      <Text style={st.streakTxt}>
+        {t('{n}일째 이어 오는 중', { n: ds.ready ? ds.streak : ds.streak })} · {t('쉼표 부적 {m}개', { m: ds.charms })}
+        {ds.ready && ds.useCharms ? ' · ' + t('빠진 날을 부적이 지켜 줄 거예요') : ''}
+        {ds.ready && ds.lost ? ' · ' + t('이어 오던 {n}일이 끊겼어요. 오늘부터 다시!', { n: ds.lost }) : ''}
+      </Text>
+      <Text style={st.streakSub}>{left ? t('{n}일 더 오면 「아주 귀함」 조각과 쉼표 부적', { n: left }) : t('오늘 오면 「아주 귀함」 조각과 쉼표 부적')}</Text>
+    </View>
+  );
+}
+
 export default function HapcheHome({ navigation }) {
   const { width } = useWindowDimensions();
   const store = usePieces();
@@ -42,6 +70,7 @@ export default function HapcheHome({ navigation }) {
       </View>
       <Text style={st.count}>{t('조각 {n}점 · 내가 모은 조각 {m}점', { n: PIECES.length, m: owned })}</Text>
       <View style={st.btns}>
+        {owned ? <StreakRow /> : null}
         {owned && dailyState().ready ? (
           <SealButton label={t('오늘의 보따리 받기 — {n}일째', { n: dailyState().nextStreak })} onPress={() => navigation.navigate('Pack', { daily: true })} />
         ) : !owned ? (
@@ -60,6 +89,13 @@ export default function HapcheHome({ navigation }) {
 }
 
 const st = StyleSheet.create({
+  streak: { alignItems: 'center', gap: 4, marginBottom: 4 },
+  dots: { flexDirection: 'row', gap: 6 },
+  dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#e0a43a' },
+  dotOn: { backgroundColor: '#e0a43a' },
+  dotToday: { transform: [{ scale: 1.25 }] },
+  streakTxt: { fontSize: 13, color: colors.ink, textAlign: 'center' },
+  streakSub: { fontSize: 12, color: colors.muted, textAlign: 'center' },
   eyebrow: { fontSize: 12, fontWeight: '700', color: '#b9781a' },
   title: { fontSize: 19, fontWeight: '700', color: colors.ink, marginTop: 2 },
   desc: { fontSize: 14, color: colors.ink, marginTop: 6, lineHeight: 21 },

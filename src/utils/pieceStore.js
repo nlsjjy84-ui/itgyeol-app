@@ -236,13 +236,32 @@ export function giveAway(k) {
 
 // 오늘의 보따리 — 하루 한 번. 이어서 온 날(연속)이 7일째가 되면 「아주 귀함」 조각 하나를 꼭 넣는다.
 const dayStr = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+// 하루 차이 — 'YYYY-MM-DD' 두 개 사이의 날 수
+const dayGap = (a, b) => {
+  if (!a || !b) return 99;
+  const [y1, m1, d1] = a.split('-').map(Number);
+  const [y2, m2, d2] = b.split('-').map(Number);
+  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
+};
+// 오늘의 보따리 이어 오기 — 7일을 이을 때마다 「쉼표 부적」 하나(최대 2개).
+// 하루 이틀 빠져도 부적이 그 날을 대신 지켜 준다(듀오링고의 스트릭 프리즈처럼, 아이가 하루 빠졌다고 0으로 무너지지 않게).
 export function dailyState() {
   const d = (state && state.daily) || { last: '', streak: 0 };
+  const charms = d.charms || 0;
   const today = dayStr();
-  const y = new Date();
-  y.setDate(y.getDate() - 1);
-  const continued = d.last === dayStr(y);
-  return { ready: d.last !== today, streak: d.last === today || continued ? d.streak : 0, nextStreak: continued ? d.streak + 1 : d.last === today ? d.streak : 1 };
+  const gap = dayGap(d.last, today);
+  const miss = gap - 1; // 빠진 날 수
+  const saved = gap > 1 && d.streak > 0 && miss <= charms; // 부적으로 지킬 수 있음
+  const continued = gap === 1 || saved;
+  return {
+    ready: d.last !== today,
+    streak: gap === 0 || continued ? d.streak : 0,
+    nextStreak: continued ? d.streak + 1 : gap === 0 ? d.streak : 1,
+    charms,
+    useCharms: saved ? miss : 0,
+    lost: gap > 1 && d.streak > 0 && !saved ? d.streak : 0,
+    days: d.days || [],
+  };
 }
 export function takeDaily(seed = Date.now()) {
   if (!state) state = { ...EMPTY };
@@ -250,13 +269,20 @@ export function takeDaily(seed = Date.now()) {
   if (!ds.ready) return null;
   const streak = ds.nextStreak;
   let keys = drawPack(3, seed % 1000003, state.owned, state.codes);
+  let charms = ds.charms - ds.useCharms;
+  let gotCharm = false;
   if (streak % 7 === 0) {
     const rare = PIECES.filter((p) => p.rare === 2 && (!p.only || (state.codes || []).includes(p.only)) && !state.owned[p.k]);
     if (rare.length) keys = [...keys, rare[seed % rare.length].k];
+    if (charms < 2) {
+      charms += 1;
+      gotCharm = true;
+    }
   }
   const fresh = addPieces(keys);
-  state = { ...state, daily: { last: dayStr(), streak } };
+  const days = [...(ds.days || []), dayStr()].slice(-7);
+  state = { ...state, daily: { last: dayStr(), streak, charms, days } };
   persist();
   emit();
-  return { keys, fresh, streak };
+  return { keys, fresh, streak, usedCharms: ds.useCharms, gotCharm, charms };
 }

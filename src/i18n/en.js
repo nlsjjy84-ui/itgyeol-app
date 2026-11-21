@@ -4,6 +4,14 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "빠진 {n}일은 쉼표 부적이 지켜 줬어요.": "The {n} missed day(s) were kept safe by a rest charm.",
+  "쉼표 부적 하나를 받았어요!": "You got a rest charm!",
+  "{n}일째 이어 오는 중": "{n}-day streak",
+  "쉼표 부적 {m}개": "Rest charms: {m}",
+  "빠진 날을 부적이 지켜 줄 거예요": "a charm will cover the missed day",
+  "이어 오던 {n}일이 끊겼어요. 오늘부터 다시!": "your {n}-day streak ended. Start again today!",
+  "{n}일 더 오면 「아주 귀함」 조각과 쉼표 부적": "{n} more day(s) for a very rare piece and a rest charm",
+  "오늘 오면 「아주 귀함」 조각과 쉼표 부적": "Come today for a very rare piece and a rest charm",
   "진짜 유물 찾기": "Find the real artifact",
   "박물관에서 진열장 설명판의 소장품번호(예: 덕수1496)를 넣으면 바로 그 유물 조각을 얻어요.": "At the museum, type the collection number on the display label (e.g. 덕수1496) to get that very artifact as a piece.",
   "소장품번호": "Collection number",
