@@ -26,7 +26,7 @@ test('떠오른 답에 맞춰 재료를 먼저 권하고, 바꿔 고르면 홈�
   for (let i = 0; i < 700; i += 1) {
     if (await page.getByText('여섯 개의 판 — 어디부터 가도 돼요').isVisible().catch(() => false)) break;
     const next = page.getByText(/^\s*(다음 장면 ›|\(가만히 있는다\))\s*$/).last();
-    if (await next.isVisible().catch(() => false)) await next.click().catch(() => {});
+    if (await next.isVisible().catch(() => false)) await next.click({ timeout: 2000 }).catch(() => {});
     await page.waitForTimeout(150);
   }
   await expect(page.getByText('고른 재료: 옻칠 + 자개(나전)')).toBeVisible();
