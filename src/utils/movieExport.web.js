@@ -356,9 +356,12 @@ export function downloadBlob(url, name) {
   const a = document.createElement('a');
   a.href = url;
   a.download = name;
+  a.rel = 'noopener';
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
-  a.remove();
+  // 브라우저가 파일 이름을 읽기 전에 지우면 「download」라는 이름으로 받아진다 — 잠시 뒤에 치운다
+  setTimeout(() => a.remove(), 4000);
 }
 
 // 자막 파일(.srt) — 영상과 같은 자막을 따로 쓸 수 있게
@@ -452,4 +455,152 @@ export async function paperKit(tl) {
   ctx.font = '400 30px sans-serif';
   ctx.fillText(t('유물 사진') + ': ' + creditOf(tl.museums || []) + ' · ' + t('잇결'), 140, H - 60);
   return new Promise((resolve) => c.toBlob((b) => resolve(URL.createObjectURL(b)), 'image/png'));
+}
+
+// 이야기 영상(프롤로그·판 입구) 파일로 저장 — 화면의 이야기 영상과 같은 구성: 움직이는 배경, 풍이·결이, 떠다니는 유물, 자막.
+// 고르는 장면은 「가만히 있기」(기본 대답)로 이어 간다.
+export async function exportStory({ part, pages, resolve, art, chars, charAr, floatersFor, onProgress, size = 720 }) {
+  if (!canExport()) return { ok: false };
+  const script = [];
+  let t0 = 0;
+  const dur = (txt) => Math.max(2.6, Math.min(6.8, 1.6 + String(txt).length * 0.075));
+  const pageSpans = [];
+  pages.forEach((pg, pi) => {
+    const start = t0;
+    const lines = resolve(pg.lines).concat(pg.input ? resolve(pg.input.react[pg.input.silent] || []) : []);
+    lines.forEach((ln) => {
+      script.push({ pi, who: ln.who, text: ln.text, t0, t1: t0 + dur(ln.text) });
+      t0 += dur(ln.text);
+    });
+    pageSpans.push({ pi, start, end: t0 });
+  });
+  const total = t0 + 0.8;
+  const W = size;
+  const H = Math.round(size * 1.05);
+  const arts = await Promise.all(pages.map((pg) => loadImg(art[pg.art] || art.gate)));
+  const ch = { pung: await loadImg(chars.pung), gyeol: await loadImg(chars.gyeol) };
+  const floats = await Promise.all(pages.map(async (pg, pi) => Promise.all(floatersFor(part, 4, pi * 31 + part.length * 7).map((p) => loadImg(p.img)))));
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const stream = canvas.captureStream(30);
+  let actx = null;
+  let dest = null;
+  try {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    dest = actx.createMediaStreamDestination();
+    const buf = await actx.decodeAudioData(await (await fetch(Asset.fromModule(SFX.bgm).uri)).arrayBuffer());
+    const play = (at) => {
+      const s = actx.createBufferSource();
+      s.buffer = buf;
+      const g = actx.createGain();
+      g.gain.value = 0.35;
+      s.connect(g);
+      g.connect(dest);
+      s.start(actx.currentTime + at);
+    };
+    for (let at = 0; at < total; at += 16) play(at);
+    dest.stream.getAudioTracks().forEach((tr) => stream.addTrack(tr));
+  } catch (e) {
+    actx = null;
+  }
+  const mime = pickMime();
+  const rec = new window.MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 4000000 } : undefined);
+  const chunks = [];
+  rec.ondataavailable = (ev) => ev.data && ev.data.size && chunks.push(ev.data);
+  const draw = (time) => {
+    const span = pageSpans.find((s) => time >= s.start && time < s.end) || pageSpans[pageSpans.length - 1];
+    const pi = span.pi;
+    const local = time - span.start;
+    const prog = Math.min(1, local / Math.max(4, span.end - span.start));
+    const im = arts[pi];
+    ctx.fillStyle = '#0b1016';
+    ctx.fillRect(0, 0, W, H);
+    if (im) {
+      const artW = H * (im.width / im.height) * 1.12;
+      const panX = -(artW - W) * (pi % 2 ? 1 - prog : prog);
+      const z = 1.04 + 0.08 * prog;
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.scale(z, z);
+      ctx.translate(-W / 2, -H / 2);
+      ctx.drawImage(im, panX, -H * 0.04, artW, H * 1.08);
+      ctx.restore();
+    }
+    ctx.fillStyle = 'rgba(11,16,22,0.25)';
+    ctx.fillRect(0, 0, W, H);
+    (floats[pi] || []).forEach((fim, i) => {
+      if (!fim) return;
+      const enter = Math.min(1, Math.max(0, (local - 0.4 - i * 0.35) / 0.8));
+      const sz = W * (0.17 + (i % 2) * 0.04);
+      const x = [0.1, 0.72, 0.36, 0.84][i] * W;
+      const y = [0.1, 0.16, 0.05, 0.42][i] * H + Math.sin(time * 1.2 + i * 1.7) * 10 + (1 - enter) * -120;
+      ctx.globalAlpha = enter * 0.95;
+      const ar = fim.width / fim.height;
+      const w = ar >= 1 ? sz : sz * ar;
+      const h = ar >= 1 ? sz / ar : sz;
+      ctx.drawImage(fim, x - w / 2, y + (sz - h) / 2, w, h);
+      ctx.globalAlpha = 1;
+    });
+    const line = script.find((s) => time >= s.t0 && time < s.t1);
+    ['pung', 'gyeol'].forEach((who, i) => {
+      const img = ch[who];
+      if (!img) return;
+      const on = line && line.who === who;
+      const cw = W * (who === 'gyeol' ? 0.34 : 0.28);
+      const chh = cw / charAr[who];
+      const hop = on ? Math.abs(Math.sin(time * 9)) * 6 : 0;
+      ctx.globalAlpha = on || !line ? 1 : 0.62;
+      const x = i === 0 ? W * 0.03 : W - W * 0.03 - cw;
+      ctx.drawImage(img, x, H - H * 0.21 - chh - hop + Math.sin(time * 2 + i * 2) * 4, cw, chh);
+      ctx.globalAlpha = 1;
+    });
+    if (local < 3.2) {
+      ctx.globalAlpha = local < 2.6 ? 1 : 1 - (local - 2.6) / 0.6;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.font = `600 ${Math.round(W * 0.034)}px "Gowun Batang", serif`;
+      const place = t(pages[pi].place || '');
+      roundRect(ctx, 16, 22, ctx.measureText(place).width + 24, W * 0.055, 8);
+      ctx.fill();
+      ctx.fillStyle = '#f6e7c4';
+      ctx.textBaseline = 'top';
+      ctx.fillText(place, 28, 28);
+      ctx.globalAlpha = 1;
+    }
+    if (line) {
+      ctx.font = `500 ${Math.round(W * 0.036)}px sans-serif`;
+      const lines = wrap(ctx, line.text, W - 64);
+      const lh = W * 0.05;
+      const bh = lh * lines.length + W * 0.07;
+      ctx.fillStyle = 'rgba(0,0,0,0.77)';
+      roundRect(ctx, 12, H - bh - 12, W - 24, bh, 14);
+      ctx.fill();
+      ctx.textBaseline = 'top';
+      ctx.font = `700 ${Math.round(W * 0.026)}px sans-serif`;
+      ctx.fillStyle = line.who === 'pung' ? '#e0a43a' : '#6fb0d8';
+      ctx.fillText(t(line.who === 'pung' ? '풍이' : '결이'), 28, H - bh);
+      ctx.font = `500 ${Math.round(W * 0.036)}px sans-serif`;
+      ctx.fillStyle = '#fff';
+      lines.forEach((ln, i) => ctx.fillText(ln, 28, H - bh + W * 0.038 + i * lh));
+    }
+  };
+  return new Promise((resolve2) => {
+    rec.onstop = () => {
+      const type = rec.mimeType || mime || 'video/webm';
+      const blob = new Blob(chunks, { type });
+      if (actx) actx.close().catch(() => {});
+      resolve2({ ok: true, url: URL.createObjectURL(blob), ext: type.includes('mp4') ? 'mp4' : 'webm' });
+    };
+    rec.start(250);
+    const start = performance.now();
+    const step = () => {
+      const time = (performance.now() - start) / 1000;
+      draw(Math.min(time, total - 0.01));
+      if (onProgress) onProgress(Math.min(1, time / total));
+      if (time < total) requestAnimationFrame(step);
+      else rec.stop();
+    };
+    requestAnimationFrame(step);
+  });
 }

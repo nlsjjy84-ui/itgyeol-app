@@ -4,6 +4,16 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "이야기 영상 만드는 중… {n}%": "Making the story movie… {n}%",
+  "이야기 영상을 저장했어요 ✓": "Story movie saved ✓",
+  "이 이야기를 영상 파일로 저장": "Save this story as a video file",
+  "{w}, 박물관 진열장 안에서 달그락 소리가 났어.": "{w}, something rattled inside a museum display case.",
+  "새벽": "At dawn",
+  "아침": "In the morning",
+  "한낮": "At midday",
+  "저녁": "In the evening",
+  "한밤": "Late at night",
+  "{a} {b}의 고향 {c}까지 한달음에 다녀오기로 했어.": "{a} decided to dash to {c}, the hometown of the {b}.",
   "나도 만들어 보기": "Make one too",
   "잇결 · 유물 합체 전시관": "Itgyeol · Artifact Combine Gallery",
   "작품 {a} / {b}": "Work {a} / {b}",

@@ -223,7 +223,11 @@ export function buildTimeline(frameId, assign, opts = {}) {
   const subs = [];
   const say = (t0, t1, who, text) => subs.push({ t0, t1, who, text });
   const villain = VILLAINS[Math.floor(r() * VILLAINS.length)];
-  say(0.2, 1.6, '풍이', t(OPENING[Math.floor(r() * OPENING.length)], { scene: sceneName }));
+  // 첫 장면 — 지금 시각에 맞춘다(새벽·아침·낮·저녁·밤)
+  const hr = new Date().getHours();
+  const when = hr < 6 ? '새벽' : hr < 11 ? '아침' : hr < 17 ? '한낮' : hr < 20 ? '저녁' : '한밤';
+  const opening = r() < 0.5 ? t('{w}, 박물관 진열장 안에서 달그락 소리가 났어.', { w: t(when) }) : t(OPENING[Math.floor(r() * OPENING.length)], { scene: sceneName });
+  say(0.2, 1.6, '풍이', opening);
   say(1.6, OPEN - 0.05, '결이', t('그때 그림자 속에서 {a} 나타나 {b}!', { a: josa(t(villain.name), '이/가'), b: t(villain.how) }));
   if (isTransform) {
     say(OPEN, lockT, '결이', t('{a} 혼자서도 할 수 있대. 모양을 바꿔 볼까?', { a: josa(bodyName, '이/가') }));
@@ -246,7 +250,12 @@ export function buildTimeline(frameId, assign, opts = {}) {
   const acts = [...new Set(pick2)].slice(0, 2).map((x) => t(ACT[x]));
   say(titleT + 1.4, titleT + 3.3, '풍이', acts.length ? t('{a} {b} {c} 물리쳤어!', { a: acts[0], b: acts[1] || '', c: josa(t(villain.name), '을/를') }).replace(/\s+/g, ' ') : t('{c} 물리쳤어!', { c: josa(t(villain.name), '을/를') }));
   say(titleT + 3.3, titleT + 5.0, '결이', t(villain.fact));
-  say(titleT + 5.0, titleT + 6.7, '풍이', t('{a} {b}', { a: josa(title.full, '은/는'), b: t(MISSION[frame.id] || MISSION.guardian) }));
+  // 끝 장면 — 출토지가 기록된 조각이 있으면 그 고향으로 날아간다
+  const home = events.map((e) => PIECE_BY_K[e.k]).find((p) => p && p.from);
+  const homeName = home ? home.from.split(' - ').slice(-1)[0] : '';
+  if (home && r() < 0.7)
+    say(titleT + 5.0, titleT + 6.7, '풍이', t('{a} {b}의 고향 {c}까지 한달음에 다녀오기로 했어.', { a: josa(title.full, '은/는'), b: pieceShort(home), c: homeName }));
+  else say(titleT + 5.0, titleT + 6.7, '풍이', t('{a} {b}', { a: josa(title.full, '은/는'), b: t(MISSION[frame.id] || MISSION.guardian) }));
   if (body) say(titleT + 6.7, endT, '결이', t('진짜 {a} {b}에 있어. 만나러 갈래?', { a: josa(pieceShort(body), '은/는'), b: t(body.by) }));
 
   // 조각마다 날아올 때 붙는 이름표(유물 이름 · 시대 · 자리)

@@ -9,11 +9,11 @@ import { PIECES } from '../data/pieces';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 
-const CHAR = {
+export const CHAR = {
   pung: require('../../assets/characters/pung_cut.png'),
   gyeol: require('../../assets/characters/gyeol_cut.png'),
 };
-const CHAR_AR = { pung: 313 / 367, gyeol: 339 / 267 }; // 너비/높이 (배경을 지운 그림)
+export const CHAR_AR = { pung: 313 / 367, gyeol: 339 / 267 }; // 너비/높이 (배경을 지운 그림)
 const NAME = { pung: '풍이', gyeol: '결이' };
 const COLOR = { pung: '#e0a43a', gyeol: '#6fb0d8' };
 
@@ -27,7 +27,7 @@ const PART_PIECES = {
   talchum: /귀면|도깨비|얼굴|짐승얼굴|탈/,
   dancheong: /막새|치미|기와|용머리|단청/,
 };
-function piecesFor(part, n, seed) {
+export function piecesFor(part, n, seed) {
   const re = PART_PIECES[part] || PART_PIECES.prologue;
   let list = PIECES.filter((p) => re.test(p.name));
   if (list.length < n) list = list.concat(PIECES.slice(0, n * 3));

@@ -13,3 +13,6 @@ export function srtOf(tl) {
 export async function paperKit() {
   return null;
 }
+export async function exportStory() {
+  return { ok: false, reason: 'native' };
+}

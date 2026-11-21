@@ -1,7 +1,9 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
 import Text from '../ui/Text';
-import StoryMovie from '../components/StoryMovie';
+import StoryMovie, { CHAR, CHAR_AR, piecesFor } from '../components/StoryMovie';
+import { ART } from '../ui/StoryScene';
+import { canExport, exportStory, downloadBlob } from '../utils/movieExport';
 import { useJourney } from '../context/JourneyContext';
 import { getBook, resolveLines } from '../data/book';
 import { t } from '../i18n';
@@ -19,6 +21,7 @@ export default function BookScreen({ navigation, route }) {
   const BOOK = getBook();
   const pages = BOOK[part] || BOOK.prologue;
   const choiceRef = useRef((book && book.choice) || {});
+  const [rec, setRec] = useState(null);
   const finish = useCallback(() => {
     markBook(part === 'prologue' ? { prologue: true } : { gate: part });
     navigation.replace(then);
@@ -41,6 +44,22 @@ export default function BookScreen({ navigation, route }) {
       </View>
       <ScrollView contentContainerStyle={st.body} showsVerticalScrollIndicator={false}>
         <StoryMovie part={part} pages={pages} resolve={resolve} onPick={onPick} onFinish={finish} />
+        {canExport() ? (
+          <Pressable
+            style={st.save}
+            disabled={typeof rec === 'number'}
+            onPress={async () => {
+              setRec(0);
+              const r = await exportStory({ part, pages, resolve, art: ART, chars: CHAR, charAr: CHAR_AR, floatersFor: piecesFor, onProgress: setRec });
+              if (r.ok) downloadBlob(r.url, `잇결_이야기_${part}.${r.ext}`);
+              setRec(r.ok ? 'done' : 'fail');
+            }}
+          >
+            <Text style={st.saveTxt}>
+              {typeof rec === 'number' ? t('이야기 영상 만드는 중… {n}%', { n: Math.round(rec * 100) }) : rec === 'done' ? t('이야기 영상을 저장했어요 ✓') : t('이 이야기를 영상 파일로 저장')}
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -55,6 +74,8 @@ const st = StyleSheet.create({
   dotDone: { backgroundColor: colors.muted },
   skip: { fontSize: 13, color: colors.muted },
   title: { fontSize: 14, color: colors.ink, fontWeight: '700' },
+  save: { alignSelf: 'center', marginTop: 10, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, borderWidth: 1, borderColor: colors.border },
+  saveTxt: { fontSize: 13, color: colors.ink },
   body: { padding: 8, paddingBottom: 40, maxWidth: 740, width: '100%', alignSelf: 'center' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14, justifyContent: 'center' },
   chip: { paddingVertical: 9, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1.5, borderColor: colors.accent, backgroundColor: colors.paper },
