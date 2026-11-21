@@ -141,6 +141,7 @@ test('유물 합체: 하루 빠져도 쉼표 부적이 이어 오기를 지켜 �
   await page.getByText(/오늘의 보따리 받기 — 7일째/).filter({ visible: true }).first().click();
   await page.getByLabel('보따리 풀기').click();
   await expect(page.getByText(/빠진 1일은 쉼표 부적이 지켜 줬어요/)).toBeVisible();
+  await expect(page.getByTestId('milestone')).toBeVisible();
   await expect(page.getByText(/쉼표 부적 하나를 받았어요/)).toBeVisible();
 });
 

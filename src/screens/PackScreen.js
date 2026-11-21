@@ -16,6 +16,32 @@ import QRCode from 'react-native-qrcode-svg';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 
+// 이어 오기 고비(7·14·21…일) 축하 — 듀오링고는 고비 날 축하 화면 하나로 7일 뒤 남는 새 사용자가 1.7% 늘었다.
+// 잇결은 오방색 고리가 돌며 퍼지고, 가운데 날 수가 튀어 오른다.
+const OBANG = ['#2b5f8e', '#b3322b', '#c8982b', '#fcfdfc', '#1b2227'];
+function Milestone({ n }) {
+  const a = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    play('shine');
+    Animated.timing(a, { toValue: 1, duration: 1400, easing: Easing.out(Easing.back(1.6)), useNativeDriver: true }).start();
+  }, []);
+  const spin = a.interpolate({ inputRange: [0, 1], outputRange: ['-120deg', '0deg'] });
+  return (
+    <View style={st.mile} testID="milestone">
+      {Array.from({ length: 10 }, (_, i) => {
+        const ang = (i / 10) * Math.PI * 2;
+        const dx = a.interpolate({ inputRange: [0, 1], outputRange: [0, Math.cos(ang) * 92] });
+        const dy = a.interpolate({ inputRange: [0, 1], outputRange: [0, Math.sin(ang) * 92] });
+        return <Animated.View key={i} style={[st.mileDot, { backgroundColor: OBANG[i % 5], transform: [{ translateX: dx }, { translateY: dy }] }]} />;
+      })}
+      <Animated.View style={[st.mileRing, { opacity: a, transform: [{ scale: a }, { rotate: spin }] }]}>
+        <Text style={st.mileN}>{n}</Text>
+        <Text style={st.mileT}>{t('일 연속!')}</Text>
+      </Animated.View>
+    </View>
+  );
+}
+
 function Card({ k, delay, fresh, size, secret }) {
   const flip = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -200,6 +226,7 @@ export default function PackScreen({ navigation, route }) {
           </View>
         ) : (
           <View>
+            {opened.daily && !opened.already && opened.streak % 7 === 0 ? <Milestone n={opened.streak} /> : null}
             <Text style={st.lead}>
               {opened.daily && !opened.already
                 ? t('오늘의 보따리! {n}일째 이어서 왔어요. 조각 {m}개.', { n: opened.streak, m: opened.keys.length }) + (opened.streak % 7 === 0 ? ' ' + t('7일째 선물 — 「아주 귀함」 조각이 들어 있어요!') : '') + (opened.usedCharms ? ' ' + t('빠진 {n}일은 쉼표 부적이 지켜 줬어요.', { n: opened.usedCharms }) : '') + (opened.gotCharm ? ' ' + t('쉼표 부적 하나를 받았어요!') : '')
@@ -283,6 +310,11 @@ function SwapBack({ got, owned, from }) {
 }
 
 const st = StyleSheet.create({
+  mile: { height: 220, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  mileDot: { position: 'absolute', width: 16, height: 16, borderRadius: 8, borderWidth: 1, borderColor: '#1b2227' },
+  mileRing: { width: 130, height: 130, borderRadius: 65, borderWidth: 8, borderColor: '#c8982b', backgroundColor: '#b3322b', alignItems: 'center', justifyContent: 'center' },
+  mileN: { fontSize: 46, fontWeight: '800', color: '#fcfdfc', lineHeight: 52 },
+  mileT: { fontSize: 15, color: '#fcfdfc', fontWeight: '700' },
   swap: { marginTop: 14, backgroundColor: '#f6f2ea', borderRadius: 14, padding: 12, gap: 6 },
   swapH: { fontSize: 16, fontWeight: '700', color: colors.ink, textAlign: 'center' },
   swapCell: { width: 84, alignItems: 'center', gap: 2, padding: 4, borderRadius: 10, backgroundColor: colors.paper },

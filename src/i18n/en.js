@@ -4,6 +4,7 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "일 연속!": "-day streak!",
   "소리 내어 읽어 주기": "Read aloud",
   "읽어 주기 켬": "Read aloud: on",
   "읽어 주기 끔": "Read aloud: off",

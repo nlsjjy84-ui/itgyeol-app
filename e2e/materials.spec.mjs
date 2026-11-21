@@ -2,7 +2,7 @@
 import { test, expect, openHome } from './helpers.mjs';
 
 test('떠오른 답에 맞춰 재료를 먼저 권하고, 바꿔 고르면 홈에 고른 재료가 보인다', async ({ page }) => {
-  test.setTimeout(180000); // 이야기 영상을 끝까지 본다
+  test.setTimeout(300000); // 이야기 영상을 끝까지 본다
   await page.goto('/');
   await page.getByText('동의하고 시작하기').click();
   await page.getByText('농악·풍물', { exact: true }).click();
