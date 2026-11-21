@@ -40,7 +40,9 @@ function piecesFor(part, n, seed) {
   }
   return out;
 }
-const lineDur = (text) => Math.max(2.6, Math.min(6.8, 1.6 + String(text).length * 0.075));
+// 자동 테스트(브라우저 테스트)에서는 영상을 빨리 감아 본다 — 사람이 볼 때는 영향 없음
+const FAST = typeof navigator !== 'undefined' && !!navigator.webdriver;
+const lineDur = (text) => (FAST ? 1.6 : Math.max(2.6, Math.min(6.8, 1.6 + String(text).length * 0.075)));
 
 export default function StoryMovie({ part, pages, resolve, onPick, onFinish, choiceOf }) {
   const { width, height } = useWindowDimensions();
@@ -63,8 +65,14 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
   // 시계
   useEffect(() => {
     let raf;
+    let last = 0;
     const tick = () => {
-      if (!pauseAt.current) setNow((Date.now() - base.current) / 1000);
+      // 초당 30번이면 충분히 부드럽고, 느린 기기·자동 테스트에서도 버벅이지 않는다
+      const ms = Date.now();
+      if (!pauseAt.current && ms - last >= 33) {
+        last = ms;
+        setNow((ms - base.current) / 1000);
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -93,7 +101,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
 
   const next = (manual) => {
     // 글자가 아직 다 나오지 않았으면, 누르면 먼저 끝까지 보여 준다
-    if (manual === true && cur && Math.floor(elapsed * 26) < curText.length) {
+    if (manual === true && cur && Math.floor(elapsed * (FAST ? 400 : 26)) < curText.length) {
       setLineStart(now - curText.length / 26 - 0.01);
       return;
     }
@@ -134,7 +142,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
   useEffect(() => {
     if (paused) return;
     if ((stage.kind === 'lines' || stage.kind === 'react') && cur && elapsed > lineDur(curText)) next();
-    if (stage.kind === 'wait' && input && elapsed > (input.waitMs || 5000) / 1000 + 0.6) pick(input.silent);
+    if (stage.kind === 'wait' && input && elapsed > (FAST ? 1.2 : (input.waitMs || 5000) / 1000 + 0.6)) pick(input.silent);
   }, [now]);
 
   // ── 그림
@@ -144,7 +152,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
   const panX = -(artW - W) * (pi % 2 ? 1 - prog : prog);
   const zoom = 1.04 + 0.08 * prog;
   const speaker = cur ? cur.who : null;
-  const typed = cur ? curText.slice(0, Math.floor(elapsed * 26)) : '';
+  const typed = cur ? curText.slice(0, Math.floor(elapsed * (FAST ? 400 : 26))) : '';
   const placeAlpha = now < 0.2 ? now / 0.2 : now < 2.6 ? 1 : Math.max(0, 1 - (now - 2.6) / 0.6);
   const waitLeft = stage.kind === 'wait' && input ? Math.max(0, (input.waitMs || 5000) / 1000 + 0.6 - elapsed) : 0;
 

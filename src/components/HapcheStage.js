@@ -23,9 +23,16 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
   useEffect(() => {
     if (!playing) return undefined;
     let raf;
+    let lastMs = 0;
     start.current = Date.now() - time * 1000;
     const tick = () => {
-      const now = (Date.now() - start.current) / 1000;
+      const ms = Date.now();
+      if (ms - lastMs < 33) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      lastMs = ms;
+      const now = (ms - start.current) / 1000;
       if (now >= tl.dur + (loop ? 1.2 : 0)) {
         if (loop) {
           fired.current = new Set();
