@@ -4,6 +4,7 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "나도 만들어 보기": "Make one too",
   "잇결 · 유물 합체 전시관": "Itgyeol · Artifact Combine Gallery",
   "작품 {a} / {b}": "Work {a} / {b}",
   "이 영상을 내 폰으로": "This movie on my phone",
