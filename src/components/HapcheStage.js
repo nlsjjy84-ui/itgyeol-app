@@ -93,6 +93,20 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
       {Array.from({ length: 9 }, (_, i) => (
         <View key={'l' + i} style={[st.wave, { top: (i + 0.5) * (size / 9), opacity: 0.06 + (done ? 0.05 : 0), transform: [{ translateX: Math.sin(time * 0.8 + i) * 18 }] }]} />
       ))}
+      {/* 밤의 박물관 — 바닥, 양쪽 진열장, 위에서 떨어지는 조명 */}
+      <View style={[st.floor, { top: size * 0.83, height: size * 0.17 }]} />
+      {[0.04, 0.8].map((x, i) => (
+        <View key={'case' + i} style={[st.case, { left: size * x, top: size * 0.5, width: size * 0.16, height: size * 0.33 }]}>
+          <View style={st.caseTop} />
+        </View>
+      ))}
+      {[-14, 14].map((deg, i) => (
+        <View
+          key={'beam' + i}
+          style={[st.beam, { left: size * (0.38 + i * 0.08), top: -size * 0.1, width: size * 0.16, height: size * 1.1, opacity: (done ? 0.16 : 0.06) + 0.03 * Math.sin(time * 2 + i), transform: [{ rotate: `${deg}deg` }] }]}
+        />
+      ))}
+      {time >= tl.lockT ? <View style={[st.shadow, { left: size * 0.22, top: size * 0.86, width: size * 0.56, height: size * 0.06, borderRadius: size * 0.3 }]} /> : null}
       {tl.frame.stars &&
         Array.from({ length: 30 }, (_, i) => (
           <View key={'s' + i} style={[st.star, { left: ((i * 137) % 100) + '%', top: ((i * 71) % 100) + '%', opacity: 0.3 + 0.5 * Math.abs(Math.sin(time * 2 + i)) }]} />
@@ -210,6 +224,11 @@ const st = StyleSheet.create({
   stage: { overflow: 'hidden', borderRadius: 18, alignSelf: 'center' },
   wave: { position: 'absolute', left: -20, right: -20, height: 2, backgroundColor: '#ffffff' },
   star: { position: 'absolute', width: 3, height: 3, borderRadius: 2, backgroundColor: '#fff' },
+  floor: { position: 'absolute', left: 0, right: 0, backgroundColor: '#00000040', borderTopWidth: 1, borderTopColor: '#ffffff22' },
+  case: { position: 'absolute', borderWidth: 1.5, borderColor: '#ffffff1f', backgroundColor: '#ffffff08', borderRadius: 4 },
+  caseTop: { position: 'absolute', left: -4, right: -4, top: -8, height: 8, backgroundColor: '#ffffff18', borderRadius: 2 },
+  beam: { position: 'absolute', backgroundColor: '#fff2cc' },
+  shadow: { position: 'absolute', backgroundColor: '#00000066' },
   glow: { position: 'absolute', backgroundColor: '#ffd98a' },
   person: { position: 'absolute', backgroundColor: '#00000055' },
   speed: { position: 'absolute', height: 3, backgroundColor: '#fff3c2', borderRadius: 2 },

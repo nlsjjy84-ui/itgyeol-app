@@ -76,6 +76,30 @@ export function drawFrame(ctx, S, tl, imgs, time) {
     for (let x = -20; x <= S + 20; x += 20) ctx.lineTo(x + Math.sin(time * 0.8 + i) * 18, y + Math.sin(x / 60 + i) * 3);
     ctx.stroke();
   }
+  // 밤의 박물관 — 바닥, 진열장, 조명
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(0, S * 0.83, S, S * 0.17);
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1.5;
+  [0.04, 0.8].forEach((x) => {
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.fillRect(S * x, S * 0.5, S * 0.16, S * 0.33);
+    ctx.strokeRect(S * x, S * 0.5, S * 0.16, S * 0.33);
+  });
+  [-14, 14].forEach((deg, i) => {
+    ctx.save();
+    ctx.translate(S * (0.46 + i * 0.08), S * 0.45);
+    ctx.rotate((deg * Math.PI) / 180);
+    ctx.fillStyle = 'rgba(255,242,204,' + ((done ? 0.16 : 0.06) + 0.03 * Math.sin(time * 2 + i)) + ')';
+    ctx.fillRect(-S * 0.08, -S * 0.55, S * 0.16, S * 1.1);
+    ctx.restore();
+  });
+  if (time >= tl.lockT) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.beginPath();
+    ctx.ellipse(S / 2, S * 0.89, S * 0.28, S * 0.03, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
   if (tl.frame.stars)
     for (let i = 0; i < 30; i++) {
       ctx.fillStyle = 'rgba(255,255,255,' + (0.3 + 0.5 * Math.abs(Math.sin(time * 2 + i))) + ')';
