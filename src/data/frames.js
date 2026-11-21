@@ -391,4 +391,117 @@ TRANSFORMS.push(
   },
 );
 
+
+// ── 2026-11-22 더 넣은 틀 — 우리 옛 이야기·놀이에서 온 모양
+FRAMES.push(
+  {
+    id: 'janggu', name: '장구 장군', kind: '로봇', desc: '두 북면이 마주 보는 장구 몸통에 열채·궁채를 든 팔. 장단에 맞춰 합체한다.', bg: '#2a1d1a',
+    slots: [
+      { key: 'drumL', slot: '몸통', x: 380, y: 480, w: 280, axis: 'a', order: 0 },
+      { key: 'drumR', slot: '몸통', x: 620, y: 480, w: 280, axis: 'a', order: 0, flip: true },
+      { key: 'waist', slot: '가슴판', x: 500, y: 480, w: 130, axis: 'v', order: 1, z: 3 },
+      { key: 'armL', slot: '무기', x: 170, y: 360, w: 280, axis: 'v', rot: -35, order: 2 },
+      { key: 'armR', slot: '무기', x: 830, y: 360, w: 280, axis: 'v', rot: 35, order: 2, flip: true },
+      { key: 'legL', slot: '다리', x: 410, y: 800, w: 230, axis: 'v', order: 3 },
+      { key: 'legR', slot: '다리', x: 590, y: 800, w: 230, axis: 'v', order: 3, flip: true },
+      { key: 'ribbon', slot: '장식', x: 500, y: 130, w: 150, axis: 'a', order: 4, z: 1 },
+      { key: 'head', slot: '머리', x: 500, y: 250, w: 200, axis: 'a', order: 9, z: 3 },
+    ],
+  },
+  {
+    id: 'tiger', name: '까치 호랑이', kind: '동물', desc: '민화 속 웃는 호랑이. 네 발로 성큼 걷고 긴 꼬리를 세운다.', bg: '#2c2418',
+    slots: [
+      { key: 'body', slot: '몸통', x: 480, y: 500, w: 480, axis: 'h', order: 0 },
+      { key: 'f1', slot: '다리', x: 300, y: 760, w: 200, axis: 'v', order: 1 },
+      { key: 'f2', slot: '다리', x: 400, y: 770, w: 200, axis: 'v', order: 1, flip: true },
+      { key: 'f3', slot: '다리', x: 580, y: 770, w: 200, axis: 'v', order: 1 },
+      { key: 'f4', slot: '다리', x: 680, y: 760, w: 200, axis: 'v', order: 1, flip: true },
+      { key: 'tail', slot: '꼬리', x: 140, y: 330, w: 280, axis: 'v', rot: -20, order: 2 },
+      { key: 'magpie', slot: '탑승자', x: 470, y: 280, w: 130, axis: 'a', order: 3, z: 2 },
+      { key: 'head', slot: '머리', x: 790, y: 380, w: 250, axis: 'a', order: 9, z: 3 },
+    ],
+  },
+  {
+    id: 'phoenix', name: '오색 봉황', kind: '새', desc: '오동나무에만 앉는다는 상서로운 새. 큰 두 날개와 부채처럼 펼친 꼬리깃.', bg: '#2a1830',
+    slots: [
+      { key: 'body', slot: '몸통', x: 500, y: 470, w: 260, axis: 'v', order: 0 },
+      { key: 'wingL', slot: '날개', x: 260, y: 360, w: 380, axis: 'h', rot: -25, order: 1 },
+      { key: 'wingR', slot: '날개', x: 740, y: 360, w: 380, axis: 'h', rot: 25, order: 1, flip: true },
+      { key: 't1', slot: '꼬리', x: 400, y: 800, w: 280, axis: 'v', rot: 25, order: 2 },
+      { key: 't2', slot: '꼬리', x: 500, y: 830, w: 300, axis: 'v', order: 2 },
+      { key: 't3', slot: '꼬리', x: 600, y: 800, w: 280, axis: 'v', rot: -25, order: 2, flip: true },
+      { key: 'crest', slot: '뿔·관', x: 500, y: 110, w: 140, axis: 'a', order: 3 },
+      { key: 'head', slot: '머리', x: 500, y: 230, w: 170, axis: 'a', order: 9, z: 3 },
+    ],
+  },
+  {
+    id: 'kite', name: '방패연', kind: '하늘', desc: '가운데 구멍 뚫린 네모 연. 긴 꼬리 줄이 바람에 너울댄다.', bg: '#16304a',
+    slots: [
+      { key: 'body', slot: '방패', x: 500, y: 380, w: 440, axis: 'a', order: 0 },
+      { key: 'eye', slot: '눈', x: 500, y: 380, w: 130, axis: 'a', order: 1, z: 3 },
+      { key: 'top', slot: '장식', x: 500, y: 140, w: 160, axis: 'a', order: 2 },
+      { key: 'tail1', slot: '꼬리', x: 440, y: 680, w: 200, axis: 'v', rot: 15, order: 3 },
+      { key: 'tail2', slot: '꼬리', x: 520, y: 800, w: 180, axis: 'v', rot: -15, order: 4, flip: true },
+      { key: 'tail3', slot: '꼬리', x: 450, y: 910, w: 150, axis: 'v', rot: 15, order: 5 },
+      { key: 'rider', slot: '탑승자', x: 760, y: 220, w: 120, axis: 'a', order: 9 },
+    ],
+  },
+  {
+    id: 'whale', name: '고래 잠수정', kind: '배', desc: '등에서 물을 뿜는 큰 고래 배. 지느러미 둘과 갈라진 꼬리.', bg: '#0d2a3a',
+    slots: [
+      { key: 'body', slot: '몸통', x: 520, y: 520, w: 580, axis: 'h', order: 0 },
+      { key: 'finL', slot: '날개', x: 470, y: 700, w: 200, axis: 'h', rot: 25, order: 1 },
+      { key: 'tailU', slot: '꼬리', x: 150, y: 400, w: 220, axis: 'h', rot: -35, order: 2 },
+      { key: 'tailD', slot: '꼬리', x: 150, y: 620, w: 220, axis: 'h', rot: 35, order: 2, flipY: true },
+      { key: 'spout', slot: '장식', x: 600, y: 210, w: 150, axis: 'v', order: 3 },
+      { key: 'eye', slot: '눈', x: 760, y: 470, w: 110, axis: 'a', order: 4, z: 3 },
+      { key: 'head', slot: '뱃머리', x: 840, y: 540, w: 200, axis: 'a', order: 9 },
+    ],
+  },
+  {
+    id: 'palanquin', name: '임금님 가마', kind: '탈것', desc: '지붕 얹은 가마를 네 다리가 메고 간다. 깃발이 앞장선다.', bg: '#2b2222',
+    slots: [
+      { key: 'box', slot: '몸통', x: 500, y: 480, w: 360, axis: 'a', order: 0 },
+      { key: 'roof', slot: '날개', x: 500, y: 270, w: 460, axis: 'h', order: 1 },
+      { key: 'pole', slot: '팔', x: 500, y: 600, w: 820, axis: 'h', order: 2, squash: 0.4 },
+      { key: 'l1', slot: '다리', x: 220, y: 800, w: 200, axis: 'v', order: 3 },
+      { key: 'l2', slot: '다리', x: 400, y: 810, w: 200, axis: 'v', order: 3, flip: true },
+      { key: 'l3', slot: '다리', x: 600, y: 810, w: 200, axis: 'v', order: 3 },
+      { key: 'l4', slot: '다리', x: 780, y: 800, w: 200, axis: 'v', order: 3, flip: true },
+      { key: 'flag', slot: '돛·깃발', x: 880, y: 260, w: 180, axis: 'a', order: 4 },
+      { key: 'king', slot: '탑승자', x: 500, y: 470, w: 140, axis: 'a', order: 9, z: 3 },
+    ],
+  },
+);
+
+const arc = (n, r, w) =>
+  Array.from({ length: n }, (_, i) => {
+    const a = Math.PI + (i / (n - 1)) * Math.PI; // 왼쪽(180°)에서 오른쪽(360°)까지 위쪽 반원
+    return { key: i === Math.floor(n / 2) ? 'core' : 'f' + i, x: 500 + Math.cos(a) * r, y: 700 + Math.sin(a) * r, w, axis: 'v', rot: (a * 180) / Math.PI + 90, order: Math.abs(i - Math.floor(n / 2)), squash: 0.7, z: n - Math.abs(i - Math.floor(n / 2)) };
+  });
+TRANSFORMS.push(
+  {
+    id: 'fan', name: '합죽선', kind: '변형', desc: '같은 유물 일곱이 아래 한 점에서 부챗살처럼 촤르륵 펼쳐진다.', bg: '#2b2420',
+    parts: [...arc(7, 330, 300), { key: 'pin', x: 500, y: 700, w: 90, axis: 'a', order: 4, z: 9, round: true }],
+  },
+  {
+    id: 'butterfly', name: '유물 나비', kind: '변형', desc: '같은 유물 넷이 위아래 두 쌍의 날개가 되고, 하나가 몸통이 된다.', bg: '#24283a',
+    parts: [
+      { key: 'core', x: 500, y: 500, w: 360, axis: 'v', order: 0, squash: 0.45, z: 5 },
+      { key: 'uL', x: 330, y: 380, w: 300, axis: 'a', rot: -20, order: 1 },
+      { key: 'uR', x: 670, y: 380, w: 300, axis: 'a', rot: 20, order: 1, flip: true },
+      { key: 'dL', x: 360, y: 640, w: 220, axis: 'a', rot: 20, order: 2, flipY: true },
+      { key: 'dR', x: 640, y: 640, w: 220, axis: 'a', rot: -20, order: 2, flip: true, flipY: true },
+    ],
+  },
+  {
+    id: 'star', name: '다섯 갈래 별', kind: '변형', desc: '같은 유물 다섯이 바깥을 향해 뻗어 별이 되고 천천히 돈다.', bg: '#0d1424',
+    parts: [{ key: 'core', x: 500, y: 500, w: 180, axis: 'a', order: 3, z: 3, spin: true }, ...ring(5, 230, 280, { spinAll: true })],
+  },
+  {
+    id: 'wave', name: '너울 물결', kind: '변형', desc: '같은 유물이 오르락내리락 줄지어 물결처럼 넘실댄다.', bg: '#0f2d3b',
+    parts: Array.from({ length: 7 }, (_, i) => ({ key: i === 3 ? 'core' : 'w' + i, x: 110 + i * 130, y: 500 + Math.sin(i * 1.1) * 170, w: 200, axis: 'a', rot: Math.cos(i * 1.1) * 25, order: Math.abs(i - 3), flip: i % 2 === 1, z: 7 - Math.abs(i - 3) })),
+  },
+);
+
 export const FRAME_BY_ID = Object.fromEntries([...FRAMES, ...TRANSFORMS].map((f) => [f.id, f]));

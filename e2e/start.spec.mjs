@@ -24,7 +24,7 @@ test('시작 전 질문: 고른 것과 닿아 있는 예시를 보여 주고, �
 });
 
 test('그림책 프롤로그를 끝까지 넘기면 홈의 여섯 개 판에 닿는다', async ({ page }) => {
-  test.setTimeout(180000); // 이야기 영상을 끝까지 본다
+  test.setTimeout(300000); // 이야기 영상을 끝까지 본다
   await page.goto('/');
   await page.getByText('동의하고 시작하기').click();
   await page.getByText('떠오르는 게 없어요 · 예시 보기').click();

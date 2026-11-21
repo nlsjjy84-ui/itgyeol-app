@@ -41,7 +41,14 @@ export default function WorkshopScreen({ navigation, route }) {
     if (mode === 'transform') setAssign((a) => autoAssign(frameId, ownedKeys, { core: params.core && PIECE_BY_K[params.core] ? params.core : a.core }));
     else setAssign(autoAssign(frameId, ownedKeys));
   }, [frameId, ownedKeys.length, mode]);
-  const tl = useMemo(() => (Object.keys(assign).length ? buildTimeline(frameId, assign, { seed: 7, scene: params.scene || '' }) : null), [frameId, assign]);
+  // 틀을 막 바꾼 순간에는 이전 틀의 자리 배정이 남아 있다 — 이 틀의 자리에 맞는 조각이 하나도 없으면 아직 그리지 않는다(빈 화면 방지)
+  const fits = (() => {
+    const f = FRAME_BY_ID[frameId];
+    if (!f) return false;
+    if (f.parts) return !!PIECE_BY_K[assign.core];
+    return f.slots.some((sp) => PIECE_BY_K[assign[sp.key]]);
+  })();
+  const tl = useMemo(() => (fits ? buildTimeline(frameId, assign, { seed: 7, scene: params.scene || '' }) : null), [frameId, assign, fits]);
   const list = mode === 'transform' ? TRANSFORMS : FRAMES;
   const stage = Math.min(width - 32, 460);
 

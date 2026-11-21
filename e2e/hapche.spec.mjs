@@ -27,6 +27,11 @@ test('유물 합체: 조각 하나로 변형', async ({ page }) => {
   await page.getByText('작업대에서 합체하기').filter({ visible: true }).first().click();
   await page.getByText('변형 — 조각 하나로 새 모양').filter({ visible: true }).first().click();
   await page.getByText('유물 꽃', { exact: true }).filter({ visible: true }).first().click();
+  // 변형 틀을 여러 번 바꿔도 변형할 유물이 비지 않는다
+  await page.getByText('합죽선', { exact: true }).filter({ visible: true }).first().click();
+  await expect(page.getByText('비어 있음')).toHaveCount(0);
+  await page.getByText('유물 꽃', { exact: true }).filter({ visible: true }).first().click();
+  await expect(page.getByText('비어 있음')).toHaveCount(0);
   await page.getByText('변형!', { exact: true }).filter({ visible: true }).first().click();
   await expect(page.getByText('변형 영상').filter({ visible: true }).first()).toBeVisible();
 });
