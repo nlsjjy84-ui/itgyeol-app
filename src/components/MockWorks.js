@@ -3,6 +3,25 @@ import { View, StyleSheet, Pressable, Image, Modal, ScrollView } from 'react-nat
 import Text from '../ui/Text';
 import { colors } from '../theme';
 import { MOCK_IMAGES } from '../data/mockWorks';
+import { REAL_PHOTOS } from '../data/realPhotos';
+
+// 우리나라 보물을 본뜬 예시 작품은 실제 유물 사진을 크게, 내 작품(3D)은 모서리에 작게 보여 준다.
+export function realOf(work) {
+  return work && work.group === 'treasure' && REAL_PHOTOS[work.item] ? REAL_PHOTOS[work.item] : null;
+}
+export function WorkImage({ work, size }) {
+  const r = realOf(work);
+  if (!r) return <Image source={MOCK_IMAGES[work.id]} style={{ width: size, height: size }} resizeMode="contain" />;
+  const inset = Math.round(size * 0.38);
+  return (
+    <View style={{ width: size, height: size }}>
+      <Image source={r.img} style={{ width: size, height: size }} resizeMode="contain" />
+      <View style={{ position: 'absolute', right: 0, bottom: 0, width: inset, height: inset, borderRadius: 8, backgroundColor: '#fffdf7', borderWidth: 1, borderColor: '#d9cfbd', alignItems: 'center', justifyContent: 'center' }}>
+        <Image source={MOCK_IMAGES[work.id]} style={{ width: inset - 6, height: inset - 6 }} resizeMode="contain" />
+      </View>
+    </View>
+  );
+}
 import { TASTE_KEYWORDS } from '../data/taste';
 import { t, getLang } from '../i18n';
 import { CATALOG } from './obj3d/catalog';
@@ -57,7 +76,7 @@ export function MockCard({ work, size = 104, onPress }) {
   return (
     <Pressable style={[st.card, { width: size }]} onPress={() => onPress && onPress(work)}>
       <View style={[st.thumb, { width: size, height: size }]}>
-        <Image source={MOCK_IMAGES[work.id]} style={{ width: size - 8, height: size - 8 }} resizeMode="contain" />
+        <WorkImage work={work} size={size - 8} />
       </View>
       <Text style={st.title} numberOfLines={1}>{workTitle(work)}</Text>
       <Text style={st.sub} numberOfLines={1}>{t('예시')} · {kwLabel(work.main)}</Text>
@@ -73,7 +92,10 @@ export function MockDetail({ work, onClose }) {
         <Pressable style={st.sheet} onPress={() => {}}>
           <ScrollView contentContainerStyle={{ gap: 8 }}>
             <View style={st.big}>
-              <Image source={MOCK_IMAGES[work.id]} style={{ width: 230, height: 230 }} resizeMode="contain" />
+              <WorkImage work={work} size={230} />
+            </View>
+            {realOf(work) ? <Text style={st.badge}>{t('큰 사진은 실제 유물, 모서리는 이 유물을 본뜬 예시 작품이에요')} · {realOf(work).ko}</Text> : null}
+            <View style={{ display: 'none' }}>
             </View>
             <Text style={st.h}>{workTitle(work)}</Text>
             <Text style={st.badge}>{t('예시 작품 · 가상의 놀이 기록으로 빚은 모양이에요')} · #{work.code}</Text>

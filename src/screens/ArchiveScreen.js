@@ -15,6 +15,8 @@ import { CATALOG_STATS } from '../data/catalog';
 // 라벨은 [ko, en, zh, ja] 순서
 const L4 = (a) => a[{ ko: 0, en: 1, zh: 2, ja: 3 }[getLang()] ?? 0] || a[1];
 export const CATS = [
+  { id: 'machine', n: ['탈것·무기·과학', 'Vehicles, arms & science', '交通·兵器·科学', '乗り物・武器・科学'] },
+  { id: 'figure', n: ['토우·동물 모양', 'Figurines & animal shapes', '土偶·动物造型', '土偶・動物の形'] },
   { id: 'royal', n: ['왕실·장신구', 'Royal & adornment', '王室·饰品', '王室・装身具'] },
   { id: 'ceramic', n: ['도자기', 'Ceramics', '陶瓷', '陶磁器'] },
   { id: 'wood', n: ['목공예·나전', 'Woodwork & lacquer', '木工艺·螺钿', '木工芸・螺鈿'] },
@@ -33,7 +35,7 @@ const MOT = { 용: ['용', 'Dragon', '龙', '竜'], 봉황: ['봉황', 'Phoenix'
   '매화·대나무': ['매화·대나무', 'Plum & bamboo', '梅·竹', '梅・竹'], 물고기: ['물고기', 'Fish', '鱼', '魚'], 호랑이: ['호랑이', 'Tiger', '老虎', 'トラ'], 거북: ['거북', 'Turtle', '龟', '亀'], 태극: ['태극', 'Taegeuk', '太极', '太極'], 새: ['새', 'Bird', '鸟', '鳥'] };
 const LIC = { KOGL1: ['공공누리 제1유형', 'KOGL Type 1', '韩国公共许可第1类（KOGL）', '韓国公共ライセンス第1類（KOGL）'], CC0: ['CC0', 'CC0', 'CC0', 'CC0'], 'Public domain': ['퍼블릭 도메인', 'Public domain', '公有领域', 'パブリックドメイン'] };
 const DES = { 국보: ['국보', 'National Treasure', '国宝', '国宝'], 보물: ['보물', 'Treasure', '宝物', '宝物'], 국가민속문화유산: ['국가민속문화유산', 'National Folklore Heritage', '国家民俗文化遗产', '国家民俗文化遺産'], 국가무형유산: ['국가무형유산', 'National Intangible Heritage', '国家非物质遗产', '国家無形遺産'] };
-const BY = { '메트로폴리탄 미술관': ['메트로폴리탄 미술관', 'The Metropolitan Museum of Art', '大都会艺术博物馆', 'メトロポリタン美術館'], '클리블랜드 미술관': ['클리블랜드 미술관', 'Cleveland Museum of Art', '克利夫兰艺术博物馆', 'クリーブランド美術館'] };
+const BY = { '국립고궁박물관': ['국립고궁박물관', 'National Palace Museum of Korea', '韩国国立古宫博物馆', '韓国国立古宮博物館'], '국립중앙박물관': ['국립중앙박물관', 'National Museum of Korea', '韩国国立中央博物馆', '韓国国立中央博物館'], '메트로폴리탄 미술관': ['메트로폴리탄 미술관', 'The Metropolitan Museum of Art', '大都会艺术博物馆', 'メトロポリタン美術館'], '클리블랜드 미술관': ['클리블랜드 미술관', 'Cleveland Museum of Art', '克利夫兰艺术博物馆', 'クリーブランド美術館'] };
 const KOGL_BY = ['국립중앙박물관 · 국가유산청', 'National Museum of Korea / Korea Heritage Service', '韩国国立中央博物馆 · 国家遗产厅', '韓国国立中央博物館・国家遺産庁'];
 const lab = (map, k) => (map[k] ? L4(map[k]) : k);
 const catName = (c) => L4(c.n);

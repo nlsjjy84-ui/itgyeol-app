@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, Image, useWindowDimensions, ScrollView } from 'react-native';
 import Text from '../ui/Text';
 import Jogakbo from '../components/Jogakbo';
-import { workTitle } from '../components/MockWorks';
+import { workTitle, WorkImage } from '../components/MockWorks';
 import { MOCK_WORKS, MOCK_IMAGES } from '../data/mockWorks';
 import { useJourney } from '../context/JourneyContext';
 import { colors, fonts } from '../theme';
@@ -81,7 +81,7 @@ export default function ExhibitWallScreen({ navigation }) {
             {cur.kind === 'visitor' ? (
               <Jogakbo attempts={cur.entry.attempts || []} size={art} />
             ) : (
-              <Image source={MOCK_IMAGES[cur.work.id]} style={{ width: art, height: art }} resizeMode="contain" />
+              <WorkImage work={cur.work} size={art} />
             )}
           </View>
           <Text style={st.title}>{cur.kind === 'visitor' ? `${cur.entry.nick || t('손님')} · ${t(cur.entry.country || '그 밖의 나라')}` : workTitle(cur.work)}</Text>

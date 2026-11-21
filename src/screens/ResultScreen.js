@@ -440,6 +440,9 @@ export default function ResultScreen({ navigation }) {
                     setVariantId(null);
                   }}
                 >
+                  {group.id === 'treasure' && REAL_PHOTOS[it.id] ? (
+                    <Image source={REAL_PHOTOS[it.id].img} style={styles.itemChipPhoto} resizeMode="cover" />
+                  ) : null}
                   <Text style={[styles.itemChipText, it.id === item.id && styles.itemChipTextOn]}>{it.label}</Text>
                 </Pressable>
               ))}
@@ -458,6 +461,17 @@ export default function ResultScreen({ navigation }) {
                   <Text style={[styles.variantChipText, v.id === variant.id && styles.variantChipTextOn]}>{v.label}</Text>
                 </Pressable>
               ))}
+            </View>
+          ) : null}
+
+          {group.id === 'treasure' && REAL_PHOTOS[item.id] ? (
+            <View style={styles.realBox}>
+              <Image source={REAL_PHOTOS[item.id].img} style={styles.realImg} resizeMode="contain" />
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={styles.realTag}>{t('실제 유물')}</Text>
+                <Text style={styles.realName}>{({ ko: REAL_PHOTOS[item.id].ko, en: REAL_PHOTOS[item.id].en, zh: REAL_PHOTOS[item.id].zh || REAL_PHOTOS[item.id].en, ja: REAL_PHOTOS[item.id].ja || REAL_PHOTOS[item.id].en })[getLang()] || REAL_PHOTOS[item.id].en}</Text>
+                <Text style={styles.commentNote}>{t('아래 3D는 이 유물을 본떠 내 무늬를 입힌 모양이에요.')}</Text>
+              </View>
             </View>
           ) : null}
 
@@ -902,6 +916,11 @@ const styles = StyleSheet.create({
   groupChipText: { fontSize: 13, fontWeight: '800', color: colors.muted },
   groupChipTextOn: { color: '#fff' },
   itemRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginTop: 10 },
+  itemChipPhoto: { width: 52, height: 52, borderRadius: 6, marginBottom: 4, backgroundColor: '#ffffff', alignSelf: 'center' },
+  realBox: { flexDirection: 'row', gap: 12, alignItems: 'center', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.borderSoft, backgroundColor: '#ffffff', marginTop: 8, marginBottom: 8 },
+  realImg: { width: 120, height: 120, borderRadius: 8 },
+  realTag: { fontSize: 11, fontWeight: '800', color: colors.muted },
+  realName: { fontSize: 15, fontWeight: '800', color: colors.ink || '#222' },
   itemChip: { paddingHorizontal: 11, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.paper },
   itemChipOn: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
   itemChipText: { fontSize: 12, fontWeight: '700', color: colors.muted },

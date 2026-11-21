@@ -3,6 +3,9 @@
 // Game screens and mission details come in phase 2.
 
 const ui = {
+  '실제 유물': 'Real artifact',
+  '아래 3D는 이 유물을 본떠 내 무늬를 입힌 모양이에요.': 'The 3D below is modeled on this artifact and wears your pattern.',
+  '큰 사진은 실제 유물, 모서리는 이 유물을 본뜬 예시 작품이에요': 'The large photo is the real artifact; the corner shows a sample work modeled on it',
   // AI 길 안내(웹, 2026-10-29)
   "가져갈 물건을 위에서 하나 골라 주세요.": "Pick at least one item above to take home.",
   "위 (필수) 확인 칸을 눌러 주세요. 확인해야 결제할 수 있어요.": "Tick the (required) box above first. You can pay once it's checked.",
