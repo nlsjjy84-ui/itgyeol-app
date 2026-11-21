@@ -23,6 +23,13 @@ const FILES = {
   gayageum: require('../../assets/sfx/gayageum_ok.wav'), // 가야금 — 맞췄을 때
   geomungo: require('../../assets/sfx/geomungo_fail.wav'), // 거문고 — 아쉬울 때
   daegeumCalm: require('../../assets/sfx/daegeum_calm.wav'), // 대금 — 결과 화면
+  // 유물 합체 — 옛날 로봇 만화영화의 합체 장면처럼
+  fly: require('../../assets/sfx/fly.wav'), // 조각이 날아오는 소리
+  clank: require('../../assets/sfx/clank.wav'), // 철컥 끼워짐
+  lock: require('../../assets/sfx/lock.wav'), // 치익-쿵 잠김
+  shine: require('../../assets/sfx/shine.wav'), // 완성 팡파르
+  transform: require('../../assets/sfx/transform.wav'), // 변신 기계음
+  unwrap: require('../../assets/sfx/unwrap.wav'), // 보따리 풀기
 };
 
 const players = {};

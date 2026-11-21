@@ -268,6 +268,20 @@ export default function ResultScreen({ navigation }) {
           style={{ marginTop: 4 }}
         />
 
+        {/* 놀이 보상 — 실제 유물 조각 보따리. 받은 조각으로 작업대에서 합체·변형한다(새 장르 「유물 합체」). */}
+        {attempts.length ? (
+          <Pressable
+            onPress={() => {
+              const last = attempts[attempts.length - 1];
+              navigation.navigate('Pack', { scene: SCENE_LABEL[last.sceneId] || '', claim: `${last.sceneId}:${attempts.length}:${last.at || last.code || ''}` });
+            }}
+            style={styles.packBanner}
+          >
+            <Text style={styles.packTitle}>{t('놀이 보상 — 유물 조각 보따리 받기')}</Text>
+            <Text style={styles.packDesc}>{t('진짜 박물관 유물 조각 3개가 들어 있어요. 모아서 로봇·하늘배·용으로 합체해 보세요 ›')}</Text>
+          </Pressable>
+        ) : null}
+
         <View style={styles.stackBox}>
           <Text style={styles.stackTitle}>{t('내가 모은 조각')}</Text>
           <View style={styles.stackRow}>
@@ -718,6 +732,9 @@ export default function ResultScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  packBanner: { marginTop: 12, backgroundColor: '#20303c', borderRadius: 14, padding: 14, borderWidth: 2, borderColor: '#e0a43a' },
+  packTitle: { color: '#f6e7c4', fontSize: 16, fontWeight: '700' },
+  packDesc: { color: '#e8eef2', fontSize: 13, marginTop: 4, lineHeight: 19 },
   dnaBox: { marginTop: 6, gap: 4 },
   dnaList: { alignSelf: 'center', gap: 2, paddingVertical: 2 },
   dnaTrait: { fontSize: 12.5, color: colors.ink, lineHeight: 18 },

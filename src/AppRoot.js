@@ -23,6 +23,10 @@ import KioskScreen from './screens/KioskScreen';
 import MakerScreen from './screens/MakerScreen';
 import ExhibitWallScreen from './screens/ExhibitWallScreen';
 import MaterialScreen from './screens/MaterialScreen';
+import PackScreen from './screens/PackScreen';
+import DexScreen from './screens/DexScreen';
+import WorkshopScreen from './screens/WorkshopScreen';
+import MovieScreen from './screens/MovieScreen';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { takeTourFlag } from './tourFlag';
 import { colors, getThemeMode } from './theme';
@@ -66,6 +70,10 @@ const ExhibitH = withHanji(ExhibitScreen);
 const KioskH = withHanji(KioskScreen);
 const MakerH = withHanji(MakerScreen);
 const MaterialH = withHanji(MaterialScreen);
+const PackH = withHanji(PackScreen);
+const DexH = withHanji(DexScreen);
+const WorkshopH = withHanji(WorkshopScreen);
+const MovieH = withHanji(MovieScreen);
 
 // 처음 열면 "전통문화 하면 떠오르는 것" 질문부터, 한 번 답하거나 건너뛰었으면 바로 홈으로.
 function Nav() {
@@ -129,6 +137,10 @@ function Nav() {
         <Stack.Screen name="Talchum" component={TalchumH} />
         <Stack.Screen name="Dancheong" component={DancheongH} />
         <Stack.Screen name="Result" component={ResultH} />
+        <Stack.Screen name="Pack" component={PackH} />
+        <Stack.Screen name="Dex" component={DexH} />
+        <Stack.Screen name="Workshop" component={WorkshopH} />
+        <Stack.Screen name="Movie" component={MovieH} />
       </Stack.Navigator>
       <StatusBar style={getThemeMode() === 'dark' ? 'light' : 'dark'} backgroundColor={colors.bg} />
       <SenseLayer />

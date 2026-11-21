@@ -1,0 +1,183 @@
+// 조각 보따리 — 놀이를 마치면 받는 보따리. 풀면 실제 유물 조각이 한 장씩 뒤집힌다(무엇이 나올지 모름).
+// 처음 오면 「첫 보따리」(자리마다 하나씩 10개)를 먼저 준다 — 작업대를 바로 써 볼 수 있게.
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, useWindowDimensions, Animated, Easing, TextInput } from 'react-native';
+import Text from '../ui/Text';
+import ScreenHeader from '../ui/ScreenHeader';
+import SealButton from '../ui/SealButton';
+import { colors } from '../theme';
+import { play } from '../utils/sound';
+import { t } from '../i18n';
+import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode } from '../utils/pieceStore';
+import { PIECE_BY_K, RARITY } from '../data/pieces';
+
+const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
+
+function Card({ k, delay, fresh, size }) {
+  const flip = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const id = setTimeout(() => play('unwrap'), delay);
+    Animated.timing(flip, { toValue: 1, duration: 520, delay, easing: Easing.out(Easing.back(1.6)), useNativeDriver: true }).start();
+    return () => clearTimeout(id);
+  }, []);
+  const p = PIECE_BY_K[k];
+  const scale = flip.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.2, 1.12, 1] });
+  const rot = flip.interpolate({ inputRange: [0, 1], outputRange: ['-90deg', '0deg'] });
+  return (
+    <Animated.View style={[st.card, { width: size, borderColor: RARE_COLOR[p.rare], opacity: flip, transform: [{ scale }, { rotateY: rot }] }]}>
+      <View style={[st.rareBand, { backgroundColor: RARE_COLOR[p.rare] }]}>
+        <Text style={st.rareTxt}>{t(RARITY[p.rare])}</Text>
+        {fresh && <Text style={st.newTxt}>{t('새 조각!')}</Text>}
+      </View>
+      <Image source={p.img} style={{ width: size - 16, height: size - 16, alignSelf: 'center' }} resizeMode="contain" />
+      <Text style={st.cardName} numberOfLines={2}>
+        {p.name}
+      </Text>
+      <Text style={st.cardMeta} numberOfLines={1}>
+        {[t(p.era), p.by].filter(Boolean).join(' · ')}
+      </Text>
+      <View style={st.slotRow}>
+        {p.slots.slice(0, 3).map((s) => (
+          <Text key={s} style={st.slotChip}>
+            {t(s)}
+          </Text>
+        ))}
+      </View>
+    </Animated.View>
+  );
+}
+
+export default function PackScreen({ navigation, route }) {
+  const { width } = useWindowDimensions();
+  const store = usePieces();
+  const scene = (route.params && route.params.scene) || '';
+  const count = (route.params && route.params.n) || 3;
+  const claim = (route.params && route.params.claim) || '';
+  const [opened, setOpened] = useState(null); // {keys, fresh, starter}
+  const [code, setCode] = useState('');
+  const [codeMsg, setCodeMsg] = useState('');
+  const shake = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shake, { toValue: 1, duration: 140, useNativeDriver: true }),
+        Animated.timing(shake, { toValue: -1, duration: 140, useNativeDriver: true }),
+        Animated.timing(shake, { toValue: 0, duration: 140, useNativeDriver: true }),
+        Animated.delay(900),
+      ])
+    ).start();
+  }, []);
+  const open = async () => {
+    await loadPieces();
+    const s = getPieces();
+    if (!s.starter) {
+      const keys = takeStarter();
+      setOpened({ keys, fresh: keys, starter: true });
+      return;
+    }
+    if (claim && isClaimed(claim)) {
+      setOpened({ keys: [], fresh: [], starter: false, already: true });
+      return;
+    }
+    const keys = drawPack(count, Date.now() % 1000003, s.owned, s.codes);
+    const fresh = addPieces(keys);
+    markClaimed(claim);
+    setOpened({ keys, fresh, starter: false });
+  };
+  const perRow = opened && opened.keys.length > 3 ? 3 : Math.max(2, (opened && opened.keys.length) || 3);
+  const cardW = Math.min(170, Math.floor((Math.min(width, 760) - 32 - 10 * (perRow - 1)) / perRow) - 2);
+  const ownedN = Object.keys(store.owned || {}).length;
+  return (
+    <SafeAreaView style={st.safe}>
+      <ScrollView contentContainerStyle={st.wrap}>
+        <ScreenHeader title={t('조각 보따리')} sub={t('놀이를 마치면 실제 유물 조각을 받아요')} onBack={() => navigation.goBack()} />
+        {!opened ? (
+          <View style={st.center}>
+            <Text style={st.lead}>
+              {scene ? t('{a} 놀이를 마쳤어요! 보따리 안에 무엇이 들었을까요?', { a: t(scene) }) : t('보따리 안에 무엇이 들었을까요?')}
+            </Text>
+            <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={t('보따리 풀기')}>
+              <Animated.View style={[st.bundle, { transform: [{ rotate: shake.interpolate({ inputRange: [-1, 1], outputRange: ['-6deg', '6deg'] }) }] }]}>
+                <View style={st.knot} />
+                <View style={st.knotL} />
+                <View style={st.knotR} />
+                <Text style={st.bundleTxt} brush>
+                  {t('결')}
+                </Text>
+              </Animated.View>
+            </Pressable>
+            <Text style={st.hint}>{t('보따리를 눌러 풀어 보세요')}</Text>
+            <Text style={st.small}>{t('보통 · 귀함 · 아주 귀함 — 아직 없는 조각이 더 잘 나와요')}</Text>
+            <View style={st.codeBox}>
+              <Text style={st.codeH}>{t('박물관에서 받은 암호')}</Text>
+              <Text style={st.small}>{t('박물관 현장에서 받은 암호를 넣으면 그곳에서만 나오는 「한정 조각」이 보따리에 섞여요.')}</Text>
+              <View style={st.codeRow}>
+                <TextInput value={code} onChangeText={setCode} placeholder={t('암호')} style={st.codeInput} autoCapitalize="characters" />
+                <SealButton
+                  small
+                  label={t('넣기')}
+                  onPress={() => {
+                    const c = enterCode(code);
+                    setCodeMsg(c ? t('「{a} 한정」 조각이 열렸어요!', { a: t(c) }) : t('맞지 않는 암호예요.'));
+                  }}
+                />
+              </View>
+              {!!codeMsg && <Text style={st.codeMsg}>{codeMsg}</Text>}
+              {(store.codes || []).length ? <Text style={st.small}>{t('열린 한정: {a}', { a: store.codes.map((c) => t(c)).join(', ') })}</Text> : null}
+            </View>
+          </View>
+        ) : (
+          <View>
+            <Text style={st.lead}>
+              {opened.already
+                ? t('이 놀이의 보따리는 이미 받았어요. 다른 놀이를 마치면 또 받을 수 있어요.')
+                : opened.starter
+                ? t('첫 보따리! 자리마다 하나씩, 조각 {n}개를 받았어요.', { n: opened.keys.length })
+                : t('조각 {n}개를 받았어요. 새 조각 {m}개!', { n: opened.keys.length, m: opened.fresh.length })}
+            </Text>
+            <View style={st.grid}>
+              {opened.keys.map((k, i) => (
+                <Card key={k + i} k={k} delay={250 + i * 380} fresh={opened.fresh.includes(k)} size={cardW} />
+              ))}
+            </View>
+            <Text style={st.small}>{t('지금 모은 조각 {n}개', { n: ownedN })}</Text>
+            <View style={st.btns}>
+              <SealButton label={t('작업대에서 합체하기')} onPress={() => navigation.navigate('Workshop')} />
+              <SealButton label={t('조각 도감 보기')} variant="ink" onPress={() => navigation.navigate('Dex')} />
+              {opened.starter && claim ? <SealButton label={t('놀이 보따리도 풀기')} variant="paper" onPress={() => setOpened(null)} /> : null}
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const st = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: 'transparent' },
+  wrap: { padding: 16, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },
+  center: { alignItems: 'center', paddingVertical: 20 },
+  lead: { fontSize: 17, color: colors.ink, textAlign: 'center', marginVertical: 14, lineHeight: 25 },
+  bundle: { width: 190, height: 170, borderRadius: 60, backgroundColor: '#3f6f8f', alignItems: 'center', justifyContent: 'center', borderWidth: 5, borderColor: '#2b4f66', marginVertical: 18 },
+  knot: { position: 'absolute', top: -14, width: 46, height: 34, borderRadius: 16, backgroundColor: '#2b4f66' },
+  knotL: { position: 'absolute', top: -26, left: 52, width: 40, height: 26, borderRadius: 14, backgroundColor: '#3f6f8f', transform: [{ rotate: '-30deg' }] },
+  knotR: { position: 'absolute', top: -26, right: 52, width: 40, height: 26, borderRadius: 14, backgroundColor: '#3f6f8f', transform: [{ rotate: '30deg' }] },
+  bundleTxt: { fontSize: 54, color: '#f6efe0' },
+  hint: { fontSize: 15, color: colors.ink, marginTop: 4 },
+  small: { fontSize: 13, color: colors.muted, textAlign: 'center', marginTop: 10 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
+  card: { backgroundColor: colors.paper, borderRadius: 14, borderWidth: 3, padding: 8, paddingTop: 0, overflow: 'hidden' },
+  rareBand: { marginHorizontal: -8, marginBottom: 6, paddingVertical: 3, flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  rareTxt: { fontSize: 11, color: '#1b2227', fontWeight: '700' },
+  newTxt: { fontSize: 11, color: '#fff', fontWeight: '700', backgroundColor: '#b3322b', paddingHorizontal: 5, borderRadius: 6, overflow: 'hidden' },
+  cardName: { fontSize: 13, color: colors.ink, fontWeight: '700', marginTop: 6, lineHeight: 17 },
+  cardMeta: { fontSize: 11, color: colors.muted, marginTop: 2 },
+  slotRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
+  slotChip: { fontSize: 10, color: colors.ink, backgroundColor: colors.accentSoft, paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6, overflow: 'hidden' },
+  btns: { gap: 10, marginTop: 18 },
+  codeBox: { marginTop: 26, width: '100%', maxWidth: 420, backgroundColor: colors.paper, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: colors.borderSoft },
+  codeH: { fontSize: 14, fontWeight: '700', color: colors.ink },
+  codeRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginTop: 8 },
+  codeInput: { flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, color: colors.ink, fontSize: 15 },
+  codeMsg: { fontSize: 13, color: colors.accent, marginTop: 6, textAlign: 'center' },
+});

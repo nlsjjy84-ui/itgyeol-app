@@ -18,6 +18,7 @@ import { PART_OF_CARD } from '../data/book';
 import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
 import HomeNumbers from '../components/HomeNumbers';
+import HapcheHome from '../components/HapcheHome';
 import { MATERIAL_BY_ID } from '../data/materialTree';
 import { Swatch, matName, MATERIAL_COUNT } from './MaterialScreen';
 
@@ -162,6 +163,9 @@ export default function HomeScreen({ navigation, route }) {
       {route && route.params && route.params.tour ? (
         <QuickTourCard navigation={navigation} onClose={() => navigation.setParams({ tour: false })} />
       ) : null}
+
+      {/* 새 장르 「유물 합체」 — 놀이 → 유물 조각 → 합체·변형 → 영상·물건 (2026-11-21) */}
+      <HapcheHome navigation={navigation} />
 
       <StoryScene scene="prologue" style={{ marginTop: 16 }} />
 
