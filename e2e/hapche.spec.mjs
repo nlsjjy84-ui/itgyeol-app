@@ -12,6 +12,8 @@ test('유물 합체: 첫 보따리 받고 합체 영상까지', async ({ page })
   await page.getByText('합체!', { exact: true }).filter({ visible: true }).first().click();
   await expect(page.getByText('합체 영상').filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByText(/이 작품에 들어간 진짜 유물 \d+점/)).toBeVisible();
+  await expect(page.getByText('함께 이야기해 봐요')).toBeVisible();
+  await expect(page.getByText(/새 이름을 붙인다면/)).toBeVisible();
   await page.getByText('내 작품에 저장', { exact: true }).filter({ visible: true }).first().click();
   await expect(page.getByText('내 작품에 저장했어요 ✓')).toBeVisible();
   await page.getByText('조각 도감', { exact: true }).filter({ visible: true }).last().click();

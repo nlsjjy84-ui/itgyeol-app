@@ -1,6 +1,7 @@
 // 이야기 영상 — 예전 그림책(한 쪽씩 넘기기)을 저절로 재생되는 영상으로 바꾼 것.
 // 배경이 천천히 움직이고(카메라), 풍이·결이가 말할 때 튀어나오고, 판과 이어진 실제 유물이 떠다니고, 자막이 흐른다.
 // 고르는 장면에서는 영상이 잠깐 멈추고 선택지가 뜬다(가만히 있으면 그것도 대답으로 받아 이어진다) — 선택형 영상.
+import { say, hush, speaking, useNarrate, setNarrate, canNarrate } from '../utils/narrate';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Image, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import Text from '../ui/Text';
@@ -145,10 +146,19 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
     setStage({ kind: 'react', i: 0 });
     setLineStart(now);
   };
+  // 소리 내어 읽어 주기 — 줄이 바뀔 때 읽고, 다 읽을 때까지 다음 줄로 넘어가지 않는다
+  const narr = useNarrate();
+  useEffect(() => {
+    if (narr && cur && !paused) say(curText, cur.who);
+  }, [pi, stage.kind, stage.i, narr]);
+  useEffect(() => {
+    if (paused) hush();
+  }, [paused]);
+  useEffect(() => () => hush(), []);
   // 저절로 넘어가기
   useEffect(() => {
     if (paused) return;
-    if ((stage.kind === 'lines' || stage.kind === 'react') && cur && elapsed > lineDur(curText)) next();
+    if ((stage.kind === 'lines' || stage.kind === 'react') && cur && elapsed > lineDur(curText) && !speaking()) next();
     if (stage.kind === 'wait' && input && elapsed > (FAST ? 1.2 : (input.waitMs || 5000) / 1000 + 0.6)) pick(input.silent);
   }, [now]);
 
@@ -249,6 +259,11 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
         <Pressable onPress={() => setPaused(!paused)} style={st.btn} accessibilityLabel={paused ? t('재생') : t('일시정지')}>
           <Text style={st.btnTxt}>{paused ? t('▶ 재생') : t('❚❚ 일시정지')}</Text>
         </Pressable>
+        {canNarrate() ? (
+          <Pressable onPress={() => setNarrate(!narr)} style={st.btn} accessibilityLabel={t('소리 내어 읽어 주기')}>
+            <Text style={st.btnTxt}>{narr ? t('읽어 주기 켬') : t('읽어 주기 끔')}</Text>
+          </Pressable>
+        ) : null}
         <Pressable onPress={() => stage.kind !== 'wait' && skipScene()} style={st.btn}>
           <Text style={st.btnTxt}>{t('다음 장면 ›')}</Text>
         </Pressable>

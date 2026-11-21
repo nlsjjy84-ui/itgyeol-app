@@ -7,9 +7,9 @@ import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
 import HapcheStage from '../components/HapcheStage';
 import { colors } from '../theme';
-import { t } from '../i18n';
+import { t, getLang } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { buildTimeline, beatsOf, judge, creditOf } from '../utils/hapche';
+import { buildTimeline, beatsOf, judge, creditOf, josa } from '../utils/hapche';
 import { play } from '../utils/sound';
 import { saveWork, usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
@@ -17,6 +17,7 @@ import { SLOT_INFO } from '../data/frames';
 import { canExport, exportMovie, downloadBlob, srtOf, paperKit } from '../utils/movieExport';
 import { movieUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
+import { useNarrate, setNarrate, canNarrate } from '../utils/narrate';
 
 // 이 작품으로 만들 수 있는 물건 — 앱은 "제시"까지, 실제 제작은 박물관·업체가 맡는다
 const GOODS = [
@@ -74,6 +75,21 @@ export default function MovieScreen({ navigation, route }) {
   const [rec, setRec] = useState(null); // null | number(진행률) | {url, ext} | 'fail'
   const size = Math.min(width - 24, 620);
   const parts = [...new Set(tl.events.map((e) => e.k))].map((k) => ({ k, p: PIECE_BY_K[k], slots: [...new Set(tl.events.filter((e) => e.k === k).map((e) => e.slot).filter(Boolean))] }));
+
+  const narr = useNarrate();
+  // 함께 이야기해 봐요 — 보호자·선생님이 아이와 나눌 질문(앱 속 대화 질문은 함께 읽기를 돕는다)
+  const talk = useMemo(() => {
+    const q = [];
+    const jo = (w, pair) => '「' + w + '」' + josa(w, pair).slice(w.length);
+    const withUse = parts.find(({ p }) => p && p.use && p.use !== '기타' && !p.abroad);
+    if (withUse && getLang() === 'ko') q.push(t('「{a}」의 원래 쓰임은 {b}. 옛날 사람들은 이걸 언제, 어디서 썼을까요?', { a: pieceName(withUse.p), b: jo(withUse.p.use, '이에요/예요') }));
+    const eras = [...new Set(parts.map(({ p }) => p && p.era).filter(Boolean))];
+    if (eras.length > 1) q.push(t('이 작품에는 {a} 유물이 함께 있어요. 몇백 년 떨어져 살던 유물들이 만나면 서로 무슨 말을 할까요?', { a: eras.map((e) => t(e)).join(', ') }));
+    const far = parts.find(({ p }) => p && p.abroad);
+    if (far) q.push(t('{a} 지금 바다 건너 {b}에 있어요. 우리 유물이 왜 먼 나라에 가 있을까요?', { a: jo(pieceName(far.p), '은/는'), b: t(far.p.by) }));
+    if (tl.villain) q.push(t('오늘 물리친 {a} 진짜 박물관에서도 유물을 괴롭혀요. 우리 집 물건은 무엇이 망가뜨릴까요?', { a: jo(t(tl.villain.name), '은/는') }));
+    return [...q.slice(0, 3), t('내가 이 작품에 새 이름을 붙인다면? 그리고 내일은 어디로 가서 누구를 도울까요?')];
+  }, [tl]);
 
   const onSave = () => {
     const w = saveWork({ id: savedId || undefined, frameId, assign: frameId === 'free' ? Object.fromEntries((layout || []).map((it, i) => ['p' + i, it.k])) : assign, layout, seed, scene, title: tl.title.full });
@@ -193,12 +209,25 @@ export default function MovieScreen({ navigation, route }) {
           </View>
         </View>
 
+        {canNarrate() ? (
+          <SealButton small variant="paper" label={narr ? t('소리 내어 읽어 주기: 켬') : t('소리 내어 읽어 주기: 끔')} onPress={() => setNarrate(!narr)} style={{ marginTop: 10 }} />
+        ) : null}
         <Text style={st.h}>{t('이야기')}</Text>
         <View style={st.story}>
           {tl.subs.map((s, i) => (
             <Text key={i} style={st.line}>
               <Text style={[st.who, { color: s.who === '풍이' ? '#b9781a' : s.who === '결이' ? '#2b6f9e' : colors.accent }]}>{t(s.who)} </Text>
               {s.text}
+            </Text>
+          ))}
+        </View>
+
+        <Text style={st.h}>{t('함께 이야기해 봐요')}</Text>
+        <View style={st.talk}>
+          <Text style={st.partMeta}>{t('영상을 본 뒤 보호자·선생님이 아이와 나눌 질문이에요.')}</Text>
+          {talk.map((q, i) => (
+            <Text key={i} style={st.line}>
+              {i + 1}. {q}
             </Text>
           ))}
         </View>
@@ -241,6 +270,7 @@ export default function MovieScreen({ navigation, route }) {
 }
 
 const st = StyleSheet.create({
+  talk: { backgroundColor: '#f6f2ea', borderRadius: 14, padding: 12, gap: 6 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 12, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },
   btns: { gap: 10, marginTop: 14 },

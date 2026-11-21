@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
+import { say, hush, useNarrate } from '../utils/narrate';
 import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { play, stop } from '../utils/sound';
@@ -106,6 +107,12 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
   const flash = time >= tl.lockT && time < tl.lockT + 0.6 ? 1 - (time - tl.lockT) / 0.6 : 0;
   const shake = time >= tl.lockT && time < tl.lockT + 0.35 ? Math.sin(time * 90) * 6 : 0;
   const sub = showSubs ? subAt(tl, time) : null;
+  const narr = useNarrate();
+  const subKey = sub ? sub.t0 : -1;
+  useEffect(() => {
+    if (narr && sound && playing && sub) say(sub.text, sub.who);
+  }, [subKey, narr]);
+  useEffect(() => () => hush(), []);
   const tags = showSubs ? tagsAt(tl, time).slice(-2) : [];
   const done = time >= tl.titleT;
   const sorted = [...tl.events].sort((a, b) => a.z - b.z);

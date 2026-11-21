@@ -4,6 +4,18 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "소리 내어 읽어 주기": "Read aloud",
+  "읽어 주기 켬": "Read aloud: on",
+  "읽어 주기 끔": "Read aloud: off",
+  "소리 내어 읽어 주기: 켬": "Read the story aloud: on",
+  "소리 내어 읽어 주기: 끔": "Read the story aloud: off",
+  "함께 이야기해 봐요": "Let's talk about it",
+  "영상을 본 뒤 보호자·선생님이 아이와 나눌 질문이에요.": "Questions for a parent or teacher to talk over with the child after watching.",
+  "「{a}」의 원래 쓰임은 {b}. 옛날 사람들은 이걸 언제, 어디서 썼을까요?": "'{a}' was originally a {b}. When and where did people long ago use it?",
+  "이 작품에는 {a} 유물이 함께 있어요. 몇백 년 떨어져 살던 유물들이 만나면 서로 무슨 말을 할까요?": "This work brings together artifacts from {a}. If artifacts made centuries apart met, what would they say to each other?",
+  "{a} 지금 바다 건너 {b}에 있어요. 우리 유물이 왜 먼 나라에 가 있을까요?": "{a} is now across the sea at the {b}. Why might a Korean artifact be in a faraway country?",
+  "오늘 물리친 {a} 진짜 박물관에서도 유물을 괴롭혀요. 우리 집 물건은 무엇이 망가뜨릴까요?": "{a}, defeated today, troubles artifacts in real museums too. What could damage the things in our home?",
+  "내가 이 작품에 새 이름을 붙인다면? 그리고 내일은 어디로 가서 누구를 도울까요?": "If you gave this work a new name, what would it be? And where will it go tomorrow, and whom will it help?",
   "답례 조각을 보낼 준비가 됐어요": "Your return piece is ready to send",
   "이 QR이나 링크를 {a} 님에게 보내면 「{b}」 조각이 건너가요.": "Send this QR or link to {a} and the '{b}' piece goes to them.",
   "이 QR이나 링크를 친구에게 보내면 「{b}」 조각이 건너가요.": "Send this QR or link to your friend and the '{b}' piece goes to them.",
