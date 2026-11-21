@@ -4,6 +4,19 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "얼쑤 {a} · 좋다 {b} · 놓침 {c}": "Eolssu {a} · Joda {b} · Missed {c}",
+  "얼쑤!": "Eolssu!",
+  "장단 등급": "Rhythm rank",
+  "장단 맞춰 톡": "Tap to the rhythm",
+  "장단 맞춰 합체하기 — 끼워질 때 톡!": "Combine to the rhythm — tap as each piece clicks in!",
+  "장단 합체 중… 박에 맞춰 톡!": "Rhythm combine… tap on the beat!",
+  "조각 {n}번이 장구 박에 맞춰 끼워졌어요.": "Pieces clicked in on {n} janggu beats.",
+  "조각이 철컥 끼워질 때 톡!": "Tap when a piece clicks in!",
+  "조금 빨라요/느려요": "A bit early/late",
+  "명창": "Master singer",
+  "흥": "Heung (getting into it)",
+  "첫걸음": "First steps",
+  "얼쑤": "Eolssu",
   "나온 곳": "Found at",
   "나들이꾼": "Explorer",
   "서로 다른 고장에서 나온 조각 5곳 모으기": "Collect pieces found in 5 different places",

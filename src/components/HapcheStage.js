@@ -10,7 +10,7 @@ import { t } from '../i18n';
 
 const WHO_COLOR = { 풍이: '#e0a43a', 결이: '#6fb0d8', 함께: '#f0e6d0' };
 
-export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, loop = false, sound = true, showSubs = true }) {
+export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, loop = false, sound = true, showSubs = true, onTime, overlay, playKey }) {
   const [time, setTime] = useState(autoPlay ? 0 : tl.dur);
   const [playing, setPlaying] = useState(autoPlay);
   const start = useRef(0);
@@ -19,7 +19,10 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
     fired.current = new Set();
     setTime(autoPlay ? 0 : tl.dur);
     setPlaying(autoPlay);
-  }, [tl]);
+  }, [tl, playKey]);
+  useEffect(() => {
+    if (onTime) onTime(time);
+  }, [time]);
   useEffect(() => {
     if (!playing) return undefined;
     let raf;
@@ -186,6 +189,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
           <Text style={[st.sub, { fontSize: Math.max(13, size * 0.04) }]}>{sub.text}</Text>
         </View>
       )}
+      {overlay || null}
       {!playing && (
         <Pressable
           style={st.replay}

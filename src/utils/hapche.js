@@ -157,8 +157,9 @@ export function buildTimeline(frameId, assign, opts = {}) {
     })
     .filter(Boolean);
 
-  const OPEN = 3.6;
-  const STEP = isTransform ? 0.75 : 0.5;
+  const OPEN = 3.725; // 3.725 + 날아오는 0.65초 = 4.375초 = 7박 — 첫 조각이 장구 박에 정확히 끼워진다
+  // 한 박 = 0.625초(96박/분) — 배경음악 장구 장단과 같은 빠르기라, 조각이 박자에 맞춰 끼워진다
+  const STEP = isTransform ? 0.625 * 1.2 : 0.625;
   const FLY = 0.65;
   const orders = [...new Set(items.map((it) => it.sp.order))].sort((a, b) => a - b);
   let cursor = OPEN;
@@ -166,7 +167,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
   orders.forEach((o) => {
     const group = items.filter((it) => it.sp.order === o);
     const isHead = o >= 9;
-    if (isHead) cursor += 0.45; // 머리는 한 박자 쉬고 마지막에
+    if (isHead) cursor += 0.625; // 머리는 한 박자 쉬고 마지막에
     group.forEach((it, gi) => {
       const sp = it.sp;
       const fromLeft = sp.x < 500 || (sp.x === 500 && gi % 2 === 0);
@@ -356,3 +357,32 @@ export function slotSay(slot) {
   return SLOT_INFO[slot] ? SLOT_INFO[slot].say : '';
 }
 export { PIECES };
+
+// 장단 합체 — 조각이 끼워지는 박(시각) 목록. 같은 순간에 여럿이 끼워지면 한 박으로 친다.
+export function beatsOf(tl) {
+  const out = [];
+  tl.events.forEach((e) => {
+    if (!out.some((b) => Math.abs(b - e.end) < 0.08)) out.push(e.end);
+  });
+  return out.sort((a, b) => a - b);
+}
+// 친 시각들로 판정 — 박에서 0.12초 안이면 「얼쑤」, 0.25초 안이면 「좋다」, 그 밖이면 놓침
+export function judge(beats, taps) {
+  const used = new Set();
+  const res = beats.map((b) => {
+    let best = null;
+    taps.forEach((x, i) => {
+      if (used.has(i)) return;
+      const d = Math.abs(x - b);
+      if (d <= 0.25 && (best === null || d < best.d)) best = { d, i };
+    });
+    if (!best) return { b, grade: 'miss' };
+    used.add(best.i);
+    return { b, grade: best.d <= 0.12 ? 'great' : 'good' };
+  });
+  const great = res.filter((r) => r.grade === 'great').length;
+  const good = res.filter((r) => r.grade === 'good').length;
+  const score = beats.length ? (great + good * 0.6) / beats.length : 0;
+  const rank = score >= 0.85 ? '명창' : score >= 0.6 ? '얼쑤' : score >= 0.3 ? '흥' : '첫걸음';
+  return { res, great, good, miss: beats.length - great - good, score, rank };
+}

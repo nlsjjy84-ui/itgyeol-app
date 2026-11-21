@@ -70,3 +70,22 @@ test('유물 합체: 선물 링크(?g=)로 열면 조각을 받는다', async ({
   await page.getByLabel('보따리 풀기').click();
   await expect(page.getByText('선물 받은 조각이에요! 도감에 들어갔어요.')).toBeVisible();
 });
+
+test('유물 합체: 장단 맞춰 합체하면 등급이 나온다', async ({ page }) => {
+  test.setTimeout(120000);
+  await page.goto('/?m=' + encodeURIComponent('flower~42~n42506'));
+  const btn = page.getByText('장단 맞춰 합체하기 — 끼워질 때 톡!');
+  for (let i = 0; i < 40 && !(await btn.isVisible().catch(() => false)); i += 1) {
+    const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+    if (await agree.count()) await agree.first().click().catch(() => {});
+    else await page.waitForTimeout(250);
+  }
+  await btn.click();
+  const pad = page.getByLabel('장단 맞춰 톡');
+  await expect(page.getByText('장단 합체 중… 박에 맞춰 톡!')).toBeVisible();
+  for (let i = 0; i < 10; i += 1) {
+    await pad.click({ timeout: 2000 }).catch(() => {});
+    await page.waitForTimeout(700);
+  }
+  await expect(page.getByText(/장단 등급/)).toBeVisible({ timeout: 30000 });
+});

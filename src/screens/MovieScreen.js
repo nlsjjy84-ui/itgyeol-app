@@ -1,6 +1,6 @@
 // 합체 영상 — 조각이 날아와 합체하는 짧은 영상과 자동 자막(풍이·결이의 이야기).
 // 영상 아래에는 이야기 전체, 들어간 진짜 유물(박물관 원본 링크), 영상·자막 파일 저장, 이 작품으로 만들 수 있는 물건.
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, SafeAreaView, useWindowDimensions, Image, Pressable, Linking, Platform } from 'react-native';
 import Text from '../ui/Text';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -9,7 +9,8 @@ import HapcheStage from '../components/HapcheStage';
 import { colors } from '../theme';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { buildTimeline } from '../utils/hapche';
+import { buildTimeline, beatsOf, judge } from '../utils/hapche';
+import { play } from '../utils/sound';
 import { saveWork, usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
 import { SLOT_INFO } from '../data/frames';
@@ -32,6 +33,44 @@ export default function MovieScreen({ navigation, route }) {
   const { frameId, assign = {}, seed = 1, scene = '', saved, shared, layout } = route.params || {};
   const tl = useMemo(() => buildTimeline(frameId, assign, { seed, scene, layout }), [frameId, assign, seed, scene, layout]);
   const [savedId, setSavedId] = useState(saved || null);
+  // 장단 합체 — 조각이 끼워지는 박에 맞춰 톡!
+  const [rhythm, setRhythm] = useState(false);
+  const [playKey, setPlayKey] = useState(0);
+  const [pop, setPop] = useState(null); // {txt, at}
+  const [result, setResult] = useState(null);
+  const timeRef = useRef(0);
+  const taps = useRef([]);
+  const armed = useRef(false); // 다시 처음부터 재생되기 시작한 뒤에만 판정한다
+  const beats = useMemo(() => beatsOf(tl), [tl]);
+  const startRhythm = () => {
+    taps.current = [];
+    armed.current = false;
+    setResult(null);
+    setPop(null);
+    setRhythm(true);
+    setPlayKey((x) => x + 1);
+  };
+  const onTap = () => {
+    if (!armed.current) return;
+    const now = timeRef.current;
+    taps.current.push(now);
+    const near = beats.reduce((b, x) => (Math.abs(x - now) < Math.abs(b - now) ? x : b), beats[0] || 0);
+    const d = Math.abs(near - now);
+    const txt = d <= 0.12 ? t('얼쑤!') : d <= 0.25 ? t('좋다!') : t('조금 빨라요/느려요');
+    if (d <= 0.25) play('clank');
+    const id = Date.now();
+    setPop({ txt, at: now, great: d <= 0.12, id });
+    setTimeout(() => setPop((pp) => (pp && pp.id === id ? null : pp)), 650);
+  };
+  const onTime = (x) => {
+    timeRef.current = x;
+    if (rhythm && !armed.current && x < 1) armed.current = true;
+    if (rhythm && armed.current && !result && x >= tl.lockT + 0.3) {
+      const j = judge(beats, taps.current);
+      setResult(j);
+      setRhythm(false);
+    }
+  };
   const [rec, setRec] = useState(null); // null | number(진행률) | {url, ext} | 'fail'
   const size = Math.min(width - 24, 620);
   const parts = [...new Set(tl.events.map((e) => e.k))].map((k) => ({ k, p: PIECE_BY_K[k], slots: [...new Set(tl.events.filter((e) => e.k === k).map((e) => e.slot).filter(Boolean))] }));
@@ -69,7 +108,40 @@ export default function MovieScreen({ navigation, route }) {
             <SealButton label={t('나도 만들어 보기 — 첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
           </View>
         ) : null}
-        <HapcheStage tl={tl} size={size} />
+        <HapcheStage
+          tl={tl}
+          size={size}
+          playKey={playKey}
+          onTime={onTime}
+          overlay={
+            rhythm ? (
+              <Pressable onPressIn={onTap} style={StyleSheet.absoluteFill} accessibilityLabel={t('장단 맞춰 톡')}>
+                <View style={st.beatHint} pointerEvents="none">
+                  <Text style={st.beatHintTxt}>{t('조각이 철컥 끼워질 때 톡!')}</Text>
+                </View>
+                {pop ? (
+                  <View style={st.popBox} pointerEvents="none">
+                    <Text style={[st.popTxt, pop.great && { color: '#ffd45a' }]}>{pop.txt}</Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            ) : null
+          }
+        />
+        <View style={st.btns}>
+          <SealButton label={rhythm ? t('장단 합체 중… 박에 맞춰 톡!') : t('장단 맞춰 합체하기 — 끼워질 때 톡!')} variant="ink" disabled={rhythm} onPress={startRhythm} sound="drum" />
+          {result ? (
+            <View style={st.result}>
+              <Text style={st.resultRank} brush>
+                {t('장단 등급')}: {t(result.rank)}
+              </Text>
+              <Text style={st.resultTxt}>
+                {t('얼쑤 {a} · 좋다 {b} · 놓침 {c}', { a: result.great, b: result.good, c: result.miss })}
+              </Text>
+              <Text style={st.resultTxt}>{t('조각 {n}번이 장구 박에 맞춰 끼워졌어요.', { n: beats.length })}</Text>
+            </View>
+          ) : null}
+        </View>
         <View style={st.btns}>
           <SealButton label={savedId ? t('내 작품에 저장했어요 ✓') : t('내 작품에 저장')} onPress={onSave} disabled={!!savedId && !saved} sound="stamp" />
           {canExport() ? (
@@ -172,6 +244,13 @@ const st = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 12, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },
   btns: { gap: 10, marginTop: 14 },
+  beatHint: { position: 'absolute', top: 10, right: 10, backgroundColor: '#b3322bdd', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  beatHintTxt: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  popBox: { position: 'absolute', top: '38%', left: 0, right: 0, alignItems: 'center' },
+  popTxt: { fontSize: 34, fontWeight: '800', color: '#ffffff', textShadowColor: '#000', textShadowRadius: 8 },
+  result: { backgroundColor: '#20303c', borderRadius: 14, padding: 14, alignItems: 'center', gap: 4 },
+  resultRank: { color: '#ffd45a', fontSize: 24 },
+  resultTxt: { color: '#e8eef2', fontSize: 14 },
   sharedBox: { backgroundColor: '#20303c', borderRadius: 14, padding: 12, gap: 8, marginBottom: 10 },
   sharedTxt: { color: '#f6e7c4', fontSize: 14, lineHeight: 20 },
   share: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: colors.paper, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: colors.borderSoft },
