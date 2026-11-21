@@ -208,7 +208,20 @@ export function drawFrame(ctx, S, tl, imgs, time) {
     ctx.shadowColor = '#000';
     ctx.shadowBlur = 10;
     ctx.fillStyle = '#fff4d6';
-    wrap(ctx, tl.title.full, S - 40).forEach((ln, i) => ctx.fillText(ln, S / 2, S * 0.06 + i * S * 0.065));
+    // 조각과 겹쳐도 읽히게 제목 뒤에 반투명 띠를 깐다(화면과 같게)
+    const tlines = wrap(ctx, tl.title.full, S * 0.82);
+    const tw = Math.max(...tlines.map((ln) => ctx.measureText(ln).width)) + S * 0.05;
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(12,14,18,0.55)';
+    const th = tlines.length * S * 0.065 + S * 0.02;
+    if (ctx.roundRect) {
+      ctx.beginPath();
+      ctx.roundRect(S / 2 - tw / 2, S * 0.03, tw, th, S * 0.03);
+      ctx.fill();
+    } else ctx.fillRect(S / 2 - tw / 2, S * 0.03, tw, th);
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#fff4d6';
+    tlines.forEach((ln, i) => ctx.fillText(ln, S / 2, S * 0.04 + i * S * 0.065));
     ctx.shadowBlur = 0;
   }
   ctx.textAlign = 'left';

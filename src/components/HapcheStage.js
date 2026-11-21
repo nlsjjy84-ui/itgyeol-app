@@ -220,9 +220,11 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
       {flash > 0 && <View style={[StyleSheet.absoluteFill, { backgroundColor: '#fff8e8', opacity: flash * 0.85 }]} />}
       {done && (
         <View style={st.titleBox} pointerEvents="none">
-          <Text style={[st.title, { fontSize: Math.max(15, size * 0.052) }]} brush>
-            {tl.title.full}
-          </Text>
+          <View style={st.titlePill}>
+            <Text style={[st.title, { fontSize: Math.max(15, size * 0.052) }]} brush>
+              {tl.title.full}
+            </Text>
+          </View>
         </View>
       )}
       {tags.map((g, i) => (
@@ -277,7 +279,8 @@ const st = StyleSheet.create({
   vNameTxt: { color: '#ffd2c8', fontSize: 12, fontWeight: '700' },
   fire: { position: 'absolute', backgroundColor: '#ff8a2a', borderRadius: 999 },
   spark: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: '#fff6c8' },
-  titleBox: { position: 'absolute', top: '6%', left: 10, right: 10, alignItems: 'center' },
+  titlePill: { backgroundColor: 'rgba(12,14,18,0.55)', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 3, maxWidth: '86%' },
+  titleBox: { position: 'absolute', top: '3%', left: 10, right: 10, alignItems: 'center' },
   title: { color: '#fff4d6', textAlign: 'center', textShadowColor: '#000', textShadowRadius: 8, textShadowOffset: { width: 0, height: 2 } },
   tag: { position: 'absolute', left: 10, maxWidth: '78%', flexDirection: 'row', alignItems: 'center', backgroundColor: '#000000a8', borderRadius: 14, paddingHorizontal: 8, paddingVertical: 4 },
   tagSlot: { color: '#1b2227', backgroundColor: '#f0c45a', fontSize: 11, fontWeight: '700', paddingHorizontal: 6, borderRadius: 8, marginRight: 6, overflow: 'hidden' },
