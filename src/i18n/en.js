@@ -4,6 +4,23 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "이달의 시리즈": "This month's series",
+  "이 시리즈 조각이 더 잘 나와요. 모은 조각 {a} / {b}": "Pieces from this series show up more often. Collected {a} / {b}",
+  "시크릿 조각이 72번에 한 번꼴로 숨어 있어요": "A secret piece hides in about 1 of 72 draws",
+  "찾았어요!": "Found it!",
+  "시크릿!": "Secret!",
+  "신라의 금빛": "Silla gold",
+  "궁궐의 과학": "Palace science",
+  "봄날의 꽃무늬": "Spring flower patterns",
+  "백제의 미소": "Smile of Baekje",
+  "아이들의 놀이": "Children's play",
+  "바다 건너온 유물": "Artifacts from across the sea",
+  "여름밤의 도깨비": "Summer-night goblins",
+  "쇠와 불의 장인": "Masters of iron and fire",
+  "가을 들녘 살림살이": "Autumn household goods",
+  "선비의 책상": "The scholar's desk",
+  "고려 청자의 달": "Goryeo celadon month",
+  "조선 백자의 겨울": "Joseon white porcelain winter",
   "이야기 영상 만드는 중… {n}%": "Making the story movie… {n}%",
   "이야기 영상을 저장했어요 ✓": "Story movie saved ✓",
   "이 이야기를 영상 파일로 저장": "Save this story as a video file",

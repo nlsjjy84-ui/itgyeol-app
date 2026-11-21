@@ -9,12 +9,12 @@ import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, dailyState, takeDaily } from '../utils/pieceStore';
+import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, dailyState, takeDaily, currentSeries } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 
-function Card({ k, delay, fresh, size }) {
+function Card({ k, delay, fresh, size, secret }) {
   const flip = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const id = setTimeout(() => play('unwrap'), delay);
@@ -29,6 +29,7 @@ function Card({ k, delay, fresh, size }) {
       <View style={[st.rareBand, { backgroundColor: RARE_COLOR[p.rare] }]}>
         <Text style={st.rareTxt}>{t(RARITY[p.rare])}</Text>
         {fresh && <Text style={st.newTxt}>{t('새 조각!')}</Text>}
+        {secret && <Text style={st.newTxt}>{t('시크릿!')}</Text>}
       </View>
       <Image source={p.img} style={{ width: size - 16, height: size - 16, alignSelf: 'center' }} resizeMode="contain" />
       <Text style={st.cardName} numberOfLines={2}>
@@ -137,6 +138,17 @@ export default function PackScreen({ navigation, route }) {
             </Pressable>
             <Text style={st.hint}>{t('보따리를 눌러 풀어 보세요')}</Text>
             <Text style={st.small}>{t('보통 · 귀함 · 아주 귀함 — 아직 없는 조각이 더 잘 나와요')}</Text>
+            {(() => {
+              const se = currentSeries();
+              const got = se.pool.filter((p) => (store.owned || {})[p.k]).length;
+              return (
+                <View style={st.series}>
+                  <Text style={st.seriesH}>{t('이달의 시리즈')} · {t(se.name)}</Text>
+                  <Text style={[st.small, st.onDark]}>{t('이 시리즈 조각이 더 잘 나와요. 모은 조각 {a} / {b}', { a: got, b: se.pool.length })}</Text>
+                  <Text style={[st.small, st.onDark]}>{t('시크릿 조각이 72번에 한 번꼴로 숨어 있어요')}{se.secret && (store.owned || {})[se.secret.k] ? ' — ' + t('찾았어요!') : ''}</Text>
+                </View>
+              );
+            })()}
             <View style={st.codeBox}>
               <Text style={st.codeH}>{t('박물관에서 받은 암호')}</Text>
               <Text style={st.small}>{t('박물관 현장에서 받은 암호를 넣으면 그곳에서만 나오는 「한정 조각」이 보따리에 섞여요.')}</Text>
@@ -174,7 +186,7 @@ export default function PackScreen({ navigation, route }) {
             </Text>
             <View style={st.grid}>
               {opened.keys.map((k, i) => (
-                <Card key={k + i} k={k} delay={250 + i * 380} fresh={opened.fresh.includes(k)} size={cardW} />
+                <Card key={k + i} k={k} delay={250 + i * 380} fresh={opened.fresh.includes(k)} size={cardW} secret={!!currentSeries().secret && currentSeries().secret.k === k} />
               ))}
             </View>
             <Text style={st.small}>{t('지금 모은 조각 {n}개', { n: ownedN })}</Text>
@@ -212,6 +224,9 @@ const st = StyleSheet.create({
   slotRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
   slotChip: { fontSize: 10, color: colors.ink, backgroundColor: colors.accentSoft, paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6, overflow: 'hidden' },
   btns: { gap: 10, marginTop: 18 },
+  series: { marginTop: 16, width: '100%', maxWidth: 420, backgroundColor: '#20303c', borderRadius: 14, padding: 12, gap: 2 },
+  onDark: { color: '#c8d3d8', textAlign: 'left' },
+  seriesH: { color: '#f6e7c4', fontSize: 15, fontWeight: '700' },
   codeBox: { marginTop: 26, width: '100%', maxWidth: 420, backgroundColor: colors.paper, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: colors.borderSoft },
   codeH: { fontSize: 14, fontWeight: '700', color: colors.ink },
   codeRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginTop: 8 },

@@ -55,6 +55,31 @@ export function rng(seed) {
   };
 }
 
+// 이달의 시리즈 — 팝마트의 시리즈·시크릿처럼, 달마다 주제가 바뀌고 그 주제 조각이 더 잘 나온다(30%).
+// 시리즈마다 「시크릿 조각」 하나가 숨어 있어 72번에 한 번꼴로 나온다.
+export const SERIES = [
+  { m: 1, name: '신라의 금빛', test: (p) => p.era === '신라' || p.era === '통일신라' },
+  { m: 2, name: '궁궐의 과학', test: (p) => /해시계|앙부|혼천|측우|자격루|부표|간평/.test(p.name) || p.by === '국립고궁박물관' },
+  { m: 3, name: '봄날의 꽃무늬', test: (p) => /꽃|연꽃|모란|국화|매화|넝쿨|당초/.test(p.name) },
+  { m: 4, name: '백제의 미소', test: (p) => p.era === '백제' || (p.from || '').includes('부여') || (p.from || '').includes('공주') },
+  { m: 5, name: '아이들의 놀이', test: (p) => /팽이|구슬|공기|윷|토우|방울|인형|말/.test(p.name) },
+  { m: 6, name: '바다 건너온 유물', test: (p) => !!p.abroad },
+  { m: 7, name: '여름밤의 도깨비', test: (p) => /귀면|도깨비|짐승얼굴|용/.test(p.name) },
+  { m: 8, name: '쇠와 불의 장인', test: (p) => p.power === '쇠' },
+  { m: 9, name: '가을 들녘 살림살이', test: (p) => /항아리|단지|장군|독|숟가락|낫|괭이|따비|저울/.test(p.name) },
+  { m: 10, name: '선비의 책상', test: (p) => /연적|벼루|먹|붓|필통|인장|도장/.test(p.name) },
+  { m: 11, name: '고려 청자의 달', test: (p) => p.era === '고려' || /청자/.test(p.name) },
+  { m: 12, name: '조선 백자의 겨울', test: (p) => /백자/.test(p.name) || p.era === '조선' },
+];
+export function currentSeries(d = new Date()) {
+  const s = SERIES.find((x) => x.m === d.getMonth() + 1) || SERIES[0];
+  const pool = PIECES.filter(s.test);
+  // 시크릿 — 시리즈 안에서 가장 귀한 조각 하나(달마다 같은 조각)
+  const rare = [...pool].sort((a, b) => b.rare - a.rare || a.k.localeCompare(b.k));
+  const secret = rare.length ? rare[(d.getFullYear() * 13 + d.getMonth()) % Math.min(5, rare.length)] : null;
+  return { ...s, pool, secret };
+}
+
 // 보따리 하나 뽑기: 보통 70% · 귀함 25% · 아주 귀함 5%.
 // 아직 없는 조각이 조금 더 잘 나오게(도감 채우는 재미), 「궁궐 한정」 조각은 박물관에서 받은 암호가 있어야 나온다.
 // 놀이와 이어진 조각 — 그 놀이를 마치면 관련 유물이 더 잘 나온다(60%)
@@ -72,10 +97,17 @@ export function drawPack(n, seed, owned = {}, codes = [], scene = '') {
   const bias = SCENE_BIAS[scene] ? all.filter((p) => SCENE_BIAS[scene].test(p.name)) : [];
   let pool = all;
   const out = [];
+  const series = currentSeries();
   const regions = (codes || []).filter((c) => REGION_CODES.includes(c));
   const local = regions.length ? all.filter((p) => p.from && regions.some((g) => p.from.includes(g))) : [];
   for (let i = 0; i < n; i++) {
-    pool = local.length > 2 && r() < 0.4 ? local : bias.length > 6 && r() < 0.6 ? bias : all;
+    // 시크릿 조각 — 72번에 한 번
+    if (series.secret && r() < 1 / 72 && !out.includes(series.secret.k)) {
+      out.push(series.secret.k);
+      continue;
+    }
+    const sr = r();
+    pool = local.length > 2 && sr < 0.4 ? local : bias.length > 6 && sr < 0.7 ? bias : series.pool.length > 6 && sr < 0.85 ? series.pool : all;
     const roll = r();
     const tier = roll < 0.05 ? 2 : roll < 0.3 ? 1 : 0;
     let cand = pool.filter((p) => p.rare === tier && !out.includes(p.k));
