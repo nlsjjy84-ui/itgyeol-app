@@ -20,6 +20,26 @@ import { powerTag } from '../utils/hapche';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 const POWERS = ['흙', '쇠', '돌', '옥', '나무', '천', '종이', '금', '뼈'];
+// 우리 땅 지도 — 유물이 땅속에서 나온 곳(출토지)을 시·도 칸으로. 실제 위치를 어림한 칸 지도(타일 지도).
+const REGIONS = [
+  { id: '경기도', short: '경기', c: 1, r: 0 },
+  { id: '강원도', short: '강원', c: 2, r: 0 },
+  { id: '인천광역시', short: '인천', c: 0, r: 1 },
+  { id: '서울특별시', short: '서울', c: 1, r: 1 },
+  { id: '충청북도', short: '충북', c: 2, r: 1 },
+  { id: '경상북도', short: '경북', c: 3, r: 1 },
+  { id: '충청남도', short: '충남', c: 0, r: 2 },
+  { id: '대전광역시', short: '대전', c: 1, r: 2 },
+  { id: '대구광역시', short: '대구', c: 3, r: 2 },
+  { id: '전라북도', short: '전북', c: 0, r: 3 },
+  { id: '경상남도', short: '경남', c: 2, r: 3 },
+  { id: '울산광역시', short: '울산', c: 3, r: 3 },
+  { id: '광주광역시', short: '광주', c: 0, r: 4 },
+  { id: '전라남도', short: '전남', c: 1, r: 4 },
+  { id: '부산광역시', short: '부산', c: 3, r: 4 },
+  { id: '제주도', short: '제주', c: 0, r: 5 },
+];
+const regionOf = (p) => (p.from ? p.from.split(' - ')[0].replace('제주특별자치도', '제주도') : '');
 
 export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
   const p = PIECE_BY_K[k];
@@ -118,6 +138,7 @@ export default function DexScreen({ navigation }) {
   const [slot, setSlot] = useState(null);
   const [power, setPower] = useState(null);
   const [onlyMine, setOnlyMine] = useState(false);
+  const [region, setRegion] = useState(null);
   const [open, setOpen] = useState(null);
   const owned = store.owned || {};
   const ownedN = Object.keys(owned).length;
@@ -126,9 +147,10 @@ export default function DexScreen({ navigation }) {
     if (slot) l = l.filter((p) => p.slots.includes(slot));
     if (power) l = l.filter((p) => p.power === power);
     if (onlyMine) l = l.filter((p) => owned[p.k]);
+    if (region) l = l.filter((p) => regionOf(p) === region);
     // 모은 것 먼저, 그다음 귀한 순
     return [...l].sort((a, b) => (owned[b.k] ? 1 : 0) - (owned[a.k] ? 1 : 0) || b.rare - a.rare);
-  }, [slot, power, onlyMine, store]);
+  }, [slot, power, onlyMine, region, store]);
   const cols = width > 700 ? 6 : width > 460 ? 4 : 3;
   const cell = (Math.min(width, 900) - 32) / cols;
   const bySlot = useMemo(() => {
@@ -199,6 +221,7 @@ export default function DexScreen({ navigation }) {
       <View style={st.tabs}>
         {[
           ['pieces', t('조각')],
+          ['map', t('우리 땅 지도')],
           ['works', t('내 작품 {n}', { n: (store.works || []).length })],
         ].map(([id, label]) => (
           <Pressable key={id} onPress={() => setTab(id)} style={[st.tab, tab === id && st.tabOn]}>
@@ -206,6 +229,38 @@ export default function DexScreen({ navigation }) {
           </Pressable>
         ))}
       </View>
+      {tab === 'map' && (
+        <View style={st.mapWrap} testID="region-map">
+          <Text style={st.mapNote}>{t('유물이 땅속에서 나온 곳이에요. 칸을 누르면 그곳 조각만 볼 수 있어요.')}</Text>
+          <View style={[st.map, { height: 6 * 74 }]}>
+            {REGIONS.map((g) => {
+              const all = PIECES.filter((p) => regionOf(p) === g.id);
+              const mine = all.filter((p) => owned[p.k]).length;
+              const heat = Math.min(1, all.length / 60);
+              return (
+                <Pressable
+                  key={g.id}
+                  accessibilityLabel={t(g.id)}
+                  disabled={!all.length}
+                  onPress={() => {
+                    setRegion(g.id);
+                    setTab('pieces');
+                  }}
+                  style={[st.tile, { left: g.c * 78, top: g.r * 74, backgroundColor: all.length ? `rgba(185,120,26,${0.18 + heat * 0.7})` : '#e9e6df' }]}
+                >
+                  <Text style={[st.tileName, heat > 0.5 && { color: '#fff' }]}>{t(g.short)}</Text>
+                  <Text style={[st.tileNum, heat > 0.5 && { color: '#fff' }]}>{all.length ? `${mine}/${all.length}` : '—'}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      )}
+      {tab === 'pieces' && region ? (
+        <Pressable onPress={() => setRegion(null)} style={[st.chip, st.chipOn, { alignSelf: 'flex-start', marginTop: 8 }]}>
+          <Text style={[st.chipTxt, st.chipTxtOn]}>{t('나온 곳')}: {t(region)} ✕</Text>
+        </Pressable>
+      ) : null}
       {tab === 'pieces' && (
         <>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.chips}>
@@ -282,7 +337,7 @@ export default function DexScreen({ navigation }) {
   return (
     <SafeAreaView style={st.safe}>
       <FlatList
-        data={list}
+        data={tab === 'map' ? [] : list}
         key={cols}
         numColumns={cols}
         keyExtractor={(p) => p.k}
@@ -330,6 +385,12 @@ export default function DexScreen({ navigation }) {
 }
 
 const st = StyleSheet.create({
+  mapWrap: { marginTop: 12, alignItems: 'center', paddingBottom: 30 },
+  mapNote: { fontSize: 13, color: colors.muted, textAlign: 'center', marginBottom: 10 },
+  map: { width: 4 * 78, position: 'relative' },
+  tile: { position: 'absolute', width: 72, height: 68, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#00000014' },
+  tileName: { fontSize: 15, fontWeight: '700', color: colors.ink },
+  tileNum: { fontSize: 11, color: colors.ink },
   story: { marginTop: 10, backgroundColor: '#fbf3e2', borderRadius: 12, padding: 10, gap: 3, borderLeftWidth: 4, borderLeftColor: '#b9781a' },
   storyWho: { fontSize: 12, fontWeight: '700', color: '#b9781a' },
   storyLine: { fontSize: 14, color: '#1b2227', lineHeight: 21 },

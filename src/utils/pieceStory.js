@@ -125,7 +125,10 @@ export function pieceStory(p) {
     const s = SIZE.find(([cm]) => p.size < cm);
     out.push(t('길이는 {n}cm — {a}만 해.', { n: p.size, a: t(s[1]) }));
   }
-  if (p.from) out.push(t('땅속에서 찾은 곳은 {a}이야.', { a: p.from.replace(' - ', ' ') }));
+  if (p.from) {
+    const place = p.from.replace(' - ', ' ');
+    out.push(t('땅속에서 찾은 곳은 {a}.', { a: getLang() === 'ko' ? josa(place, '이야/야') : place }));
+  }
   if (p.abroad) out.push(t('지금은 바다 건너 {a}에 있어.', { a: t(p.by) }));
   else out.push(t('진짜는 {a}에 있어. 가서 직접 찾아봐!', { a: t(p.by) }));
   return out;
