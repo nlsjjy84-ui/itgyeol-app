@@ -9,7 +9,7 @@ import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode } from '../utils/pieceStore';
+import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, dailyState, takeDaily } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
@@ -55,6 +55,7 @@ export default function PackScreen({ navigation, route }) {
   const count = (route.params && route.params.n) || 3;
   const claim = (route.params && route.params.claim) || '';
   const gift = (route.params && route.params.gift) || '';
+  const daily = !!(route.params && route.params.daily);
   const from = (route.params && route.params.from) || '';
   const [opened, setOpened] = useState(null); // {keys, fresh, starter}
   const [code, setCode] = useState('');
@@ -73,6 +74,15 @@ export default function PackScreen({ navigation, route }) {
   const open = async () => {
     await loadPieces();
     const s = getPieces();
+    if (daily && s.starter) {
+      const d = takeDaily();
+      if (!d) {
+        setOpened({ keys: [], fresh: [], starter: false, already: true, daily: true });
+        return;
+      }
+      setOpened({ keys: d.keys, fresh: d.fresh, starter: false, daily: true, streak: d.streak });
+      return;
+    }
     if (gift) {
       if (isClaimed('gift:' + gift)) {
         setOpened({ keys: [], fresh: [], starter: false, already: true });
@@ -148,7 +158,11 @@ export default function PackScreen({ navigation, route }) {
         ) : (
           <View>
             <Text style={st.lead}>
-              {opened.already
+              {opened.daily && !opened.already
+                ? t('오늘의 보따리! {n}일째 이어서 왔어요. 조각 {m}개.', { n: opened.streak, m: opened.keys.length }) + (opened.streak % 7 === 0 ? ' ' + t('7일째 선물 — 「아주 귀함」 조각이 들어 있어요!') : '')
+                : opened.already && opened.daily
+                ? t('오늘의 보따리는 이미 받았어요. 내일 또 와요!')
+                : opened.already
                 ? gift
                   ? t('이 선물은 이미 받았어요.')
                   : t('이 놀이의 보따리는 이미 받았어요. 다른 놀이를 마치면 또 받을 수 있어요.')

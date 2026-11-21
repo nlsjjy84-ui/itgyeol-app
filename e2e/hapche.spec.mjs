@@ -89,3 +89,16 @@ test('유물 합체: 장단 맞춰 합체하면 등급이 나온다', async ({ p
   }
   await expect(page.getByText(/장단 등급/)).toBeVisible({ timeout: 30000 });
 });
+
+test('유물 합체: 첫 보따리 뒤 홈에서 오늘의 보따리를 받는다(하루 한 번)', async ({ page }) => {
+  await openHome(page);
+  await page.getByText('첫 보따리 받기').filter({ visible: true }).first().click();
+  await page.getByLabel('보따리 풀기').click();
+  await expect(page.getByText(/첫 보따리! 자리마다 하나씩/)).toBeVisible();
+  await openHome(page);
+  await page.getByText(/오늘의 보따리 받기 — 1일째/).filter({ visible: true }).first().click();
+  await page.getByLabel('보따리 풀기').click();
+  await expect(page.getByText(/오늘의 보따리! 1일째 이어서 왔어요/)).toBeVisible();
+  await openHome(page);
+  await expect(page.getByText(/오늘의 보따리는 받았어요/).filter({ visible: true }).first()).toBeVisible();
+});

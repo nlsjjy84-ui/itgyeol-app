@@ -8,7 +8,7 @@ import HapcheStage from './HapcheStage';
 import { colors } from '../theme';
 import { t } from '../i18n';
 import { buildTimeline, autoAssign } from '../utils/hapche';
-import { starterKeys, usePieces } from '../utils/pieceStore';
+import { starterKeys, usePieces, dailyState } from '../utils/pieceStore';
 import { PIECES } from '../data/pieces';
 import { FRAMES, TRANSFORMS } from '../data/frames';
 
@@ -42,7 +42,13 @@ export default function HapcheHome({ navigation }) {
       </View>
       <Text style={st.count}>{t('조각 {n}점 · 내가 모은 조각 {m}점', { n: PIECES.length, m: owned })}</Text>
       <View style={st.btns}>
-        <SealButton label={owned ? t('조각 보따리 풀기') : t('첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
+        {owned && dailyState().ready ? (
+          <SealButton label={t('오늘의 보따리 받기 — {n}일째', { n: dailyState().nextStreak })} onPress={() => navigation.navigate('Pack', { daily: true })} />
+        ) : !owned ? (
+          <SealButton label={t('첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
+        ) : (
+          <Text style={st.count}>{t('오늘의 보따리는 받았어요 · {n}일째 이어서', { n: dailyState().streak })}</Text>
+        )}
         <View style={st.row}>
           <SealButton style={{ flex: 1 }} label={t('합체 작업대')} variant="ink" onPress={() => navigation.navigate('Workshop')} />
           <SealButton style={{ flex: 1 }} label={t('조각 도감')} variant="paper" onPress={() => navigation.navigate('Dex')} />

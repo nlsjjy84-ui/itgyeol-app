@@ -4,6 +4,11 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "오늘의 보따리! {n}일째 이어서 왔어요. 조각 {m}개.": "Today's bundle! Day {n} in a row. {m} pieces.",
+  "7일째 선물 — 「아주 귀함」 조각이 들어 있어요!": "Day-7 gift — a 'very rare' piece inside!",
+  "오늘의 보따리는 이미 받았어요. 내일 또 와요!": "You already got today's bundle. Come back tomorrow!",
+  "오늘의 보따리 받기 — {n}일째": "Get today's bundle — day {n}",
+  "오늘의 보따리는 받았어요 · {n}일째 이어서": "Today's bundle received · {n} days in a row",
   "얼쑤 {a} · 좋다 {b} · 놓침 {c}": "Eolssu {a} · Joda {b} · Missed {c}",
   "얼쑤!": "Eolssu!",
   "장단 등급": "Rhythm rank",

@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
 
 const KEY = 'itgyeol_pieces_v1';
-const EMPTY = { owned: {}, order: [], works: [], packs: 0, starter: false, codes: [], claimed: [] };
+const EMPTY = { owned: {}, order: [], works: [], packs: 0, starter: false, codes: [], claimed: [], daily: { last: '', streak: 0 } };
 let state = null;
 const subs = new Set();
 
@@ -183,4 +183,31 @@ export function giveAway(k) {
   persist();
   emit();
   return true;
+}
+
+// 오늘의 보따리 — 하루 한 번. 이어서 온 날(연속)이 7일째가 되면 「아주 귀함」 조각 하나를 꼭 넣는다.
+const dayStr = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+export function dailyState() {
+  const d = (state && state.daily) || { last: '', streak: 0 };
+  const today = dayStr();
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  const continued = d.last === dayStr(y);
+  return { ready: d.last !== today, streak: d.last === today || continued ? d.streak : 0, nextStreak: continued ? d.streak + 1 : d.last === today ? d.streak : 1 };
+}
+export function takeDaily(seed = Date.now()) {
+  if (!state) state = { ...EMPTY };
+  const ds = dailyState();
+  if (!ds.ready) return null;
+  const streak = ds.nextStreak;
+  let keys = drawPack(3, seed % 1000003, state.owned, state.codes);
+  if (streak % 7 === 0) {
+    const rare = PIECES.filter((p) => p.rare === 2 && (!p.only || (state.codes || []).includes(p.only)) && !state.owned[p.k]);
+    if (rare.length) keys = [...keys, rare[seed % rare.length].k];
+  }
+  const fresh = addPieces(keys);
+  state = { ...state, daily: { last: dayStr(), streak } };
+  persist();
+  emit();
+  return { keys, fresh, streak };
 }
