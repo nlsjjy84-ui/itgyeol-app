@@ -12,6 +12,7 @@ const SFX = {
   shine: require('../../assets/sfx/shine.wav'),
   transform: require('../../assets/sfx/transform.wav'),
   daegeum: require('../../assets/sfx/daegeum_start.wav'),
+  bgm: require('../../assets/sfx/bgm_hapche.wav'),
 };
 
 export function canExport() {
@@ -221,14 +222,43 @@ export function drawFrame(ctx, S, tl, imgs, time) {
 }
 
 // 영상 파일 만들기 — 진행률(0~1)을 알려 주고, 끝나면 {blob, url, ext}를 돌려준다
-export async function exportMovie(tl, { size = 720, fps = 30, onProgress } = {}) {
+export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertical = false } = {}) {
   if (!canExport()) return { ok: false, reason: 'unsupported' };
   const imgs = {};
   await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
   const canvas = document.createElement('canvas');
   canvas.width = size;
-  canvas.height = size;
+  canvas.height = vertical ? Math.round((size * 16) / 9) : size;
   const ctx = canvas.getContext('2d');
+  // 세로 영상(쇼츠·릴스): 정사각 장면을 가운데 두고 위에 제목, 아래에 잇결 표시
+  const sq = vertical ? document.createElement('canvas') : null;
+  if (sq) {
+    sq.width = size;
+    sq.height = size;
+  }
+  const paint = (time) => {
+    if (!vertical) return drawFrame(ctx, size, tl, imgs, time);
+    drawFrame(sq.getContext('2d'), size, tl, imgs, time);
+    const Hh = canvas.height;
+    ctx.fillStyle = tl.frame.bg || '#1b2530';
+    ctx.fillRect(0, 0, size, Hh);
+    ctx.globalAlpha = 0.35;
+    ctx.drawImage(sq, -size * 0.4, -size * 0.1, size * 1.8, Hh * 1.2);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(0, 0, size, Hh);
+    const top = (Hh - size) / 2;
+    ctx.drawImage(sq, 0, top, size, size);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f6e7c4';
+    ctx.font = `700 ${Math.round(size * 0.06)}px "Gowun Batang", serif`;
+    ctx.fillText(t('유물 합체'), size / 2, top * 0.45);
+    ctx.font = `500 ${Math.round(size * 0.034)}px sans-serif`;
+    ctx.fillStyle = '#ffffffcc';
+    ctx.fillText(tl.title.full, size / 2, top * 0.45 + size * 0.07, size - 40);
+    ctx.font = `500 ${Math.round(size * 0.03)}px sans-serif`;
+    ctx.fillText(t('잇결 · 진짜 박물관 유물로 만든 작품'), size / 2, top + size + (Hh - top - size) * 0.5);
+  };
   const stream = canvas.captureStream(fps);
   // 소리 섞기
   let actx = null;
@@ -252,12 +282,15 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress } = {})
   const chunks = [];
   rec.ondataavailable = (ev) => ev.data && ev.data.size && chunks.push(ev.data);
   const fired = new Set();
-  const playS = (id, n) => {
+  const playS = (id, n, vol = 1) => {
     if (!actx || fired.has(id) || !bufs[n]) return;
     fired.add(id);
     const src = actx.createBufferSource();
     src.buffer = bufs[n];
-    src.connect(bufs.__dest);
+    const g = actx.createGain();
+    g.gain.value = vol;
+    src.connect(g);
+    g.connect(bufs.__dest);
     src.start();
   };
   return new Promise((resolve) => {
@@ -272,7 +305,9 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress } = {})
     const total = tl.dur + 0.8;
     const step = () => {
       const time = (performance.now() - t0) / 1000;
-      drawFrame(ctx, size, tl, imgs, Math.min(time, tl.dur));
+      paint(Math.min(time, tl.dur));
+      if (time > 0.02) playS('bgm', 'bgm', 0.45);
+      if (time > 16) playS('bgm2', 'bgm', 0.45);
       if (time > 0.15) playS('open', tl.isTransform ? 'transform' : 'daegeum');
       tl.events.forEach((e, i) => {
         if (time >= e.start && i % 2 === 0) playS('f' + e.start, 'fly');

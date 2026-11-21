@@ -30,6 +30,7 @@ const FILES = {
   shine: require('../../assets/sfx/shine.wav'), // 완성 팡파르
   transform: require('../../assets/sfx/transform.wav'), // 변신 기계음
   unwrap: require('../../assets/sfx/unwrap.wav'), // 보따리 풀기
+  bgm: require('../../assets/sfx/bgm_hapche.wav'), // 합체 영상 배경음악(가야금 + 장구, 16초)
 };
 
 const players = {};
@@ -59,5 +60,17 @@ export function play(name) {
     if (r && typeof r.catch === 'function') r.catch(() => {});
   } catch (e) {
     // 소리가 안 나도 체험은 계속된다
+  }
+}
+
+// 길게 나는 소리(배경음악)를 멈춘다
+export function stop(name) {
+  const p = players[name];
+  if (!p) return;
+  try {
+    p.pause();
+    p.seekTo(0);
+  } catch (e) {
+    // 멈추지 못해도 체험은 계속된다
   }
 }

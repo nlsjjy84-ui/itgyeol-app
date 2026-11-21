@@ -13,6 +13,8 @@ import { saveWork, usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
 import { SLOT_INFO } from '../data/frames';
 import { canExport, exportMovie, downloadBlob, srtOf } from '../utils/movieExport';
+import { movieUrl } from '../utils/movieLink';
+import QRCode from 'react-native-qrcode-svg';
 
 // 이 작품으로 만들 수 있는 물건 — 앱은 "제시"까지, 실제 제작은 박물관·업체가 맡는다
 const GOODS = [
@@ -26,7 +28,7 @@ const GOODS = [
 export default function MovieScreen({ navigation, route }) {
   const { width } = useWindowDimensions();
   const store = usePieces();
-  const { frameId, assign, seed = 1, scene = '', saved } = route.params || {};
+  const { frameId, assign, seed = 1, scene = '', saved, shared } = route.params || {};
   const tl = useMemo(() => buildTimeline(frameId, assign, { seed, scene }), [frameId, assign, seed, scene]);
   const [savedId, setSavedId] = useState(saved || null);
   const [rec, setRec] = useState(null); // null | number(진행률) | {url, ext} | 'fail'
@@ -37,15 +39,18 @@ export default function MovieScreen({ navigation, route }) {
     const w = saveWork({ id: savedId || undefined, frameId, assign, seed, scene, title: tl.title.full });
     setSavedId(w.id);
   };
-  const onExport = async () => {
+  const link = movieUrl({ frameId, assign, seed });
+  const [copied, setCopied] = useState(false);
+  const back = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'));
+  const onExport = async (vertical) => {
     setRec(0);
-    const r = await exportMovie(tl, { size: 720, onProgress: (x) => setRec(x) });
+    const r = await exportMovie(tl, { size: 720, vertical: !!vertical, onProgress: (x) => setRec(x) });
     if (!r.ok) {
       setRec('fail');
       return;
     }
     setRec(r);
-    downloadBlob(r.url, `잇결_${tl.title.short}.${r.ext}`);
+    downloadBlob(r.url, `잇결_${tl.title.short}${vertical ? '_세로' : ''}.${r.ext}`);
   };
   const onSrt = () => {
     if (Platform.OS !== 'web') return;
@@ -56,7 +61,13 @@ export default function MovieScreen({ navigation, route }) {
   return (
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.wrap}>
-        <ScreenHeader title={tl.isTransform ? t('변형 영상') : t('합체 영상')} sub={tl.title.full} onBack={() => navigation.goBack()} />
+        <ScreenHeader title={tl.isTransform ? t('변형 영상') : t('합체 영상')} sub={tl.title.full} onBack={back} />
+        {shared ? (
+          <View style={st.sharedBox}>
+            <Text style={st.sharedTxt}>{t('누군가 보낸 합체 영상이에요. 진짜 박물관 유물 조각으로 만들었어요.')}</Text>
+            <SealButton label={t('나도 만들어 보기 — 첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
+          </View>
+        ) : null}
         <HapcheStage tl={tl} size={size} />
         <View style={st.btns}>
           <SealButton label={savedId ? t('내 작품에 저장했어요 ✓') : t('내 작품에 저장')} onPress={onSave} disabled={!!savedId && !saved} sound="stamp" />
@@ -65,13 +76,38 @@ export default function MovieScreen({ navigation, route }) {
               label={typeof rec === 'number' ? t('영상 만드는 중… {n}%', { n: Math.round(rec * 100) }) : rec && rec.url ? t('영상 파일 다시 받기') : t('영상 파일로 저장 (자막 포함)')}
               variant="ink"
               disabled={typeof rec === 'number'}
-              onPress={() => (rec && rec.url ? downloadBlob(rec.url, `잇결_${tl.title.short}.${rec.ext}`) : onExport())}
+              onPress={() => (rec && rec.url ? downloadBlob(rec.url, `잇결_${tl.title.short}.${rec.ext}`) : onExport(false))}
             />
           ) : (
             <Text style={st.note}>{t('영상 파일 저장은 웹(박물관 키오스크·브라우저)에서 할 수 있어요.')}</Text>
           )}
           {rec === 'fail' && <Text style={st.note}>{t('이 브라우저에서는 영상 저장이 안 돼요. 크롬이나 엣지에서 다시 해 보세요.')}</Text>}
+          {canExport() && typeof rec !== 'number' ? <SealButton label={t('세로 영상으로 저장 (쇼츠·릴스용)')} variant="ink" onPress={() => onExport(true)} /> : null}
           {Platform.OS === 'web' && <SealButton label={t('자막 파일(.srt) 받기')} variant="paper" onPress={onSrt} />}
+        </View>
+
+        <Text style={st.h}>{t('영상 나누기')}</Text>
+        <View style={st.share}>
+          <View style={st.qr}>
+            <QRCode value={link} size={120} color="#1b2227" backgroundColor="#ffffff" />
+          </View>
+          <View style={{ flex: 1, gap: 8 }}>
+            <Text style={st.shareTxt}>{t('QR을 찍거나 링크를 열면 누구나 이 합체 영상을 그대로 볼 수 있어요. 영상 카드에 이 QR이 들어가요.')}</Text>
+            {Platform.OS === 'web' ? (
+              <SealButton
+                small
+                label={copied ? t('링크를 복사했어요 ✓') : t('링크 복사')}
+                variant="paper"
+                onPress={() => {
+                  try {
+                    navigator.clipboard.writeText(link).then(() => setCopied(true));
+                  } catch (e) {
+                    setCopied(false);
+                  }
+                }}
+              />
+            ) : null}
+          </View>
         </View>
 
         <Text style={st.h}>{t('이야기')}</Text>
@@ -125,6 +161,11 @@ const st = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 12, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },
   btns: { gap: 10, marginTop: 14 },
+  sharedBox: { backgroundColor: '#20303c', borderRadius: 14, padding: 12, gap: 8, marginBottom: 10 },
+  sharedTxt: { color: '#f6e7c4', fontSize: 14, lineHeight: 20 },
+  share: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: colors.paper, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: colors.borderSoft },
+  qr: { padding: 6, backgroundColor: '#fff', borderRadius: 8 },
+  shareTxt: { fontSize: 13, color: colors.ink, lineHeight: 19 },
   note: { fontSize: 13, color: colors.muted, textAlign: 'center' },
   h: { fontSize: 17, fontWeight: '700', color: colors.ink, marginTop: 22, marginBottom: 8 },
   story: { backgroundColor: colors.paper, borderRadius: 14, padding: 14, gap: 8, borderWidth: 1, borderColor: colors.borderSoft },

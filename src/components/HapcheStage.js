@@ -5,7 +5,7 @@ import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
 import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
-import { play } from '../utils/sound';
+import { play, stop } from '../utils/sound';
 import { t } from '../i18n';
 
 const WHO_COLOR = { 풍이: '#e0a43a', 결이: '#6fb0d8', 함께: '#f0e6d0' };
@@ -53,6 +53,8 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
       fired.current.add(id);
       play(name);
     };
+    if (time > 0.05) once('bgm', 'bgm');
+    if (time > 15.9) once('bgm2', 'bgm');
     if (time > 0.15) once('open', tl.isTransform ? 'transform' : 'daegeum');
     tl.events.forEach((e, i) => {
       if (time >= e.start && i % 2 === 0) once('f' + e.start, 'fly');
@@ -62,6 +64,10 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
     if (time >= tl.titleT) once('shine', 'shine');
   }, [time]);
 
+  useEffect(() => () => stop('bgm'), []);
+  useEffect(() => {
+    if (!playing) stop('bgm');
+  }, [playing]);
   const k = size / 1000;
   const bob = idleBob(tl, time);
   const flash = time >= tl.lockT && time < tl.lockT + 0.6 ? 1 - (time - tl.lockT) / 0.6 : 0;

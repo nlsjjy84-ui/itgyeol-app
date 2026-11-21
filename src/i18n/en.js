@@ -4,6 +4,15 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "QR을 찍거나 링크를 열면 누구나 이 합체 영상을 그대로 볼 수 있어요. 영상 카드에 이 QR이 들어가요.": "Scan the QR or open the link and anyone can watch this exact combine movie. This QR goes on the video card.",
+  "나도 만들어 보기 — 첫 보따리 받기": "Make one too — get your first bundle",
+  "누군가 보낸 합체 영상이에요. 진짜 박물관 유물 조각으로 만들었어요.": "Someone sent you a combine movie, made from real museum artifact pieces.",
+  "링크 복사": "Copy link",
+  "링크를 복사했어요 ✓": "Link copied ✓",
+  "세로 영상으로 저장 (쇼츠·릴스용)": "Save as a vertical video (Shorts·Reels)",
+  "영상 나누기": "Share the movie",
+  "유물 합체": "Artifact Combine",
+  "잇결 · 진짜 박물관 유물로 만든 작품": "Itgyeol · a work made from real museum artifacts",
   "습기 귀신": "Damp Ghost",
   "눅눅한 숨을 내뿜어 종이와 나무를 썩게 하려 했어": "tried to breathe damp air and rot the paper and wood",
   "그래서 박물관은 습도를 50% 안팎으로 늘 맞춰 둬.": "That's why museums always keep humidity around 50%.",

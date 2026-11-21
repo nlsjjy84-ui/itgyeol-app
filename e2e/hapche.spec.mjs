@@ -28,3 +28,15 @@ test('유물 합체: 조각 하나로 변형', async ({ page }) => {
   await page.getByText('변형!', { exact: true }).filter({ visible: true }).first().click();
   await expect(page.getByText('변형 영상').filter({ visible: true }).first()).toBeVisible();
 });
+
+test('유물 합체: 공유 링크(?m=)로 열면 같은 영상이 바로 나온다', async ({ page }) => {
+  await page.goto('/?m=' + encodeURIComponent('flower~42~n42506'));
+  const msg = page.getByText('누군가 보낸 합체 영상이에요. 진짜 박물관 유물 조각으로 만들었어요.');
+  for (let i = 0; i < 40 && !(await msg.isVisible().catch(() => false)); i += 1) {
+    const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+    if (await agree.count()) await agree.first().click().catch(() => {});
+    else await page.waitForTimeout(250);
+  }
+  await expect(page.getByText('누군가 보낸 합체 영상이에요. 진짜 박물관 유물 조각으로 만들었어요.')).toBeVisible();
+  await expect(page.getByText('변형 영상').filter({ visible: true }).first()).toBeVisible();
+});
