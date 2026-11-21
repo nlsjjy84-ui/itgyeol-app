@@ -14,6 +14,7 @@ for o in meta:
     if o.get('size'): d['size'] = o['size']
     if o.get('en'): d['en'] = o['en']
     if o.get('from'): d['from'] = o['from']
+    if o.get('abroad'): d['abroad'] = True
     cls = (o.get('cls') or '').split(' - ')
     d['use'] = cls[-1] if cls and cls[-1] else ''
     lines.append("  [%s, require('../../assets/pieces/%s.webp')]," % (json.dumps(d, ensure_ascii=False), o['k']))

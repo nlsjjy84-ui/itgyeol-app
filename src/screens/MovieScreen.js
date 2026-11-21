@@ -9,7 +9,7 @@ import HapcheStage from '../components/HapcheStage';
 import { colors } from '../theme';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { buildTimeline, beatsOf, judge } from '../utils/hapche';
+import { buildTimeline, beatsOf, judge, creditOf } from '../utils/hapche';
 import { play } from '../utils/sound';
 import { saveWork, usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
@@ -219,7 +219,7 @@ export default function MovieScreen({ navigation, route }) {
             <Text style={st.link}>{t('원본 ↗')}</Text>
           </Pressable>
         ))}
-        <Text style={st.lic}>{t('유물 사진: {a} (공공누리 제1유형, 출처 표시) — 배경만 지우고 모양은 그대로 썼어요.', { a: tl.museums.join('·') })}</Text>
+        <Text style={st.lic}>{t('유물 사진') + ': ' + creditOf(tl.museums) + ' — ' + t('배경만 지우고 모양은 그대로 썼어요.')}</Text>
 
         <Text style={st.h}>{t('이 작품으로 만들 수 있는 것')}</Text>
         {GOODS.map((g) => (

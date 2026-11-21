@@ -1,7 +1,7 @@
 // 웹: 합체 영상을 실제 영상 파일(mp4 또는 webm)로 저장한다.
 // 앱 화면과 같은 대본(hapche.js)을 캔버스에 다시 그리고, 효과음까지 섞어 녹화한다. 자막은 영상 안에 새긴다.
 import { Asset } from 'expo-asset';
-import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from './hapche';
+import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf } from './hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { t } from '../i18n';
 
@@ -241,7 +241,7 @@ export function drawFrame(ctx, S, tl, imgs, time) {
   ctx.font = `400 ${Math.round(S * 0.018)}px sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.textAlign = 'right';
-  ctx.fillText(t('유물 사진: {a} (공공누리 제1유형) · 잇결', { a: (tl.museums || []).join('·') }), S - 14, S - 12 - S * 0.0);
+  ctx.fillText(t('유물 사진') + ': ' + creditOf(tl.museums || []) + ' · ' + t('잇결'), S - 14, S - 12);
   ctx.restore();
 }
 
@@ -445,6 +445,6 @@ export async function paperKit(tl) {
   });
   ctx.fillStyle = '#5d6a70';
   ctx.font = '400 30px sans-serif';
-  ctx.fillText(t('유물 사진: {a} (공공누리 제1유형) · 잇결', { a: (tl.museums || []).join('·') }), 140, H - 60);
+  ctx.fillText(t('유물 사진') + ': ' + creditOf(tl.museums || []) + ' · ' + t('잇결'), 140, H - 60);
   return new Promise((resolve) => c.toBlob((b) => resolve(URL.createObjectURL(b)), 'image/png'));
 }

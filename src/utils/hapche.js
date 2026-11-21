@@ -230,7 +230,12 @@ export function buildTimeline(frameId, assign, opts = {}) {
   } else {
     const firstEnd = OPEN + Math.max(1.4, (lockT - OPEN) * 0.45);
     say(OPEN, firstEnd, '결이', t('{a} 먼저 일어나 외쳤어. "혼자서는 못 해, 다 모여!"', { a: josa(bodyName, '이/가') }));
-    if (eras.length > 1) say(firstEnd, headEv.start - 0.05, '풍이', t('{a}부터 {b}까지, {n}개의 시대가 한자리에 모여.', { a: eras[0], b: eras[eras.length - 1], n: eras.length }));
+    const far = events.map((e) => PIECE_BY_K[e.k]).find((p) => p && p.abroad);
+    if (far) {
+      const mid = firstEnd + (headEv.start - 0.05 - firstEnd) / 2;
+      say(firstEnd, mid, '풍이', t('{a} 바다 건너 {b}에서 날아왔어! 오랫동안 고향을 떠나 있던 우리 유물이야.', { a: josa(pieceShort(far), '은/는'), b: t(far.by) }));
+      say(mid, headEv.start - 0.05, '결이', t('{n}개의 시대와 먼 나라까지, 모두 한자리에 모여.', { n: Math.max(1, eras.length) }));
+    } else if (eras.length > 1) say(firstEnd, headEv.start - 0.05, '풍이', t('{a}부터 {b}까지, {n}개의 시대가 한자리에 모여.', { a: eras[0], b: eras[eras.length - 1], n: eras.length }));
     else say(firstEnd, headEv.start - 0.05, '풍이', t('조각 {n}개가 하나씩 제자리를 찾아가.', { n: events.length }));
     if (head) say(headEv.start - 0.05, lockT, '결이', t('마지막은 머리! {a}!', { a: headName }));
   }
@@ -385,4 +390,9 @@ export function judge(beats, taps) {
   const score = beats.length ? (great + good * 0.6) / beats.length : 0;
   const rank = score >= 0.85 ? '명창' : score >= 0.6 ? '얼쑤' : score >= 0.3 ? '흥' : '첫걸음';
   return { res, great, good, miss: beats.length - great - good, score, rank };
+}
+
+// 출처 표시 — 박물관마다 이용 조건이 다르다(국내: 공공누리 제1유형, 클리블랜드: CC0)
+export function creditOf(museums) {
+  return museums.map((m) => (m === '클리블랜드 미술관' ? `${t(m)} (CC0)` : `${t(m)} (${t('공공누리 제1유형')})`)).join(' · ');
 }

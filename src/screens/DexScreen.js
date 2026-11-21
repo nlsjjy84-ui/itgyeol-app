@@ -54,7 +54,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
                 </Text>
                 {p.from ? <Text style={st.fact}>{t('나온 곳')}: {p.from}</Text> : null}
                 {!!p.desc && <Text style={st.desc}>{p.desc}</Text>}
-                <Text style={st.lic}>{t('사진: {a} · 공공누리 제1유형(출처 표시)', { a: p.by })}</Text>
+                <Text style={st.lic}>{p.abroad ? t('사진: {a} · CC0(누구나 자유롭게 쓸 수 있음) · 해외에 있는 우리 유물', { a: t(p.by) }) : t('사진: {a} · 공공누리 제1유형(출처 표시)', { a: t(p.by) })}</Text>
                 <View style={{ gap: 8, marginTop: 12 }}>
                   {onTransform && <SealButton label={t('이 조각 하나로 변형하기')} onPress={() => onTransform(k)} />}
                   <SealButton label={t('박물관 원본 페이지 열기')} variant="paper" onPress={() => Linking.openURL(p.page)} />
@@ -143,6 +143,7 @@ export default function DexScreen({ navigation }) {
       { id: 'palace', icon: '⛩', name: '궁궐 손님', note: '국립고궁박물관 조각 10개 모으기', cur: palace, max: 10 },
       { id: 'works', icon: '⚙', name: '합체 장인', note: '합체 작품 5개 만들기', cur: works, max: 5 },
       { id: 'hundred', icon: '百', name: '백 조각', note: '조각 100개 모으기', cur: mine.length, max: 100 },
+      { id: 'abroad', icon: '✈', name: '먼 길 온 유물', note: '바다 건너 해외 박물관에 있는 우리 유물 조각 5개 모으기', cur: mine.filter((p) => p.abroad).length, max: 5 },
       { id: 'places', icon: '⛰', name: '나들이꾼', note: '서로 다른 고장에서 나온 조각 5곳 모으기', cur: new Set(mine.filter((p) => p.from).map((p) => p.from.split(' - ')[0])).size, max: 5 },
     ];
   }, [store]);

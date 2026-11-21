@@ -4,6 +4,15 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "{a} 바다 건너 {b}에서 날아왔어! 오랫동안 고향을 떠나 있던 우리 유물이야.": "{a} flew across the sea from {b}! A Korean artifact that has been far from home for a long time.",
+  "{n}개의 시대와 먼 나라까지, 모두 한자리에 모여.": "{n} eras and a faraway land — all gather in one place.",
+  "공공누리 제1유형": "KOGL Type 1",
+  "배경만 지우고 모양은 그대로 썼어요.": "only the background was removed; the shapes are untouched.",
+  "사진: {a} · CC0(누구나 자유롭게 쓸 수 있음) · 해외에 있는 우리 유물": "Photo: {a} · CC0 (free for anyone) · a Korean artifact abroad",
+  "유물 사진": "Artifact photos",
+  "클리블랜드 미술관": "Cleveland Museum of Art",
+  "먼 길 온 유물": "Long Journey",
+  "바다 건너 해외 박물관에 있는 우리 유물 조각 5개 모으기": "Collect 5 pieces of Korean artifacts kept in museums abroad",
   "오늘의 보따리! {n}일째 이어서 왔어요. 조각 {m}개.": "Today's bundle! Day {n} in a row. {m} pieces.",
   "7일째 선물 — 「아주 귀함」 조각이 들어 있어요!": "Day-7 gift — a 'very rare' piece inside!",
   "오늘의 보따리는 이미 받았어요. 내일 또 와요!": "You already got today's bundle. Come back tomorrow!",
