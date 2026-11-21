@@ -8,11 +8,15 @@ import { PIECE_BY_K } from '../data/pieces';
 import { play, stop } from '../utils/sound';
 import { t } from '../i18n';
 
+// 재료마다 끼워질 때 나는 소리
+export const CLANK_OF = { 쇠: 'clankMetal', 금: 'clankMetal', 흙: 'clankClay', 돌: 'clankStone', 옥: 'clankStone', 뼈: 'clankStone', 나무: 'clankWood', 종이: 'clankWood', 천: 'clankWood' };
 const WHO_COLOR = { 풍이: '#e0a43a', 결이: '#6fb0d8', 함께: '#f0e6d0' };
 
 export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, loop = false, sound = true, showSubs = true, onTime, overlay, playKey }) {
   const [time, setTime] = useState(autoPlay ? 0 : tl.dur);
   const [playing, setPlaying] = useState(autoPlay);
+  const [spin, setSpin] = useState(null); // 돌려 보기 시작 시각(ms) — 완성된 작품을 입체처럼 빙글 돌린다
+  const [, force] = useState(0);
   const start = useRef(0);
   const fired = useRef(new Set());
   useEffect(() => {
@@ -68,13 +72,32 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
     if (time > 0.15) once('open', tl.isTransform ? 'transform' : 'daegeum');
     tl.events.forEach((e, i) => {
       if (time >= e.start && i % 2 === 0) once('f' + e.start, 'fly');
-      if (time >= e.end) once('c' + e.end, 'clank');
+      if (time >= e.end) once('c' + e.end, CLANK_OF[(PIECE_BY_K[e.k] || {}).power] || 'clank');
     });
     if (time >= tl.lockT) once('lock', 'lock');
     if (time >= tl.titleT) once('shine', 'shine');
   }, [time]);
 
   useEffect(() => () => stop('bgm'), []);
+  useEffect(() => {
+    if (!spin) return undefined;
+    let raf;
+    let last = 0;
+    const tick = () => {
+      const ms = Date.now();
+      if (ms - last >= 33) {
+        last = ms;
+        force((x) => x + 1);
+      }
+      if (ms - spin > 7000) {
+        setSpin(null);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [spin]);
   useEffect(() => {
     if (!playing) stop('bgm');
   }, [playing]);
@@ -86,6 +109,11 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
   const tags = showSubs ? tagsAt(tl, time).slice(-2) : [];
   const done = time >= tl.titleT;
   const sorted = [...tl.events].sort((a, b) => a.z - b.z);
+  // 돌려 보기 — 조각마다 앞뒤 깊이(z)를 주고, 세로축으로 돌리면 가까운 조각이 더 크게 움직여 입체처럼 보인다
+  const theta = spin ? ((Date.now() - spin) / 1000) * 0.9 : 0;
+  const cosT = Math.cos(theta);
+  const sinT = Math.sin(theta);
+  const proj = (x, z) => (spin ? 500 + (x - 500) * cosT + (z - 2) * 70 * sinT : x);
 
   return (
     <View style={[st.stage, { width: size, height: size, backgroundColor: tl.frame.bg || '#1b2530' }]}>
@@ -150,7 +178,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
       })() }}>
         {(tl.threads || []).map((th, i) => {
           const f = threadAt(th, time);
-          if (!f) return null;
+          if (!f || spin) return null;
           const dx = (th.b.x - th.a.x) * f;
           const dy = (th.b.y - th.a.y) * f;
           const len = Math.hypot(dx, dy) * k;
@@ -164,14 +192,15 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
           );
         })}
         {sorted.map((e) => {
-          const p = poseAt(e, time);
-          if (!p) return null;
+          const p0 = poseAt(e, time);
+          if (!p0) return null;
+          const p = spin ? { ...p0, x: proj(p0.x, e.z) } : p0;
           const piece = PIECE_BY_K[e.k];
-          const w = e.w * k * p.s;
+          const w = e.w * k * p.s * (spin ? Math.max(0.12, Math.abs(cosT)) : 1);
           const h = e.h * k * p.s;
           const spinning = e.spin && done ? (time - tl.titleT) * 360 : 0;
           return (
-            <View key={e.key} style={{ position: 'absolute', left: p.x * k - w / 2, top: p.y * k - h / 2, width: w, height: h, transform: [{ rotate: `${p.rot + spinning}deg` }, { scaleX: e.flip ? -1 : 1 }, { scaleY: e.flipY ? -1 : 1 }], opacity: e.ghost ? 0.55 : 1 }}>
+            <View key={e.key} style={{ position: 'absolute', left: p.x * k - w / 2, top: p.y * k - h / 2, width: w, height: h, transform: [{ rotate: `${p.rot + spinning}deg` }, { scaleX: (e.flip ? -1 : 1) * (spin && cosT < 0 ? -1 : 1) }, { scaleY: e.flipY ? -1 : 1 }], opacity: e.ghost ? 0.55 : spin && cosT < 0 ? 0.8 : 1 }}>
               {e.fire && p.landed && (
                 <View style={[st.fire, { width: w * 0.7, height: h * 0.9, left: w * 0.15, top: h * 0.55, opacity: 0.6 + 0.4 * Math.abs(Math.sin(time * 18)) }]} />
               )}
@@ -204,6 +233,11 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
         </View>
       )}
       {overlay || null}
+      {!playing && !spin && time >= tl.titleT ? (
+        <Pressable style={st.spinBtn} onPress={() => setSpin(Date.now())} accessibilityLabel={t('돌려 보기')}>
+          <Text style={st.replayTxt}>{t('↻ 돌려 보기')}</Text>
+        </Pressable>
+      ) : null}
       {!playing && (
         <Pressable
           style={st.replay}
@@ -245,5 +279,6 @@ const st = StyleSheet.create({
   who: { fontSize: 12, fontWeight: '700', marginBottom: 2 },
   sub: { color: '#fff', lineHeight: 20 },
   replay: { position: 'absolute', right: 10, top: 10, backgroundColor: '#ffffffd9', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5 },
+  spinBtn: { position: 'absolute', right: 10, top: 46, backgroundColor: '#ffffffd9', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5 },
   replayTxt: { color: '#1b2227', fontSize: 12, fontWeight: '700' },
 });

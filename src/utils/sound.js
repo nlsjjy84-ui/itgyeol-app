@@ -30,7 +30,11 @@ const FILES = {
   shine: require('../../assets/sfx/shine.wav'), // 완성 팡파르
   transform: require('../../assets/sfx/transform.wav'), // 변신 기계음
   unwrap: require('../../assets/sfx/unwrap.wav'), // 보따리 풀기
-  bgm: require('../../assets/sfx/bgm_hapche.wav'), // 합체 영상 배경음악(가야금 + 장구, 16초)
+  bgm: require('../../assets/sfx/bgm_hapche.wav'),
+  clankMetal: require('../../assets/sfx/clank_metal.wav'), // 쇠 — 쨍
+  clankClay: require('../../assets/sfx/clank_clay.wav'), // 흙·도자기 — 탁
+  clankStone: require('../../assets/sfx/clank_stone.wav'), // 돌·옥 — 딱
+  clankWood: require('../../assets/sfx/clank_wood.wav'), // 나무·종이·천 — 똑 // 합체 영상 배경음악(가야금 + 장구, 16초)
 };
 
 const players = {};

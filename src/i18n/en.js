@@ -4,6 +4,8 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "돌려 보기": "Spin it",
+  "↻ 돌려 보기": "↻ Spin it",
   "{a} 바다 건너 {b}에서 날아왔어! 오랫동안 고향을 떠나 있던 우리 유물이야.": "{a} flew across the sea from {b}! A Korean artifact that has been far from home for a long time.",
   "{n}개의 시대와 먼 나라까지, 모두 한자리에 모여.": "{n} eras and a faraway land — all gather in one place.",
   "공공누리 제1유형": "KOGL Type 1",

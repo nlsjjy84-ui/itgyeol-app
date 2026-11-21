@@ -52,3 +52,15 @@ x=rng.standard_normal(len(tt))*(np.abs(np.sin(2*np.pi*14*tt))**3)*np.exp(-tt*4)*
 x+=np.sin(2*np.pi*1320*tt)*np.exp(-tt*6)*(tt>0.25)
 save('unwrap.wav', x)
 print('ok')
+
+# 재료별 끼움 소리 — 쇠(쨍), 흙·도자기(탁), 돌(딱), 나무(똑)
+def hit(name, freqs, dec, noise, nd):
+    d=0.35; tt=t(d)
+    x=noise*rng.standard_normal(len(tt))*np.exp(-tt*nd)
+    for fr,amp in freqs: x+=amp*np.sin(2*np.pi*fr*tt)*np.exp(-tt*dec)
+    save(name, x)
+hit('clank_metal.wav', [(2350,1),(3520,0.7),(5200,0.4)], 9, 0.5, 70)
+hit('clank_clay.wav', [(820,1),(1240,0.5)], 28, 0.9, 55)
+hit('clank_stone.wav', [(1500,0.8),(2900,0.5)], 40, 1.2, 90)
+hit('clank_wood.wav', [(540,1),(1080,0.4)], 35, 0.6, 60)
+print('material clanks ok')

@@ -13,7 +13,12 @@ const SFX = {
   transform: require('../../assets/sfx/transform.wav'),
   daegeum: require('../../assets/sfx/daegeum_start.wav'),
   bgm: require('../../assets/sfx/bgm_hapche.wav'),
+  clankMetal: require('../../assets/sfx/clank_metal.wav'),
+  clankClay: require('../../assets/sfx/clank_clay.wav'),
+  clankStone: require('../../assets/sfx/clank_stone.wav'),
+  clankWood: require('../../assets/sfx/clank_wood.wav'),
 };
+const CLANK_OF = { 쇠: 'clankMetal', 금: 'clankMetal', 흙: 'clankClay', 돌: 'clankStone', 옥: 'clankStone', 뼈: 'clankStone', 나무: 'clankWood', 종이: 'clankWood', 천: 'clankWood' };
 
 export function canExport() {
   return typeof window !== 'undefined' && typeof window.MediaRecorder !== 'undefined' && !!document.createElement('canvas').captureStream;
@@ -335,7 +340,7 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertic
       if (time > 0.15) playS('open', tl.isTransform ? 'transform' : 'daegeum');
       tl.events.forEach((e, i) => {
         if (time >= e.start && i % 2 === 0) playS('f' + e.start, 'fly');
-        if (time >= e.end) playS('c' + e.end, 'clank');
+        if (time >= e.end) playS('c' + e.end, CLANK_OF[(PIECE_BY_K[e.k] || {}).power] || 'clank');
       });
       if (time >= tl.lockT) playS('lock', 'lock');
       if (time >= tl.titleT) playS('shine', 'shine');
