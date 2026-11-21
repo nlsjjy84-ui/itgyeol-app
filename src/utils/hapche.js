@@ -53,6 +53,23 @@ const MISSION = {
   bird: '큰 날개를 펴고 박물관 지붕 위를 빙빙 돌았어',
   walker: '뚜벅뚜벅 걸어 전시실을 순찰하기 시작했어',
 };
+// 위기 — 박물관이 실제로 유물을 지키려고 싸우는 "보존의 적". 이야기를 보며 유물 보존을 배운다.
+export const VILLAINS = [
+  { id: 'damp', name: '습기 귀신', how: '눅눅한 숨을 내뿜어 종이와 나무를 썩게 하려 했어', fact: '그래서 박물관은 습도를 50% 안팎으로 늘 맞춰 둬.', color: '#3d6b7a' },
+  { id: 'rust', name: '녹 도깨비', how: '쇠붙이 유물을 붉은 녹으로 갉아먹으려 했어', fact: '그래서 쇠 유물은 마른 공기 속, 따로 만든 진열장에 둬.', color: '#7a4a32' },
+  { id: 'moth', name: '좀벌레 떼', how: '책과 그림, 비단을 갉아먹으려고 몰려왔어', fact: '그래서 박물관은 해충이 들어오지 못하게 수장고를 소독하고 살펴.', color: '#5a5446' },
+  { id: 'dust', name: '먼지 안개', how: '자욱하게 내려앉아 유물의 빛깔을 덮으려 했어', fact: '그래서 진열장은 꼭 닫아 두고, 보존 전문가가 붓으로 살살 털어 줘.', color: '#6f6a62' },
+  { id: 'fade', name: '빛바램 요정', how: '센 빛을 쏘아 그림과 옷감의 색을 바래게 하려 했어', fact: '그래서 그림 전시실은 조명을 어둡게 하고, 오래 걸지 않고 바꿔 걸어.', color: '#8a7a3a' },
+];
+// 자리마다 싸울 때 하는 일(이어지는 말)
+const ACT = {
+  머리: '머리로 길을 읽고', 눈: '눈으로 적을 찾아내고', '뿔·관': '뿔로 빛을 모아 쏘고', 몸통: '몸통으로 버티고', 가슴판: '가슴판으로 받아 내고',
+  어깨: '어깨로 밀어붙이고', 팔: '팔을 쭉 뻗고', 손: '손으로 꽉 붙잡고', 다리: '다리로 우뚝 버티고', '발·받침': '발을 쿵 구르고',
+  바퀴: '바퀴로 힘차게 굴러가고', 날개: '날개로 큰 바람을 일으키고', 꼬리: '꼬리로 휘휘 쓸어 내고', 추진기: '추진기로 불꽃을 뿜고',
+  무기: '무기로 단번에 가르고', 방패: '방패로 막아 내고', '돛·깃발': '돛으로 바람을 모으고', 뱃머리: '뱃머리로 헤치고 나가고',
+  장식: '장식이 반짝 빛을 내고', 탑승자: '탑승자가 길을 이끌고',
+};
+
 const OPENING = [
   '{scene} 놀이가 끝나자 박물관 불이 하나씩 꺼졌어.',
   '밤 아홉 시, 진열장 안에서 달그락 소리가 났어.',
@@ -114,7 +131,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
     })
     .filter(Boolean);
 
-  const OPEN = 2.2;
+  const OPEN = 3.6;
   const STEP = isTransform ? 0.75 : 0.5;
   const FLY = 0.65;
   const orders = [...new Set(items.map((it) => it.sp.order))].sort((a, b) => a - b);
@@ -163,7 +180,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
     });
   const lockT = cursor + 0.35;
   const titleT = lockT + 0.6;
-  const endT = titleT + 5.4;
+  const endT = titleT + 8.6;
 
   // ── 이야기(자막) 만들기
   const sceneName = t(opts.scene || '잇결');
@@ -178,7 +195,9 @@ export function buildTimeline(frameId, assign, opts = {}) {
   const headName = head ? shortName(head.name) : '';
   const subs = [];
   const say = (t0, t1, who, text) => subs.push({ t0, t1, who, text });
-  say(0.2, OPEN - 0.1, '풍이', t(OPENING[Math.floor(r() * OPENING.length)], { scene: sceneName }));
+  const villain = VILLAINS[Math.floor(r() * VILLAINS.length)];
+  say(0.2, 1.6, '풍이', t(OPENING[Math.floor(r() * OPENING.length)], { scene: sceneName }));
+  say(1.6, OPEN - 0.05, '결이', t('그때 그림자 속에서 {a} 나타나 {b}!', { a: josa(t(villain.name), '이/가'), b: t(villain.how) }));
   if (isTransform) {
     say(OPEN, lockT, '결이', t('{a} 혼자서도 할 수 있대. 모양을 바꿔 볼까?', { a: josa(bodyName, '이/가') }));
   } else {
@@ -188,9 +207,15 @@ export function buildTimeline(frameId, assign, opts = {}) {
     else say(firstEnd, headEv.start - 0.05, '풍이', t('조각 {n}개가 하나씩 제자리를 찾아가.', { n: events.length }));
     if (head) say(headEv.start - 0.05, lockT, '결이', t('마지막은 머리! {a}!', { a: headName }));
   }
-  say(lockT, titleT + 1.7, '함께', t('합체! {a}', { a: title.full }));
-  say(titleT + 1.7, titleT + 3.6, '풍이', t('{a} {b}', { a: josa(title.full, '은/는'), b: t(MISSION[frame.id] || MISSION.guardian) }));
-  if (body) say(titleT + 3.6, endT, '결이', t('진짜 {a} {b}에 있어. 만나러 갈래?', { a: josa(shortName(body.name), '은/는'), b: body.by }));
+  say(lockT, titleT + 1.4, '함께', t('합체! {a}', { a: title.full }));
+  // 해결 — 실제로 끼운 자리 두 가지로 적을 물리친다
+  const used = [...new Set(events.map((e) => e.slot).filter((x) => ACT[x]))];
+  const pick2 = used.length >= 2 ? [used[Math.floor(r() * used.length)], used[Math.floor(r() * used.length)]] : used;
+  const acts = [...new Set(pick2)].slice(0, 2).map((x) => t(ACT[x]));
+  say(titleT + 1.4, titleT + 3.3, '풍이', acts.length ? t('{a} {b} {c} 물리쳤어!', { a: acts[0], b: acts[1] || '', c: josa(t(villain.name), '을/를') }).replace(/\s+/g, ' ') : t('{c} 물리쳤어!', { c: josa(t(villain.name), '을/를') }));
+  say(titleT + 3.3, titleT + 5.0, '결이', t(villain.fact));
+  say(titleT + 5.0, titleT + 6.7, '풍이', t('{a} {b}', { a: josa(title.full, '은/는'), b: t(MISSION[frame.id] || MISSION.guardian) }));
+  if (body) say(titleT + 6.7, endT, '결이', t('진짜 {a} {b}에 있어. 만나러 갈래?', { a: josa(shortName(body.name), '은/는'), b: body.by }));
 
   // 조각마다 날아올 때 붙는 이름표(유물 이름 · 시대 · 자리)
   const tags = events.map((e) => {
@@ -198,7 +223,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
     return { t0: e.start, t1: e.end + 0.55, key: e.key, text: `${p.name}${p.era ? ' · ' + t(p.era) : ''}`, slot: t(e.slot || '') };
   });
 
-  return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform };
+  return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain };
 }
 
 // 시각 t에서 조각 하나의 자세
@@ -223,6 +248,29 @@ export function idleBob(tl, time) {
   return Math.sin((time - tl.titleT) * 2.2) * 8;
 }
 
+// 카메라 — 조각이 끼워질 때 그쪽으로 살짝 다가갔다가, 합체 순간 한 발 물러나 전체를 보여 준다
+export function camAt(tl, time) {
+  const ease = (x) => (x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x));
+  if (time >= tl.lockT) {
+    const back = ease((time - tl.lockT) / 0.5);
+    const z = 1 + 0.0 * back + 0.04 * Math.max(0, Math.sin((time - tl.titleT) * 0.6)) * (time > tl.titleT ? 1 : 0);
+    return { z, cx: 500, cy: 500 };
+  }
+  const cur = [...tl.events].reverse().find((e) => time >= e.start - 0.1);
+  if (!cur) return { z: 1, cx: 500, cy: 500 };
+  const f = ease((time - (cur.start - 0.1)) / 0.45);
+  const z = 1 + 0.22 * f;
+  const cx = 500 + (cur.to.x - 500) * 0.55 * f;
+  const cy = 500 + (cur.to.y - 500) * 0.55 * f;
+  return { z, cx, cy };
+}
+// 악당(보존의 적) 구름 — 이야기 시작 뒤 다가오고, 합체 순간 흩어진다. 0이면 안 보임
+export function villainAt(tl, time) {
+  if (!tl.villain || time < 1.5) return 0;
+  if (time < tl.lockT) return Math.min(1, (time - 1.5) / 1.2);
+  return Math.max(0, 1 - (time - tl.lockT) / 0.9);
+}
+
 // 시각 t에서 결 실 하나가 얼마나 뻗었는지(0~1)
 export function threadAt(th, time) {
   if (time < th.t) return 0;
@@ -233,7 +281,12 @@ export function subAt(tl, time) {
   return tl.subs.find((s) => time >= s.t0 && time < s.t1) || null;
 }
 export function tagsAt(tl, time) {
-  return tl.tags.filter((s) => time >= s.t0 && time < s.t1);
+  const seen = new Set();
+  return tl.tags.filter((s) => {
+    if (!(time >= s.t0 && time < s.t1) || seen.has(s.text)) return false;
+    seen.add(s.text);
+    return true;
+  });
 }
 
 // 빈 자리를 내가 가진 조각으로 채운다 — 자리 맞음 > 모양 맞음 > 아무거나

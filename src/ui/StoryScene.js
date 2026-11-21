@@ -8,7 +8,7 @@ import { getScenes } from '../data/book';
 import { t } from '../i18n';
 
 // 포트폴리오에 그려진 장면 그림 — 미션·결과 화면 위에 깔아 이야기의 자리를 보여 준다.
-const ART = {
+export const ART = {
   gate: require('../../assets/story/gate.jpg'),
   madang: require('../../assets/story/madang.jpg'),
   byeongpung: require('../../assets/story/byeongpung.jpg'),

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
-import { poseAt, subAt, tagsAt, idleBob, threadAt } from '../utils/hapche';
+import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
@@ -92,7 +92,32 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
           const p = poseAt(e, time);
           return <View key={'v' + e.key} style={[st.speed, { left: Math.min(p.x, e.to.x) * k, top: p.y * k, width: Math.abs(e.to.x - p.x) * k + 30, opacity: 0.5 * (1 - p.p) }]} />;
         })}
-      <View style={{ position: 'absolute', left: 0, top: 0, width: size, height: size, transform: [{ translateY: bob * k }, { translateX: shake }] }}>
+      {/* 보존의 적 — 먹빛 구름이 다가오다가 합체 순간 흩어진다 */}
+      {(() => {
+        const v = villainAt(tl, time);
+        if (!v) return null;
+        const scatter = time >= tl.lockT ? (time - tl.lockT) * 900 : 0;
+        return Array.from({ length: 9 }, (_, i) => {
+          const a = (i / 9) * Math.PI * 2;
+          const cx = 800 - Math.min(1, (time - 1.5) / 2.2) * 120 + Math.cos(a) * (70 + scatter) + Math.sin(time * 2 + i) * 10;
+          const cy = 170 + Math.sin(a) * (45 + scatter * 0.7);
+          const r = (60 + (i % 3) * 18) * k;
+          return <View key={'vl' + i} style={{ position: 'absolute', left: cx * k - r, top: cy * k - r, width: r * 2, height: r * 2, borderRadius: r, backgroundColor: tl.villain.color, opacity: 0.55 * v }} />;
+        });
+      })()}
+      {(() => {
+        const v = villainAt(tl, time);
+        if (!v || time >= tl.lockT) return null;
+        return (
+          <View style={[st.vName, { right: 12, top: 118 * k }]} pointerEvents="none">
+            <Text style={st.vNameTxt}>{t(tl.villain.name)}</Text>
+          </View>
+        );
+      })()}
+      <View style={{ position: 'absolute', left: 0, top: 0, width: size, height: size, transform: (() => {
+        const c = camAt(tl, time);
+        return [{ translateX: (500 - c.cx) * c.z * k + shake }, { translateY: (500 - c.cy) * c.z * k + bob * k }, { scale: c.z }];
+      })() }}>
         {(tl.threads || []).map((th, i) => {
           const f = threadAt(th, time);
           if (!f) return null;
@@ -171,6 +196,8 @@ const st = StyleSheet.create({
   glow: { position: 'absolute', backgroundColor: '#ffd98a' },
   person: { position: 'absolute', backgroundColor: '#00000055' },
   speed: { position: 'absolute', height: 3, backgroundColor: '#fff3c2', borderRadius: 2 },
+  vName: { position: 'absolute', backgroundColor: '#000000aa', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
+  vNameTxt: { color: '#ffd2c8', fontSize: 12, fontWeight: '700' },
   fire: { position: 'absolute', backgroundColor: '#ff8a2a', borderRadius: 999 },
   spark: { ...StyleSheet.absoluteFillObject, borderWidth: 3, borderColor: '#fff6c8' },
   titleBox: { position: 'absolute', top: '6%', left: 10, right: 10, alignItems: 'center' },

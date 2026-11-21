@@ -33,7 +33,7 @@ test('그림책 프롤로그를 끝까지 넘기면 홈의 여섯 개 판에 닿
   // 톡 · 고르기 · 가만히 있기만으로 넘어간다
   for (let i = 0; i < 120; i += 1) {
     if (await page.getByText('여섯 개의 판 — 어디부터 가도 돼요').isVisible().catch(() => false)) break;
-    const next = page.getByText(/^\s*(톡 ›|\(가만히 있는다\)|마당으로 ›)\s*$/).last();
+    const next = page.getByText(/^\s*(다음 장면 ›|\(가만히 있는다\))\s*$/).last();
     if (await next.isVisible().catch(() => false)) await next.click().catch(() => {});
     await page.waitForTimeout(150);
   }

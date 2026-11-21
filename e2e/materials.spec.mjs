@@ -24,7 +24,7 @@ test('떠오른 답에 맞춰 재료를 먼저 권하고, 바꿔 고르면 홈�
   await page.getByText('이 재료로 놀기').click();
   for (let i = 0; i < 120; i += 1) {
     if (await page.getByText('여섯 개의 판 — 어디부터 가도 돼요').isVisible().catch(() => false)) break;
-    const next = page.getByText(/^\s*(톡 ›|\(가만히 있는다\)|마당으로 ›)\s*$/).last();
+    const next = page.getByText(/^\s*(다음 장면 ›|\(가만히 있는다\))\s*$/).last();
     if (await next.isVisible().catch(() => false)) await next.click().catch(() => {});
     await page.waitForTimeout(150);
   }

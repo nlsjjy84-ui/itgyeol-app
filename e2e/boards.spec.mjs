@@ -32,7 +32,7 @@ test('탈춤·단청도 처음 들어가면 입구 이야기 2쪽이 먼저 뜬�
   ]) {
     await page.getByText(board, { exact: true }).filter({ visible: true }).first().click();
     await expect(page.getByText('건너뛰기', { exact: true }).filter({ visible: true })).toBeVisible();
-    const tok = page.getByText(/^\s*톡 ›\s*$/).filter({ visible: true }).last();
+    const tok = page.getByText(/^\s*다음 장면 ›\s*$/).filter({ visible: true }).last();
     for (const line of [first, second]) {
       for (let i = 0; i < 8 && !(await page.getByText(line).isVisible().catch(() => false)); i += 1) await tok.click().catch(() => {});
       await expect(page.getByText(line)).toBeVisible();

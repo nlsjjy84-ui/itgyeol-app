@@ -1,7 +1,7 @@
 // 웹: 합체 영상을 실제 영상 파일(mp4 또는 webm)로 저장한다.
 // 앱 화면과 같은 대본(hapche.js)을 캔버스에 다시 그리고, 효과음까지 섞어 녹화한다. 자막은 영상 안에 새긴다.
 import { Asset } from 'expo-asset';
-import { poseAt, subAt, tagsAt, idleBob, threadAt } from './hapche';
+import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from './hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { t } from '../i18n';
 
@@ -99,6 +99,28 @@ export function drawFrame(ctx, S, tl, imgs, time) {
   });
   const bob = idleBob(tl, time) * k;
   const shake = time >= tl.lockT && time < tl.lockT + 0.35 ? Math.sin(time * 90) * 6 : 0;
+  const vv = villainAt(tl, time);
+  if (vv) {
+    const scatter = time >= tl.lockT ? (time - tl.lockT) * 900 : 0;
+    ctx.save();
+    ctx.fillStyle = tl.villain.color;
+    for (let i = 0; i < 9; i++) {
+      const a = (i / 9) * Math.PI * 2;
+      const cx = 800 - Math.min(1, (time - 1.5) / 2.2) * 120 + Math.cos(a) * (70 + scatter) + Math.sin(time * 2 + i) * 10;
+      const cy = 170 + Math.sin(a) * (45 + scatter * 0.7);
+      ctx.globalAlpha = 0.55 * vv;
+      ctx.beginPath();
+      ctx.arc(cx * k, cy * k, (60 + (i % 3) * 18) * k, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  const cam = camAt(tl, time);
+  ctx.save();
+  ctx.translate(S / 2 + shake, S / 2 + bob);
+  ctx.scale(cam.z, cam.z);
+  ctx.translate(-cam.cx * k, -cam.cy * k);
+  const bobSave = bob;
   (tl.threads || []).forEach((th, i) => {
     const f = threadAt(th, time);
     if (!f) return;
@@ -110,8 +132,8 @@ export function drawFrame(ctx, S, tl, imgs, time) {
     ctx.shadowColor = '#ffd98a';
     ctx.shadowBlur = 8;
     ctx.beginPath();
-    ctx.moveTo(th.a.x * k + shake, th.a.y * k + bob);
-    ctx.lineTo((th.a.x + (th.b.x - th.a.x) * f) * k + shake, (th.a.y + (th.b.y - th.a.y) * f) * k + bob);
+    ctx.moveTo(th.a.x * k, th.a.y * k);
+    ctx.lineTo((th.a.x + (th.b.x - th.a.x) * f) * k, (th.a.y + (th.b.y - th.a.y) * f) * k);
     ctx.stroke();
     ctx.restore();
   });
@@ -125,7 +147,7 @@ export function drawFrame(ctx, S, tl, imgs, time) {
       const h = e.h * k * p.s;
       const spin = e.spin && done ? (time - tl.titleT) * 360 : 0;
       ctx.save();
-      ctx.translate(p.x * k + shake, p.y * k + bob);
+      ctx.translate(p.x * k, p.y * k);
       ctx.rotate(((p.rot + spin) * Math.PI) / 180);
       ctx.scale(e.flip ? -1 : 1, e.flipY ? -1 : 1);
       ctx.globalAlpha = e.ghost ? 0.55 : 1;
@@ -143,6 +165,8 @@ export function drawFrame(ctx, S, tl, imgs, time) {
       }
       ctx.restore();
     });
+  ctx.restore();
+  void bobSave;
   if (time >= tl.lockT && time < tl.lockT + 0.6) {
     ctx.fillStyle = 'rgba(255,248,232,' + (1 - (time - tl.lockT) / 0.6) * 0.85 + ')';
     ctx.fillRect(0, 0, S, S);
