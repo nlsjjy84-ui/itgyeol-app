@@ -223,6 +223,7 @@ export default function DexScreen({ navigation }) {
       <SafeAreaView style={st.safe}>
         <ScrollView contentContainerStyle={st.wrap}>
           {header}
+          <SealButton label={t('합체 전시관 화면 띄우기 (큰 화면·키오스크)')} variant="ink" onPress={() => navigation.navigate('HapcheWall')} style={{ marginTop: 10 }} />
           {!works.length && (
             <View style={st.empty}>
               <Text style={st.emptyTxt}>{t('아직 만든 작품이 없어요. 작업대에서 조각을 합체해 보세요.')}</Text>

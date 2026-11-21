@@ -4,6 +4,12 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "잇결 · 유물 합체 전시관": "Itgyeol · Artifact Combine Gallery",
+  "작품 {a} / {b}": "Work {a} / {b}",
+  "이 영상을 내 폰으로": "This movie on my phone",
+  "전시관 닫기": "Close gallery",
+  "합체 전시관 화면 띄우기 (큰 화면·키오스크)": "Open the combine gallery (big screen · kiosk)",
+  "합체 전시관 (큰 화면)": "Combine gallery (big screen)",
   "돌려 보기": "Spin it",
   "↻ 돌려 보기": "↻ Spin it",
   "{a} 바다 건너 {b}에서 날아왔어! 오랫동안 고향을 떠나 있던 우리 유물이야.": "{a} flew across the sea from {b}! A Korean artifact that has been far from home for a long time.",

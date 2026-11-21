@@ -27,6 +27,7 @@ import PackScreen from './screens/PackScreen';
 import DexScreen from './screens/DexScreen';
 import WorkshopScreen from './screens/WorkshopScreen';
 import MovieScreen from './screens/MovieScreen';
+import HapcheWallScreen from './screens/HapcheWallScreen';
 import { readMovieParam, readGiftParam } from './utils/movieLink';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { takeTourFlag } from './tourFlag';
@@ -145,6 +146,7 @@ function Nav() {
         <Stack.Screen name="Pack" component={PackH} initialParams={sharedGift || undefined} />
         <Stack.Screen name="Dex" component={DexH} />
         <Stack.Screen name="Workshop" component={WorkshopH} />
+        <Stack.Screen name="HapcheWall" component={HapcheWallScreen} />
         <Stack.Screen name="Movie" component={MovieH} initialParams={sharedMovie || undefined} />
       </Stack.Navigator>
       <StatusBar style={getThemeMode() === 'dark' ? 'light' : 'dark'} backgroundColor={colors.bg} />

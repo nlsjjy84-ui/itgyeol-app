@@ -53,6 +53,7 @@ export default function HapcheHome({ navigation }) {
           <SealButton style={{ flex: 1 }} label={t('합체 작업대')} variant="ink" onPress={() => navigation.navigate('Workshop')} />
           <SealButton style={{ flex: 1 }} label={t('조각 도감')} variant="paper" onPress={() => navigation.navigate('Dex')} />
         </View>
+        <SealButton small label={t('합체 전시관 (큰 화면)')} variant="paper" onPress={() => navigation.navigate('HapcheWall')} />
       </View>
     </Frame>
   );

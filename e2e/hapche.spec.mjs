@@ -102,3 +102,11 @@ test('유물 합체: 첫 보따리 뒤 홈에서 오늘의 보따리를 받는�
   await openHome(page);
   await expect(page.getByText(/오늘의 보따리는 받았어요/).filter({ visible: true }).first()).toBeVisible();
 });
+
+test('유물 합체: 합체 전시관이 예시 작품을 틀고 QR을 보여 준다', async ({ page }) => {
+  await openHome(page);
+  await page.getByText('합체 전시관 (큰 화면)').filter({ visible: true }).first().click();
+  await expect(page.getByText('잇결 · 유물 합체 전시관')).toBeVisible();
+  await expect(page.getByText('이 영상을 내 폰으로')).toBeVisible();
+  await expect(page.getByText(/작품 1 \/ \d+/)).toBeVisible();
+});
