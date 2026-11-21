@@ -12,7 +12,7 @@ import { buildTimeline } from '../utils/hapche';
 import { saveWork, usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
 import { SLOT_INFO } from '../data/frames';
-import { canExport, exportMovie, downloadBlob, srtOf } from '../utils/movieExport';
+import { canExport, exportMovie, downloadBlob, srtOf, paperKit } from '../utils/movieExport';
 import { movieUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -84,6 +84,16 @@ export default function MovieScreen({ navigation, route }) {
           {rec === 'fail' && <Text style={st.note}>{t('이 브라우저에서는 영상 저장이 안 돼요. 크롬이나 엣지에서 다시 해 보세요.')}</Text>}
           {canExport() && typeof rec !== 'number' ? <SealButton label={t('세로 영상으로 저장 (쇼츠·릴스용)')} variant="ink" onPress={() => onExport(true)} /> : null}
           {Platform.OS === 'web' && <SealButton label={t('자막 파일(.srt) 받기')} variant="paper" onPress={onSrt} />}
+          {Platform.OS === 'web' && (
+            <SealButton
+              label={t('종이 변형 키트 도안 받기 (A4)')}
+              variant="paper"
+              onPress={async () => {
+                const url = await paperKit(tl);
+                if (url) downloadBlob(url, `잇결_종이키트_${tl.title.short}.png`);
+              }}
+            />
+          )}
         </View>
 
         <Text style={st.h}>{t('영상 나누기')}</Text>

@@ -53,6 +53,8 @@ export default function PackScreen({ navigation, route }) {
   const scene = (route.params && route.params.scene) || '';
   const count = (route.params && route.params.n) || 3;
   const claim = (route.params && route.params.claim) || '';
+  const gift = (route.params && route.params.gift) || '';
+  const from = (route.params && route.params.from) || '';
   const [opened, setOpened] = useState(null); // {keys, fresh, starter}
   const [code, setCode] = useState('');
   const [codeMsg, setCodeMsg] = useState('');
@@ -70,6 +72,16 @@ export default function PackScreen({ navigation, route }) {
   const open = async () => {
     await loadPieces();
     const s = getPieces();
+    if (gift) {
+      if (isClaimed('gift:' + gift)) {
+        setOpened({ keys: [], fresh: [], starter: false, already: true });
+        return;
+      }
+      const fresh = addPieces([gift]);
+      markClaimed('gift:' + gift);
+      setOpened({ keys: [gift], fresh, starter: false, gift: true });
+      return;
+    }
     if (!s.starter) {
       const keys = takeStarter();
       setOpened({ keys, fresh: keys, starter: true });
@@ -94,7 +106,13 @@ export default function PackScreen({ navigation, route }) {
         {!opened ? (
           <View style={st.center}>
             <Text style={st.lead}>
-              {scene ? t('{a} 놀이를 마쳤어요! 보따리 안에 무엇이 들었을까요?', { a: t(scene) }) : t('보따리 안에 무엇이 들었을까요?')}
+              {gift
+                ? from
+                  ? t('{a} 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.', { a: from })
+                  : t('친구가 유물 조각을 선물했어요! 보따리를 풀어 보세요.')
+                : scene
+                ? t('{a} 놀이를 마쳤어요! 보따리 안에 무엇이 들었을까요?', { a: t(scene) })
+                : t('보따리 안에 무엇이 들었을까요?')}
             </Text>
             <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={t('보따리 풀기')}>
               <Animated.View style={[st.bundle, { transform: [{ rotate: shake.interpolate({ inputRange: [-1, 1], outputRange: ['-6deg', '6deg'] }) }] }]}>
@@ -130,7 +148,11 @@ export default function PackScreen({ navigation, route }) {
           <View>
             <Text style={st.lead}>
               {opened.already
-                ? t('이 놀이의 보따리는 이미 받았어요. 다른 놀이를 마치면 또 받을 수 있어요.')
+                ? gift
+                  ? t('이 선물은 이미 받았어요.')
+                  : t('이 놀이의 보따리는 이미 받았어요. 다른 놀이를 마치면 또 받을 수 있어요.')
+                : opened.gift
+                ? t('선물 받은 조각이에요! 도감에 들어갔어요.')
                 : opened.starter
                 ? t('첫 보따리! 자리마다 하나씩, 조각 {n}개를 받았어요.', { n: opened.keys.length })
                 : t('조각 {n}개를 받았어요. 새 조각 {m}개!', { n: opened.keys.length, m: opened.fresh.length })}

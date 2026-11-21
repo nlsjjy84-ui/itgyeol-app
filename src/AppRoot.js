@@ -27,7 +27,7 @@ import PackScreen from './screens/PackScreen';
 import DexScreen from './screens/DexScreen';
 import WorkshopScreen from './screens/WorkshopScreen';
 import MovieScreen from './screens/MovieScreen';
-import { readMovieParam } from './utils/movieLink';
+import { readMovieParam, readGiftParam } from './utils/movieLink';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { takeTourFlag } from './tourFlag';
 import { colors, getThemeMode } from './theme';
@@ -84,6 +84,8 @@ function Nav() {
   const [tour] = useState(() => !payBack && takeTourFlag());
   // 공유받은 합체 영상 링크(?m=)로 열었으면 영상부터 보여 준다
   const [sharedMovie] = useState(() => readMovieParam());
+  // 친구가 보낸 조각 선물 링크(?g=)
+  const [sharedGift] = useState(() => (sharedMovie ? null : readGiftParam()));
   useEffect(() => {
     if (!tour || taste === null || book === null) return;
     if (!taste.done) setTaste([]);
@@ -112,7 +114,7 @@ function Nav() {
   // 처음이면 질문 → 그림책 프롤로그 → 홈. 질문만 끝낸 사람은 바로 프롤로그부터.
   // QR로 집에서 이어서 여는 사람은 질문·그림책을 건너뛰고 바로 홈(가져온 작품)으로.
   // 토스 결제창에서 돌아왔으면 결과 화면(주문 진행)으로 바로 간다.
-  const first = payBack ? 'Result' : sharedMovie ? 'Movie' : carried || tour ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
+  const first = payBack ? 'Result' : sharedMovie ? 'Movie' : sharedGift ? 'Pack' : carried || tour ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
   return (
     <NavigationContainer
       ref={navRef}
@@ -140,7 +142,7 @@ function Nav() {
         <Stack.Screen name="Talchum" component={TalchumH} />
         <Stack.Screen name="Dancheong" component={DancheongH} />
         <Stack.Screen name="Result" component={ResultH} />
-        <Stack.Screen name="Pack" component={PackH} />
+        <Stack.Screen name="Pack" component={PackH} initialParams={sharedGift || undefined} />
         <Stack.Screen name="Dex" component={DexH} />
         <Stack.Screen name="Workshop" component={WorkshopH} />
         <Stack.Screen name="Movie" component={MovieH} initialParams={sharedMovie || undefined} />

@@ -57,3 +57,16 @@ test('유물 합체: 자유 합체로 직접 놓고 영상 만들기', async ({ 
   await expect(page.getByText('합체 영상').filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByText(/자유 합체/).filter({ visible: true }).first()).toBeVisible();
 });
+
+test('유물 합체: 선물 링크(?g=)로 열면 조각을 받는다', async ({ page }) => {
+  await page.goto('/?g=n42506&n=' + encodeURIComponent('풍이'));
+  const msg = page.getByText('풍이 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.');
+  for (let i = 0; i < 40 && !(await msg.isVisible().catch(() => false)); i += 1) {
+    const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+    if (await agree.count()) await agree.first().click().catch(() => {});
+    else await page.waitForTimeout(250);
+  }
+  await expect(msg).toBeVisible();
+  await page.getByLabel('보따리 풀기').click();
+  await expect(page.getByText('선물 받은 조각이에요! 도감에 들어갔어요.')).toBeVisible();
+});

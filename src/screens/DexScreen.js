@@ -9,7 +9,9 @@ import SealButton from '../ui/SealButton';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
-import { usePieces, removeWork } from '../utils/pieceStore';
+import { usePieces, removeWork, giveAway } from '../utils/pieceStore';
+import { giftUrl } from '../utils/movieLink';
+import QRCode from 'react-native-qrcode-svg';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
 import { SLOT_INFO, SLOT_NAMES, FRAME_BY_ID } from '../data/frames';
 import { powerTag } from '../utils/hapche';
@@ -17,8 +19,9 @@ import { powerTag } from '../utils/hapche';
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 const POWERS = ['흙', '쇠', '돌', '옥', '나무', '천', '종이', '금', '뼈'];
 
-export function PieceDetail({ k, owned, onClose, onTransform }) {
+export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
   const p = PIECE_BY_K[k];
+  const [gift, setGift] = React.useState(null);
   if (!p) return null;
   return (
     <Modal transparent animationType="fade" visible onRequestClose={onClose}>
@@ -53,6 +56,28 @@ export function PieceDetail({ k, owned, onClose, onTransform }) {
                 <View style={{ gap: 8, marginTop: 12 }}>
                   {onTransform && <SealButton label={t('이 조각 하나로 변형하기')} onPress={() => onTransform(k)} />}
                   <SealButton label={t('박물관 원본 페이지 열기')} variant="paper" onPress={() => Linking.openURL(p.page)} />
+                  {count > 1 && !gift ? (
+                    <SealButton
+                      label={t('겹친 조각 친구에게 선물하기 (×{n})', { n: count })}
+                      variant="ink"
+                      onPress={() => {
+                        if (giveAway(k)) setGift(giftUrl(k));
+                      }}
+                    />
+                  ) : null}
+                  {gift ? (
+                    <View style={st.giftBox}>
+                      <View style={{ padding: 6, backgroundColor: '#fff', borderRadius: 8 }}>
+                        <QRCode value={gift} size={110} />
+                      </View>
+                      <View style={{ flex: 1, gap: 6 }}>
+                        <Text style={st.desc}>{t('이 QR이나 링크를 친구에게 보내면 이 조각이 친구 도감으로 가요.')}</Text>
+                        {Platform.OS === 'web' ? (
+                          <SealButton small variant="paper" label={t('링크 복사')} onPress={() => navigator.clipboard && navigator.clipboard.writeText(gift)} />
+                        ) : null}
+                      </View>
+                    </View>
+                  ) : null}
                 </View>
               </>
             ) : (
@@ -263,6 +288,7 @@ export default function DexScreen({ navigation }) {
         <PieceDetail
           k={open}
           owned={!!owned[open]}
+          count={owned[open] || 0}
           onClose={() => setOpen(null)}
           onTransform={(k) => {
             setOpen(null);
@@ -320,6 +346,7 @@ const st = StyleSheet.create({
   fact: { fontSize: 13, color: colors.ink, marginTop: 4, lineHeight: 19 },
   desc: { fontSize: 13, color: colors.ink, marginTop: 8, lineHeight: 20 },
   lic: { fontSize: 11, color: colors.muted, marginTop: 10 },
+  giftBox: { flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#f6f2ea', borderRadius: 12, padding: 8 },
   work: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.paper, borderRadius: 14, padding: 10, marginTop: 10, borderWidth: 1, borderColor: colors.borderSoft },
   workImgs: { flexDirection: 'row', width: 120, flexWrap: 'wrap' },
   workImg: { width: 40, height: 40 },

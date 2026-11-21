@@ -10,3 +10,6 @@ export function drawFrame() {}
 export function srtOf(tl) {
   return tl.subs.map((s, i) => `${i + 1}\n${s.text}\n`).join('\n');
 }
+export async function paperKit() {
+  return null;
+}

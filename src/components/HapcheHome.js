@@ -12,6 +12,8 @@ import { starterKeys, usePieces } from '../utils/pieceStore';
 import { PIECES } from '../data/pieces';
 import { FRAMES, TRANSFORMS } from '../data/frames';
 
+// 자동 테스트에서는 홈의 합체 장면을 멈춰 둔다(다른 테스트가 느려지지 않게) — 사람이 볼 때는 계속 돈다
+const STILL = typeof navigator !== 'undefined' && !!navigator.webdriver;
 const DEMO = ['guardian', 'skyship', 'dragon', 'jet', 'suit', 'flower', 'turtle', 'haechi'];
 
 export default function HapcheHome({ navigation }) {
@@ -36,7 +38,7 @@ export default function HapcheHome({ navigation }) {
         })}
       </Text>
       <View style={{ marginTop: 10 }}>
-        <HapcheStage tl={tl} size={size} sound={false} onEnd={() => setI((x) => x + 1)} />
+        <HapcheStage tl={tl} size={size} sound={false} autoPlay={!STILL} onEnd={() => setI((x) => x + 1)} />
       </View>
       <Text style={st.count}>{t('조각 {n}점 · 내가 모은 조각 {m}점', { n: PIECES.length, m: owned })}</Text>
       <View style={st.btns}>

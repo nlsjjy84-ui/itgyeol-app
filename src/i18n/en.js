@@ -4,6 +4,15 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "{a} 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.": "{a} sent you an artifact piece! Open the bundle.",
+  "① 점선을 따라 오려요  ② 회색 날개에 풀칠해요  ③ 번호 순서대로 완성 그림처럼 붙여요": "① Cut along the dotted lines  ② Glue the gray tabs  ③ Stick them in number order like the finished picture",
+  "겹친 조각 친구에게 선물하기 (×{n})": "Gift a duplicate to a friend (×{n})",
+  "선물 받은 조각이에요! 도감에 들어갔어요.": "A gift piece! It's in your piece book now.",
+  "이 QR이나 링크를 친구에게 보내면 이 조각이 친구 도감으로 가요.": "Send this QR or link to a friend and the piece goes into their book.",
+  "이 선물은 이미 받았어요.": "You already received this gift.",
+  "조립 순서": "Assembly order",
+  "종이 변형 키트 도안 받기 (A4)": "Download the paper transform kit (A4)",
+  "친구가 유물 조각을 선물했어요! 보따리를 풀어 보세요.": "A friend sent you an artifact piece! Open the bundle.",
   "내 조각 {n}개 — 눌러서 올리기": "My pieces: {n} — tap to place",
   "달성!": "Done!",
   "뒤집기": "Flip",

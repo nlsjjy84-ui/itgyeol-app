@@ -59,3 +59,19 @@ export function readMovieParam() {
     return null;
   }
 }
+
+// 조각 선물 링크 — 겹친 조각 하나를 친구에게 보낸다(?g=조각&n=보내는 사람 별명)
+export function giftUrl(k, nick = '') {
+  return `${SITE_URL}?g=${short(k)}${nick ? '&n=' + encodeURIComponent(nick.slice(0, 12)) : ''}`;
+}
+export function readGiftParam() {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const g = q.get('g');
+    if (!g || !PIECE_BY_K[long(g)]) return null;
+    return { gift: long(g), from: (q.get('n') || '').slice(0, 12) };
+  } catch (e) {
+    return null;
+  }
+}

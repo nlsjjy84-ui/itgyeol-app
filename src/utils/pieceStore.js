@@ -167,3 +167,12 @@ export function removeWork(id) {
 }
 
 export { RARITY };
+
+// 겹친 조각을 선물로 내보낸다(하나 남기고)
+export function giveAway(k) {
+  if (!state || !state.owned[k] || state.owned[k] < 2) return false;
+  state = { ...state, owned: { ...state.owned, [k]: state.owned[k] - 1 } };
+  persist();
+  emit();
+  return true;
+}

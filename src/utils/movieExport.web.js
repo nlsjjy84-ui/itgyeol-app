@@ -343,3 +343,84 @@ export function srtOf(tl) {
   };
   return tl.subs.map((s, i) => `${i + 1}\n${ts(s.t0)} --> ${ts(s.t1)}\n${t(s.who)}: ${s.text}\n`).join('\n');
 }
+
+// 종이 변형 키트 도안(A4) — 합체 작품의 조각을 합체 순서대로 번호를 매겨 오려 붙일 수 있게 한 장에 담는다.
+// 위: 완성 모습과 조립 순서, 아래: 조각마다 오리는 선(점선)과 풀칠 날개, 번호·자리 이름·유물 이름.
+export async function paperKit(tl) {
+  const W = 2480;
+  const H = 3508; // A4 300dpi
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  const imgs = {};
+  await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
+  ctx.fillStyle = '#fffdf8';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#1b2227';
+  ctx.font = '700 96px "Gowun Batang", serif';
+  ctx.fillText(t('종이 변형 키트'), 140, 210);
+  ctx.font = '500 56px sans-serif';
+  ctx.fillText(tl.title.full, 140, 300, W - 280);
+  ctx.font = '400 40px sans-serif';
+  ctx.fillStyle = '#5d6a70';
+  ctx.fillText(t('① 점선을 따라 오려요  ② 회색 날개에 풀칠해요  ③ 번호 순서대로 완성 그림처럼 붙여요'), 140, 380, W - 280);
+  // 완성 그림
+  const fin = document.createElement('canvas');
+  fin.width = 900;
+  fin.height = 900;
+  drawFrame(fin.getContext('2d'), 900, tl, imgs, tl.dur);
+  ctx.drawImage(fin, 140, 440, 900, 900);
+  // 조립 순서
+  const order = [];
+  tl.events.forEach((e) => {
+    if (!order.find((o) => o.k === e.k && o.slot === e.slot)) order.push(e);
+  });
+  ctx.fillStyle = '#1b2227';
+  ctx.font = '700 52px sans-serif';
+  ctx.fillText(t('조립 순서'), 1120, 500);
+  ctx.font = '400 38px sans-serif';
+  order.slice(0, 16).forEach((e, i) => {
+    const p = PIECE_BY_K[e.k];
+    ctx.fillText(`${i + 1}. ${t(e.slot || '')} — ${p.name}`.slice(0, 34), 1120, 580 + i * 50);
+  });
+  // 조각 오리기 판
+  const cell = 520;
+  const cols = 4;
+  order.slice(0, 16).forEach((e, i) => {
+    const im = imgs[e.k];
+    if (!im) return;
+    const cx = 140 + (i % cols) * (cell + 30);
+    const cy = 1440 + Math.floor(i / cols) * (cell + 60);
+    if (cy + cell > H - 80) return;
+    const ar = im.width / im.height;
+    const w = ar >= 1 ? cell - 80 : (cell - 80) * ar;
+    const h = ar >= 1 ? (cell - 80) / ar : cell - 80;
+    const x = cx + (cell - w) / 2;
+    const y = cy + (cell - h) / 2;
+    ctx.fillStyle = '#d9d4ca';
+    ctx.fillRect(x - 18, y + h, w + 36, 40); // 풀칠 날개
+    ctx.drawImage(im, x, y, w, h);
+    ctx.setLineDash([16, 12]);
+    ctx.strokeStyle = '#1b2227';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x - 18, y - 10, w + 36, h + 50);
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#b3322b';
+    ctx.beginPath();
+    ctx.arc(cx + 40, cy + 40, 34, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 40px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(i + 1), cx + 40, cy + 54);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1b2227';
+    ctx.font = '400 30px sans-serif';
+    ctx.fillText(PIECE_BY_K[e.k].name.slice(0, 16), cx, cy + cell + 30, cell);
+  });
+  ctx.fillStyle = '#5d6a70';
+  ctx.font = '400 30px sans-serif';
+  ctx.fillText(t('유물 사진: {a} (공공누리 제1유형) · 잇결', { a: (tl.museums || []).join('·') }), 140, H - 60);
+  return new Promise((resolve) => c.toBlob((b) => resolve(URL.createObjectURL(b)), 'image/png'));
+}

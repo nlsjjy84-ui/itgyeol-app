@@ -42,7 +42,7 @@ function piecesFor(part, n, seed) {
 }
 // 자동 테스트(브라우저 테스트)에서는 영상을 빨리 감아 본다 — 사람이 볼 때는 영향 없음
 const FAST = typeof navigator !== 'undefined' && !!navigator.webdriver;
-const lineDur = (text) => (FAST ? 1.6 : Math.max(2.6, Math.min(6.8, 1.6 + String(text).length * 0.075)));
+const lineDur = (text) => (FAST ? 2.6 : Math.max(2.6, Math.min(6.8, 1.6 + String(text).length * 0.075)));
 
 export default function StoryMovie({ part, pages, resolve, onPick, onFinish, choiceOf }) {
   const { width, height } = useWindowDimensions();
