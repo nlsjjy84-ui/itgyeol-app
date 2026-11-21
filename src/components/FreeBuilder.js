@@ -7,6 +7,7 @@ import SealButton from '../ui/SealButton';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
+import { pieceName } from '../utils/pieceName';
 import { PIECE_BY_K } from '../data/pieces';
 
 function Item({ it, k, selected, onSelect, onMove }) {
@@ -113,10 +114,10 @@ export default function FreeBuilder({ ownedKeys, size, onDone }) {
       <Text style={st.h}>{t('내 조각 {n}개 — 눌러서 올리기', { n: ownedKeys.length })}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.tray}>
         {ownedKeys.map((key, i) => (
-          <Pressable key={key} testID={'tray-' + i} accessibilityLabel={PIECE_BY_K[key].name} onPress={() => add(key)} style={st.trayItem}>
+          <Pressable key={key} testID={'tray-' + i} accessibilityLabel={pieceName(PIECE_BY_K[key])} onPress={() => add(key)} style={st.trayItem}>
             <Image source={PIECE_BY_K[key].img} style={st.trayImg} resizeMode="contain" />
             <Text style={st.trayName} numberOfLines={1}>
-              {PIECE_BY_K[key].name}
+              {pieceName(PIECE_BY_K[key])}
             </Text>
           </Pressable>
         ))}

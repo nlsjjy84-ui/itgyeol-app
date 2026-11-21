@@ -3,6 +3,7 @@
 import { FRAME_BY_ID, SLOT_INFO } from '../data/frames';
 import { PIECE_BY_K, PIECES } from '../data/pieces';
 import { t, getLang } from '../i18n';
+import { pieceName, pieceShort } from './pieceName';
 
 // ── 한국어 조사(이/가, 은/는, 을/를, 와/과, 으로/로)
 function hasBatchim(word) {
@@ -38,7 +39,7 @@ export function powerTag(power) {
 // 작품 이름 — 몸통 유물의 재료 결 + 틀 이름 + 「몸통 유물 이름 + 호」
 export function workTitle(frame, bodyPiece) {
   const tag = powerTag(bodyPiece ? bodyPiece.power : '');
-  const short = bodyPiece ? shortName(bodyPiece.name).slice(0, 4) : '잇결';
+  const short = bodyPiece ? pieceShort(bodyPiece).slice(0, getLang() === 'ko' ? 4 : 12) : '잇결';
   return { full: `${t(tag)} ${t(frame.name)} 「${short}${t('호')}」`, tag, short };
 }
 
@@ -216,8 +217,8 @@ export function buildTimeline(frameId, assign, opts = {}) {
   const title = workTitle(frame, body);
   const eras = [...new Set(events.map((e) => (PIECE_BY_K[e.k] || {}).era).filter(Boolean))].sort((a, b) => ERA_ORDER.indexOf(a) - ERA_ORDER.indexOf(b));
   const museums = [...new Set(events.map((e) => (PIECE_BY_K[e.k] || {}).by).filter(Boolean))];
-  const bodyName = body ? shortName(body.name) : '';
-  const headName = head ? shortName(head.name) : '';
+  const bodyName = body ? pieceShort(body) : '';
+  const headName = head ? pieceShort(head) : '';
   const subs = [];
   const say = (t0, t1, who, text) => subs.push({ t0, t1, who, text });
   const villain = VILLAINS[Math.floor(r() * VILLAINS.length)];
@@ -240,12 +241,12 @@ export function buildTimeline(frameId, assign, opts = {}) {
   say(titleT + 1.4, titleT + 3.3, '풍이', acts.length ? t('{a} {b} {c} 물리쳤어!', { a: acts[0], b: acts[1] || '', c: josa(t(villain.name), '을/를') }).replace(/\s+/g, ' ') : t('{c} 물리쳤어!', { c: josa(t(villain.name), '을/를') }));
   say(titleT + 3.3, titleT + 5.0, '결이', t(villain.fact));
   say(titleT + 5.0, titleT + 6.7, '풍이', t('{a} {b}', { a: josa(title.full, '은/는'), b: t(MISSION[frame.id] || MISSION.guardian) }));
-  if (body) say(titleT + 6.7, endT, '결이', t('진짜 {a} {b}에 있어. 만나러 갈래?', { a: josa(shortName(body.name), '은/는'), b: body.by }));
+  if (body) say(titleT + 6.7, endT, '결이', t('진짜 {a} {b}에 있어. 만나러 갈래?', { a: josa(pieceShort(body), '은/는'), b: t(body.by) }));
 
   // 조각마다 날아올 때 붙는 이름표(유물 이름 · 시대 · 자리)
   const tags = events.map((e) => {
     const p = PIECE_BY_K[e.k];
-    return { t0: e.start, t1: e.end + 0.55, key: e.key, text: `${p.name}${p.era ? ' · ' + t(p.era) : ''}`, slot: t(e.slot || '') };
+    return { t0: e.start, t1: e.end + 0.55, key: e.key, text: `${pieceName(p)}${p.era ? ' · ' + t(p.era) : ''}`, slot: t(e.slot || '') };
   });
 
   return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain };

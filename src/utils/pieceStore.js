@@ -72,8 +72,10 @@ export function drawPack(n, seed, owned = {}, codes = [], scene = '') {
   const bias = SCENE_BIAS[scene] ? all.filter((p) => SCENE_BIAS[scene].test(p.name)) : [];
   let pool = all;
   const out = [];
+  const regions = (codes || []).filter((c) => REGION_CODES.includes(c));
+  const local = regions.length ? all.filter((p) => p.from && regions.some((g) => p.from.includes(g))) : [];
   for (let i = 0; i < n; i++) {
-    pool = bias.length > 6 && r() < 0.6 ? bias : all;
+    pool = local.length > 2 && r() < 0.4 ? local : bias.length > 6 && r() < 0.6 ? bias : all;
     const roll = r();
     const tier = roll < 0.05 ? 2 : roll < 0.3 ? 1 : 0;
     let cand = pool.filter((p) => p.rare === tier && !out.includes(p.k));
@@ -140,7 +142,13 @@ export function takeStarter() {
 }
 
 // 박물관 현장에서 받은 암호 — 「궁궐 한정」 조각이 보따리에서 나오기 시작한다
-export const MUSEUM_CODES = { 고궁: '궁궐', GOGUNG: '궁궐' };
+export const MUSEUM_CODES = {
+  고궁: '궁궐', GOGUNG: '궁궐',
+  // 지역 국립박물관 — 그 고장에서 나온 유물 조각이 보따리에 더 많이 섞인다(포켓몬 GO 지역 한정처럼)
+  경주: '경주', GYEONGJU: '경주', 부여: '부여', BUYEO: '부여', 공주: '공주', GONGJU: '공주',
+  김해: '김해', GIMHAE: '김해', 청주: '청주', CHEONGJU: '청주', 서울: '서울', SEOUL: '서울',
+};
+export const REGION_CODES = ['경주', '부여', '공주', '김해', '청주', '서울'];
 export function enterCode(text) {
   const c = MUSEUM_CODES[String(text || '').trim().toUpperCase()] || MUSEUM_CODES[String(text || '').trim()];
   if (!c) return null;

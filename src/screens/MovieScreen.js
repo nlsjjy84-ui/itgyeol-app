@@ -8,6 +8,7 @@ import SealButton from '../ui/SealButton';
 import HapcheStage from '../components/HapcheStage';
 import { colors } from '../theme';
 import { t } from '../i18n';
+import { pieceName } from '../utils/pieceName';
 import { buildTimeline } from '../utils/hapche';
 import { saveWork, usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
@@ -135,8 +136,8 @@ export default function MovieScreen({ navigation, route }) {
           <Pressable key={k} style={st.part} onPress={() => Linking.openURL(p.page)}>
             <Image source={p.img} style={st.partImg} resizeMode="contain" />
             <View style={{ flex: 1 }}>
-              <Text style={st.partName}>{p.name}</Text>
-              <Text style={st.partMeta}>{[t(p.era), p.by, p.use].filter(Boolean).join(' · ')}</Text>
+              <Text style={st.partName}>{pieceName(p)}</Text>
+              <Text style={st.partMeta}>{[t(p.era), t(p.by), p.use].filter(Boolean).join(' · ')}</Text>
               {!!slots.length && (
                 <Text style={st.partSlot}>
                   {slots.map((s) => `${(SLOT_INFO[s] || {}).icon || ''} ${t(s)} — ${t((SLOT_INFO[s] || {}).say || '')}`).join('   ')}

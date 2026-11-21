@@ -8,6 +8,7 @@ import SealButton from '../ui/SealButton';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
+import { pieceName } from '../utils/pieceName';
 import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
 
@@ -31,10 +32,10 @@ function Card({ k, delay, fresh, size }) {
       </View>
       <Image source={p.img} style={{ width: size - 16, height: size - 16, alignSelf: 'center' }} resizeMode="contain" />
       <Text style={st.cardName} numberOfLines={2}>
-        {p.name}
+        {pieceName(p)}
       </Text>
       <Text style={st.cardMeta} numberOfLines={1}>
-        {[t(p.era), p.by].filter(Boolean).join(' · ')}
+        {[t(p.era), t(p.by)].filter(Boolean).join(' · ')}
       </Text>
       <View style={st.slotRow}>
         {p.slots.slice(0, 3).map((s) => (

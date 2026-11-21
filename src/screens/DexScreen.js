@@ -9,6 +9,7 @@ import SealButton from '../ui/SealButton';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
+import { pieceName } from '../utils/pieceName';
 import { usePieces, removeWork, giveAway } from '../utils/pieceStore';
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
@@ -31,10 +32,10 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
             <View style={[st.detailImgBox, { borderColor: RARE_COLOR[p.rare] }]}>
               <Image source={p.img} style={[st.detailImg, !owned && st.shadowImg]} resizeMode="contain" />
             </View>
-            <Text style={st.detailName}>{owned ? p.name : t('아직 못 모은 조각')}</Text>
+            <Text style={st.detailName}>{owned ? pieceName(p) : t('아직 못 모은 조각')}</Text>
             {owned ? (
               <>
-                <Text style={st.detailMeta}>{[t(RARITY[p.rare]), t(p.era), p.by, p.no].filter(Boolean).join(' · ')}</Text>
+                <Text style={st.detailMeta}>{[t(RARITY[p.rare]), t(p.era), t(p.by), p.no].filter(Boolean).join(' · ')}</Text>
                 <View style={st.rowWrap}>
                   {p.slots.map((s) => (
                     <View key={s} style={st.slotBig}>
@@ -51,6 +52,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
                   {p.use ? `   ·   ${t('원래 쓰임')}: ${p.use}` : ''}
                   {p.size ? `   ·   ${t('크기')}: ${p.size}cm` : ''}
                 </Text>
+                {p.from ? <Text style={st.fact}>{t('나온 곳')}: {p.from}</Text> : null}
                 {!!p.desc && <Text style={st.desc}>{p.desc}</Text>}
                 <Text style={st.lic}>{t('사진: {a} · 공공누리 제1유형(출처 표시)', { a: p.by })}</Text>
                 <View style={{ gap: 8, marginTop: 12 }}>
@@ -141,6 +143,7 @@ export default function DexScreen({ navigation }) {
       { id: 'palace', icon: '⛩', name: '궁궐 손님', note: '국립고궁박물관 조각 10개 모으기', cur: palace, max: 10 },
       { id: 'works', icon: '⚙', name: '합체 장인', note: '합체 작품 5개 만들기', cur: works, max: 5 },
       { id: 'hundred', icon: '百', name: '백 조각', note: '조각 100개 모으기', cur: mine.length, max: 100 },
+      { id: 'places', icon: '⛰', name: '나들이꾼', note: '서로 다른 고장에서 나온 조각 5곳 모으기', cur: new Set(mine.filter((p) => p.from).map((p) => p.from.split(' - ')[0])).size, max: 5 },
     ];
   }, [store]);
 
@@ -270,7 +273,7 @@ export default function DexScreen({ navigation }) {
                 play('tap');
                 setOpen(p.k);
               }}
-              accessibilityLabel={mine ? p.name : t('아직 못 모은 조각')}
+              accessibilityLabel={mine ? pieceName(p) : t('아직 못 모은 조각')}
             >
               <View style={[st.cellBox, { borderColor: mine ? RARE_COLOR[p.rare] : colors.borderSoft }]}>
                 <Image source={p.img} style={[{ width: cell - 22, height: cell - 22 }, !mine && st.shadowImg]} resizeMode="contain" />
@@ -278,7 +281,7 @@ export default function DexScreen({ navigation }) {
                 {p.only ? <Text style={st.only}>{t('궁궐 한정')}</Text> : null}
               </View>
               <Text style={st.cellName} numberOfLines={1}>
-                {mine ? p.name : '？'}
+                {mine ? pieceName(p) : '？'}
               </Text>
             </Pressable>
           );

@@ -2,6 +2,7 @@
 import { test, expect, openHome } from './helpers.mjs';
 
 test('떠오른 답에 맞춰 재료를 먼저 권하고, 바꿔 고르면 홈에 고른 재료가 보인다', async ({ page }) => {
+  test.setTimeout(180000); // 이야기 영상을 끝까지 본다
   await page.goto('/');
   await page.getByText('동의하고 시작하기').click();
   await page.getByText('농악·풍물', { exact: true }).click();
@@ -22,7 +23,7 @@ test('떠오른 답에 맞춰 재료를 먼저 권하고, 바꿔 고르면 홈�
   await expect(page.getByText('나전', { exact: false }).first()).toBeVisible();
   await page.getByText('무늬 재료로').click();
   await page.getByText('이 재료로 놀기').click();
-  for (let i = 0; i < 300; i += 1) {
+  for (let i = 0; i < 700; i += 1) {
     if (await page.getByText('여섯 개의 판 — 어디부터 가도 돼요').isVisible().catch(() => false)) break;
     const next = page.getByText(/^\s*(다음 장면 ›|\(가만히 있는다\))\s*$/).last();
     if (await next.isVisible().catch(() => false)) await next.click().catch(() => {});

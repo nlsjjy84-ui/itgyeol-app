@@ -24,6 +24,7 @@ test('시작 전 질문: 고른 것과 닿아 있는 예시를 보여 주고, �
 });
 
 test('그림책 프롤로그를 끝까지 넘기면 홈의 여섯 개 판에 닿는다', async ({ page }) => {
+  test.setTimeout(180000); // 이야기 영상을 끝까지 본다
   await page.goto('/');
   await page.getByText('동의하고 시작하기').click();
   await page.getByText('떠오르는 게 없어요 · 예시 보기').click();
@@ -31,7 +32,7 @@ test('그림책 프롤로그를 끝까지 넘기면 홈의 여섯 개 판에 닿
   // 놀이 전에 재료 고르기 — 이번에는 나중에 고른다
   await page.getByText('나중에 고를게요 ›').click();
   // 톡 · 고르기 · 가만히 있기만으로 넘어간다
-  for (let i = 0; i < 300; i += 1) {
+  for (let i = 0; i < 700; i += 1) {
     if (await page.getByText('여섯 개의 판 — 어디부터 가도 돼요').isVisible().catch(() => false)) break;
     const next = page.getByText(/^\s*(다음 장면 ›|\(가만히 있는다\))\s*$/).last();
     if (await next.isVisible().catch(() => false)) await next.click().catch(() => {});

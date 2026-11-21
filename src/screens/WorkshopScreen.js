@@ -10,6 +10,7 @@ import FreeBuilder from '../components/FreeBuilder';
 import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
+import { pieceName } from '../utils/pieceName';
 import { usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
 import { FRAMES, TRANSFORMS, FRAME_BY_ID, SLOT_INFO } from '../data/frames';
@@ -137,7 +138,7 @@ export default function WorkshopScreen({ navigation, route }) {
                     {mode === 'transform' ? t('변형할 유물') : `${(SLOT_INFO[sp.slot] || {}).icon} ${t(sp.slot)}${twin ? ' ×' + frame.slots.filter((o) => o.slot === sp.slot).length : ''}`}
                   </Text>
                   <Text style={st.slotPiece} numberOfLines={1}>
-                    {p ? p.name : t('비어 있음')}
+                    {p ? pieceName(p) : t('비어 있음')}
                   </Text>
                 </View>
                 <Text style={st.change}>{t('바꾸기')}</Text>
@@ -181,7 +182,7 @@ export default function WorkshopScreen({ navigation, route }) {
                     >
                       <Image source={p.img} style={{ width: cell - 16, height: cell - 16 }} resizeMode="contain" />
                       <Text style={st.pickName} numberOfLines={1}>
-                        {p.name}
+                        {pieceName(p)}
                       </Text>
                       {fit && <Text style={st.fit}>{t('딱 맞음')}</Text>}
                     </Pressable>

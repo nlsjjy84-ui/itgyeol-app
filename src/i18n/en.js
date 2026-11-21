@@ -4,6 +4,16 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "나온 곳": "Found at",
+  "나들이꾼": "Explorer",
+  "서로 다른 고장에서 나온 조각 5곳 모으기": "Collect pieces found in 5 different places",
+  "국립중앙박물관": "National Museum of Korea",
+  "국립고궁박물관": "National Palace Museum of Korea",
+  "경주": "Gyeongju",
+  "부여": "Buyeo",
+  "공주": "Gongju",
+  "김해": "Gimhae",
+  "청주": "Cheongju",
   "{a} 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.": "{a} sent you an artifact piece! Open the bundle.",
   "① 점선을 따라 오려요  ② 회색 날개에 풀칠해요  ③ 번호 순서대로 완성 그림처럼 붙여요": "① Cut along the dotted lines  ② Glue the gray tabs  ③ Stick them in number order like the finished picture",
   "겹친 조각 친구에게 선물하기 (×{n})": "Gift a duplicate to a friend (×{n})",
