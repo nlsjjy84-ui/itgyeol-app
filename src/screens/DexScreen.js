@@ -10,7 +10,7 @@ import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { usePieces, removeWork, giveAway } from '../utils/pieceStore';
+import { usePieces, removeWork, giveAway, currentSeries, dailyState } from '../utils/pieceStore';
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
@@ -153,6 +153,12 @@ export default function DexScreen({ navigation }) {
       { id: 'works', icon: '⚙', name: '합체 장인', note: '합체 작품 5개 만들기', cur: works, max: 5 },
       { id: 'hundred', icon: '百', name: '백 조각', note: '조각 100개 모으기', cur: mine.length, max: 100 },
       { id: 'abroad', icon: '✈', name: '먼 길 온 유물', note: '바다 건너 해외 박물관에 있는 우리 유물 조각 5개 모으기', cur: mine.filter((p) => p.abroad).length, max: 5 },
+      (() => {
+        const se = currentSeries();
+        return { id: 'series', icon: '月', name: '이달의 시리즈', note: t('「{a}」 조각 {n}개 모으기', { a: t(se.name), n: Math.min(20, se.pool.length) }), raw: true, cur: se.pool.filter((p) => owned[p.k]).length, max: Math.min(20, se.pool.length) };
+      })(),
+      { id: 'scan', icon: '⌕', name: '진짜 유물 탐정', note: '박물관에서 소장품번호로 진짜 유물 3개 찾기', cur: (store.claimed || []).filter((c) => String(c).startsWith('scan:')).length, max: 3 },
+      { id: 'streak', icon: '◔', name: '이어 오기', note: '오늘의 보따리를 7일 이어 받기', cur: dailyState().streak, max: 7 },
       { id: 'places', icon: '⛰', name: '나들이꾼', note: '서로 다른 고장에서 나온 조각 5곳 모으기', cur: new Set(mine.filter((p) => p.from).map((p) => p.from.split(' - ')[0])).size, max: 5 },
     ];
   }, [store]);
@@ -171,7 +177,7 @@ export default function DexScreen({ navigation }) {
               <Text style={[st.goalIc, done && { color: '#fff' }]}>{g.icon}</Text>
               <Text style={[st.goalName, done && { color: '#fff' }]}>{t(g.name)}</Text>
               <Text style={[st.goalNote, done && { color: '#ffffffcc' }]} numberOfLines={2}>
-                {t(g.note)}
+                {g.raw ? g.note : t(g.note)}
               </Text>
               <View style={st.goalBar}>
                 <View style={[st.goalFill, { width: `${Math.min(100, (g.cur / g.max) * 100)}%` }]} />

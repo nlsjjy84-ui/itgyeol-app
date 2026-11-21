@@ -4,6 +4,11 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "「{a}」 조각 {n}개 모으기": "Collect {n} pieces of '{a}'",
+  "진짜 유물 탐정": "Real-artifact detective",
+  "박물관에서 소장품번호로 진짜 유물 3개 찾기": "Find 3 real artifacts by collection number at the museum",
+  "이어 오기": "Keep it going",
+  "오늘의 보따리를 7일 이어 받기": "Get today's bundle 7 days in a row",
   "가운데 구멍 뚫린 네모 연. 긴 꼬리 줄이 바람에 너울댄다.": "A square kite with a hole in the middle. Its long tail ribbons ripple in the wind.",
   "갑옷을 입고 박물관의 밤을 지키는 기사가 되었어": "put on the armor and became the knight who guards the museum at night",
   "같은 유물 넷이 위아래 두 쌍의 날개가 되고, 하나가 몸통이 된다.": "Four copies become two pairs of wings, top and bottom, and one becomes the body.",
