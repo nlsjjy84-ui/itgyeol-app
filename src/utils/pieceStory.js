@@ -95,6 +95,14 @@ const SIZE = [
   [9999, '어른 키'],
 ];
 
+// 쓰임 한 줄(수수께끼용) — 맞는 낱말이 없으면 null
+export function useOf(p) {
+  if (!p) return null;
+  const name = String(p.name || '').replace(/\(.*?\)/g, '');
+  const hit = USE.find(([k]) => (k.length === 1 ? name.trim().endsWith(k) : new RegExp(k + '(?!\\s?(무늬|모양))').test(name)));
+  return hit ? { key: hit[0], what: hit[1] } : null;
+}
+
 export function pieceStory(p) {
   if (!p) return [];
   const out = [];

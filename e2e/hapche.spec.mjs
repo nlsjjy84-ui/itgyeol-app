@@ -185,3 +185,20 @@ test('유물 합체: 도감 조각을 열면 풍이가 쓰임·크기·있는 �
   await expect(page.getByText('길이는 7.3cm — 어른 손바닥만 해.')).toBeVisible();
   await expect(page.getByText('진짜는 국립중앙박물관에 있어. 가서 직접 찾아봐!')).toBeVisible();
 });
+
+test('유물 합체: 유물 수수께끼를 풀면 조각을 얻거나 정답을 알려 준다', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_42506: 1 }, order: ['nmk_42506'], works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  });
+  await openHome(page);
+  await page.getByText('유물 수수께끼 — 맞히면 조각을 가져요').filter({ visible: true }).first().click();
+  await expect(page.getByTestId('riddle-q')).toBeVisible();
+  await expect(page.getByText(/오늘 남은 문제 5개/)).toBeVisible();
+  await page.getByTestId('riddle-opt-0').click();
+  await expect(page.getByText(/맞았어요! 얼쑤!|아쉬워요. 정답은 \d번이에요./)).toBeVisible();
+  await expect(page.getByText(/오늘 남은 문제 4개/)).toBeVisible();
+  await page.getByText('다음 수수께끼').click();
+  await expect(page.getByTestId('riddle-q')).toBeVisible();
+});

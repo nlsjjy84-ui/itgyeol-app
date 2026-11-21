@@ -4,6 +4,19 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "유물 수수께끼": "Artifact riddles",
+  "옛날에 어디에 쓰던 물건일까? 맞히면 그 조각을 가져요.": "What was it used for long ago? Guess right and the piece is yours.",
+  "오늘 남은 문제 {n}개 · 지금까지 맞힌 문제 {m}개": "{n} riddles left today · {m} solved so far",
+  "이 가운데 「{a}」은(는) 어느 것일까?": "Which of these is the {a}?",
+  "{n}번": "No. {n}",
+  "맞았어요! 얼쑤!": "Correct! Eolssu!",
+  "아쉬워요. 정답은 {n}번이에요.": "So close. The answer is No. {n}.",
+  "새 조각 「{a}」이(가) 도감에 들어갔어요.": "The new piece '{a}' went into your collection.",
+  "이미 가진 조각이라 한 개 더 겹쳤어요. 겹친 조각은 친구와 바꿀 수 있어요.": "You already had it, so now you have a duplicate. Duplicates can be swapped with friends.",
+  "「{a}」였어요. 도감에서 풍이의 설명을 더 들어 봐요.": "It was '{a}'. Hear more from Pung in the collection.",
+  "다음 수수께끼": "Next riddle",
+  "오늘 수수께끼는 다 풀었어요. 내일 또 만나요!": "You've solved today's riddles. See you tomorrow!",
+  "유물 수수께끼 — 맞히면 조각을 가져요": "Artifact riddles — guess right, get the piece",
   "풍이의 설명": "Pung's notes",
   "{a} 시대에 만든 유물이야.": "An artifact made in the {a} period.",
   "길이는 {n}cm — {a}만 해.": "It's {n} cm long — about the size of {a}.",

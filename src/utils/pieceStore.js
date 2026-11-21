@@ -208,6 +208,23 @@ export function findByNo(text) {
   return (NO_INDEX[q] || []).slice(0, 3);
 }
 
+// 유물 수수께끼 — 하루 5문제까지, 맞히면 그 조각을 갖는다
+export function riddleState() {
+  const r = (state && state.riddle) || { day: '', n: 0, right: 0 };
+  const today = dayStr();
+  return r.day === today ? { ...r, left: Math.max(0, 5 - r.n) } : { day: today, n: 0, right: r.right || 0, left: 5 };
+}
+export function answerRiddle(k, ok) {
+  if (!state) state = { ...EMPTY };
+  const r = riddleState();
+  if (!r.left) return { fresh: [] };
+  const fresh = ok ? addPieces([k]) : [];
+  state = { ...state, riddle: { day: r.day, n: r.n + 1, right: (r.right || 0) + (ok ? 1 : 0) } };
+  persist();
+  emit();
+  return { fresh };
+}
+
 export function saveWork(work) {
   if (!state) state = { ...EMPTY };
   const w = { ...work, id: work.id || 'W' + Date.now().toString(36), at: Date.now() };
