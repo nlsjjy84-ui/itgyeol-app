@@ -50,7 +50,7 @@ export const STEPS = {
   play: { route: 'Play', who: 'pung', say: '전래놀이 하나만 짧게 해 보자! 놀이마다 손 동작이 다 달라. 마음에 드는 걸 골라 봐.' },
   result: { route: 'Result', who: 'gyeol', say: '놀이한 기록이 작품 모양을 빚었어. 손가락으로 돌려 봐! 같은 기록이면 같은 작품, 다른 놀이면 다른 모양이야.' },
   gallery: { route: 'Gallery', who: 'pung', say: '다른 사람들이 가져간 예시 작품 450점이야. 똑같은 게 하나도 없지?' },
-  archive: { route: 'Archive', who: 'gyeol', say: '작품의 바탕이 된 실제 유물 121점이야. 이름·시대·재료는 박물관 기록에서만 가져왔어.' },
+  archive: { route: 'Archive', who: 'gyeol', say: '작품의 바탕이 된 실제 유물 345점이야. 이름·시대·재료는 박물관 기록에서만 가져왔어.' },
   jinbeop: { route: 'Jinbeop', who: 'pung', say: '풍물 진풀이·강강술래·학익진 같은 대형을 만드는 판이야. 누가 어느 자리에 섰는지까지 작품에 남아.' },
   print: { route: 'Print', who: 'gyeol', say: '자음·모음을 짓고 활자로 새겨 찍는 판이야. 훈민정음과 금속활자를 한 판에 담았어.' },
   hangul: { route: 'Hangul', who: 'gyeol', say: '자음·모음 블록을 쌓아 줄을 지우는 한글 테트리스야. 블록을 돌리면 모음도 바뀌어.' },
@@ -64,7 +64,7 @@ export const STEPS = {
   jMaterials: { route: 'Materials', who: 'pung', say: '재료 35가지마다 실물 사진에서 색·거칠기·광택을 정했어. 재료가 기법(상감·청화·나전)을 정해.' },
   jMaker: { route: 'Maker', who: 'gyeol', say: '업체 화면이야. 결제가 끝난 주문이 제작 사양서와 함께 들어오고, 서버로 손님 폰·키오스크와 이어져.' },
   jWall: { route: 'ExhibitWall', who: 'pung', say: '전시 벽이야. 다른 기기에서 전시를 신청한 작품도 서버를 거쳐 여기 같이 걸려.' },
-  jArchive: { route: 'Archive', who: 'gyeol', say: '실제 유물 121점과 출처야. 사실(박물관 기록)과 해석(짝짓기)을 나눠서 보여 줘.' },
+  jArchive: { route: 'Archive', who: 'gyeol', say: '실제 유물 345점과 출처야. 사실(박물관 기록)과 해석(짝짓기)을 나눠서 보여 줘.' },
 };
 
 export const COURSES = {

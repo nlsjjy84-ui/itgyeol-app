@@ -41,14 +41,14 @@ test('그림책 프롤로그를 끝까지 넘기면 홈의 여섯 개 판에 닿
   await expect(page.getByText('판은 여섯 곳이야', { exact: false }).first()).toBeVisible();
 });
 
-test('홈: 판 여섯 개와 숫자(놀이 17가지·자료 121점·4개 언어)가 맞다', async ({ page }) => {
+test('홈: 판 여섯 개와 숫자(놀이 17가지·자료 345점·4개 언어)가 맞다', async ({ page }) => {
   await openHome(page);
   for (const n of ['진법', '훈민정음 · 인쇄', '전래놀이', '한글 테트리스', '탈춤 · 가면극', '단청 · 전통 문양']) {
     await expect(page.getByText(n, { exact: true }).first()).toBeVisible();
   }
   await expect(page.getByText('손끝으로 만나는 여섯 가지 전통', { exact: false })).toBeVisible();
   await expect(page.getByText('17가지')).toBeVisible();
-  await expect(page.getByText('121점').first()).toBeVisible();
+  await expect(page.getByText('345점').first()).toBeVisible();
   await expect(page.getByText('똑같은 작품 0점')).toBeVisible();
   // 판이 여섯인데 예전 숫자(네 개·네 곳)가 남아 있으면 안 된다
   await expect(page.getByText(/네 개의 판|네 가지 전통|판은 네 곳/)).toHaveCount(0);
@@ -61,8 +61,8 @@ test('3분 둘러보기 ②: 예시 작품 450점으로 바로 간다', async ({
   await expect(page.getByText('예시 둘러보기', { exact: true }).filter({ visible: true })).toBeVisible();
 });
 
-test('3분 둘러보기 ③: 전통 자료실 121점으로 바로 간다', async ({ page }) => {
+test('3분 둘러보기 ③: 전통 자료실 345점으로 바로 간다', async ({ page }) => {
   await openHome(page);
-  await page.getByText('작품의 바탕이 된 실제 유물 121점').filter({ visible: true }).first().click({ timeout: 15000 });
-  await expect(page.getByText('창작의 바탕이 되는 실제 전통 121점')).toBeVisible();
+  await page.getByText('작품의 바탕이 된 실제 유물 345점').filter({ visible: true }).first().click({ timeout: 15000 });
+  await expect(page.getByText('창작의 바탕이 되는 실제 전통 345점')).toBeVisible();
 });

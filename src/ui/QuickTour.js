@@ -26,7 +26,7 @@ export function QuickTourCard({ navigation, onClose }) {
   const steps = [
     { n: '1', title: t('놀이 한 판'), sub: t('전래놀이 하나를 짧게 해 봐요'), go: () => navigation.navigate('Play') },
     { n: '2', title: t('예시 작품'), sub: t('가상의 놀이 기록으로 빚은 예시 450점'), go: () => navigation.navigate('Gallery') },
-    { n: '3', title: t('전통 자료실'), sub: t('작품의 바탕이 된 실제 유물 121점'), go: () => navigation.navigate('Archive') },
+    { n: '3', title: t('전통 자료실'), sub: t('작품의 바탕이 된 실제 유물 345점'), go: () => navigation.navigate('Archive') },
   ];
   return (
     <View style={st.card}>

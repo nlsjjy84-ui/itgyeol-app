@@ -57,7 +57,7 @@ const ui = {
   "박물관 키오스크 화면이야. QR을 찍으면 줄 서지 않고 내 폰으로 이어서 할 수 있어.": "This is the museum kiosk. Scan the QR to keep playing on your own phone—no waiting in line.",
   "북이 덩! 울릴 때 한삼을 휙 뿌리는 탈춤 판이야. 장단이 점점 빨라져. 얼쑤!": "Fling your long sleeves when the drum goes DEONG! This is the mask-dance board—the rhythm keeps speeding up. Eolssu!",
   "시작 질문": "Starting question",
-  "실제 유물 121점과 출처야. 사실(박물관 기록)과 해석(짝짓기)을 나눠서 보여 줘.": "121 real artifacts with sources. Facts (museum records) and interpretation (pairings) are shown separately.",
+  "실제 유물 345점과 출처야. 사실(박물관 기록)과 해석(짝짓기)을 나눠서 보여 줘.": "345 real artifacts with sources. Facts (museum records) and interpretation (pairings) are shown separately.",
   "안내 끝내기": "End the tour",
   "안내 닫기": "Close the guide",
   "안내 접기": "Fold the guide",
@@ -72,7 +72,7 @@ const ui = {
   "잇결 길 안내": "Itgyeol guide",
   "자음·모음 블록을 쌓아 줄을 지우는 한글 테트리스야. 블록을 돌리면 모음도 바뀌어.": "Hangul Tetris: stack consonant and vowel blocks to clear lines. Rotate a block and its vowel changes too.",
   "자음·모음을 짓고 활자로 새겨 찍는 판이야. 훈민정음과 금속활자를 한 판에 담았어.": "Build letters from consonants and vowels, then carve and print them as type—Hunminjeongeum and metal type in one board.",
-  "작품의 바탕이 된 실제 유물 121점이야. 이름·시대·재료는 박물관 기록에서만 가져왔어.": "121 real artifacts behind the works. Names, periods and materials come only from museum records.",
+  "작품의 바탕이 된 실제 유물 345점이야. 이름·시대·재료는 박물관 기록에서만 가져왔어.": "345 real artifacts behind the works. Names, periods and materials come only from museum records.",
   "재료 35가지마다 실물 사진에서 색·거칠기·광택을 정했어. 재료가 기법(상감·청화·나전)을 정해.": "Each of the 35 materials takes its color, roughness and gloss from real photos. The material decides the technique (inlay, cobalt blue, mother-of-pearl).",
   "전래놀이 판": "Folk-games board",
   "전래놀이 하나만 짧게 해 보자! 놀이마다 손 동작이 다 달라. 마음에 드는 걸 골라 봐.": "Let's play one folk game quickly! Every game uses a different hand move. Pick one you like.",
@@ -1603,7 +1603,7 @@ const ui = {
   "전래놀이 하나를 짧게 해 봐요": "Try one traditional game — it's short",
   "예시 작품": "Sample works",
   "가상의 놀이 기록으로 빚은 예시 450점": "450 samples shaped from imaginary play records",
-  "작품의 바탕이 된 실제 유물 121점": "121 real heritage objects behind the works",
+  "작품의 바탕이 된 실제 유물 345점": "345 real heritage objects behind the works",
   "다 보고 나면 아래 여섯 개의 판에서 마음대로 골라 놀아요.": "After that, pick any of the six boards below and play as you like.",
 };
 
