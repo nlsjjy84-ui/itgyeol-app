@@ -4,6 +4,15 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "답례 조각을 보낼 준비가 됐어요": "Your return piece is ready to send",
+  "이 QR이나 링크를 {a} 님에게 보내면 「{b}」 조각이 건너가요.": "Send this QR or link to {a} and the '{b}' piece goes to them.",
+  "이 QR이나 링크를 친구에게 보내면 「{b}」 조각이 건너가요.": "Send this QR or link to your friend and the '{b}' piece goes to them.",
+  "{a} 님이 조각을 바꾸자고 했어요": "{a} wants to swap pieces",
+  "친구가 조각을 바꾸자고 했어요": "A friend wants to swap pieces",
+  "내 겹친 조각 가운데 하나를 골라 답례로 보내요.": "Pick one of your duplicate pieces to send back.",
+  "답례로 보내기": "Send back",
+  "아직 겹친 조각이 없어요. 보따리를 더 풀어 겹친 조각이 생기면 도감에서 답례를 보낼 수 있어요.": "No duplicates yet. Open more bundles; once you have a duplicate you can send one back from the collection.",
+  "친구와 조각 바꾸기 (답례 받기)": "Swap with a friend (get one back)",
   "빠진 {n}일은 쉼표 부적이 지켜 줬어요.": "The {n} missed day(s) were kept safe by a rest charm.",
   "쉼표 부적 하나를 받았어요!": "You got a rest charm!",
   "{n}일째 이어 오는 중": "{n}-day streak",

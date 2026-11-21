@@ -141,3 +141,23 @@ test('유물 합체: 하루 빠져도 쉼표 부적이 이어 오기를 지켜 �
   await expect(page.getByText(/빠진 1일은 쉼표 부적이 지켜 줬어요/)).toBeVisible();
   await expect(page.getByText(/쉼표 부적 하나를 받았어요/)).toBeVisible();
 });
+
+test('유물 합체: 바꾸자 링크(?x=1)로 받으면 내 겹친 조각을 답례로 보낸다', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_112600: 2, nmk_26363: 1 }, order: ['nmk_112600', 'nmk_26363'], works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  });
+  await page.goto('/?g=n42506&x=1&n=' + encodeURIComponent('풍이'));
+  const msg = page.getByText('풍이 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.');
+  for (let i = 0; i < 40 && !(await msg.isVisible().catch(() => false)); i += 1) {
+    const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+    if (await agree.count()) await agree.first().click().catch(() => {});
+    else await page.waitForTimeout(250);
+  }
+  await page.getByLabel('보따리 풀기').click();
+  await expect(page.getByText('풍이 님이 조각을 바꾸자고 했어요')).toBeVisible();
+  await page.getByTestId('swap-nmk_112600').click();
+  await expect(page.getByText('답례 조각을 보낼 준비가 됐어요')).toBeVisible();
+  await expect(page.getByText(/풍이 님에게 보내면 「인장」 조각이 건너가요/)).toBeVisible();
+});

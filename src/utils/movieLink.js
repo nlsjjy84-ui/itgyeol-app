@@ -61,8 +61,9 @@ export function readMovieParam() {
 }
 
 // 조각 선물 링크 — 겹친 조각 하나를 친구에게 보낸다(?g=조각&n=보내는 사람 별명)
-export function giftUrl(k, nick = '') {
-  return `${SITE_URL}?g=${short(k)}${nick ? '&n=' + encodeURIComponent(nick.slice(0, 12)) : ''}`;
+// swap=true면 「바꾸자」 링크 — 받은 친구가 자기 겹친 조각 하나를 답례로 골라 되돌려 보낸다.
+export function giftUrl(k, nick = '', swap = false) {
+  return `${SITE_URL}?g=${short(k)}${nick ? '&n=' + encodeURIComponent(nick.slice(0, 12)) : ''}${swap ? '&x=1' : ''}`;
 }
 export function readGiftParam() {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
@@ -70,7 +71,7 @@ export function readGiftParam() {
     const q = new URLSearchParams(window.location.search);
     const g = q.get('g');
     if (!g || !PIECE_BY_K[long(g)]) return null;
-    return { gift: long(g), from: (q.get('n') || '').slice(0, 12) };
+    return { gift: long(g), from: (q.get('n') || '').slice(0, 12), swap: q.get('x') === '1' };
   } catch (e) {
     return null;
   }

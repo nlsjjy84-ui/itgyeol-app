@@ -130,6 +130,13 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
       setTimeout(onFinish, 700);
     }
   };
+  // 「다음 장면 ›」 — 한 줄이 아니라 이 장면을 건너뛴다(고를 것이 있으면 고르는 자리로)
+  const skipScene = () => {
+    if (stage.kind === 'lines' && input) {
+      setStage({ kind: 'wait', i: 0 });
+      setLineStart(now);
+    } else if (stage.kind === 'lines' || stage.kind === 'react') nextPage();
+  };
   const pick = (id) => {
     if (stage.kind !== 'wait') return;
     play('clank');
@@ -242,7 +249,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
         <Pressable onPress={() => setPaused(!paused)} style={st.btn} accessibilityLabel={paused ? t('재생') : t('일시정지')}>
           <Text style={st.btnTxt}>{paused ? t('▶ 재생') : t('❚❚ 일시정지')}</Text>
         </Pressable>
-        <Pressable onPress={() => stage.kind !== 'wait' && next(true)} style={st.btn}>
+        <Pressable onPress={() => stage.kind !== 'wait' && skipScene()} style={st.btn}>
           <Text style={st.btnTxt}>{t('다음 장면 ›')}</Text>
         </Pressable>
       </View>

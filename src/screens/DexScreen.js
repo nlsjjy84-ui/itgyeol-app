@@ -60,6 +60,15 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
                   <SealButton label={t('박물관 원본 페이지 열기')} variant="paper" onPress={() => Linking.openURL(p.page)} />
                   {count > 1 && !gift ? (
                     <SealButton
+                      label={t('친구와 조각 바꾸기 (답례 받기)')}
+                      variant="paper"
+                      onPress={() => {
+                        if (giveAway(k)) setGift(giftUrl(k, '', true));
+                      }}
+                    />
+                  ) : null}
+                  {count > 1 && !gift ? (
+                    <SealButton
                       label={t('겹친 조각 친구에게 선물하기 (×{n})', { n: count })}
                       variant="ink"
                       onPress={() => {

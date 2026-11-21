@@ -9,8 +9,10 @@ import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, findByNo, dailyState, takeDaily, currentSeries } from '../utils/pieceStore';
+import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, findByNo, giveAway, dailyState, takeDaily, currentSeries } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
+import { giftUrl } from '../utils/movieLink';
+import QRCode from 'react-native-qrcode-svg';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 
@@ -58,6 +60,7 @@ export default function PackScreen({ navigation, route }) {
   const gift = (route.params && route.params.gift) || '';
   const daily = !!(route.params && route.params.daily);
   const from = (route.params && route.params.from) || '';
+  const swap = !!(route.params && route.params.swap);
   const [opened, setOpened] = useState(null); // {keys, fresh, starter}
   const [code, setCode] = useState('');
   const [codeMsg, setCodeMsg] = useState('');
@@ -219,6 +222,7 @@ export default function PackScreen({ navigation, route }) {
                 <Card key={k + i} k={k} delay={250 + i * 380} fresh={opened.fresh.includes(k)} size={cardW} secret={!!currentSeries().secret && currentSeries().secret.k === k} />
               ))}
             </View>
+            {opened.gift && swap && !opened.already ? <SwapBack got={opened.keys[0]} owned={store.owned || {}} from={from} /> : null}
             <Text style={st.small}>{t('지금 모은 조각 {n}개', { n: ownedN })}</Text>
             <View style={st.btns}>
               <SealButton label={t('작업대에서 합체하기')} onPress={() => navigation.navigate('Workshop')} />
@@ -232,7 +236,57 @@ export default function PackScreen({ navigation, route }) {
   );
 }
 
+// 바꾸기 답례 — 「바꾸자」 링크로 조각을 받은 친구가 자기 겹친 조각 하나를 골라 되돌려 보낸다
+function SwapBack({ got, owned, from }) {
+  const [back, setBack] = useState(null);
+  const dups = Object.keys(owned).filter((k) => owned[k] > 1 && k !== got && PIECE_BY_K[k]).slice(0, 12);
+  if (back) {
+    return (
+      <View style={st.swap}>
+        <Text style={st.swapH}>{t('답례 조각을 보낼 준비가 됐어요')}</Text>
+        <View style={{ padding: 6, backgroundColor: '#fff', borderRadius: 8, alignSelf: 'center' }}>
+          <QRCode value={back.url} size={120} />
+        </View>
+        <Text style={st.small}>{from ? t('이 QR이나 링크를 {a} 님에게 보내면 「{b}」 조각이 건너가요.', { a: from, b: pieceName(PIECE_BY_K[back.k]) }) : t('이 QR이나 링크를 친구에게 보내면 「{b}」 조각이 건너가요.', { b: pieceName(PIECE_BY_K[back.k]) })}</Text>
+        {typeof navigator !== 'undefined' && navigator.clipboard ? <SealButton small variant="paper" label={t('링크 복사')} onPress={() => navigator.clipboard.writeText(back.url)} /> : null}
+      </View>
+    );
+  }
+  return (
+    <View style={st.swap}>
+      <Text style={st.swapH}>{from ? t('{a} 님이 조각을 바꾸자고 했어요', { a: from }) : t('친구가 조각을 바꾸자고 했어요')}</Text>
+      {dups.length ? (
+        <>
+          <Text style={st.small}>{t('내 겹친 조각 가운데 하나를 골라 답례로 보내요.')}</Text>
+          <View style={st.grid}>
+            {dups.map((k) => (
+              <Pressable
+                key={k}
+                testID={'swap-' + k}
+                accessibilityLabel={t('답례로 보내기') + ' ' + pieceName(PIECE_BY_K[k])}
+                onPress={() => {
+                  if (giveAway(k)) setBack({ k, url: giftUrl(k) });
+                }}
+                style={st.swapCell}
+              >
+                <Image source={PIECE_BY_K[k].img} style={{ width: 64, height: 64 }} resizeMode="contain" />
+                <Text style={st.swapName} numberOfLines={2}>{pieceName(PIECE_BY_K[k])}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      ) : (
+        <Text style={st.small}>{t('아직 겹친 조각이 없어요. 보따리를 더 풀어 겹친 조각이 생기면 도감에서 답례를 보낼 수 있어요.')}</Text>
+      )}
+    </View>
+  );
+}
+
 const st = StyleSheet.create({
+  swap: { marginTop: 14, backgroundColor: '#f6f2ea', borderRadius: 14, padding: 12, gap: 6 },
+  swapH: { fontSize: 16, fontWeight: '700', color: colors.ink, textAlign: 'center' },
+  swapCell: { width: 84, alignItems: 'center', gap: 2, padding: 4, borderRadius: 10, backgroundColor: colors.paper },
+  swapName: { fontSize: 11, color: colors.ink, textAlign: 'center' },
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 16, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },
   center: { alignItems: 'center', paddingVertical: 20 },
