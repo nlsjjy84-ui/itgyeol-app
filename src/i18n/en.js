@@ -4,6 +4,20 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "풍이의 설명": "Pung's notes",
+  "{a} 시대에 만든 유물이야.": "An artifact made in the {a} period.",
+  "길이는 {n}cm — {a}만 해.": "It's {n} cm long — about the size of {a}.",
+  "땅속에서 찾은 곳은 {a}이야.": "It was dug up in {a}.",
+  "지금은 바다 건너 {a}에 있어.": "Now it is across the sea at the {a}.",
+  "진짜는 {a}에 있어. 가서 직접 찾아봐!": "The real one is at the {a}. Go and find it!",
+  "콩알": "a bean",
+  "엄지손가락": "a thumb",
+  "어른 손바닥": "a grown-up's palm",
+  "연필": "a pencil",
+  "30cm 자": "a 30 cm ruler",
+  "어린이 팔": "a child's arm",
+  "어린이 키의 절반": "half a child's height",
+  "어른 키": "a grown-up's height",
   "「{a}」 조각 {n}개 모으기": "Collect {n} pieces of '{a}'",
   "진짜 유물 탐정": "Real-artifact detective",
   "박물관에서 소장품번호로 진짜 유물 3개 찾기": "Find 3 real artifacts by collection number at the museum",

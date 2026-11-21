@@ -10,6 +10,7 @@ import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
+import { pieceStory } from '../utils/pieceStory';
 import { usePieces, removeWork, giveAway, currentSeries, dailyState } from '../utils/pieceStore';
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
@@ -54,6 +55,14 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
                 </Text>
                 {p.from ? <Text style={st.fact}>{t('나온 곳')}: {p.from}</Text> : null}
                 {!!p.desc && <Text style={st.desc}>{p.desc}</Text>}
+                <View style={st.story} testID="piece-story">
+                  <Text style={st.storyWho}>{t('풍이의 설명')}</Text>
+                  {pieceStory(p).map((l, i) => (
+                    <Text key={i} style={st.storyLine}>
+                      {l}
+                    </Text>
+                  ))}
+                </View>
                 <Text style={st.lic}>{p.abroad ? t('사진: {a} · CC0(누구나 자유롭게 쓸 수 있음) · 해외에 있는 우리 유물', { a: t(p.by) }) : t('사진: {a} · 공공누리 제1유형(출처 표시)', { a: t(p.by) })}</Text>
                 <View style={{ gap: 8, marginTop: 12 }}>
                   {onTransform && <SealButton label={t('이 조각 하나로 변형하기')} onPress={() => onTransform(k)} />}
@@ -321,6 +330,9 @@ export default function DexScreen({ navigation }) {
 }
 
 const st = StyleSheet.create({
+  story: { marginTop: 10, backgroundColor: '#fbf3e2', borderRadius: 12, padding: 10, gap: 3, borderLeftWidth: 4, borderLeftColor: '#b9781a' },
+  storyWho: { fontSize: 12, fontWeight: '700', color: '#b9781a' },
+  storyLine: { fontSize: 14, color: '#1b2227', lineHeight: 21 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 16, paddingBottom: 60, maxWidth: 900, width: '100%', alignSelf: 'center' },
   progress: { height: 8, borderRadius: 4, backgroundColor: colors.borderSoft, overflow: 'hidden', marginTop: 4 },

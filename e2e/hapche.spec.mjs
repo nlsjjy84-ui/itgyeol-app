@@ -169,3 +169,19 @@ test('유물 합체: 바꾸자 링크(?x=1)로 받으면 내 겹친 조각을 �
   await expect(page.getByText('답례 조각을 보낼 준비가 됐어요')).toBeVisible();
   await expect(page.getByText(/풍이 님에게 보내면 「인장」 조각이 건너가요/)).toBeVisible();
 });
+
+test('유물 합체: 도감 조각을 열면 풍이가 쓰임·크기·있는 곳을 알려 준다', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_42506: 1 }, order: ['nmk_42506'], works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  });
+  await openHome(page);
+  await page.getByText('조각 도감', { exact: true }).filter({ visible: true }).first().click();
+  await page.getByLabel('백자청화동채복숭아형연적').first().click();
+  await expect(page.getByTestId('piece-story')).toBeVisible();
+  await expect(page.getByText('먹을 갈 때 벼루에 물을 한 방울씩 떨어뜨리던 작은 물병이야.')).toBeVisible();
+  await expect(page.getByText('조선 사람들이 썼어.')).toBeVisible();
+  await expect(page.getByText('길이는 7.3cm — 어른 손바닥만 해.')).toBeVisible();
+  await expect(page.getByText('진짜는 국립중앙박물관에 있어. 가서 직접 찾아봐!')).toBeVisible();
+});
