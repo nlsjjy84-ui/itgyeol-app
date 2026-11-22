@@ -161,7 +161,7 @@ test('나의 박물관: 진열장의 유물을 누르면 쓰임·뜻에서 나�
   await page.getByTestId('vitrine-nmk_4220').click();
   await expect(page.getByTestId('craft-ideas')).toBeVisible();
   await expect(page.getByTestId('craft-ideas').getByText('한 방울 디퓨저', { exact: true })).toBeVisible();
-  await expect(page.getByTestId('craft-ideas').getByText(/먹을 갈 때 물을 한 방울씩 떨어뜨리던 그릇이라/)).toBeVisible();
+  await expect(page.getByTestId('craft-ideas').getByText(/같은 구멍으로 향을 조금씩 올려 보내는 디퓨저/)).toBeVisible();
   await expect(page.getByTestId('craft-ideas').getByText(/아기 탄생·돌을 축하할 때/).first()).toBeVisible();
   await page.getByTestId('craft-ideas').getByText('이 물건 내 박물관에 담기', { exact: true }).first().click();
   await expect(page.getByTestId('craft-ideas').getByText('내 물건에 담았어요', { exact: true }).first()).toBeVisible();
