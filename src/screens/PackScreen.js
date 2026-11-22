@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, useWindowDimensions, Animated, Easing, TextInput } from 'react-native';
 import Text from '../ui/Text';
+import { labelLine } from './MuseumScreen';
 import WhyBox from '../ui/WhyBox';
 import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
@@ -67,13 +68,10 @@ function Card({ k, delay, fresh, size, secret }) {
       <Text style={st.cardMeta} numberOfLines={1}>
         {[t(p.era), t(p.by)].filter(Boolean).join(' · ')}
       </Text>
-      <View style={st.slotRow}>
-        {p.slots.slice(0, 3).map((s) => (
-          <Text key={s} style={st.slotChip}>
-            {t(s)}
-          </Text>
-        ))}
-      </View>
+      {/* 유물에 담긴 뜻 한 줄(예전 합체 「자리」 표시 대신) */}
+      <Text style={st.cardMean} numberOfLines={3}>
+        {t(labelLine(p.k))}
+      </Text>
     </Animated.View>
   );
 }
@@ -275,7 +273,8 @@ export default function PackScreen({ navigation, route }) {
             {opened.gift && swap && !opened.already ? <SwapBack got={opened.keys[0]} owned={store.owned || {}} from={from} /> : null}
             <Text style={st.small}>{t('지금 모은 유물 {n}점', { n: ownedN })}</Text>
             <View style={st.btns}>
-              <SealButton label={t('유물 도감 보기')} variant="ink" onPress={() => navigation.navigate('Dex')} />
+              <SealButton label={t('나의 박물관에 전시하기')} onPress={() => navigation.navigate('Museum')} />
+              <SealButton label={t('유물 도감 보기')} variant="paper" style={{ marginTop: 8 }} onPress={() => navigation.navigate('Dex')} />
             </View>
           </View>
         )}
@@ -359,6 +358,7 @@ const st = StyleSheet.create({
   newTxt: { fontSize: 11, color: '#fff', fontWeight: '700', backgroundColor: '#b3322b', paddingHorizontal: 5, borderRadius: 6, overflow: 'hidden' },
   cardName: { fontSize: 13, color: colors.ink, fontWeight: '700', marginTop: 6, lineHeight: 17 },
   cardMeta: { fontSize: 11, color: colors.muted, marginTop: 2 },
+  cardMean: { fontSize: 11, color: '#5f574c', lineHeight: 15, marginTop: 4 },
   slotRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
   slotChip: { fontSize: 10, color: colors.ink, backgroundColor: colors.accentSoft, paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6, overflow: 'hidden' },
   btns: { gap: 10, marginTop: 18 },

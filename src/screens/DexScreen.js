@@ -18,7 +18,7 @@ import { usePieces, giveAway, currentSeries, dailyState } from '../utils/pieceSt
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
-import { SLOT_INFO, SLOT_NAMES } from '../data/frames';
+import { KINDS, kindOf } from '../utils/relicKind';
 import { powerTag } from '../utils/hapche';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
@@ -147,7 +147,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
                 </View>
               </>
             ) : (
-              <Text style={st.desc}>{t('놀이를 마치고 보따리를 풀면 만날 수 있어요. 자리: {a}', { a: p.slots.map((s) => t(s)).join(', ') })}</Text>
+              <Text style={st.desc}>{t('놀이를 마치고 보따리를 풀면 만날 수 있어요.')}</Text>
             )}
             <SealButton label={t('닫기')} variant="ink" onPress={onClose} style={{ marginTop: 10 }} />
           </ScrollView>
@@ -172,7 +172,7 @@ export default function DexScreen({ navigation }) {
   const ownedN = Object.keys(owned).length;
   const list = useMemo(() => {
     let l = PIECES;
-    if (slot) l = l.filter((p) => p.slots.includes(slot));
+    if (slot) l = l.filter((p) => kindOf(p) === slot);
     if (power) l = l.filter((p) => p.power === power);
     if (col) l = l.filter((p) => p.col === col);
     const qq = q.trim().toLowerCase().replace(/\s+/g, '');
@@ -190,44 +190,42 @@ export default function DexScreen({ navigation }) {
   }, [slot, power, col, q, onlyMine, region, store]);
   const cols = width > 700 ? 6 : width > 460 ? 4 : 3;
   const cell = (Math.min(width, 900) - 32) / cols;
+  // 종류별 모은 수(그릇·문방구·꾸미개…)
   const bySlot = useMemo(() => {
     const m = {};
-    SLOT_NAMES.forEach((s) => (m[s] = { all: 0, mine: 0 }));
-    PIECES.forEach((p) =>
-      p.slots.forEach((s) => {
-        if (!m[s]) return;
-        m[s].all++;
-        if (owned[p.k]) m[s].mine++;
-      })
-    );
+    KINDS.forEach((s) => (m[s] = { all: 0, mine: 0 }));
+    PIECES.forEach((p) => {
+      const s = kindOf(p);
+      m[s].all++;
+      if (owned[p.k]) m[s].mine++;
+    });
     return m;
   }, [store]);
 
   // 모음 목표(배지) — 띠부씰 도감처럼, 채울수록 목표가 열린다
   const goals = useMemo(() => {
     const mine = PIECES.filter((p) => owned[p.k]);
-    const slotsHave = new Set(mine.flatMap((p) => p.slots));
     const eras = new Set(mine.map((p) => p.era).filter(Boolean));
     const powers = new Set(mine.map((p) => p.power));
     const veryRare = mine.filter((p) => p.rare === 2).length;
     const palace = mine.filter((p) => p.by === '국립고궁박물관').length;
     const works = (store.works || []).length;
     return [
-      { id: 'eras', icon: '⌛', name: '시간 여행자', note: '서로 다른 시대 6곳의 조각 모으기', cur: eras.size, max: 6 },
+      { id: 'eras', icon: '⌛', name: '시간 여행자', note: '서로 다른 시대 6곳의 유물 모으기', cur: eras.size, max: 6 },
       { id: 'powers', icon: '✦', name: '재료 장인', note: '흙·쇠·돌·옥·나무·천·종이·금·뼈 9가지 재료 모으기', cur: powers.size, max: 9 },
-      { id: 'rare', icon: '★', name: '보물 사냥꾼', note: '「아주 귀함」 조각 3개 모으기', cur: veryRare, max: 3 },
-      { id: 'palace', icon: '⛩', name: '궁궐 손님', note: '국립고궁박물관 조각 10개 모으기', cur: palace, max: 10 },
+      { id: 'rare', icon: '★', name: '보물 사냥꾼', note: '「아주 귀함」 유물 3점 모으기', cur: veryRare, max: 3 },
+      { id: 'palace', icon: '⛩', name: '궁궐 손님', note: '국립고궁박물관 유물 10점 모으기', cur: palace, max: 10 },
       { id: 'crafts', icon: '⚙', name: '물건 장인', note: '유물로 오늘의 물건 5개 만들어 담기', cur: (store.crafts || []).length, max: 5 },
-      { id: 'hundred', icon: '百', name: '백 조각', note: '조각 100개 모으기', cur: mine.length, max: 100 },
-      { id: 'abroad', icon: '✈', name: '먼 길 온 유물', note: '바다 건너 해외 박물관에 있는 우리 유물 조각 5개 모으기', cur: mine.filter((p) => p.abroad).length, max: 5 },
+      { id: 'hundred', icon: '백', name: '유물 백 점', note: '유물 100점 모으기', cur: mine.length, max: 100 },
+      { id: 'abroad', icon: '✈', name: '먼 길 온 유물', note: '바다 건너 해외 박물관에 있는 우리 유물 5점 모으기', cur: mine.filter((p) => p.abroad).length, max: 5 },
       (() => {
         const se = currentSeries();
-        return { id: 'series', icon: '月', name: '이달의 시리즈', note: t('「{a}」 유물 {n}점 모으기', { a: t(se.name), n: Math.min(20, se.pool.length) }), raw: true, cur: se.pool.filter((p) => owned[p.k]).length, max: Math.min(20, se.pool.length) };
+        return { id: 'series', icon: '달', name: '이달의 시리즈', note: t('「{a}」 유물 {n}점 모으기', { a: t(se.name), n: Math.min(20, se.pool.length) }), raw: true, cur: se.pool.filter((p) => owned[p.k]).length, max: Math.min(20, se.pool.length) };
       })(),
       { id: 'scan', icon: '⌕', name: '진짜 유물 탐정', note: '박물관에서 소장품번호로 진짜 유물 3개 찾기', cur: (store.claimed || []).filter((c) => String(c).startsWith('scan:')).length, max: 3 },
       { id: 'streak', icon: '◔', name: '이어 오기', note: '오늘의 보따리를 7일 이어 받기', cur: dailyState().streak, max: 7 },
-      { id: 'colors', icon: '◐', name: '빛깔 모으기', note: '초록·파랑·하양·금빛·빨강·회색·검정 7가지 빛깔 조각 모으기', cur: new Set(mine.map((p) => p.col).filter((c) => c && c !== '갈색')).size, max: 7 },
-      { id: 'places', icon: '⛰', name: '나들이꾼', note: '서로 다른 고장에서 나온 조각 5곳 모으기', cur: new Set(mine.filter((p) => p.from).map((p) => p.from.split(' - ')[0])).size, max: 5 },
+      { id: 'colors', icon: '◐', name: '빛깔 모으기', note: '초록·파랑·하양·금빛·빨강·회색·검정 7가지 빛깔 유물 모으기', cur: new Set(mine.map((p) => p.col).filter((c) => c && c !== '갈색')).size, max: 7 },
+      { id: 'places', icon: '⛰', name: '나들이꾼', note: '서로 다른 고장에서 나온 유물 5곳 모으기', cur: new Set(mine.filter((p) => p.from).map((p) => p.from.split(' - ')[0])).size, max: 5 },
     ];
   }, [store]);
 
@@ -321,12 +319,12 @@ export default function DexScreen({ navigation }) {
           {q.trim() ? <Text style={st.searchCount}>{t('{n}개 찾았어요').replace('{n}', String(list.length))}</Text> : null}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.chips}>
             <Pressable onPress={() => setSlot(null)} style={[st.chip, !slot && st.chipOn]}>
-              <Text style={[st.chipTxt, !slot && st.chipTxtOn]}>{t('모든 자리')}</Text>
+              <Text style={[st.chipTxt, !slot && st.chipTxtOn]}>{t('모든 종류')}</Text>
             </Pressable>
-            {SLOT_NAMES.map((s) => (
+            {KINDS.map((s) => (
               <Pressable key={s} onPress={() => setSlot(slot === s ? null : s)} style={[st.chip, slot === s && st.chipOn]}>
                 <Text style={[st.chipTxt, slot === s && st.chipTxtOn]}>
-                  {SLOT_INFO[s].icon} {t(s)} {bySlot[s].mine}/{bySlot[s].all}
+                  {t(s)} {bySlot[s].mine}/{bySlot[s].all}
                 </Text>
               </Pressable>
             ))}
