@@ -3,7 +3,7 @@ import { test, expect, openHome, carryPath } from './helpers.mjs';
 
 test('유물: 선물 링크(?g=)로 열면 조각을 받는다', async ({ page }) => {
   await page.goto('/?g=n42506&n=' + encodeURIComponent('풍이'));
-  const msg = page.getByText('풍이 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.');
+  const msg = page.getByText('풍이 님이 유물을 선물했어요! 보따리를 풀어 보세요.');
   for (let i = 0; i < 40 && !(await msg.isVisible().catch(() => false)); i += 1) {
     const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
     if (await agree.count()) await agree.first().click().catch(() => {});
@@ -11,7 +11,7 @@ test('유물: 선물 링크(?g=)로 열면 조각을 받는다', async ({ page }
   }
   await expect(msg).toBeVisible();
   await page.getByLabel('보따리 풀기').click();
-  await expect(page.getByText('선물 받은 조각이에요! 도감에 들어갔어요.')).toBeVisible();
+  await expect(page.getByText('선물 받은 유물이에요! 도감에 들어갔어요.')).toBeVisible();
 });
 
 test('유물: 하루 빠져도 쉼표 부적이 이어 오기를 지켜 준다', async ({ page }) => {
@@ -44,17 +44,17 @@ test('유물: 바꾸자 링크(?x=1)로 받으면 내 겹친 조각을 답례로
     localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_112600: 2, nmk_26363: 1 }, order: ['nmk_112600', 'nmk_26363'], works: [], packs: 1, starter: true, codes: [], claimed: [] }));
   });
   await page.goto('/?g=n42506&x=1&n=' + encodeURIComponent('풍이'));
-  const msg = page.getByText('풍이 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.');
+  const msg = page.getByText('풍이 님이 유물을 선물했어요! 보따리를 풀어 보세요.');
   for (let i = 0; i < 40 && !(await msg.isVisible().catch(() => false)); i += 1) {
     const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
     if (await agree.count()) await agree.first().click().catch(() => {});
     else await page.waitForTimeout(250);
   }
   await page.getByLabel('보따리 풀기').click();
-  await expect(page.getByText('풍이 님이 조각을 바꾸자고 했어요')).toBeVisible();
+  await expect(page.getByText('풍이 님이 유물을 바꾸자고 했어요')).toBeVisible();
   await page.getByTestId('swap-nmk_112600').click();
-  await expect(page.getByText('답례 조각을 보낼 준비가 됐어요')).toBeVisible();
-  await expect(page.getByText(/풍이 님에게 보내면 「인장」 조각이 건너가요/)).toBeVisible();
+  await expect(page.getByText('답례 유물을 보낼 준비가 됐어요')).toBeVisible();
+  await expect(page.getByText(/풍이 님에게 보내면 「인장」 유물이 건너가요/)).toBeVisible();
 });
 
 test('유물: 도감 조각을 열면 풍이가 쓰임·크기·있는 곳을 알려 준다', async ({ page }) => {

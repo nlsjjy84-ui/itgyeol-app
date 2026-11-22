@@ -67,7 +67,7 @@ export default function RiddleScreen({ navigation }) {
   return (
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.wrap}>
-        <ScreenHeader title={t('유물 수수께끼')} sub={t('옛날에 어디에 쓰던 물건일까? 맞히면 그 조각을 가져요.')} onBack={() => navigation.goBack()} />
+        <ScreenHeader title={t('유물 수수께끼')} sub={t('옛날에 어디에 쓰던 물건일까? 맞히면 그 유물을 가져요.')} onBack={() => navigation.goBack()} />
         <WhyBox style={{ marginTop: 8 }} text={t('생김새만 보고 옛날 쓰임을 맞혀 보는 곳이에요. 유물을 「예쁜 그림」이 아니라 「누군가 쓰던 물건」으로 보는 눈을 길러요.')} />
         <Text style={st.count}>{t('오늘 남은 문제 {n}개 · 지금까지 맞힌 문제 {m}개', { n: rs.left, m: rs.right || 0 })}</Text>
         {rs.left || picked ? (
@@ -112,7 +112,7 @@ export default function RiddleScreen({ navigation }) {
                   {ok ? t('맞았어요! 얼쑤!') : t('아쉬워요. 정답은 {n}번이에요.', { n: q.opts.findIndex((p) => p.k === q.answer.k) + 1 })}
                 </Text>
                 <Text style={st.small}>
-                  {ok ? (fresh ? t('새 조각 「{a}」이(가) 도감에 들어갔어요.', { a: pieceName(q.answer) }) : t('이미 가진 조각이라 한 개 더 겹쳤어요. 겹친 조각은 친구와 바꿀 수 있어요.')) : t('「{a}」였어요. 도감에서 풍이의 설명을 더 들어 봐요.', { a: pieceName(q.answer) })}
+                  {ok ? (fresh ? t('새 유물 「{a}」이(가) 도감에 들어갔어요.', { a: pieceName(q.answer) }) : t('이미 가진 유물이라 한 점 더 겹쳤어요. 겹친 유물은 친구와 바꿀 수 있어요.')) : t('「{a}」였어요. 도감에서 풍이의 설명을 더 들어 봐요.', { a: pieceName(q.answer) })}
                 </Text>
                 {rs.left ? (
                   <SealButton
@@ -133,7 +133,7 @@ export default function RiddleScreen({ navigation }) {
           <Text style={st.small}>{t('오늘 수수께끼는 다 풀었어요. 내일 또 만나요!')}</Text>
         )}
         <View style={{ gap: 8, marginTop: 18 }}>
-          <SealButton label={t('조각 도감')} variant="ink" onPress={() => navigation.navigate('Dex')} />
+          <SealButton label={t('유물 도감')} variant="ink" onPress={() => navigation.navigate('Dex')} />
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -57,7 +57,7 @@ function Card({ k, delay, fresh, size, secret }) {
     <Animated.View style={[st.card, { width: size, borderColor: RARE_COLOR[p.rare], opacity: flip, transform: [{ scale }, { rotateY: rot }] }]}>
       <View style={[st.rareBand, { backgroundColor: RARE_COLOR[p.rare] }]}>
         <Text style={st.rareTxt}>{t(RARITY[p.rare])}</Text>
-        {fresh && <Text style={st.newTxt}>{t('새 조각!')}</Text>}
+        {fresh && <Text style={st.newTxt}>{t('새 유물!')}</Text>}
         {secret && <Text style={st.newTxt}>{t('시크릿!')}</Text>}
       </View>
       <Image source={p.img} style={{ width: size - 16, height: size - 16, alignSelf: 'center' }} resizeMode="contain" />
@@ -97,7 +97,7 @@ export default function PackScreen({ navigation, route }) {
     await loadPieces();
     const ks = findByNo(typeof q === 'string' ? q : no);
     if (!ks.length) {
-      setNoMsg(t('그 번호의 조각은 아직 잇결에 없어요. 번호를 다시 확인해 주세요.'));
+      setNoMsg(t('그 번호의 유물은 아직 잇결에 없어요. 번호를 다시 확인해 주세요.'));
       return;
     }
     const key = 'scan:' + ks.join(',');
@@ -115,7 +115,7 @@ export default function PackScreen({ navigation, route }) {
   useEffect(() => {
     if (qr.museum) {
       const c = enterCode(qr.museum);
-      if (c) setCodeMsg(t('「{a}」에 오신 걸 환영해요! 이곳 한정 조각이 열렸고, 이 고장 유물이 보따리에 더 잘 나와요.', { a: t(c) }));
+      if (c) setCodeMsg(t('「{a}」에 오신 걸 환영해요! 이곳 한정 유물이 열렸고, 이 고장 유물이 보따리에 더 잘 나와요.', { a: t(c) }));
     }
     if (qr.no) {
       setNo(qr.no);
@@ -188,8 +188,8 @@ export default function PackScreen({ navigation, route }) {
             <Text style={st.lead}>
               {gift
                 ? from
-                  ? t('{a} 님이 유물 조각을 선물했어요! 보따리를 풀어 보세요.', { a: from })
-                  : t('친구가 유물 조각을 선물했어요! 보따리를 풀어 보세요.')
+                  ? t('{a} 님이 유물을 선물했어요! 보따리를 풀어 보세요.', { a: from })
+                  : t('친구가 유물을 선물했어요! 보따리를 풀어 보세요.')
                 : scene
                 ? t('{a} 놀이를 마쳤어요! 보따리 안에 무엇이 들었을까요?', { a: t(scene) })
                 : t('보따리 안에 무엇이 들었을까요?')}
@@ -205,21 +205,21 @@ export default function PackScreen({ navigation, route }) {
               </Animated.View>
             </Pressable>
             <Text style={st.hint}>{t('보따리를 눌러 풀어 보세요')}</Text>
-            <Text style={st.small}>{t('보통 · 귀함 · 아주 귀함 — 아직 없는 조각이 더 잘 나와요')}</Text>
+            <Text style={st.small}>{t('보통 · 귀함 · 아주 귀함 — 아직 없는 유물이 더 잘 나와요')}</Text>
             {(() => {
               const se = currentSeries();
               const got = se.pool.filter((p) => (store.owned || {})[p.k]).length;
               return (
                 <View style={st.series}>
                   <Text style={st.seriesH}>{t('이달의 시리즈')} · {t(se.name)}</Text>
-                  <Text style={[st.small, st.onDark]}>{t('이 시리즈 조각이 더 잘 나와요. 모은 조각 {a} / {b}', { a: got, b: se.pool.length })}</Text>
-                  <Text style={[st.small, st.onDark]}>{t('시크릿 조각이 72번에 한 번꼴로 숨어 있어요')}{se.secret && (store.owned || {})[se.secret.k] ? ' — ' + t('찾았어요!') : ''}</Text>
+                  <Text style={[st.small, st.onDark]}>{t('이 시리즈 유물이 더 잘 나와요. 모은 유물 {a} / {b}', { a: got, b: se.pool.length })}</Text>
+                  <Text style={[st.small, st.onDark]}>{t('시크릿 유물이 72번에 한 번꼴로 숨어 있어요')}{se.secret && (store.owned || {})[se.secret.k] ? ' — ' + t('찾았어요!') : ''}</Text>
                 </View>
               );
             })()}
             <View style={st.codeBox}>
               <Text style={st.codeH}>{t('진짜 유물 찾기')}</Text>
-              <Text style={st.small}>{t('박물관에서 진열장 설명판의 소장품번호(예: 덕수1496)를 넣으면 바로 그 유물 조각을 얻어요.')}</Text>
+              <Text style={st.small}>{t('박물관에서 진열장 설명판의 소장품번호(예: 덕수1496)를 넣으면 바로 그 유물을 얻어요.')}</Text>
               <View style={st.codeRow}>
                 <TextInput testID="scan-no" value={no} onChangeText={setNo} placeholder={t('소장품번호')} style={st.codeInput} />
                 <SealButton small label={t('찾기')} onPress={scan} />
@@ -228,7 +228,7 @@ export default function PackScreen({ navigation, route }) {
             </View>
             <View style={st.codeBox}>
               <Text style={st.codeH}>{t('박물관에서 받은 암호')}</Text>
-              <Text style={st.small}>{t('박물관 현장에서 받은 암호를 넣으면 그곳에서만 나오는 「한정 조각」이 보따리에 섞여요.')}</Text>
+              <Text style={st.small}>{t('박물관 현장에서 받은 암호를 넣으면 그곳에서만 나오는 「한정 유물」이 보따리에 섞여요.')}</Text>
               <View style={st.codeRow}>
                 <TextInput value={code} onChangeText={setCode} placeholder={t('암호')} style={st.codeInput} autoCapitalize="characters" />
                 <SealButton
@@ -236,7 +236,7 @@ export default function PackScreen({ navigation, route }) {
                   label={t('넣기')}
                   onPress={() => {
                     const c = enterCode(code);
-                    setCodeMsg(c ? t('「{a} 한정」 조각이 열렸어요!', { a: t(c) }) : t('맞지 않는 암호예요.'));
+                    setCodeMsg(c ? t('「{a} 한정」 유물이 열렸어요!', { a: t(c) }) : t('맞지 않는 암호예요.'));
                   }}
                 />
               </View>
@@ -249,7 +249,7 @@ export default function PackScreen({ navigation, route }) {
             {opened.daily && !opened.already && opened.streak % 7 === 0 ? <Milestone n={opened.streak} /> : null}
             <Text style={st.lead}>
               {opened.daily && !opened.already
-                ? t('오늘의 보따리! {n}일째 이어서 왔어요. 조각 {m}개.', { n: opened.streak, m: opened.keys.length }) + (opened.streak % 7 === 0 ? ' ' + t('7일째 선물 — 「아주 귀함」 조각이 들어 있어요!') : '') + (opened.usedCharms ? ' ' + t('빠진 {n}일은 쉼표 부적이 지켜 줬어요.', { n: opened.usedCharms }) : '') + (opened.gotCharm ? ' ' + t('쉼표 부적 하나를 받았어요!') : '')
+                ? t('오늘의 보따리! {n}일째 이어서 왔어요. 유물 {m}점.', { n: opened.streak, m: opened.keys.length }) + (opened.streak % 7 === 0 ? ' ' + t('7일째 선물 — 「아주 귀함」 유물이 들어 있어요!') : '') + (opened.usedCharms ? ' ' + t('빠진 {n}일은 쉼표 부적이 지켜 줬어요.', { n: opened.usedCharms }) : '') + (opened.gotCharm ? ' ' + t('쉼표 부적 하나를 받았어요!') : '')
                 : opened.already && opened.daily
                 ? t('오늘의 보따리는 이미 받았어요. 내일 또 와요!')
                 : opened.already
@@ -257,14 +257,14 @@ export default function PackScreen({ navigation, route }) {
                   ? t('이 선물은 이미 받았어요.')
                   : t('이 놀이의 보따리는 이미 받았어요. 다른 놀이를 마치면 또 받을 수 있어요.')
                 : opened.scan
-                ? t('진짜 유물을 찾았어요! 눈앞의 그 유물이 조각이 되어 도감에 들어갔어요.')
+                ? t('진짜 유물을 찾았어요! 눈앞의 그 유물이 내 도감에 들어갔어요.')
                 : opened.gift
-                ? t('선물 받은 조각이에요! 도감에 들어갔어요.')
+                ? t('선물 받은 유물이에요! 도감에 들어갔어요.')
                 : opened.starter && scene
                 ? t('첫 보따리! {a} 놀이에서 진짜 유물 {n}점을 받았어요.', { a: t(scene), n: opened.keys.length })
                 : opened.starter
-                ? t('첫 보따리! 자리마다 하나씩, 조각 {n}개를 받았어요.', { n: opened.keys.length })
-                : t('조각 {n}개를 받았어요. 새 조각 {m}개!', { n: opened.keys.length, m: opened.fresh.length })}
+                ? t('첫 보따리! 진짜 유물 {n}점을 받았어요.', { n: opened.keys.length })
+                : t('유물 {n}점을 받았어요. 새 유물 {m}점!', { n: opened.keys.length, m: opened.fresh.length })}
             </Text>
             {scene && SCENE_REASON[scene] && !opened.already ? <Text style={st.reason} testID="scene-reason">{t(SCENE_REASON[scene])}</Text> : null}
             <View style={st.grid}>
@@ -273,9 +273,9 @@ export default function PackScreen({ navigation, route }) {
               ))}
             </View>
             {opened.gift && swap && !opened.already ? <SwapBack got={opened.keys[0]} owned={store.owned || {}} from={from} /> : null}
-            <Text style={st.small}>{t('지금 모은 조각 {n}개', { n: ownedN })}</Text>
+            <Text style={st.small}>{t('지금 모은 유물 {n}점', { n: ownedN })}</Text>
             <View style={st.btns}>
-              <SealButton label={t('조각 도감 보기')} variant="ink" onPress={() => navigation.navigate('Dex')} />
+              <SealButton label={t('유물 도감 보기')} variant="ink" onPress={() => navigation.navigate('Dex')} />
             </View>
           </View>
         )}
@@ -291,21 +291,21 @@ function SwapBack({ got, owned, from }) {
   if (back) {
     return (
       <View style={st.swap}>
-        <Text style={st.swapH}>{t('답례 조각을 보낼 준비가 됐어요')}</Text>
+        <Text style={st.swapH}>{t('답례 유물을 보낼 준비가 됐어요')}</Text>
         <View style={{ padding: 6, backgroundColor: '#fff', borderRadius: 8, alignSelf: 'center' }}>
           <QRCode value={back.url} size={120} />
         </View>
-        <Text style={st.small}>{from ? t('이 QR이나 링크를 {a} 님에게 보내면 「{b}」 조각이 건너가요.', { a: from, b: pieceName(PIECE_BY_K[back.k]) }) : t('이 QR이나 링크를 친구에게 보내면 「{b}」 조각이 건너가요.', { b: pieceName(PIECE_BY_K[back.k]) })}</Text>
+        <Text style={st.small}>{from ? t('이 QR이나 링크를 {a} 님에게 보내면 「{b}」 유물이 건너가요.', { a: from, b: pieceName(PIECE_BY_K[back.k]) }) : t('이 QR이나 링크를 친구에게 보내면 「{b}」 유물이 건너가요.', { b: pieceName(PIECE_BY_K[back.k]) })}</Text>
         {typeof navigator !== 'undefined' && navigator.clipboard ? <SealButton small variant="paper" label={t('링크 복사')} onPress={() => navigator.clipboard.writeText(back.url)} /> : null}
       </View>
     );
   }
   return (
     <View style={st.swap}>
-      <Text style={st.swapH}>{from ? t('{a} 님이 조각을 바꾸자고 했어요', { a: from }) : t('친구가 조각을 바꾸자고 했어요')}</Text>
+      <Text style={st.swapH}>{from ? t('{a} 님이 유물을 바꾸자고 했어요', { a: from }) : t('친구가 유물을 바꾸자고 했어요')}</Text>
       {dups.length ? (
         <>
-          <Text style={st.small}>{t('내 겹친 조각 가운데 하나를 골라 답례로 보내요.')}</Text>
+          <Text style={st.small}>{t('내 겹친 유물 가운데 하나를 골라 답례로 보내요.')}</Text>
           <View style={st.grid}>
             {dups.map((k) => (
               <Pressable
@@ -324,7 +324,7 @@ function SwapBack({ got, owned, from }) {
           </View>
         </>
       ) : (
-        <Text style={st.small}>{t('아직 겹친 조각이 없어요. 보따리를 더 풀어 겹친 조각이 생기면 도감에서 답례를 보낼 수 있어요.')}</Text>
+        <Text style={st.small}>{t('아직 겹친 유물이 없어요. 보따리를 더 풀어 겹친 유물이 생기면 도감에서 답례를 보낼 수 있어요.')}</Text>
       )}
     </View>
   );

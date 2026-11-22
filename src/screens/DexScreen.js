@@ -14,13 +14,12 @@ import { pieceName } from '../utils/pieceName';
 import { pieceStory } from '../utils/pieceStory';
 import { MEANING, MOTIF } from '../data/pieceMeaning';
 import { PIECE_COLORS } from '../utils/pieceColors';
-import { usePieces, removeWork, giveAway, currentSeries, dailyState } from '../utils/pieceStore';
+import { usePieces, giveAway, currentSeries, dailyState } from '../utils/pieceStore';
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
-import { SLOT_INFO, SLOT_NAMES, FRAME_BY_ID, FRAMES, TRANSFORMS } from '../data/frames';
-import { powerTag, buildTimeline } from '../utils/hapche';
-import { albumPng, downloadBlob } from '../utils/movieExport';
+import { SLOT_INFO, SLOT_NAMES } from '../data/frames';
+import { powerTag } from '../utils/hapche';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 const POWERS = ['흙', '쇠', '돌', '옥', '나무', '천', '종이', '금', '뼈'];
@@ -45,15 +44,6 @@ const REGIONS = [
 ];
 const regionOf = (p) => (p.from ? p.from.split(' - ')[0].replace('제주특별자치도', '제주도') : '');
 
-// 이 조각이 첫째로 맞는 자리를 가진 합체 틀 하나(조각마다 늘 같은 틀 — 여러 조각을 보면 여러 틀을 만난다)
-export function frameForPiece(p) {
-  if (!p) return null;
-  const fits = FRAMES.filter((f) => f.slots && f.slots.some((sp) => sp.slot === p.slots[0]));
-  if (!fits.length) return null;
-  let h = 0;
-  for (const ch of p.k) h = (h * 31 + ch.charCodeAt(0)) % 9973;
-  return fits[h % fits.length];
-}
 export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapche }) {
   const p = PIECE_BY_K[k];
   const [gift, setGift] = React.useState(null);
@@ -66,7 +56,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
             <View style={[st.detailImgBox, { borderColor: RARE_COLOR[p.rare] }]}>
               <Image source={p.img} style={[st.detailImg, !owned && st.shadowImg]} resizeMode="contain" />
             </View>
-            <Text style={st.detailName}>{owned ? pieceName(p) : t('아직 못 모은 조각')}</Text>
+            <Text style={st.detailName}>{owned ? pieceName(p) : t('아직 못 모은 유물')}</Text>
             {owned ? (
               <>
                 <Text style={st.detailMeta}>{[t(RARITY[p.rare]), t(p.era), t(p.by), p.no].filter(Boolean).join(' · ')}</Text>
@@ -125,7 +115,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
                   <SealButton label={t('박물관 원본 페이지 열기')} variant="paper" onPress={() => Linking.openURL(p.page)} />
                   {count > 1 && !gift ? (
                     <SealButton
-                      label={t('친구와 조각 바꾸기 (답례 받기)')}
+                      label={t('친구와 유물 바꾸기 (답례 받기)')}
                       variant="paper"
                       onPress={() => {
                         if (giveAway(k)) setGift(giftUrl(k, '', true));
@@ -134,7 +124,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
                   ) : null}
                   {count > 1 && !gift ? (
                     <SealButton
-                      label={t('겹친 조각 친구에게 선물하기 (×{n})', { n: count })}
+                      label={t('겹친 유물 친구에게 선물하기 (×{n})', { n: count })}
                       variant="ink"
                       onPress={() => {
                         if (giveAway(k)) setGift(giftUrl(k));
@@ -147,7 +137,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
                         <QRCode value={gift} size={110} />
                       </View>
                       <View style={{ flex: 1, gap: 6 }}>
-                        <Text style={st.desc}>{t('이 QR이나 링크를 친구에게 보내면 이 조각이 친구 도감으로 가요.')}</Text>
+                        <Text style={st.desc}>{t('이 QR이나 링크를 친구에게 보내면 이 유물이 친구 도감으로 가요.')}</Text>
                         {Platform.OS === 'web' ? (
                           <SealButton small variant="paper" label={t('링크 복사')} onPress={() => navigator.clipboard && navigator.clipboard.writeText(gift)} />
                         ) : null}
@@ -179,7 +169,6 @@ export default function DexScreen({ navigation }) {
   const [region, setRegion] = useState(null);
   const [open, setOpen] = useState(null);
   const owned = store.owned || {};
-  const madeFrames = new Set((store.works || []).map((w) => w.frameId).filter((id) => FRAME_BY_ID[id]));
   const ownedN = Object.keys(owned).length;
   const list = useMemo(() => {
     let l = PIECES;
@@ -233,7 +222,7 @@ export default function DexScreen({ navigation }) {
       { id: 'abroad', icon: '✈', name: '먼 길 온 유물', note: '바다 건너 해외 박물관에 있는 우리 유물 조각 5개 모으기', cur: mine.filter((p) => p.abroad).length, max: 5 },
       (() => {
         const se = currentSeries();
-        return { id: 'series', icon: '月', name: '이달의 시리즈', note: t('「{a}」 조각 {n}개 모으기', { a: t(se.name), n: Math.min(20, se.pool.length) }), raw: true, cur: se.pool.filter((p) => owned[p.k]).length, max: Math.min(20, se.pool.length) };
+        return { id: 'series', icon: '月', name: '이달의 시리즈', note: t('「{a}」 유물 {n}점 모으기', { a: t(se.name), n: Math.min(20, se.pool.length) }), raw: true, cur: se.pool.filter((p) => owned[p.k]).length, max: Math.min(20, se.pool.length) };
       })(),
       { id: 'scan', icon: '⌕', name: '진짜 유물 탐정', note: '박물관에서 소장품번호로 진짜 유물 3개 찾기', cur: (store.claimed || []).filter((c) => String(c).startsWith('scan:')).length, max: 3 },
       { id: 'streak', icon: '◔', name: '이어 오기', note: '오늘의 보따리를 7일 이어 받기', cur: dailyState().streak, max: 7 },
@@ -269,7 +258,7 @@ export default function DexScreen({ navigation }) {
       </ScrollView>
       <View style={st.tabs}>
         {[
-          ['pieces', t('조각')],
+          ['pieces', t('유물')],
           ['map', t('우리 땅 지도')],
           ['museum', t('나의 박물관 →')],
         ].map(([id, label]) => (
@@ -280,7 +269,7 @@ export default function DexScreen({ navigation }) {
       </View>
       {tab === 'map' && (
         <View style={st.mapWrap} testID="region-map">
-          <Text style={st.mapNote}>{t('유물이 땅속에서 나온 곳이에요. 칸을 누르면 그곳 조각만 볼 수 있어요.')}</Text>
+          <Text style={st.mapNote}>{t('유물이 땅속에서 나온 곳이에요. 칸을 누르면 그곳 유물만 볼 수 있어요.')}</Text>
           <View style={[st.map, { height: 6 * 74 }]}>
             {REGIONS.map((g) => {
               const all = PIECES.filter((p) => regionOf(p) === g.id);
@@ -363,7 +352,7 @@ export default function DexScreen({ navigation }) {
           </ScrollView>
           {ownedN === 0 && (
             <View style={st.empty}>
-              <Text style={st.emptyTxt}>{t('아직 모은 조각이 없어요. 첫 보따리를 풀어 볼까요?')}</Text>
+              <Text style={st.emptyTxt}>{t('아직 모은 유물이 없어요. 첫 보따리를 풀어 볼까요?')}</Text>
               <SealButton label={t('첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
             </View>
           )}
@@ -371,84 +360,6 @@ export default function DexScreen({ navigation }) {
       )}
     </View>
   );
-
-  if (tab === 'frames') {
-    // 틀 모음 — 만들어 본 틀에는 도장(✓), 아직 안 만든 틀은 눌러서 바로 작업대로
-    const all = [...FRAMES, ...TRANSFORMS];
-    return (
-      <SafeAreaView style={st.safe}>
-        <ScrollView contentContainerStyle={st.wrap}>
-          {header}
-          <Text style={st.framesNote}>{t('만들어 본 틀 {a}가지 / 모두 {b}가지 — 안 만든 틀을 눌러 바로 합체해 봐요.', { a: madeFrames.size, b: all.length })}</Text>
-          <View style={st.framesGrid} testID="frames-grid">
-            {all.map((f) => {
-              const made = madeFrames.has(f.id);
-              return (
-                <Pressable
-                  key={f.id}
-                  accessibilityLabel={t(f.name)}
-                  onPress={() => navigation.navigate('Museum')}
-                  style={[st.frameCard, { backgroundColor: f.bg || '#222', width: cols >= 6 ? '23%' : cols >= 4 ? '31%' : '47%' }, made && st.frameMade]}
-                >
-                  <Text style={st.frameKind}>{t(f.kind)}</Text>
-                  <Text style={st.frameName}>{t(f.name)}</Text>
-                  <Text style={[st.frameStamp, made && st.frameStampOn]}>{made ? t('✓ 만들었어요') : t('아직')}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-  if (tab === 'works') {
-    const works = store.works || [];
-    return (
-      <SafeAreaView style={st.safe}>
-        <ScrollView contentContainerStyle={st.wrap}>
-          {header}
-          {Platform.OS === 'web' && works.length ? (
-            <SealButton
-              label={t('내 작품 앨범 저장 (A4 한 장, 최근 6개)')}
-              variant="paper"
-              style={{ marginTop: 8 }}
-              onPress={async () => {
-                const tls = works.slice(0, 6).map((w) => buildTimeline(w.frameId, w.assign, { seed: w.seed, scene: w.scene, layout: w.layout, morphFrom: w.morphFrom }));
-                const url = await albumPng(tls);
-                if (url) downloadBlob(url, '잇결_앨범.png');
-              }}
-            />
-          ) : null}
-          {!works.length && (
-            <View style={st.empty}>
-              <Text style={st.emptyTxt}>{t('아직 만든 작품이 없어요. 작업대에서 조각을 합체해 보세요.')}</Text>
-              <SealButton label={t('나의 박물관으로')} onPress={() => navigation.navigate('Museum')} />
-            </View>
-          )}
-          {works.map((w) => {
-            const f = FRAME_BY_ID[w.frameId];
-            const ks = [...new Set(Object.values(w.assign || {}))].slice(0, 6);
-            return (
-              <Pressable key={w.id} style={st.work} onPress={() => navigation.navigate('Movie', { frameId: w.frameId, assign: w.assign, layout: w.layout, seed: w.seed, scene: w.scene, saved: w.id, morphFrom: w.morphFrom })}>
-                <View style={st.workImgs}>
-                  {ks.map((k) => (PIECE_BY_K[k] ? <Image key={k} source={PIECE_BY_K[k].img} style={st.workImg} resizeMode="contain" /> : null))}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={st.workTitle}>{w.title}</Text>
-                  <Text style={st.workMeta}>
-                    {f ? t(f.name) : w.frameId === 'free' ? t('자유 합체') : ''} · {new Date(w.at).toLocaleDateString()}
-                  </Text>
-                </View>
-                <Pressable onPress={() => removeWork(w.id)} hitSlop={8}>
-                  <Text style={st.del}>{t('지우기')}</Text>
-                </Pressable>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={st.safe}>
@@ -470,7 +381,7 @@ export default function DexScreen({ navigation }) {
                 play('tap');
                 setOpen(p.k);
               }}
-              accessibilityLabel={mine ? pieceName(p) : t('아직 못 모은 조각')}
+              accessibilityLabel={mine ? pieceName(p) : t('아직 못 모은 유물')}
             >
               <View style={[st.cellBox, { borderColor: mine ? RARE_COLOR[p.rare] : colors.borderSoft }]}>
                 <Image source={p.img} style={[{ width: cell - 22, height: cell - 22 }, !mine && st.shadowImg]} resizeMode="contain" />
