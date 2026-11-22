@@ -5,7 +5,7 @@ import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
 import { say, hush, useNarrate } from '../utils/narrate';
 import { useBigSubs } from '../utils/subSize';
-import { bgmOf, sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
+import { bgmOf, sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, beamAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { play, stop } from '../utils/sound';
 import { t } from '../i18n';
@@ -202,6 +202,19 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
             />
           );
         })}
+        {(() => {
+          // 등대 빛줄기 — 등불 자리를 가운데 두고 양쪽으로 뻗은 빛이 빙빙 돈다
+          const b = spin ? null : beamAt(tl, time);
+          if (!b) return null;
+          const L = 900 * k;
+          const hh = 70 * k;
+          return (
+            <View
+              pointerEvents="none"
+              style={{ position: 'absolute', left: b.x * k - L, top: b.y * k - hh / 2, width: L * 2, height: hh, borderRadius: hh, backgroundColor: '#fff3b8', opacity: 0.5 * b.a, transform: [{ rotate: `${b.deg}deg` }] }}
+            />
+          );
+        })()}
         {sorted.map((e) => {
           const p0 = poseAt(e, time);
           if (!p0) return null;

@@ -1,7 +1,7 @@
 // 웹: 합체 영상을 실제 영상 파일(mp4 또는 webm)로 저장한다.
 // 앱 화면과 같은 대본(hapche.js)을 캔버스에 다시 그리고, 효과음까지 섞어 녹화한다. 자막은 영상 안에 새긴다.
 import { Asset } from 'expo-asset';
-import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf, sceneKind, sceneAt, bgmOf } from './hapche';
+import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf, sceneKind, sceneAt, bgmOf, beamAt } from './hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { t } from '../i18n';
 
@@ -218,6 +218,25 @@ export function drawFrame(ctx, S, tl, imgs, time) {
     ctx.stroke();
     ctx.restore();
   });
+  const bm = beamAt(tl, time);
+  if (bm) {
+    // 등대 빛줄기(화면과 같게)
+    ctx.save();
+    ctx.translate(bm.x * k, bm.y * k);
+    ctx.rotate((bm.deg * Math.PI) / 180);
+    ctx.fillStyle = 'rgba(255,243,184,' + 0.5 * bm.a + ')';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(900 * k, -60 * k);
+    ctx.lineTo(900 * k, 60 * k);
+    ctx.closePath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-900 * k, -60 * k);
+    ctx.lineTo(-900 * k, 60 * k);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
   [...tl.events, ...(tl.exits || [])]
     .sort((a, b) => a.z - b.z)
     .forEach((e) => {

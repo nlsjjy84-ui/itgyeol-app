@@ -237,6 +237,8 @@ export function buildTimeline(frameId, assign, opts = {}) {
         fire: !!sp.fire,
         spin: !!sp.spin, // 바퀴·팽이 — 완성 뒤 제자리에서 빙글빙글
         orbit: !!sp.spinAll, // 별·바람개비 날개 — 완성 뒤 다 함께 가운데를 돈다
+        beam: !!sp.beam, // 등대 등불 — 완성 뒤 빛줄기가 빙빙 돈다
+        sway: typeof sp.sway === 'number' ? sp.sway : null, // 물결 — 완성 뒤 저마다 다른 박자로 오르락내리락
         ghost: !!sp.ghost,
         slot: sp.slot || '',
         head: isHead,
@@ -260,11 +262,12 @@ export function buildTimeline(frameId, assign, opts = {}) {
       const prev = events.filter((o) => o !== e && o.start < e.start - 0.01);
       if (!prev.length) return;
       const near = prev.reduce((a, b) => (Math.hypot(b.to.x - e.to.x, b.to.y - e.to.y) < Math.hypot(a.to.x - e.to.x, a.to.y - e.to.y) ? b : a));
-      threads.push({ a: { x: near.to.x, y: near.to.y }, b: { x: e.to.x, y: e.to.y }, t: e.end - 0.05, orbit: e.orbit || near.orbit });
+      threads.push({ a: { x: near.to.x, y: near.to.y }, b: { x: e.to.x, y: e.to.y }, t: e.end - 0.05, orbit: e.orbit || near.orbit || e.sway != null || near.sway != null });
     });
   const lockT = cursor + 0.35;
   events.forEach((e) => {
     if (e.orbit) e.orbitT = lockT;
+    if (e.sway != null) e.swayT = lockT;
   });
   // 도는 조각에 이어진 실은 돌기 시작할 때 거둬들인다(실이 제자리에 남아 엇갈리지 않게)
   threads.forEach((th) => {
@@ -368,6 +371,13 @@ export function poseAt(ev, time) {
     pose.y = 500 + dx * Math.sin(a) + dy * Math.cos(a);
     pose.rot += deg;
   }
+  // 물결 — 오르락내리락(처음 0.8초 동안 점점 커진다)
+  if (ev.swayT != null && p >= 1 && time > ev.swayT) {
+    const d = time - ev.swayT;
+    const amp = Math.min(1, d / 0.8);
+    pose.y += Math.sin(d * 2.6 + ev.sway) * 34 * amp;
+    pose.rot += Math.cos(d * 2.6 + ev.sway) * 9 * amp;
+  }
   return pose;
 }
 
@@ -398,6 +408,17 @@ export function villainAt(tl, time) {
   if (!tl.villain || time < 1.5) return 0;
   if (time < tl.lockT) return Math.min(1, (time - 1.5) / 1.2);
   return Math.max(0, 1 - (time - tl.lockT) / 0.9);
+}
+
+// 등대 빛줄기 — 완성 뒤 등불 자리에서 빙빙 도는 빛. 없으면 null
+export function beamAt(tl, time) {
+  if (time < tl.lockT) return null;
+  const e = tl.events.find((o) => o.beam);
+  if (!e) return null;
+  const p = poseAt(e, time);
+  if (!p || !p.landed) return null;
+  const d = time - tl.lockT;
+  return { x: p.x, y: p.y, deg: d * 80, a: Math.min(1, d / 0.6) };
 }
 
 // 시각 t에서 결 실 하나가 얼마나 뻗었는지(0~1)

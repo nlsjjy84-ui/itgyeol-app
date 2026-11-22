@@ -539,7 +539,7 @@ TRANSFORMS.push(
   },
   {
     id: 'wave', name: '너울 물결', kind: '변형', desc: '같은 유물이 오르락내리락 줄지어 물결처럼 넘실댄다.', bg: '#0f2d3b',
-    parts: Array.from({ length: 7 }, (_, i) => ({ key: i === 3 ? 'core' : 'w' + i, x: 110 + i * 130, y: 500 + Math.sin(i * 1.1) * 170, w: 200, axis: 'a', rot: Math.cos(i * 1.1) * 25, order: Math.abs(i - 3), flip: i % 2 === 1, z: 7 - Math.abs(i - 3) })),
+    parts: Array.from({ length: 7 }, (_, i) => ({ key: i === 3 ? 'core' : 'w' + i, x: 110 + i * 130, y: 500 + Math.sin(i * 1.1) * 170, w: 200, axis: 'a', rot: Math.cos(i * 1.1) * 25, order: Math.abs(i - 3), flip: i % 2 === 1, z: 7 - Math.abs(i - 3), sway: i * 1.1 })),
   },
 );
 
