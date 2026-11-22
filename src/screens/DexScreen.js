@@ -214,7 +214,7 @@ export default function DexScreen({ navigation }) {
       { id: 'eras', icon: '⌛', name: '시간 여행자', note: '서로 다른 시대 6곳의 유물 모으기', cur: eras.size, max: 6 },
       { id: 'powers', icon: '✦', name: '재료 장인', note: '흙·쇠·돌·옥·나무·천·종이·금·뼈 9가지 재료 모으기', cur: powers.size, max: 9 },
       { id: 'rare', icon: '★', name: '보물 사냥꾼', note: '「아주 귀함」 유물 3점 모으기', cur: veryRare, max: 3 },
-      { id: 'palace', icon: '⛩', name: '궁궐 손님', note: '국립고궁박물관 유물 10점 모으기', cur: palace, max: 10 },
+      { id: 'palace', icon: '궁', name: '궁궐 손님', note: '국립고궁박물관 유물 10점 모으기', cur: palace, max: 10 },
       { id: 'crafts', icon: '⚙', name: '물건 장인', note: '유물로 오늘의 물건 5개 만들어 담기', cur: (store.crafts || []).length, max: 5 },
       { id: 'hundred', icon: '백', name: '유물 백 점', note: '유물 100점 모으기', cur: mine.length, max: 100 },
       { id: 'abroad', icon: '✈', name: '먼 길 온 유물', note: '바다 건너 해외 박물관에 있는 우리 유물 5점 모으기', cur: mine.filter((p) => p.abroad).length, max: 5 },
