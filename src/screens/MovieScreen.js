@@ -10,7 +10,7 @@ import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { pieceName } from '../utils/pieceName';
 import { todayMission, countMatch } from '../utils/mission';
-import { buildTimeline, beatsOf, judge, creditOf, josa, sceneKind, JANGDAN_OF } from '../utils/hapche';
+import { buildTimeline, beatsOf, judge, creditOf, josa, sceneKind, JANGDAN_OF, VILLAINS } from '../utils/hapche';
 import { play } from '../utils/sound';
 import { saveWork, usePieces, missionDone, claimMission } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
@@ -250,6 +250,19 @@ export default function MovieScreen({ navigation, route }) {
           ))}
         </View>
 
+        {(() => {
+          // 다음 이야기 예고 — 내일의 합체 미션과 다음 보존의 적을 미리 알려 다시 오고 싶게 한다
+          const tm = new Date();
+          tm.setDate(tm.getDate() + 1);
+          const m = todayMission(tm);
+          const v = VILLAINS[(tm.getDate() + tm.getMonth()) % VILLAINS.length];
+          return (
+            <View style={st.teaser} testID="teaser">
+              <Text style={st.teaserH}>{t('다음 이야기 예고')}</Text>
+              <Text style={st.teaserT}>{t('내일 밤, {v} 다시 박물관에 숨어든대요. 내일의 합체 미션은 「{a}」 조각으로 만드는 「{b}」! 보따리를 받고 조각을 모아 둬요.', { v: getLang() === 'ko' ? '「' + v.name + '」' + josa(v.name, '이/가').slice(v.name.length) : t(v.name), a: t(m.value), b: t(m.frameName) })}</Text>
+            </View>
+          );
+        })()}
         <Text style={st.h}>{t('함께 이야기해 봐요')}</Text>
         <View style={st.talk}>
           <Text style={st.partMeta}>{t('영상을 본 뒤 보호자·선생님이 아이와 나눌 질문이에요.')}</Text>
@@ -301,6 +314,9 @@ export default function MovieScreen({ navigation, route }) {
 }
 
 const st = StyleSheet.create({
+  teaser: { marginTop: 16, backgroundColor: '#1b2227', borderRadius: 14, padding: 14, gap: 4 },
+  teaserH: { color: '#f6c46a', fontSize: 13, fontWeight: '800', letterSpacing: 1 },
+  teaserT: { color: '#f6e7c4', fontSize: 15, lineHeight: 23 },
   missionWin: { backgroundColor: '#2c7a64', borderRadius: 14, padding: 12, marginBottom: 10, gap: 4 },
   missionWinH: { color: '#fff', fontSize: 17, fontWeight: '800' },
   talk: { backgroundColor: '#f6f2ea', borderRadius: 14, padding: 12, gap: 6 },
