@@ -265,3 +265,22 @@ test('유물 합체: 박물관 현장 QR — 입구(?c=)는 한정을 열고, �
   await pass('/?no=' + encodeURIComponent('덕수1496'), found);
   await expect(found).toBeVisible();
 });
+
+test('유물 합체: 저장한 작품으로 A4 앨범 한 장을 내려받는다', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    const works = [
+      { id: 'w1', frameId: 'whale', assign: { body: 'nmk_42506', head: 'nmk_69779' }, seed: 3, scene: '', title: 'A', at: Date.now() },
+      { id: 'w2', frameId: 'flower', assign: { core: 'nmk_69779' }, seed: 4, scene: '', title: 'B', at: Date.now() },
+    ];
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_42506: 1, nmk_69779: 1 }, order: ['nmk_42506', 'nmk_69779'], works, packs: 1, starter: true, codes: [], claimed: [] }));
+  });
+  await openHome(page);
+  await page.getByText('조각 도감', { exact: true }).filter({ visible: true }).first().click();
+  await page.getByText(/^내 작품 2/).click();
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByText('내 작품 앨범 저장 (A4 한 장, 최근 6개)').click()]);
+  expect(dl.suggestedFilename()).toMatch(/^itgyeol_album_\d{8}-\d{6}\.png$/);
+  const fs = await import('fs');
+  fs.copyFileSync(await dl.path(), '/tmp/album_e2e.png');
+});

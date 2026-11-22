@@ -4,6 +4,10 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "잇결 · 유물 합체": "Itgyeol · Artifact Combine",
+  "{a}의 합체 앨범": "{a}'s combine album",
+  "나의 합체 앨범": "My combine album",
+  "내 작품 앨범 저장 (A4 한 장, 최근 6개)": "Save my album (one A4 page, latest 6)",
   "「{a}」에 오신 걸 환영해요! 이곳 한정 조각이 열렸고, 이 고장 유물이 보따리에 더 잘 나와요.": "Welcome to {a}! Pieces only found here are unlocked, and local artifacts show up more often in bundles.",
   "흙": "Earth",
   "쇠": "Iron",

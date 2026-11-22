@@ -16,7 +16,8 @@ import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
 import { SLOT_INFO, SLOT_NAMES, FRAME_BY_ID } from '../data/frames';
-import { powerTag } from '../utils/hapche';
+import { powerTag, buildTimeline } from '../utils/hapche';
+import { albumPng, downloadBlob } from '../utils/movieExport';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 const POWERS = ['흙', '쇠', '돌', '옥', '나무', '천', '종이', '금', '뼈'];
@@ -303,6 +304,18 @@ export default function DexScreen({ navigation }) {
         <ScrollView contentContainerStyle={st.wrap}>
           {header}
           <SealButton label={t('합체 전시관 화면 띄우기 (큰 화면·키오스크)')} variant="ink" onPress={() => navigation.navigate('HapcheWall')} style={{ marginTop: 10 }} />
+          {Platform.OS === 'web' && works.length ? (
+            <SealButton
+              label={t('내 작품 앨범 저장 (A4 한 장, 최근 6개)')}
+              variant="paper"
+              style={{ marginTop: 8 }}
+              onPress={async () => {
+                const tls = works.slice(0, 6).map((w) => buildTimeline(w.frameId, w.assign, { seed: w.seed, scene: w.scene, layout: w.layout }));
+                const url = await albumPng(tls);
+                if (url) downloadBlob(url, '잇결_앨범.png');
+              }}
+            />
+          ) : null}
           {!works.length && (
             <View style={st.empty}>
               <Text style={st.emptyTxt}>{t('아직 만든 작품이 없어요. 작업대에서 조각을 합체해 보세요.')}</Text>

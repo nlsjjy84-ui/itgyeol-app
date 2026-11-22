@@ -418,7 +418,7 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertic
 
 // 한글 파일 이름은 브라우저·운영체제에 따라 「download」로 바뀌어 받아지는 일이 있다(시험에서 확인) —
 // 받는 파일 이름은 늘 영문으로 만들고, 날짜·시각을 붙여 겹치지 않게 한다.
-const KO_WORD = [['잇결', 'itgyeol'], ['작품사진', 'photo'], ['종이키트', 'paperkit'], ['이야기', 'story'], ['세로', 'vertical']];
+const KO_WORD = [['잇결', 'itgyeol'], ['앨범', 'album'], ['작품사진', 'photo'], ['종이키트', 'paperkit'], ['이야기', 'story'], ['세로', 'vertical']];
 export function safeName(name) {
   const dot = name.lastIndexOf('.');
   const ext = dot > 0 ? name.slice(dot) : '';
@@ -689,5 +689,49 @@ export async function posterPng(tl, { size = 1080 } = {}) {
   c.width = size;
   c.height = size;
   drawFrame(c.getContext('2d'), size, tl, imgs, Math.min(tl.dur - 0.05, tl.titleT + 2.4));
+  return new Promise((res) => c.toBlob((b) => res(b ? URL.createObjectURL(b) : null), 'image/png'));
+}
+
+// 내 작품 앨범 — 저장한 합체 작품(최대 6개)의 출동 장면을 A4 한 장(2×3)에 모은다. 앨범·사진책 상품의 밑그림.
+export async function albumPng(tls, { owner = '' } = {}) {
+  const W = 2480;
+  const H = 3508;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#f6f2ea';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#b3322b';
+  ctx.textAlign = 'left';
+  ctx.font = '700 52px "Noto Sans KR", sans-serif';
+  ctx.fillText(t('잇결 · 유물 합체'), 160, 200);
+  ctx.fillStyle = '#1b2227';
+  ctx.font = '800 120px "Nanum Myeongjo", "Noto Serif KR", serif';
+  ctx.fillText(owner ? t('{a}의 합체 앨범', { a: owner }) : t('나의 합체 앨범'), 160, 350);
+  const cell = 1000;
+  const gx = [160, W - 160 - cell];
+  for (let i = 0; i < Math.min(6, tls.length); i += 1) {
+    const tl = tls[i];
+    const imgs = {};
+    await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
+    const sq = document.createElement('canvas');
+    sq.width = cell;
+    sq.height = cell;
+    drawFrame(sq.getContext('2d'), cell, tl, imgs, Math.min(tl.dur - 0.05, tl.titleT + 2.4));
+    const x = gx[i % 2];
+    const y = 470 + Math.floor(i / 2) * (cell + 50);
+    ctx.save();
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, cell, cell, 40);
+    else ctx.rect(x, y, cell, cell);
+    ctx.clip();
+    ctx.drawImage(sq, x, y);
+    ctx.restore();
+  }
+  ctx.fillStyle = '#6b5d4d';
+  ctx.font = '400 34px "Noto Sans KR", sans-serif';
+  const credit = creditOf([...new Set(tls.flatMap((tl) => tl.museums || []))]);
+  ctx.fillText(t('유물 사진') + ': ' + credit, 160, H - 120);
   return new Promise((res) => c.toBlob((b) => res(b ? URL.createObjectURL(b) : null), 'image/png'));
 }
