@@ -88,9 +88,28 @@ export function stop(name) {
 }
 
 // 배경음악을 작게, 끝없이 돌린다(이야기 영상처럼 목소리 밑에 까는 음악)
+// 웹에서는 브라우저 오디오를 직접 써서, 재생 중에 멈춰도 오류가 나지 않게 한다(play()의 약속을 받아 처리).
+const webLoops = {};
+const isWeb = typeof window !== 'undefined' && typeof window.Audio === 'function';
+const srcOf = (m) => (typeof m === 'string' ? m : m && (m.uri || m.default)) || null;
 export function playLoop(name, volume = 0.35) {
-  if (muted || !createAudioPlayer || !FILES[name]) return;
+  if (muted || !FILES[name]) return;
   try {
+    if (isWeb) {
+      let a = webLoops[name];
+      if (!a) {
+        const src = srcOf(FILES[name]);
+        if (!src) return;
+        a = new window.Audio(src);
+        a.loop = true;
+        webLoops[name] = a;
+      }
+      a.volume = volume;
+      const r = a.play();
+      if (r && typeof r.catch === 'function') r.catch(() => {});
+      return;
+    }
+    if (!createAudioPlayer) return;
     let p = players[name];
     if (!p) {
       p = createAudioPlayer(FILES[name]);
@@ -103,4 +122,14 @@ export function playLoop(name, volume = 0.35) {
   } catch (e) {
     // 소리가 안 나도 체험은 계속된다
   }
+}
+export function stopLoop(name) {
+  const a = webLoops[name];
+  if (a) {
+    try {
+      a.pause();
+    } catch (e) {}
+    return;
+  }
+  stop(name);
 }

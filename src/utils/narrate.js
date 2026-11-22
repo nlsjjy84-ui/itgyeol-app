@@ -69,19 +69,34 @@ export function say(text, who) {
   if (!on || !text) return;
   const c = clean(text);
   const src = VOICE[voiceKey(getLang(), who, c)];
-  if (src && createAudioPlayer && !(typeof navigator !== 'undefined' && navigator.webdriver)) {
+  const isWeb = typeof window !== 'undefined' && typeof window.Audio === 'function';
+  if (src && (isWeb || createAudioPlayer) && !(typeof navigator !== 'undefined' && navigator.webdriver)) {
     try {
       if (ok()) window.speechSynthesis.cancel();
       stopVoice();
-      if (!vPlayer) {
-        vPlayer = createAudioPlayer(src);
-        vPlayer.addListener('playbackStatusUpdate', (st) => {
-          if (st && st.didJustFinish) vPlaying = false;
-        });
-      } else vPlayer.replace(src);
       vPlaying = true;
-      const r = vPlayer.play();
-      if (r && typeof r.catch === 'function') r.catch(() => { vPlaying = false; });
+      if (isWeb) {
+        // 웹: 브라우저 오디오를 직접 — 멈춰도 오류가 남지 않게 play()의 약속을 받아 둔다
+        const url = typeof src === 'string' ? src : src && (src.uri || src.default);
+        if (!vPlayer || !vPlayer.isWebAudio) {
+          vPlayer = new window.Audio();
+          vPlayer.isWebAudio = true;
+          vPlayer.addEventListener('ended', () => { vPlaying = false; });
+          vPlayer.addEventListener('error', () => { vPlaying = false; });
+        }
+        vPlayer.src = url;
+        const r = vPlayer.play();
+        if (r && typeof r.catch === 'function') r.catch(() => { vPlaying = false; });
+      } else {
+        if (!vPlayer) {
+          vPlayer = createAudioPlayer(src);
+          vPlayer.addListener('playbackStatusUpdate', (st) => {
+            if (st && st.didJustFinish) vPlaying = false;
+          });
+        } else vPlayer.replace(src);
+        const r = vPlayer.play();
+        if (r && typeof r.catch === 'function') r.catch(() => { vPlaying = false; });
+      }
       // 끝 알림이 오지 않는 환경에서도 이야기가 멈추지 않게 — 넉넉히 기다린 뒤 풀어 준다
       const guard = 1500 + c.length * 180;
       setTimeout(() => { vPlaying = false; }, guard);
