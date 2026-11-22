@@ -1,7 +1,7 @@
 // 웹: 합체 영상을 실제 영상 파일(mp4 또는 webm)로 저장한다.
 // 앱 화면과 같은 대본(hapche.js)을 캔버스에 다시 그리고, 효과음까지 섞어 녹화한다. 자막은 영상 안에 새긴다.
 import { Asset } from 'expo-asset';
-import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf, sceneKind, sceneAt, bgmOf, beamAt } from './hapche';
+import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf, sceneKind, sceneAt, bgmOf, beamAt, puffsAt } from './hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { t } from '../i18n';
 
@@ -265,6 +265,12 @@ export function drawFrame(ctx, S, tl, imgs, time) {
       }
       ctx.restore();
     });
+  puffsAt(tl, time).forEach((f) => {
+    ctx.fillStyle = (f.kind === 'water' ? 'rgba(191,230,255,' : 'rgba(227,221,210,') + f.a + ')';
+    ctx.beginPath();
+    ctx.arc(f.x * k, f.y * k, f.r * k, 0, Math.PI * 2);
+    ctx.fill();
+  });
   ctx.restore();
   void bobSave;
   if (time >= tl.lockT && time < tl.lockT + 0.6) {

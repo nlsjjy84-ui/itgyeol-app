@@ -5,7 +5,7 @@ import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
 import { say, hush, useNarrate } from '../utils/narrate';
 import { useBigSubs } from '../utils/subSize';
-import { bgmOf, sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, beamAt } from '../utils/hapche';
+import { bgmOf, sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, beamAt, puffsAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { play, stop } from '../utils/sound';
 import { t } from '../i18n';
@@ -233,6 +233,13 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
             </View>
           );
         })}
+        {(spin ? [] : puffsAt(tl, time)).map((f, i) => (
+          <View
+            key={'pf' + i}
+            pointerEvents="none"
+            style={{ position: 'absolute', left: (f.x - f.r) * k, top: (f.y - f.r) * k, width: f.r * 2 * k, height: f.r * 2 * k, borderRadius: f.r * k, backgroundColor: f.kind === 'water' ? '#bfe6ff' : '#e3ddd2', opacity: f.a }}
+          />
+        ))}
       </View>
       {flash > 0 && <View style={[StyleSheet.absoluteFill, { backgroundColor: '#fff8e8', opacity: flash * 0.85 }]} />}
       {done && (

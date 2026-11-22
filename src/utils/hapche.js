@@ -238,6 +238,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
         spin: !!sp.spin, // 바퀴·팽이 — 완성 뒤 제자리에서 빙글빙글
         orbit: !!sp.spinAll, // 별·바람개비 날개 — 완성 뒤 다 함께 가운데를 돈다
         beam: !!sp.beam, // 등대 등불 — 완성 뒤 빛줄기가 빙빙 돈다
+        puff: sp.smoke ? 'smoke' : sp.spout ? 'water' : null, // 기차 굴뚝 연기·고래 물줄기
         sway: typeof sp.sway === 'number' ? sp.sway : null, // 물결 — 완성 뒤 저마다 다른 박자로 오르락내리락
         ghost: !!sp.ghost,
         slot: sp.slot || '',
@@ -269,6 +270,13 @@ export function buildTimeline(frameId, assign, opts = {}) {
     if (e.orbit) e.orbitT = lockT;
     if (e.sway != null) e.swayT = lockT;
   });
+  // 다리 — 완성 뒤 번갈아 앞뒤로 흔들며 걷는다(왼쪽·오른쪽이 엇박)
+  events
+    .filter((e) => e.slot === '다리')
+    .forEach((e, i) => {
+      e.stepT = lockT + 0.6;
+      e.stepPh = i % 2 ? Math.PI : 0;
+    });
   // 도는 조각에 이어진 실은 돌기 시작할 때 거둬들인다(실이 제자리에 남아 엇갈리지 않게)
   threads.forEach((th) => {
     if (th.orbit) th.until = lockT;
@@ -371,6 +379,11 @@ export function poseAt(ev, time) {
     pose.y = 500 + dx * Math.sin(a) + dy * Math.cos(a);
     pose.rot += deg;
   }
+  // 걷기 — 다리를 번갈아 흔든다
+  if (ev.stepT != null && p >= 1 && time > ev.stepT) {
+    const d = time - ev.stepT;
+    pose.rot += Math.sin(d * 5.2 + ev.stepPh) * 9 * Math.min(1, d / 0.6);
+  }
   // 물결 — 오르락내리락(처음 0.8초 동안 점점 커진다)
   if (ev.swayT != null && p >= 1 && time > ev.swayT) {
     const d = time - ev.swayT;
@@ -419,6 +432,32 @@ export function beamAt(tl, time) {
   if (!p || !p.landed) return null;
   const d = time - tl.lockT;
   return { x: p.x, y: p.y, deg: d * 80, a: Math.min(1, d / 0.6) };
+}
+
+// 기차 연기·고래 물줄기 — 완성 뒤 조각 위로 동글동글 피어오른다. [{x, y, r, a, kind}]
+export function puffsAt(tl, time) {
+  if (time < tl.lockT) return [];
+  const out = [];
+  tl.events.forEach((e) => {
+    if (!e.puff) return;
+    const p = poseAt(e, time);
+    if (!p || !p.landed) return;
+    const d = time - tl.lockT;
+    const top = p.y - (e.h * p.s) / 2;
+    for (let i = 0; i < 6; i += 1) {
+      const age = (d * 0.8 + i / 6) % 1;
+      if (d * 0.8 < i / 6 && d < 1.2) continue; // 처음엔 하나씩 나온다
+      const water = e.puff === 'water';
+      out.push({
+        x: p.x + Math.sin(i * 2.1 + d) * (water ? 40 + age * 90 : 18 + age * 60) * (water && i % 2 ? -1 : 1),
+        y: top - age * (water ? 220 : 300) + (water ? age * age * 140 : 0),
+        r: (water ? 14 : 22) + age * (water ? 26 : 60),
+        a: (1 - age) * (water ? 0.75 : 0.55),
+        kind: e.puff,
+      });
+    }
+  });
+  return out;
 }
 
 // 시각 t에서 결 실 하나가 얼마나 뻗었는지(0~1)
