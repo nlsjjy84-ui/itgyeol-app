@@ -78,6 +78,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
     });
     if (time >= tl.lockT) once('lock', 'lock');
     if (time >= tl.titleT) once('shine', 'shine');
+    if (tl.motionSfx && time >= tl.titleT + 0.5) once('motion', tl.motionSfx);
   }, [time]);
 
   const stopBgm = () => ['bgm', 'bgmSea', 'bgmSky', 'bgmSpace'].forEach(stop);

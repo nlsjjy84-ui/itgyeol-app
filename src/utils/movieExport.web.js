@@ -20,6 +20,9 @@ const SFX = {
   clankClay: require('../../assets/sfx/clank_clay.wav'),
   clankStone: require('../../assets/sfx/clank_stone.wav'),
   clankWood: require('../../assets/sfx/clank_wood.wav'),
+  steam: require('../../assets/sfx/steam.wav'),
+  splash: require('../../assets/sfx/splash.wav'),
+  whirl: require('../../assets/sfx/whirl.wav'),
 };
 const CLANK_OF = { 쇠: 'clankMetal', 금: 'clankMetal', 흙: 'clankClay', 돌: 'clankStone', 옥: 'clankStone', 뼈: 'clankStone', 나무: 'clankWood', 종이: 'clankWood', 천: 'clankWood' };
 
@@ -433,6 +436,7 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertic
       });
       if (time >= tl.lockT) playS('lock', 'lock');
       if (time >= tl.titleT) playS('shine', 'shine');
+      if (tl.motionSfx && time >= tl.titleT + 0.5) playS('motion', tl.motionSfx);
       if (onProgress) onProgress(Math.min(1, time / total));
       if (time < total) requestAnimationFrame(step);
       else rec.stop();

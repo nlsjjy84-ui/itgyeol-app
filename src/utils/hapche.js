@@ -362,7 +362,15 @@ export function buildTimeline(frameId, assign, opts = {}) {
     return { t0: e.start, t1: e.end + 0.55, key: e.key, text: `${pieceName(p)}${p.era ? ' · ' + t(p.era) : ''}`, slot: t(e.slot || '') };
   });
 
-  return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain, isMorph: !!opts.morphFrom, exits };
+  // 완성 뒤 움직임 효과음 — 연기는 칙칙폭폭, 물은 첨벙, 다 함께 도는 것은 빙글
+  const motionSfx = events.some((e) => e.puff === 'smoke')
+    ? 'steam'
+    : events.some((e) => e.puff === 'water') || ['watermill', 'stepping', 'wave'].includes(frame.id)
+    ? 'splash'
+    : events.some((e) => e.orbit || e.beam) || frame.id === 'top'
+    ? 'whirl'
+    : null;
+  return { motionSfx, frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain, isMorph: !!opts.morphFrom, exits };
 }
 
 // 시각 t에서 조각 하나의 자세

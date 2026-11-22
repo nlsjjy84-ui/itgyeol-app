@@ -37,7 +37,10 @@ const FILES = {
   clankMetal: require('../../assets/sfx/clank_metal.wav'), // 쇠 — 쨍
   clankClay: require('../../assets/sfx/clank_clay.wav'), // 흙·도자기 — 탁
   clankStone: require('../../assets/sfx/clank_stone.wav'), // 돌·옥 — 딱
-  clankWood: require('../../assets/sfx/clank_wood.wav'), // 나무·종이·천 — 똑 // 합체 영상 배경음악(가야금 + 장구, 16초)
+  clankWood: require('../../assets/sfx/clank_wood.wav'), // 나무·종이·천 — 똑
+  steam: require('../../assets/sfx/steam.wav'), // 칙칙폭폭(기차 연기)
+  splash: require('../../assets/sfx/splash.wav'), // 첨벙(물줄기·물레방아·징검다리·물결)
+  whirl: require('../../assets/sfx/whirl.wav'), // 빙글(별·바람개비·팽이·등대 빛)
 };
 
 const players = {};
