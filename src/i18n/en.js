@@ -4,6 +4,10 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "틀 탐험가": "Frame Explorer",
+  "서로 다른 틀 10가지로 작품 만들기": "Make works with 10 different frames",
+  "빛깔 모으기": "Color Collector",
+  "초록·파랑·하양·금빛·빨강·회색·검정 7가지 빛깔 조각 모으기": "Collect pieces in 7 colors: green, blue, white, gold, red, gray and black",
   "틀 모음 {a}/{b}": "Frames {a}/{b}",
   "만들어 본 틀 {a}가지 / 모두 {b}가지 — 안 만든 틀을 눌러 바로 합체해 봐요.": "You've made {a} of {b} frames — tap one you haven't made to start combining.",
   "✓ 만들었어요": "✓ Made",
