@@ -20,7 +20,6 @@ import { epilogueLines } from '../data/book';
 import { PLAY_GAMES } from '../data/playGames';
 import { useJourney } from '../context/JourneyContext';
 import { resultOptionCode } from '../utils/resultSeed';
-import { synthesizeAttention } from '../utils/attentionSynth';
 import { colors, fonts } from '../theme';
 import { buildFacts, baseCommentary, polishCommentary, polishEnabled } from '../utils/commentary';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -195,14 +194,9 @@ export default function ResultScreen({ navigation }) {
   };
   const [customShapeText, setCustomShapeText] = useState('');
   const [customRequests, setCustomRequests] = useState([]);
-  // [결과물+결과물=전통창작결과물] 두 가지 결과물 보기 방식 — "기존 문양"은 원래 있던
-  // 추상적인 꽃문양, "변형 결과물"은 완성한 판들을 실제 인코더-디코더 어텐션으로 섞어
-  // 부채→날개 / 붓→칼 / 자모→도형처럼 구체적으로 변형되는 모양. 새로 만든 쪽을 기본값으로 둔다.
+  // 결과물 보기 방식 — 「조각보」(판마다 한 조각씩 이어 붙임)와 「기존 문양」.
+  // 2026-11-23: 예전 「변형(부채→날개·붓→칼)」 보기는 뺐다 — 변형은 이제 「유물 → 오늘의 물건」(나의 박물관)에서 한다.
   const [patternMode, setPatternMode] = useState('jogakbo');
-  const synth = useMemo(
-    () => (selectedAttempts.length > 0 ? synthesizeAttention(selectedAttempts) : null),
-    [selectedAttempts]
-  );
 
   // [1,2,3에 적용한 걸 결과물에도] 진법·훈민정음·전래놀이 각 판에서 쌓은 실제 숙련도
   // (skills, useJourney가 추적하는 -3~3 레이팅)를 그대로 가져와서, 결과 화면의 두
@@ -353,14 +347,6 @@ export default function ResultScreen({ navigation }) {
               </Text>
             </Pressable>
             <Pressable
-              style={[styles.modeChip, patternMode === 'transform' && styles.modeChipActive]}
-              onPress={() => setPatternMode('transform')}
-            >
-              <Text style={[styles.modeChipText, patternMode === 'transform' && styles.modeChipTextActive]}>
-                {t('변형 (어텐션 합성)')}
-              </Text>
-            </Pressable>
-            <Pressable
               style={[styles.modeChip, patternMode === 'pattern' && styles.modeChipActive]}
               onPress={() => setPatternMode('pattern')}
             >
@@ -379,31 +365,6 @@ export default function ResultScreen({ navigation }) {
             <Text style={styles.code}>{code}</Text>
           </View>
         </ViewShot>
-
-        {patternMode === 'transform' && synth && (
-          <View style={styles.attentionBox}>
-            <Text style={styles.attentionTitle}>
-              {t('부채→날개 · 붓→칼 · 자모→도형 — 어떤 판을 얼마나 반영했는지')}
-            </Text>
-            <View style={styles.attentionBars}>
-              {SCENE_ORDER.filter((id) => synth.attentionBySceneId[id] !== undefined).map((id) => {
-                const pct = Math.round((synth.attentionBySceneId[id] || 0) * 100);
-                return (
-                  <View key={id} style={styles.attentionRow}>
-                    <Text style={styles.attentionLabel}>{t(SCENE_LABEL[id])}</Text>
-                    <View style={styles.attentionTrack}>
-                      <View style={[styles.attentionFill, { width: `${pct}%` }]} />
-                    </View>
-                    <Text style={styles.attentionPct}>{pct}%</Text>
-                  </View>
-                );
-              })}
-            </View>
-            <Text style={styles.attentionHint}>
-              {t('각 판을 완성한 속도·방식에서 나온 실제 숫자를 인코더-디코더 어텐션(6개 층)으로 섞어요. 아직 완성하지 않았거나 나중에 끝낸 판은 마스킹으로 가려서, 먼저 끝낸 판의 결과가 나중 판 때문에 거꾸로 바뀌지 않게 했어요. 그 결과가 위 모양의 날개 폭·칼날 길이·글자 정돈 정도를 직접 결정해요.')}
-            </Text>
-          </View>
-        )}
 
         <Pressable
           style={[styles.primaryBtn, !selected && styles.btnDisabled]}
