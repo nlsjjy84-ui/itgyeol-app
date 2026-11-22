@@ -4,6 +4,14 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "색으로 찾기": "By color",
+  "초록": "Green",
+  "파랑": "Blue",
+  "하양": "White",
+  "빨강": "Red",
+  "갈색": "Brown",
+  "회색": "Gray",
+  "검정": "Black",
   "이야기 영상부터 보기 — 밤의 박물관": "Watch the story first — Museum at Night",
   "이야기 영상 다시 보기 — 밤의 박물관": "Watch again — Museum at Night",
   "유물 합체 이야기 영상": "Artifact Combine story",

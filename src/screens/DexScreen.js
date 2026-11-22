@@ -20,6 +20,17 @@ import { powerTag, buildTimeline } from '../utils/hapche';
 import { albumPng, downloadBlob } from '../utils/movieExport';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
+// 색으로 찾기 — 조각 사진의 대표 색(사진에서 자동으로 뽑음)
+const COLORS = [
+  ['초록', '#5f8f6a'],
+  ['파랑', '#2f5d9a'],
+  ['하양', '#f2efe8'],
+  ['금빛', '#c9a23a'],
+  ['빨강', '#b3322b'],
+  ['갈색', '#8a5a3a'],
+  ['회색', '#8d8f8f'],
+  ['검정', '#22262a'],
+];
 const POWERS = ['흙', '쇠', '돌', '옥', '나무', '천', '종이', '금', '뼈'];
 // 우리 땅 지도 — 유물이 땅속에서 나온 곳(출토지)을 시·도 칸으로. 실제 위치를 어림한 칸 지도(타일 지도).
 const REGIONS = [
@@ -138,6 +149,7 @@ export default function DexScreen({ navigation }) {
   const [tab, setTab] = useState('pieces');
   const [slot, setSlot] = useState(null);
   const [power, setPower] = useState(null);
+  const [col, setCol] = useState(null);
   const [onlyMine, setOnlyMine] = useState(false);
   const [region, setRegion] = useState(null);
   const [open, setOpen] = useState(null);
@@ -147,11 +159,12 @@ export default function DexScreen({ navigation }) {
     let l = PIECES;
     if (slot) l = l.filter((p) => p.slots.includes(slot));
     if (power) l = l.filter((p) => p.power === power);
+    if (col) l = l.filter((p) => p.col === col);
     if (onlyMine) l = l.filter((p) => owned[p.k]);
     if (region) l = l.filter((p) => regionOf(p) === region);
     // 모은 것 먼저, 그다음 귀한 순
     return [...l].sort((a, b) => (owned[b.k] ? 1 : 0) - (owned[a.k] ? 1 : 0) || b.rare - a.rare);
-  }, [slot, power, onlyMine, region, store]);
+  }, [slot, power, col, onlyMine, region, store]);
   const cols = width > 700 ? 6 : width > 460 ? 4 : 3;
   const cell = (Math.min(width, 900) - 32) / cols;
   const bySlot = useMemo(() => {
@@ -283,6 +296,15 @@ export default function DexScreen({ navigation }) {
             {POWERS.map((pw) => (
               <Pressable key={pw} onPress={() => setPower(power === pw ? null : pw)} style={[st.chip, power === pw && st.chipOn]}>
                 <Text style={[st.chipTxt, power === pw && st.chipTxtOn]}>{t(powerTag(pw))}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.chips}>
+            <Text style={[st.chipTxt, { alignSelf: 'center', marginRight: 2 }]}>{t('색으로 찾기')}</Text>
+            {COLORS.map(([c, hex]) => (
+              <Pressable key={c} accessibilityLabel={t(c)} onPress={() => setCol(col === c ? null : c)} style={[st.chip, col === c && st.chipOn, { flexDirection: 'row', alignItems: 'center', gap: 5 }]}>
+                <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: hex, borderWidth: 1, borderColor: '#00000033' }} />
+                <Text style={[st.chipTxt, col === c && st.chipTxtOn]}>{t(c)}</Text>
               </Pressable>
             ))}
           </ScrollView>

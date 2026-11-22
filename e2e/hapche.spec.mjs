@@ -207,6 +207,7 @@ test('유물 합체: 유물 수수께끼를 풀면 조각을 얻거나 정답을
 test('유물 합체: 도감의 우리 땅 지도에서 지역을 누르면 그곳 조각만 보인다', async ({ page }) => {
   await openHome(page);
   await page.getByText('조각 도감', { exact: true }).filter({ visible: true }).first().click();
+  await page.getByLabel('초록').click();
   await page.getByText('우리 땅 지도').click();
   await expect(page.getByTestId('region-map')).toBeVisible();
   await page.getByLabel('경상북도').click();
