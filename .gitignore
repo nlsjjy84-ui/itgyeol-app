@@ -62,3 +62,5 @@ shots/
 
 # 업체 견적용 파일(메일 첨부용, 저장소에 올리지 않음)
 견적*/
+node_modules
+vid_tmp.mjs
