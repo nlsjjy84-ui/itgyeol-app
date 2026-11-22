@@ -1,7 +1,7 @@
 // 웹: 합체 영상을 실제 영상 파일(mp4 또는 webm)로 저장한다.
 // 앱 화면과 같은 대본(hapche.js)을 캔버스에 다시 그리고, 효과음까지 섞어 녹화한다. 자막은 영상 안에 새긴다.
 import { Asset } from 'expo-asset';
-import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf } from './hapche';
+import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf, sceneKind, sceneAt } from './hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { t } from '../i18n';
 
@@ -55,6 +55,53 @@ function wrap(ctx, text, maxW) {
   return out;
 }
 
+// 출동 장면(영상용) — 화면(HapcheStage Scenery)과 같은 모양
+function pill(ctx, x, y, w, h) {
+  const r = Math.min(w, h) / 2;
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fill();
+}
+function drawScenery(ctx, kind, a, time, S) {
+  if (a <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = a;
+  if (kind === 'sea') {
+    ctx.fillStyle = 'rgba(253,243,196,0.85)';
+    ctx.beginPath();
+    ctx.arc(S * 0.12, S * 0.2, S * 0.06, 0, Math.PI * 2);
+    ctx.fill();
+    ['rgba(45,111,143,0.85)', 'rgba(36,93,122,0.85)', 'rgba(27,74,99,0.85)'].forEach((c, i) => {
+      ctx.fillStyle = c;
+      pill(ctx, -S * 0.2 + Math.sin(time * (1.2 + i * 0.3) + i) * S * 0.06, S * (0.74 + i * 0.08), S * 1.4, S * 0.3);
+    });
+  } else if (kind === 'sky') {
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    for (let i = 0; i < 4; i++) {
+      const x = ((((i * 0.31 + 0.1) - time * 0.04 * (1 + i * 0.2)) % 1.3) + 1.3) % 1.3 - 0.2;
+      pill(ctx, x * S, S * (0.12 + ((i * 0.23) % 0.7)), S * (0.22 + (i % 2) * 0.08), S * 0.07);
+    }
+  } else if (kind === 'space') {
+    ctx.fillStyle = 'rgba(91,74,138,0.8)';
+    ctx.beginPath();
+    ctx.arc(S * 0.17, S * 0.73, S * 0.11, 0, Math.PI * 2);
+    ctx.fill();
+    for (let i = 0; i < 24; i++) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.4 + 0.5 * Math.abs(Math.sin(time * 3 + i))) + ')';
+      ctx.fillRect(((i * 53) % 100) * S / 100, ((i * 37) % 100) * S / 100, 2, 2);
+    }
+  } else {
+    ctx.fillStyle = 'rgba(246,196,106,0.75)';
+    ctx.beginPath();
+    ctx.arc(S * 0.125, S * 0.195, S * 0.065, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(63,107,67,0.85)';
+    pill(ctx, -S * 0.2, S * 0.8, S * 0.8, S * 0.5);
+    ctx.fillStyle = 'rgba(53,92,57,0.9)';
+    pill(ctx, S * 0.4, S * 0.84, S * 0.9, S * 0.5);
+  }
+  ctx.restore();
+}
+
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -105,6 +152,7 @@ export function drawFrame(ctx, S, tl, imgs, time) {
     ctx.ellipse(S / 2, S * 0.89, S * 0.28, S * 0.03, 0, 0, Math.PI * 2);
     ctx.fill();
   }
+  drawScenery(ctx, sceneKind(tl.frame.id), sceneAt(tl, time), time, S);
   if (tl.frame.stars)
     for (let i = 0; i < 30; i++) {
       ctx.fillStyle = 'rgba(255,255,255,' + (0.3 + 0.5 * Math.abs(Math.sin(time * 2 + i))) + ')';
@@ -365,11 +413,23 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertic
   });
 }
 
+// 한글 파일 이름은 브라우저·운영체제에 따라 「download」로 바뀌어 받아지는 일이 있다(시험에서 확인) —
+// 받는 파일 이름은 늘 영문으로 만들고, 날짜·시각을 붙여 겹치지 않게 한다.
+const KO_WORD = [['잇결', 'itgyeol'], ['작품사진', 'photo'], ['종이키트', 'paperkit'], ['이야기', 'story'], ['세로', 'vertical']];
+export function safeName(name) {
+  const dot = name.lastIndexOf('.');
+  const ext = dot > 0 ? name.slice(dot) : '';
+  let base = dot > 0 ? name.slice(0, dot) : name;
+  KO_WORD.forEach(([k, e]) => (base = base.split(k).join(e)));
+  base = base.replace(/[^A-Za-z0-9_-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || 'itgyeol';
+  const d = new Date();
+  const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}${String(d.getSeconds()).padStart(2, '0')}`;
+  return `${base}_${stamp}${ext}`;
+}
 export function downloadBlob(url, name) {
   const a = document.createElement('a');
   a.href = url;
-  a.download = name;
-  a.rel = 'noopener';
+  a.download = safeName(name);
   a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
@@ -616,4 +676,15 @@ export async function exportStory({ part, pages, resolve, art, chars, charAr, fl
     };
     requestAnimationFrame(step);
   });
+}
+
+// 작품 사진(포스터) — 합체가 끝나고 출동 장면이 다 펼쳐진 순간을 1080×1080 PNG 한 장으로
+export async function posterPng(tl, { size = 1080 } = {}) {
+  const imgs = {};
+  await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
+  const c = document.createElement('canvas');
+  c.width = size;
+  c.height = size;
+  drawFrame(c.getContext('2d'), size, tl, imgs, Math.min(tl.dur - 0.05, tl.titleT + 2.4));
+  return new Promise((res) => c.toBlob((b) => res(b ? URL.createObjectURL(b) : null), 'image/png'));
 }

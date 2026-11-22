@@ -211,3 +211,20 @@ test('유물 합체: 도감의 우리 땅 지도에서 지역을 누르면 그�
   await page.getByLabel('경상북도').click();
   await expect(page.getByText('나온 곳: 경상북도 ✕')).toBeVisible();
 });
+
+test('유물 합체: 작품 사진(PNG)을 저장하면 출동 장면이 담긴 그림 파일이 내려받아진다', async ({ page }) => {
+  await page.goto('/?m=' + encodeURIComponent('whale~5~n42506.n69779.n26363.n7732.n91260.n112600.g367533'));
+  const btn = page.getByText('작품 사진 저장 (PNG)').filter({ visible: true }).first();
+  for (let i = 0; i < 40 && !(await btn.isVisible().catch(() => false)); i += 1) {
+    const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+    if (await agree.count()) await agree.first().click().catch(() => {});
+    else await page.waitForTimeout(250);
+  }
+  const [dl] = await Promise.all([page.waitForEvent('download'), btn.click()]);
+  expect(dl.suggestedFilename()).toMatch(/^itgyeol_photo_.*\d{8}-\d{6}\.png$/);
+  const path = await dl.path();
+  const fs = await import('fs');
+  const buf = fs.readFileSync(path);
+  expect(buf.slice(1, 4).toString()).toBe('PNG');
+  fs.copyFileSync(path, '/tmp/poster_e2e.png');
+});

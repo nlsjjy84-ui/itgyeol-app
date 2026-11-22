@@ -348,6 +348,20 @@ export function threadAt(th, time) {
   return Math.min(1, (time - th.t) / 0.28);
 }
 
+// 출동 장면 — 합체가 끝나면 박물관 밤 무대가 작품이 떠나는 세상으로 바뀐다(바다·하늘·우주·들판)
+const SCENE = {
+  sea: ['seaship', 'submarine', 'whale', 'sub2', 'wave', 'lighthouse'],
+  sky: ['skyship', 'jet', 'drone', 'kite', 'phoenix', 'bird', 'drone2', 'butterfly', 'dragon', 'snake', 'fan'],
+  space: ['station', 'star', 'rocket', 'top'],
+};
+export function sceneKind(frameId) {
+  return Object.keys(SCENE).find((k) => SCENE[k].includes(frameId)) || 'land';
+}
+// 0~1 — 제목이 뜬 뒤 1.2초 동안 바깥 세상으로 넘어간다
+export function sceneAt(tl, time) {
+  return Math.max(0, Math.min(1, (time - tl.titleT) / 1.2));
+}
+
 export function subAt(tl, time) {
   return tl.subs.find((s) => time >= s.t0 && time < s.t1) || null;
 }

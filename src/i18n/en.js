@@ -4,6 +4,7 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "작품 사진 저장 (PNG)": "Save a photo of the work (PNG)",
   "우리 땅 지도": "Map of Korea",
   "유물이 땅속에서 나온 곳이에요. 칸을 누르면 그곳 조각만 볼 수 있어요.": "Where artifacts were dug up. Tap a square to see only pieces from there.",
   "경기": "Gyeonggi",

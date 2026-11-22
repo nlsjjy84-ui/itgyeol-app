@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
 import { say, hush, useNarrate } from '../utils/narrate';
-import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
+import { sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { play, stop } from '../utils/sound';
 import { t } from '../i18n';
@@ -142,6 +142,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
         />
       ))}
       {time >= tl.lockT ? <View style={[st.shadow, { left: size * 0.22, top: size * 0.86, width: size * 0.56, height: size * 0.06, borderRadius: size * 0.3 }]} /> : null}
+      <Scenery kind={sceneKind(tl.frame.id)} a={sceneAt(tl, time)} time={time} size={size} />
       {tl.frame.stars &&
         Array.from({ length: 30 }, (_, i) => (
           <View key={'s' + i} style={[st.star, { left: ((i * 137) % 100) + '%', top: ((i * 71) % 100) + '%', opacity: 0.3 + 0.5 * Math.abs(Math.sin(time * 2 + i)) }]} />
@@ -259,6 +260,50 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
           <Text style={st.replayTxt}>{t('▶ 다시 보기')}</Text>
         </Pressable>
       )}
+    </View>
+  );
+}
+
+// 출동 장면(화면용) — 저장 영상(movieExport.web.js drawScenery)과 같은 모양
+function Scenery({ kind, a, time, size }) {
+  if (a <= 0) return null;
+  const S = size;
+  if (kind === 'sea')
+    return (
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: a }]}>
+        <View style={{ position: 'absolute', left: S * 0.06, top: S * 0.14, width: S * 0.12, height: S * 0.12, borderRadius: S, backgroundColor: '#fdf3c4', opacity: 0.85 }} />
+        {[0, 1, 2].map((i) => (
+          <View
+            key={i}
+            style={{ position: 'absolute', left: -S * 0.2, top: S * (0.74 + i * 0.08), width: S * 1.4, height: S * 0.3, borderRadius: S * 0.15, backgroundColor: ['#2d6f8f', '#245d7a', '#1b4a63'][i], opacity: 0.85, transform: [{ translateX: Math.sin(time * (1.2 + i * 0.3) + i) * S * 0.06 }] }}
+          />
+        ))}
+      </View>
+    );
+  if (kind === 'sky')
+    return (
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: a }]}>
+        {[0, 1, 2, 3].map((i) => {
+          const x = ((((i * 0.31 + 0.1) - time * 0.04 * (1 + i * 0.2)) % 1.3) + 1.3) % 1.3 - 0.2;
+          return <View key={i} style={{ position: 'absolute', left: x * S, top: S * (0.12 + ((i * 0.23) % 0.7)), width: S * (0.22 + (i % 2) * 0.08), height: S * 0.07, borderRadius: S, backgroundColor: '#ffffff', opacity: 0.55 }} />;
+        })}
+      </View>
+    );
+  if (kind === 'space')
+    return (
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: a }]}>
+        <View style={{ position: 'absolute', left: S * 0.06, top: S * 0.62, width: S * 0.22, height: S * 0.22, borderRadius: S, backgroundColor: '#5b4a8a', opacity: 0.8 }} />
+        <View style={{ position: 'absolute', left: S * 0.01, top: S * 0.72, width: S * 0.32, height: S * 0.03, borderRadius: S, backgroundColor: '#c7b8ef', opacity: 0.6, transform: [{ rotate: '-12deg' }] }} />
+        {Array.from({ length: 24 }, (_, i) => (
+          <View key={i} style={{ position: 'absolute', left: ((i * 53) % 100) * S / 100, top: ((i * 37) % 100) * S / 100, width: 2, height: 2, backgroundColor: '#fff', opacity: 0.4 + 0.5 * Math.abs(Math.sin(time * 3 + i)) }} />
+        ))}
+      </View>
+    );
+  return (
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: a }]}>
+      <View style={{ position: 'absolute', left: S * 0.06, top: S * 0.13, width: S * 0.13, height: S * 0.13, borderRadius: S, backgroundColor: '#f6c46a', opacity: 0.75 }} />
+      <View style={{ position: 'absolute', left: -S * 0.2, top: S * 0.8, width: S * 0.8, height: S * 0.5, borderRadius: S, backgroundColor: '#3f6b43', opacity: 0.85 }} />
+      <View style={{ position: 'absolute', left: S * 0.4, top: S * 0.84, width: S * 0.9, height: S * 0.5, borderRadius: S, backgroundColor: '#355c39', opacity: 0.9 }} />
     </View>
   );
 }
