@@ -8,7 +8,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { ItgyeolScene, jangdanName } from './scene';
-import { PLAYS, STEPS, GALLERY, ARCHIVE, NUMBERS } from './content';
+import { PLAYS, STEPS, GALLERY, ARCHIVE, NUMBERS, HAPCHE } from './content';
 
 declare const __IMG__: Record<string, string>; // 빌드가 넣는 그림 주소표
 declare const __APP__: string; // 앱 주소
@@ -25,7 +25,8 @@ const SECTIONS: Sec[] = [
   { id: 'hero', scene: [0, 0.1], shift: -0.18, veil: 'left' },
   { id: 'play', scene: [0.1, 0.4], shift: -0.24, veil: 'left' },
   { id: 'process', scene: [0.4, 0.58], shift: 0, veil: 'soft' },
-  { id: 'works', scene: [0.58, 0.8], shift: 0, veil: 'center' },
+  { id: 'works', scene: [0.58, 0.74], shift: 0, veil: 'center' },
+  { id: 'hapche', scene: [0.74, 0.8], shift: 0.2, veil: 'soft' },
   { id: 'archive', scene: [0.8, 0.86], shift: 0, veil: 'soft' },
   { id: 'rule', scene: [0.86, 0.9], shift: 0.18, veil: 'right' },
   { id: 'numbers', scene: [0.9, 0.95], shift: 0, veil: 'soft' },
@@ -53,6 +54,9 @@ function html() {
   const archiveRow = (list: string[]) =>
     [0, 1].map(() => `<span>${list.map((a) => `<img src="${img(a)}" alt="" loading="lazy">`).join('')}</span>`).join('');
   const half = Math.ceil(ARCHIVE.length / 2);
+  const pieces = HAPCHE.map(
+    (h, i) => `<img class="ig-piece" data-i="${i}" src="${img(h.img)}" alt="${h.name}" loading="lazy" style="left:${h.x / 10}%;top:${h.y / 10}%;width:${h.w / 10}%;z-index:${h.z}">`,
+  ).join('');
   const numbers = NUMBERS.map(
     (n, i) => `<div class="ig-number" data-reveal="${i}"><strong><b data-to="${n.to}">0</b><small>${n.unit}</small></strong><span>${n.label}</span></div>`,
   ).join('');
@@ -95,6 +99,18 @@ function html() {
         <p class="ig-kicker" data-reveal="0">결과물</p>
         <h2 class="ig-huge" data-reveal="1">같은 놀이도,<br><em>사람마다 다른 작품</em></h2>
         <p data-reveal="2">노리개 · 비녀 · 달항아리 · 범종 · 부채… 놀이가 모양을 빚는 결과물 49가지를 청자 · 나전 · 옻칠 · 유기 같은 실제 전통 재료 35가지로 빚습니다. 뒤에 도는 35점은 결과물 종류마다 하나씩, 가상의 놀이 기록으로 빚은 예시 작품입니다.</p>
+      </div>
+    </section>
+
+    <section class="ig-sec ig-sec-hapche">
+      <div class="ig-hapin">
+        <div class="ig-hapcopy">
+          <p class="ig-kicker">새 장르 · 유물 합체</p>
+          <h2>놀아서 얻은 진짜 유물 조각이<br><em>날아와 합체하고, 영상이 됩니다.</em></h2>
+          <p>국립중앙박물관 · 국립고궁박물관 · 클리블랜드 미술관의 유물 2,890점을 배경만 지운 조각으로. 조각마다 머리 · 몸통 · 무기 같은 자리가 박물관 기록으로 정해지고, 장단에 맞춰 철컥 끼워지면 바다 · 하늘 · 우주로 출동하는 이야기 영상과 자막이 저절로 만들어집니다.</p>
+          <p class="ig-hapline">오늘의 보따리 · 이달의 시리즈 · 진짜 유물 찾기(소장품번호) · 유물 수수께끼 · 친구와 조각 바꾸기</p>
+        </div>
+        <div class="ig-hapstage" aria-label="진짜 유물 조각으로 합체한 수호 장군">${pieces}<span class="ig-hapflash"></span><p class="ig-haptitle">흙결 수호 장군 「청화호」</p></div>
       </div>
     </section>
 
@@ -166,6 +182,11 @@ export function mount(root: HTMLElement) {
   const track = $<HTMLElement>('.ig-htrack');
   const counters = $$<HTMLElement>('.ig-number b');
   const threads = $$<SVGPathElement>('.ig-thread path');
+  const hapSec = $<HTMLElement>('.ig-sec-hapche');
+  const hapPieces = $$<HTMLElement>('.ig-piece');
+  const hapFlash = $<HTMLElement>('.ig-hapflash');
+  const hapTitle = $<HTMLElement>('.ig-haptitle');
+  const numSec = $<HTMLElement>('.ig-sec-numbers');
   let target = 0, current = 0, shown = -1, lastName = '', lastTime = -1;
 
   const read = () => {
@@ -175,7 +196,7 @@ export function mount(root: HTMLElement) {
       const r = el.getBoundingClientRect();
       if (r.top <= mid) {
         idx = i;
-        local = SECTIONS[i].id === 'play' ? clamp(-r.top / Math.max(1, r.height - vh)) : clamp((mid - r.top) / Math.max(1, r.height));
+        local = SECTIONS[i].id === 'play' || SECTIONS[i].id === 'hapche' ? clamp(-r.top / Math.max(1, r.height - vh)) : clamp((mid - r.top) / Math.max(1, r.height));
       }
     });
     const sec = SECTIONS[idx];
@@ -196,8 +217,22 @@ export function mount(root: HTMLElement) {
       const d = clamp((vh * 0.85 - r.top) / (vh * 0.4));
       path.style.strokeDashoffset = String(1 - d);
     });
+    // 유물 합체: 스크롤만큼 조각이 화면 밖에서 날아와 제자리에 끼워진다(머리가 마지막)
+    const hr = hapSec.getBoundingClientRect();
+    const hk = clamp(-hr.top / Math.max(1, hr.height - vh));
+    hapPieces.forEach((el, i) => {
+      const h = HAPCHE[i];
+      const p = smooth((hk - (i / HAPCHE.length) * 0.55) / 0.33); // 머리(마지막)까지 스크롤 85%쯤에 다 끼워진다
+      const dx = (1 - p) * h.from[0] * 120, dy = (1 - p) * h.from[1] * 120;
+      const rot = (h.rot || 0) + (1 - p) * (i % 2 ? 160 : -160);
+      el.style.transform = `translate(-50%,-50%) translate(${dx}vmin,${dy}vmin) rotate(${rot}deg) scaleX(${h.flip ? -1 : 1})`;
+      el.style.opacity = String(clamp(p * 3));
+    });
+    const done = clamp((hk - 0.86) / 0.08);
+    hapFlash.style.opacity = String(done > 0 && done < 1 ? 1 - Math.abs(done - 0.5) * 2 : 0);
+    hapTitle.style.opacity = String(done);
     // 숫자
-    const nr = secs[6].getBoundingClientRect();
+    const nr = numSec.getBoundingClientRect();
     const nk = smooth((vh * 0.85 - nr.top) / (vh * 0.6));
     counters.forEach((el, i) => {
       const val = Math.round(Number(el.dataset.to) * smooth(nk * 1.4 - i * 0.1));

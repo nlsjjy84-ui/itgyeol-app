@@ -26,7 +26,28 @@ export const NUMBERS = [
   { to: 6, unit: '판', label: '진법 · 인쇄 · 전래놀이 · 한글 · 탈춤 · 단청' },
   { to: 12, unit: '종', label: '조작이 모두 다른 전래놀이' },
   { to: 121, unit: '점', label: '실제 유물 자료실' },
+  { to: 2890, unit: '점', label: '배경을 지운 진짜 유물 조각 — 유물 합체' },
+  { to: 36, unit: '가지', label: '합체 틀 22 · 변형 14' },
   { to: 49, unit: '가지', label: '놀이가 모양을 빚는 결과물' },
   { to: 35, unit: '가지', label: '청자 · 나전 · 옻칠 · 유기 같은 실제 전통 재료' },
   { to: 4, unit: '개 언어', label: '한국어 · English · 中文 · 日本語' },
+];
+
+// 새 장르 · 유물 합체 — 스크롤하면 진짜 유물 조각(국립중앙박물관 공공누리 제1유형)이 날아와 「수호 장군」으로 합체한다.
+// 왼쪽 글을 가로지르지 않게 조각은 위·아래·오른쪽에서 날아온다. x·y·w는 앱의 수호 장군 틀(src/data/frames.js guardian)과 같은 1000 칸 좌표, from은 날아오기 시작하는 쪽(화면 밖)
+export const HAPCHE = [
+  { img: 'hp_leg', name: '석탑', x: 420, y: 700, w: 200, from: [-0.3, 0.6], z: 1 },
+  { img: 'hp_leg', name: '석탑', x: 580, y: 700, w: 200, from: [0.9, 0.7], z: 1, flip: true },
+  { img: 'hp_foot', name: '맷돌', x: 400, y: 880, w: 170, from: [-0.3, 1.2], z: 1 },
+  { img: 'hp_foot', name: '맷돌', x: 600, y: 880, w: 170, from: [0.8, 1.2], z: 1, flip: true },
+  { img: 'hp_body', name: '청화백자 거북무늬 항아리', x: 500, y: 430, w: 330, from: [0.0, 1.3], z: 2 },
+  { img: 'hp_chest', name: '청동 꾸미개', x: 500, y: 400, w: 160, from: [0.2, -1.2], z: 4 },
+  { img: 'hp_sh', name: '청자 기와', x: 320, y: 290, w: 190, from: [-0.3, -0.6], z: 3, rot: -18 },
+  { img: 'hp_sh', name: '청자 기와', x: 680, y: 290, w: 190, from: [1.1, -0.6], z: 3, rot: 18, flip: true },
+  { img: 'hp_arm', name: '칼', x: 255, y: 470, w: 70, from: [-0.3, 0.1], z: 3 },
+  { img: 'hp_arm', name: '칼', x: 745, y: 470, w: 70, from: [1.2, 0.1], z: 3, flip: true },
+  { img: 'hp_shield', name: '청동 거울', x: 190, y: 560, w: 230, from: [-0.3, 0.4], z: 5 },
+  { img: 'hp_weapon', name: '창', x: 830, y: 440, w: 200, from: [1.3, -0.2], z: 5, rot: 20 },
+  { img: 'hp_crown', name: '금귀걸이', x: 500, y: 70, w: 170, from: [0.0, -1.4], z: 3 },
+  { img: 'hp_head', name: '용머리상', x: 500, y: 200, w: 200, from: [0.0, -1.6], z: 6 },
 ];
