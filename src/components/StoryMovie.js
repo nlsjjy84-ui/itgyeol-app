@@ -9,6 +9,7 @@ import Text from '../ui/Text';
 import { ART } from '../ui/StoryScene';
 import { PIECES } from '../data/pieces';
 import { t } from '../i18n';
+import { playLoop, stop } from '../utils/sound';
 
 export const CHAR = {
   pung: require('../../assets/characters/pung_cut.png'),
@@ -55,6 +56,12 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
   const [stage, setStage] = useState({ kind: 'lines', i: 0 }); // lines | wait | react | done
   const [picked, setPicked] = useState(null);
   const [paused, setPaused] = useState(false);
+  // 잔잔한 바탕 음악 — 효과음 없이, 목소리 밑에 작게 깔고 멈추면 같이 멈춘다
+  useEffect(() => {
+    if (paused) stop('bgmStory');
+    else playLoop('bgmStory', 0.28);
+  }, [paused]);
+  useEffect(() => () => stop('bgmStory'), []);
   const [now, setNow] = useState(0); // 이 쪽이 시작된 뒤 흐른 시간(초)
   const [lineStart, setLineStart] = useState(0);
   const base = useRef(Date.now());

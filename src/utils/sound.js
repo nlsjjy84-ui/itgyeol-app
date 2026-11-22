@@ -34,6 +34,8 @@ const FILES = {
   bgmSea: require('../../assets/sfx/bgm_sea.wav'), // 중모리(바다)
   bgmSky: require('../../assets/sfx/bgm_sky.wav'), // 자진모리(하늘)
   bgmSpace: require('../../assets/sfx/bgm_space.wav'), // 세마치(우주)
+  // 이야기 영상 바탕 — 평조 다섯 음을 가야금처럼 뜯는 잔잔한 64초 고리(tools/voice/make_story_bgm.py로 직접 만듦)
+  bgmStory: require('../../assets/sfx/bgm_story.mp3'),
   clankMetal: require('../../assets/sfx/clank_metal.wav'), // 쇠 — 쨍
   clankClay: require('../../assets/sfx/clank_clay.wav'), // 흙·도자기 — 탁
   clankStone: require('../../assets/sfx/clank_stone.wav'), // 돌·옥 — 딱
@@ -82,5 +84,23 @@ export function stop(name) {
     p.seekTo(0);
   } catch (e) {
     // 멈추지 못해도 체험은 계속된다
+  }
+}
+
+// 배경음악을 작게, 끝없이 돌린다(이야기 영상처럼 목소리 밑에 까는 음악)
+export function playLoop(name, volume = 0.35) {
+  if (muted || !createAudioPlayer || !FILES[name]) return;
+  try {
+    let p = players[name];
+    if (!p) {
+      p = createAudioPlayer(FILES[name]);
+      players[name] = p;
+    }
+    p.loop = true;
+    p.volume = volume;
+    const r = p.play();
+    if (r && typeof r.catch === 'function') r.catch(() => {});
+  } catch (e) {
+    // 소리가 안 나도 체험은 계속된다
   }
 }
