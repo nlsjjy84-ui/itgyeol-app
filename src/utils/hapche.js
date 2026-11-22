@@ -510,7 +510,7 @@ export function tagsAt(tl, time) {
 
 // 빈 자리를 내가 가진 조각으로 채운다 — 자리 맞음 > 모양 맞음 > 아무거나
 // 변신 짝 — 로봇·동물 ↔ 탈것
-export const MORPH_TO = { guardian: 'car', car: 'guardian', suit: 'jet', jet: 'suit', janggu: 'train', train: 'janggu', haechi: 'car', tiger: 'car', beast: 'drone', drone: 'beast', turtle: 'submarine', submarine: 'turtle', dragon: 'skyship', skyship: 'dragon', phoenix: 'jet', seaship: 'whale', whale: 'seaship', fortress: 'station', station: 'fortress', lighthouse: 'seaship', kite: 'phoenix', palanquin: 'train', hwacha: 'rocket', jangseung: 'guardian', cheomseong: 'rocket' };
+export const MORPH_TO = { guardian: 'car', car: 'guardian', suit: 'jet', jet: 'suit', janggu: 'train', train: 'janggu', haechi: 'car', tiger: 'car', beast: 'drone', drone: 'beast', turtle: 'submarine', submarine: 'turtle', dragon: 'skyship', skyship: 'dragon', phoenix: 'jet', seaship: 'whale', whale: 'seaship', fortress: 'station', station: 'fortress', lighthouse: 'seaship', kite: 'phoenix', palanquin: 'train', hwacha: 'car', jangseung: 'guardian', cheomseong: 'station' };
 // 앞 작품의 조각을 새 틀의 자리에 다시 나눈다(자리에 맞는 조각 먼저, 모자라면 남은 것, 그래도 모자라면 다시 쓴다)
 export function morphAssign(fromId, fromAssign, toId) {
   const to = FRAME_BY_ID[toId];

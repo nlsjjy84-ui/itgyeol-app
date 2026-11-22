@@ -16,7 +16,7 @@ import { usePieces, removeWork, giveAway, currentSeries, dailyState } from '../u
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
-import { SLOT_INFO, SLOT_NAMES, FRAME_BY_ID, FRAMES } from '../data/frames';
+import { SLOT_INFO, SLOT_NAMES, FRAME_BY_ID, FRAMES, TRANSFORMS } from '../data/frames';
 import { powerTag, buildTimeline } from '../utils/hapche';
 import { albumPng, downloadBlob } from '../utils/movieExport';
 
@@ -157,6 +157,7 @@ export default function DexScreen({ navigation }) {
   const [region, setRegion] = useState(null);
   const [open, setOpen] = useState(null);
   const owned = store.owned || {};
+  const madeFrames = new Set((store.works || []).map((w) => w.frameId).filter((id) => FRAME_BY_ID[id]));
   const ownedN = Object.keys(owned).length;
   const list = useMemo(() => {
     let l = PIECES;
@@ -248,6 +249,7 @@ export default function DexScreen({ navigation }) {
           ['pieces', t('조각')],
           ['map', t('우리 땅 지도')],
           ['works', t('내 작품 {n}', { n: (store.works || []).length })],
+          ['frames', t('틀 모음 {a}/{b}', { a: madeFrames.size, b: FRAMES.length + TRANSFORMS.length })],
         ].map(([id, label]) => (
           <Pressable key={id} onPress={() => setTab(id)} style={[st.tab, tab === id && st.tabOn]}>
             <Text style={[st.tabTxt, tab === id && st.tabTxtOn]}>{label}</Text>
@@ -348,6 +350,35 @@ export default function DexScreen({ navigation }) {
     </View>
   );
 
+  if (tab === 'frames') {
+    // 틀 모음 — 만들어 본 틀에는 도장(✓), 아직 안 만든 틀은 눌러서 바로 작업대로
+    const all = [...FRAMES, ...TRANSFORMS];
+    return (
+      <SafeAreaView style={st.safe}>
+        <ScrollView contentContainerStyle={st.wrap}>
+          {header}
+          <Text style={st.framesNote}>{t('만들어 본 틀 {a}가지 / 모두 {b}가지 — 안 만든 틀을 눌러 바로 합체해 봐요.', { a: madeFrames.size, b: all.length })}</Text>
+          <View style={st.framesGrid} testID="frames-grid">
+            {all.map((f) => {
+              const made = madeFrames.has(f.id);
+              return (
+                <Pressable
+                  key={f.id}
+                  accessibilityLabel={t(f.name)}
+                  onPress={() => navigation.navigate('Workshop', f.parts ? { mode: 'transform', frame: f.id } : { frame: f.id })}
+                  style={[st.frameCard, { backgroundColor: f.bg || '#222', width: cols >= 6 ? '23%' : cols >= 4 ? '31%' : '47%' }, made && st.frameMade]}
+                >
+                  <Text style={st.frameKind}>{t(f.kind)}</Text>
+                  <Text style={st.frameName}>{t(f.name)}</Text>
+                  <Text style={[st.frameStamp, made && st.frameStampOn]}>{made ? t('✓ 만들었어요') : t('아직')}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
   if (tab === 'works') {
     const works = store.works || [];
     return (
@@ -453,6 +484,14 @@ export default function DexScreen({ navigation }) {
 }
 
 const st = StyleSheet.create({
+  framesNote: { fontSize: 15, color: colors.muted, marginTop: 12, lineHeight: 22 },
+  framesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 12 },
+  frameCard: { borderRadius: 14, padding: 12, minHeight: 96, justifyContent: 'space-between', borderWidth: 2, borderColor: 'transparent', opacity: 0.78 },
+  frameMade: { borderColor: '#f2c75c', opacity: 1 },
+  frameKind: { fontSize: 12, color: '#ffffffaa' },
+  frameName: { fontSize: 16, fontWeight: '700', color: '#fff', marginTop: 2 },
+  frameStamp: { fontSize: 12, color: '#ffffff88', marginTop: 8 },
+  frameStampOn: { color: '#f2c75c', fontWeight: '700' },
   searchRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, marginHorizontal: 16, paddingHorizontal: 12, borderRadius: 22, backgroundColor: '#fffaf2', borderWidth: 1, borderColor: '#d9cbb6', gap: 8 },
   searchIcon: { fontSize: 18, color: '#6b5d4f' },
   searchInput: { flex: 1, fontSize: 16, paddingVertical: 10, color: '#2a221c', outlineStyle: 'none' },

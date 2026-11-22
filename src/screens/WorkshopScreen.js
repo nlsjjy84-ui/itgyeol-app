@@ -33,7 +33,7 @@ export default function WorkshopScreen({ navigation, route }) {
   const store = usePieces();
   const params = route.params || {};
   const [mode, setMode] = useState(params.mode === 'transform' ? 'transform' : params.mode === 'free' ? 'free' : 'hapche');
-  const [frameId, setFrameId] = useState(params.mode === 'transform' ? 'rocket' : params.frame && FRAME_BY_ID[params.frame] ? params.frame : 'guardian');
+  const [frameId, setFrameId] = useState(params.mode === 'transform' ? (params.frame && FRAME_BY_ID[params.frame] && FRAME_BY_ID[params.frame].parts ? params.frame : 'rocket') : params.frame && FRAME_BY_ID[params.frame] ? params.frame : 'guardian');
   const mission = params.mission ? todayMission() : null;
   const [assign, setAssign] = useState({});
   const [picking, setPicking] = useState(null); // 슬롯 key

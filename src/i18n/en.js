@@ -4,6 +4,10 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "틀 모음 {a}/{b}": "Frames {a}/{b}",
+  "만들어 본 틀 {a}가지 / 모두 {b}가지 — 안 만든 틀을 눌러 바로 합체해 봐요.": "You've made {a} of {b} frames — tap one you haven't made to start combining.",
+  "✓ 만들었어요": "✓ Made",
+  "아직": "Not yet",
   "이 조각으로 「{a}」 합체하기": "Combine into the “{a}” with this piece",
   "빙글빙글 돌며 마을 논에 물을 골고루 나눠 주었어": "turned round and round and shared water evenly with the village rice fields",
   "냇물 위에 줄지어 누워 아이들이 신나게 건너가게 해 주었어": "lay in a row across the stream so the children could hop across",
