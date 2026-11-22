@@ -14,7 +14,8 @@ const QUIET = 'itgyeol_aiguide_quiet';
 const TOUR = 'long'; // 예전 「10분 자세히」 열두 곳 — 3분·10분·평가자용으로 나누지 않는다
 const OBANG = ['#d9443a', '#e9b42a', '#2c62c9', '#3d8a5a']; // 적·황·청 + 녹(리본 넷)
 // 전시 벽·키오스크는 전시장 화면이라 「길 안내」 글자를 숨긴다(효과는 그대로).
-const QUIET_SCREENS = ['Kiosk', 'ExhibitWall'];
+// Book(이야기 영상)에서는 자막과 겹쳐서 길 안내를 띄우지 않는다(2026-11-23)
+const QUIET_SCREENS = ['Kiosk', 'ExhibitWall', 'Book'];
 
 // 자동 브라우저 테스트에서는 커서를 바꾸지 않는다(테스트가 화면을 그대로 누르게). 주소에 guide=1 이 있으면 켠다.
 const HIDDEN = (() => {
@@ -103,6 +104,7 @@ function Guide({ routeName, navigate, greet = true }) {
   routeRef.current = routeName;
   const runningRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const autoDrove = useRef(false);
   const [quiet, setQuietState] = useState(() => store.get(QUIET, false) === true);
   const [, bump] = useState(0);
   const [light, setLight] = useState(false);
@@ -184,15 +186,19 @@ function Guide({ routeName, navigate, greet = true }) {
   }
 
   // 처음 온 사람에게 한 번 메뉴를 보여 준다. 코스 중이면 이어 간다.
+  // 이야기 영상(Book)처럼 조용한 화면에 처음 들어왔으면, 홈 등 다른 화면에 닿았을 때 그때 한 번 보여 준다.
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (read().course) { drive(); return; }
+      if (read().course) {
+        if (!autoDrove.current && !QUIET_SCREENS.includes(routeRef.current)) { autoDrove.current = true; drive(); }
+        return;
+      }
       if (!greet || QUIET_SCREENS.includes(routeRef.current) || store.get(GREETED, false)) return;
       store.set(GREETED, true);
       setMenuOpen(true);
     }, 1500);
     return () => clearTimeout(timer);
-  }, [greet]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [greet, routeName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resume = Boolean(read().course);
   if (QUIET_SCREENS.includes(routeName) && !menuOpen && !resume) return null;
