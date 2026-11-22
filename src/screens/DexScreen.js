@@ -16,7 +16,7 @@ import { usePieces, removeWork, giveAway, currentSeries, dailyState } from '../u
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 import { PIECES, PIECE_BY_K, RARITY } from '../data/pieces';
-import { SLOT_INFO, SLOT_NAMES, FRAME_BY_ID } from '../data/frames';
+import { SLOT_INFO, SLOT_NAMES, FRAME_BY_ID, FRAMES } from '../data/frames';
 import { powerTag, buildTimeline } from '../utils/hapche';
 import { albumPng, downloadBlob } from '../utils/movieExport';
 
@@ -43,7 +43,16 @@ const REGIONS = [
 ];
 const regionOf = (p) => (p.from ? p.from.split(' - ')[0].replace('제주특별자치도', '제주도') : '');
 
-export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
+// 이 조각이 첫째로 맞는 자리를 가진 합체 틀 하나(조각마다 늘 같은 틀 — 여러 조각을 보면 여러 틀을 만난다)
+export function frameForPiece(p) {
+  if (!p) return null;
+  const fits = FRAMES.filter((f) => f.slots && f.slots.some((sp) => sp.slot === p.slots[0]));
+  if (!fits.length) return null;
+  let h = 0;
+  for (const ch of p.k) h = (h * 31 + ch.charCodeAt(0)) % 9973;
+  return fits[h % fits.length];
+}
+export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapche }) {
   const p = PIECE_BY_K[k];
   const [gift, setGift] = React.useState(null);
   if (!p) return null;
@@ -87,6 +96,9 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform }) {
                 </View>
                 <Text style={st.lic}>{p.abroad ? t('사진: {a} · CC0(누구나 자유롭게 쓸 수 있음) · 해외에 있는 우리 유물', { a: t(p.by) }) : t('사진: {a} · 공공누리 제1유형(출처 표시)', { a: t(p.by) })}</Text>
                 <View style={{ gap: 8, marginTop: 12 }}>
+                  {onHapche && frameForPiece(p) ? (
+                    <SealButton label={t('이 조각으로 「{a}」 합체하기', { a: t(frameForPiece(p).name) })} variant="ink" onPress={() => onHapche(k, frameForPiece(p).id)} />
+                  ) : null}
                   {onTransform && <SealButton label={t('이 조각 하나로 변형하기')} onPress={() => onTransform(k)} />}
                   <SealButton label={t('박물관 원본 페이지 열기')} variant="paper" onPress={() => Linking.openURL(p.page)} />
                   {count > 1 && !gift ? (
@@ -429,6 +441,10 @@ export default function DexScreen({ navigation }) {
           onTransform={(k) => {
             setOpen(null);
             navigation.navigate('Workshop', { mode: 'transform', core: k });
+          }}
+          onHapche={(k, frame) => {
+            setOpen(null);
+            navigation.navigate('Workshop', { frame, lead: k });
           }}
         />
       )}

@@ -4,6 +4,7 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "이 조각으로 「{a}」 합체하기": "Combine into the “{a}” with this piece",
   "빙글빙글 돌며 마을 논에 물을 골고루 나눠 주었어": "turned round and round and shared water evenly with the village rice fields",
   "냇물 위에 줄지어 누워 아이들이 신나게 건너가게 해 주었어": "lay in a row across the stream so the children could hop across",
   "물레방아": "Watermill",

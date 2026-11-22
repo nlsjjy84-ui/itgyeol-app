@@ -43,7 +43,12 @@ export default function WorkshopScreen({ navigation, route }) {
   useEffect(() => {
     if (!ownedKeys.length) return;
     if (mode === 'transform') setAssign((a) => autoAssign(frameId, ownedKeys, { core: params.core && PIECE_BY_K[params.core] ? params.core : a.core }));
-    else setAssign(autoAssign(frameId, ownedKeys, {}, mission && frameId === mission.frameId ? (p) => matches(mission, p) : null));
+    else {
+      // 도감에서 「이 조각으로 합체하기」로 왔으면 — 그 조각을 첫째로 맞는 자리에 먼저 넣는다
+      const lead = params.lead && PIECE_BY_K[params.lead] && frameId === params.frame ? PIECE_BY_K[params.lead] : null;
+      const sp = lead && FRAME_BY_ID[frameId].slots && FRAME_BY_ID[frameId].slots.find((o) => o.slot === lead.slots[0]);
+      setAssign(autoAssign(frameId, ownedKeys, sp ? { [sp.key]: lead.k } : {}, mission && frameId === mission.frameId ? (p) => matches(mission, p) : null));
+    }
   }, [frameId, ownedKeys.length, mode]);
   // 틀을 막 바꾼 순간에는 이전 틀의 자리 배정이 남아 있다 — 이 틀의 자리에 맞는 조각이 하나도 없으면 아직 그리지 않는다(빈 화면 방지)
   const fits = (() => {

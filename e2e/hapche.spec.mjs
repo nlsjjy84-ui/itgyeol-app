@@ -303,6 +303,25 @@ test('유물 합체: 한 시대·같은 빛깔 조각으로 합체하면 이야�
   await expect(page.getByText(/조각 \d+개가 모이자 온몸이 금빛으로 반짝였어/).first()).toBeAttached({ timeout: 15000 });
 });
 
+test('유물 합체: 도감 조각 카드에서 「이 조각으로 합체하기」 — 작업대에 그 조각이 먼저 들어가 있다', async ({ page }) => {
+  const fs = await import('fs');
+  const keys = [...fs.readFileSync('src/data/pieces.js', 'utf8').matchAll(/"k": "([^"]+)"/g)].map((m) => m[1]).slice(0, 300);
+  await page.addInitScript((keys) => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    const owned = {};
+    keys.forEach((k) => (owned[k] = 1));
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned, order: keys, works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  }, keys);
+  await openHome(page);
+  await page.getByText('조각 도감', { exact: true }).filter({ visible: true }).first().click();
+  await page.getByTestId('dex-search').fill('복숭아형연적');
+  await page.getByLabel('백자청화동채복숭아형연적').first().click();
+  await page.getByText(/이 조각으로 「.+」 합체하기/).click();
+  await expect(page.getByText('백자청화동채복숭아형연적').filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText(/자리마다 들어갈 조각/)).toBeVisible();
+});
+
 test('유물 합체: 박물관 현장 QR — 입구(?c=)는 한정을 열고, 진열장(?no=)은 그 유물 조각을 준다', async ({ page }) => {
   const pass = async (url, sel) => {
     await page.goto(url);
