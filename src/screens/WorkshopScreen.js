@@ -81,8 +81,10 @@ export default function WorkshopScreen({ navigation, route }) {
     ? [...ownedKeys].sort((a, b) => {
         const pa = PIECE_BY_K[a];
         const pb = PIECE_BY_K[b];
-        const sa = pa.slots[0] === pickSpec.slot ? 2 : pa.slots.includes(pickSpec.slot) ? 1 : 0;
-        const sb = pb.slots[0] === pickSpec.slot ? 2 : pb.slots.includes(pickSpec.slot) ? 1 : 0;
+        // 미션 중이면 조건에 맞는 조각을 먼저
+        const mb = (q) => (mission && frameId === mission.frameId && matches(mission, q) ? 3 : 0);
+        const sa = (pa.slots[0] === pickSpec.slot ? 2 : pa.slots.includes(pickSpec.slot) ? 1 : 0) + mb(pa);
+        const sb = (pb.slots[0] === pickSpec.slot ? 2 : pb.slots.includes(pickSpec.slot) ? 1 : 0) + mb(pb);
         return sb - sa;
       })
     : [];
@@ -204,6 +206,7 @@ export default function WorkshopScreen({ navigation, route }) {
                         {pieceName(p)}
                       </Text>
                       {fit && <Text style={st.fit}>{t('딱 맞음')}</Text>}
+                      {mission && frameId === mission.frameId && matches(mission, p) ? <Text style={st.missionTag}>{t('미션')}</Text> : null}
                     </Pressable>
                   );
                 }}
@@ -217,6 +220,7 @@ export default function WorkshopScreen({ navigation, route }) {
 }
 
 const st = StyleSheet.create({
+  missionTag: { position: 'absolute', top: 4, right: 4, fontSize: 10, fontWeight: '800', color: '#fff', backgroundColor: '#b3322b', borderRadius: 6, paddingHorizontal: 5, overflow: 'hidden' },
   mission: { backgroundColor: '#20303c', borderRadius: 12, padding: 10, marginTop: 8, gap: 2 },
   missionH: { color: '#f6c46a', fontSize: 13, fontWeight: '700' },
   missionT: { color: '#f6e7c4', fontSize: 14 },

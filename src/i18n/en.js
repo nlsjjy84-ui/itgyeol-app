@@ -4,6 +4,7 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "미션": "Mission",
   "다음 이야기 예고": "Next time",
   "내일 밤, {v} 다시 박물관에 숨어든대요. 내일의 합체 미션은 「{a}」 조각으로 만드는 「{b}」! 보따리를 받고 조각을 모아 둬요.": "Tomorrow night, the {v} will sneak back into the museum. Tomorrow's mission: build the {b} with {a} pieces! Get your bundle and gather pieces.",
   "스미스소니언 국립아시아미술관": "Smithsonian National Museum of Asian Art",
