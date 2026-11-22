@@ -287,3 +287,17 @@ test('유물 합체: 저장한 작품으로 A4 앨범 한 장을 내려받는다
   const fs = await import('fs');
   fs.copyFileSync(await dl.path(), '/tmp/album_e2e.png');
 });
+
+test('유물 합체: 변신 — 수호 장군의 조각 그대로 탈것으로 바뀐다', async ({ page }) => {
+  await page.goto('/?m=' + encodeURIComponent('guardian~5~n42506.n69779.n26363.n7732.n91260.n112600.g367533'));
+  const btn = page.getByText(/^변신! — 같은 조각으로/).filter({ visible: true }).first();
+  for (let i = 0; i < 40 && !(await btn.isVisible().catch(() => false)); i += 1) {
+    const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+    if (await agree.count()) await agree.first().click().catch(() => {});
+    else await page.waitForTimeout(250);
+  }
+  await expect(btn).toContainText('달리는 수레');
+  await btn.click();
+  await expect(page.getByText(/수호 장군, 변신할 시간이야!/).first()).toBeAttached();
+  await expect(page.getByText(/^변신! — 같은 조각으로 「수호 장군」/).filter({ visible: true }).first()).toBeVisible();
+});

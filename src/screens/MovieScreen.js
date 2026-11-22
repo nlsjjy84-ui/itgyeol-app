@@ -10,10 +10,11 @@ import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { pieceName } from '../utils/pieceName';
 import { todayMission, countMatch } from '../utils/mission';
-import { buildTimeline, beatsOf, judge, creditOf, josa, sceneKind, JANGDAN_OF, VILLAINS } from '../utils/hapche';
+import { MORPH_TO, morphAssign, buildTimeline, beatsOf, judge, creditOf, josa, sceneKind, JANGDAN_OF, VILLAINS } from '../utils/hapche';
 import { play } from '../utils/sound';
 import { saveWork, usePieces, missionDone, claimMission } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
+import { FRAME_BY_ID } from '../data/frames';
 import { SLOT_INFO } from '../data/frames';
 import { canExport, exportMovie, downloadBlob, srtOf, paperKit, posterPng } from '../utils/movieExport';
 import { movieUrl } from '../utils/movieLink';
@@ -33,14 +34,14 @@ const GOODS = [
 export default function MovieScreen({ navigation, route }) {
   const { width } = useWindowDimensions();
   const store = usePieces();
-  const { frameId, assign = {}, seed = 1, scene = '', saved, shared, layout, mission: fromMission } = route.params || {};
+  const { frameId, assign = {}, seed = 1, scene = '', saved, shared, layout, mission: fromMission, morphFrom } = route.params || {};
   const [missionWin, setMissionWin] = useState(null);
   useEffect(() => {
     if (!fromMission || saved || shared) return;
     const m = todayMission();
     if (countMatch(m, frameId, assign) >= m.need && !missionDone(m.day)) setMissionWin(claimMission(m.day));
   }, []);
-  const tl = useMemo(() => buildTimeline(frameId, assign, { seed, scene, layout }), [frameId, assign, seed, scene, layout]);
+  const tl = useMemo(() => buildTimeline(frameId, assign, { seed, scene, layout, morphFrom }), [frameId, assign, seed, scene, layout, morphFrom]);
   const [savedId, setSavedId] = useState(saved || null);
   // 장단 합체 — 조각이 끼워지는 박에 맞춰 톡!
   const [rhythm, setRhythm] = useState(false);
@@ -236,6 +237,22 @@ export default function MovieScreen({ navigation, route }) {
           </View>
         </View>
 
+        {MORPH_TO[frameId] && FRAME_BY_ID[MORPH_TO[frameId]] ? (
+          <SealButton
+            label={t('변신! — 같은 조각으로 「{a}」', { a: t(FRAME_BY_ID[MORPH_TO[frameId]].name) })}
+            sound="drum"
+            style={{ marginTop: 10 }}
+            onPress={() =>
+              navigation.push('Movie', {
+                frameId: MORPH_TO[frameId],
+                assign: morphAssign(frameId, assign, MORPH_TO[frameId]),
+                seed,
+                scene,
+                morphFrom: { frameId, assign },
+              })
+            }
+          />
+        ) : null}
         <SealButton small variant="paper" testID="bigsubs" label={bigSubs ? t('큰 자막: 켬') : t('큰 자막: 끔')} onPress={() => setBigSubs(!bigSubs)} style={{ marginTop: 10 }} />
         {canNarrate() ? (
           <SealButton small variant="paper" label={narr ? t('소리 내어 읽어 주기: 켬') : t('소리 내어 읽어 주기: 끔')} onPress={() => setNarrate(!narr)} style={{ marginTop: 10 }} />

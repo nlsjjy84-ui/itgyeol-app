@@ -194,6 +194,12 @@ export function buildTimeline(frameId, assign, opts = {}) {
   const orders = [...new Set(items.map((it) => it.sp.order))].sort((a, b) => a - b);
   let cursor = OPEN;
   const events = [];
+  // 변신 — 앞 작품(morphFrom)의 마지막 자리에서 같은 조각이 출발한다(트랜스포머처럼 로봇 → 탈것)
+  const morphPool = {};
+  if (opts.morphFrom && !isTransform) {
+    const prev = buildTimeline(opts.morphFrom.frameId, opts.morphFrom.assign, { seed });
+    prev.events.forEach((e) => (morphPool[e.k] = morphPool[e.k] || []).push(e));
+  }
   orders.forEach((o) => {
     const group = items.filter((it) => it.sp.order === o);
     const isHead = o >= 9;
@@ -201,7 +207,10 @@ export function buildTimeline(frameId, assign, opts = {}) {
     group.forEach((it, gi) => {
       const sp = it.sp;
       const fromLeft = sp.x < 500 || (sp.x === 500 && gi % 2 === 0);
-      const from = isTransform
+      const mp = morphPool[it.k] && morphPool[it.k].length ? morphPool[it.k].shift() : null;
+      const from = mp
+        ? { x: mp.to.x, y: mp.to.y, rot: mp.to.rot, s: Math.max(0.3, Math.min(3, mp.w / Math.max(1, it.fit.w))) }
+        : isTransform
         ? { x: 500, y: 470, rot: 0, s: 0.2 }
         : isHead
         ? { x: 500, y: -260, rot: 0, s: 1.6 }
@@ -222,6 +231,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
         ghost: !!sp.ghost,
         slot: sp.slot || '',
         head: isHead,
+        morph: !!mp,
       });
     });
     cursor += STEP;
@@ -256,7 +266,9 @@ export function buildTimeline(frameId, assign, opts = {}) {
   // 첫 장면 — 지금 시각에 맞춘다(새벽·아침·낮·저녁·밤)
   const hr = new Date().getHours();
   const when = hr < 6 ? '새벽' : hr < 11 ? '아침' : hr < 17 ? '한낮' : hr < 20 ? '저녁' : '한밤';
-  const opening = r() < 0.5 ? t('{w}, 박물관 진열장 안에서 달그락 소리가 났어.', { w: t(when) }) : t(OPENING[Math.floor(r() * OPENING.length)], { scene: sceneName });
+  const opening = opts.morphFrom
+    ? t('{a}, 변신할 시간이야! 철컥철컥, 몸을 접기 시작했어.', { a: t((FRAME_BY_ID[opts.morphFrom.frameId] || {}).name || '') })
+    : r() < 0.5 ? t('{w}, 박물관 진열장 안에서 달그락 소리가 났어.', { w: t(when) }) : t(OPENING[Math.floor(r() * OPENING.length)], { scene: sceneName });
   say(0.2, 1.6, '풍이', opening);
   say(1.6, OPEN - 0.05, '결이', t('그때 그림자 속에서 {a} 나타나 {b}!', { a: josa(t(villain.name), '이/가'), b: t(villain.how) }));
   if (isTransform) {
@@ -299,7 +311,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
 
 // 시각 t에서 조각 하나의 자세
 export function poseAt(ev, time) {
-  if (time < ev.start) return null;
+  if (time < ev.start) return ev.morph ? { x: ev.from.x, y: ev.from.y, rot: ev.from.rot, s: ev.from.s, landed: false, p: 0 } : null;
   const p = Math.min(1, (time - ev.start) / (ev.end - ev.start));
   const e = easeOutBack(p);
   const m = easeOut(p);
@@ -379,6 +391,29 @@ export function tagsAt(tl, time) {
 }
 
 // 빈 자리를 내가 가진 조각으로 채운다 — 자리 맞음 > 모양 맞음 > 아무거나
+// 변신 짝 — 로봇·동물 ↔ 탈것
+export const MORPH_TO = { guardian: 'car', car: 'guardian', suit: 'jet', jet: 'suit', janggu: 'train', train: 'janggu', haechi: 'car', tiger: 'car', beast: 'drone', drone: 'beast', turtle: 'submarine', submarine: 'turtle', dragon: 'skyship', skyship: 'dragon', phoenix: 'jet', seaship: 'whale', whale: 'seaship', fortress: 'station', station: 'fortress', lighthouse: 'seaship', kite: 'phoenix', palanquin: 'train' };
+// 앞 작품의 조각을 새 틀의 자리에 다시 나눈다(자리에 맞는 조각 먼저, 모자라면 남은 것, 그래도 모자라면 다시 쓴다)
+export function morphAssign(fromId, fromAssign, toId) {
+  const to = FRAME_BY_ID[toId];
+  const pool = [...new Set(Object.values(fromAssign || {}))].map((k) => PIECE_BY_K[k]).filter(Boolean);
+  const out = {};
+  const used = {};
+  if (!to || !to.slots || !pool.length) return out;
+  to.slots.forEach((sp) => {
+    const twin = to.slots.find((o) => o !== sp && o.slot === sp.slot && out[o.key]);
+    if (twin) {
+      out[sp.key] = out[twin.key];
+      return;
+    }
+    const score = (p) => (p.slots[0] === sp.slot ? 3 : p.slots.includes(sp.slot) ? 2 : 0) - (used[p.k] || 0) * 2.5 + shapeFit(p, sp);
+    const best = [...pool].sort((a, b) => score(b) - score(a))[0];
+    out[sp.key] = best.k;
+    used[best.k] = (used[best.k] || 0) + 1;
+  });
+  return out;
+}
+
 export function autoAssign(frameId, ownedKeys, prefer = {}, bonus = null) {
   const frame = FRAME_BY_ID[frameId];
   const pool = ownedKeys.map((k) => PIECE_BY_K[k]).filter(Boolean);
