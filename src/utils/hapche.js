@@ -75,6 +75,9 @@ const MISSION = {
   kite: '바람을 타고 높이 올라 액운을 멀리 날려 보냈어',
   whale: '물을 뿜으며 바다 건너 해외에 있는 우리 유물을 만나러 갔어',
   palanquin: '임금님을 모시고 궁궐 나들이를 나섰어',
+  hwacha: '불화살 백 개를 한꺼번에 쏘아 올려 밤하늘을 대낮처럼 밝혔어',
+  cheomseong: '밤새 별을 하나하나 세며 하늘의 길을 그렸어',
+  jangseung: '마을 어귀에 우뚝 서서 나쁜 기운이 못 들어오게 막았어',
   sub2: '물속으로 쏙 들어가 바다 밑 유물을 찾아 나섰어',
   car2: '두 바퀴를 굴려 전시실 사이를 신나게 달렸어',
   drone2: '바람개비 날개로 둥실 떠올라 박물관 하늘을 돌았어',
@@ -386,7 +389,7 @@ export function threadAt(th, time) {
 const SCENE = {
   sea: ['seaship', 'submarine', 'whale', 'sub2', 'wave', 'lighthouse'],
   sky: ['skyship', 'jet', 'drone', 'kite', 'phoenix', 'bird', 'drone2', 'butterfly', 'dragon', 'snake', 'fan'],
-  space: ['station', 'star', 'rocket', 'top'],
+  space: ['station', 'star', 'rocket', 'top', 'cheomseong'],
 };
 export function sceneKind(frameId) {
   return Object.keys(SCENE).find((k) => SCENE[k].includes(frameId)) || 'land';
@@ -414,7 +417,7 @@ export function tagsAt(tl, time) {
 
 // 빈 자리를 내가 가진 조각으로 채운다 — 자리 맞음 > 모양 맞음 > 아무거나
 // 변신 짝 — 로봇·동물 ↔ 탈것
-export const MORPH_TO = { guardian: 'car', car: 'guardian', suit: 'jet', jet: 'suit', janggu: 'train', train: 'janggu', haechi: 'car', tiger: 'car', beast: 'drone', drone: 'beast', turtle: 'submarine', submarine: 'turtle', dragon: 'skyship', skyship: 'dragon', phoenix: 'jet', seaship: 'whale', whale: 'seaship', fortress: 'station', station: 'fortress', lighthouse: 'seaship', kite: 'phoenix', palanquin: 'train' };
+export const MORPH_TO = { guardian: 'car', car: 'guardian', suit: 'jet', jet: 'suit', janggu: 'train', train: 'janggu', haechi: 'car', tiger: 'car', beast: 'drone', drone: 'beast', turtle: 'submarine', submarine: 'turtle', dragon: 'skyship', skyship: 'dragon', phoenix: 'jet', seaship: 'whale', whale: 'seaship', fortress: 'station', station: 'fortress', lighthouse: 'seaship', kite: 'phoenix', palanquin: 'train', hwacha: 'rocket', jangseung: 'guardian', cheomseong: 'rocket' };
 // 앞 작품의 조각을 새 틀의 자리에 다시 나눈다(자리에 맞는 조각 먼저, 모자라면 남은 것, 그래도 모자라면 다시 쓴다)
 export function morphAssign(fromId, fromAssign, toId) {
   const to = FRAME_BY_ID[toId];

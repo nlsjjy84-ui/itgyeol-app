@@ -27,7 +27,7 @@ export const NUMBERS = [
   { to: 12, unit: '종', label: '조작이 모두 다른 전래놀이' },
   { to: 121, unit: '점', label: '실제 유물 자료실' },
   { to: 2903, unit: '점', label: '배경을 지운 진짜 유물 조각 — 유물 합체' },
-  { to: 36, unit: '가지', label: '합체 틀 22 · 변형 14' },
+  { to: 39, unit: '가지', label: '합체 틀 25 · 변형 14' },
   { to: 49, unit: '가지', label: '놀이가 모양을 빚는 결과물' },
   { to: 35, unit: '가지', label: '청자 · 나전 · 옻칠 · 유기 같은 실제 전통 재료' },
   { to: 4, unit: '개 언어', label: '한국어 · English · 中文 · 日本語' },

@@ -471,6 +471,45 @@ FRAMES.push(
       { key: 'flag', slot: '돛·깃발', x: 880, y: 260, w: 180, axis: 'a', order: 4 },
       { key: 'king', slot: '탑승자', x: 500, y: 470, w: 140, axis: 'a', order: 9, z: 3 },
     ],
+  },  {
+    id: 'hwacha', name: '신기전 화차', kind: '탈것', desc: '두 바퀴 수레 위에 불화살 틀을 비스듬히 세웠다. 불꽃을 뿜으며 밤하늘로 쏘아 올린다.', bg: '#2a201c',
+    slots: [
+      { key: 'cart', slot: '몸통', x: 470, y: 640, w: 520, axis: 'h', order: 0 },
+      { key: 'wF', slot: '바퀴', x: 690, y: 800, w: 200, axis: 'a', order: 1, spin: true },
+      { key: 'wB', slot: '바퀴', x: 260, y: 800, w: 200, axis: 'a', order: 1, spin: true },
+      { key: 'rack', slot: '방패', x: 520, y: 430, w: 380, axis: 'h', rot: -28, order: 2 },
+      { key: 'a1', slot: '무기', x: 560, y: 240, w: 300, axis: 'v', rot: 62, order: 3, squash: 0.6 },
+      { key: 'a2', slot: '무기', x: 740, y: 370, w: 300, axis: 'v', rot: 62, order: 3, squash: 0.6 },
+      { key: 'fire', slot: '추진기', x: 230, y: 520, w: 150, axis: 'h', rot: 200, order: 4, fire: true },
+      { key: 'flag', slot: '돛·깃발', x: 160, y: 330, w: 170, axis: 'a', order: 5 },
+      { key: 'gunner', slot: '탑승자', x: 330, y: 470, w: 130, axis: 'v', order: 9, z: 3 },
+    ],
+  },
+  {
+    id: 'cheomseong', name: '첨성대 별지기', kind: '로봇', desc: '돌을 쌓은 병 모양 몸에 창문 눈이 하나. 꼭대기 우물정 머리로 밤하늘 별을 센다.', bg: '#1b2033',
+    slots: [
+      { key: 'base', slot: '발·받침', x: 500, y: 880, w: 520, axis: 'h', order: 0, squash: 0.6 },
+      { key: 'body', slot: '몸통', x: 500, y: 600, w: 360, axis: 'v', order: 1 },
+      { key: 'window', slot: '눈', x: 500, y: 560, w: 110, axis: 'a', order: 2, z: 3 },
+      { key: 'neck', slot: '가슴판', x: 500, y: 340, w: 230, axis: 'h', order: 3, squash: 0.7 },
+      { key: 'armL', slot: '팔', x: 250, y: 560, w: 230, axis: 'v', rot: -25, order: 4 },
+      { key: 'armR', slot: '팔', x: 750, y: 560, w: 230, axis: 'v', rot: 25, order: 4, flip: true },
+      { key: 'star', slot: '장식', x: 790, y: 150, w: 120, axis: 'a', order: 5 },
+      { key: 'head', slot: '머리', x: 500, y: 200, w: 210, axis: 'a', order: 9, z: 3 },
+    ],
+  },
+  {
+    id: 'jangseung', name: '마을 장승', kind: '로봇', desc: '마을 어귀를 지키는 키다리 장승. 큰 눈, 높은 관, 두 팔을 벌려 길을 지킨다.', bg: '#24221d',
+    slots: [
+      { key: 'pole', slot: '몸통', x: 500, y: 640, w: 520, axis: 'v', order: 0 },
+      { key: 'feet', slot: '발·받침', x: 500, y: 910, w: 300, axis: 'h', order: 1, squash: 0.6 },
+      { key: 'armL', slot: '팔', x: 300, y: 560, w: 260, axis: 'h', rot: -15, order: 2 },
+      { key: 'armR', slot: '팔', x: 700, y: 560, w: 260, axis: 'h', rot: 15, order: 2, flip: true },
+      { key: 'eyeL', slot: '눈', x: 445, y: 300, w: 80, axis: 'a', order: 3, z: 5 },
+      { key: 'eyeR', slot: '눈', x: 555, y: 300, w: 80, axis: 'a', order: 3, z: 5, flip: true },
+      { key: 'hat', slot: '뿔·관', x: 500, y: 120, w: 220, axis: 'a', order: 4, z: 4 },
+      { key: 'head', slot: '머리', x: 500, y: 290, w: 250, axis: 'a', order: 9, z: 3 },
+    ],
   },
 );
 

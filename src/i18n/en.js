@@ -4,6 +4,15 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "신기전 화차": "Singijeon Fire Cart",
+  "두 바퀴 수레 위에 불화살 틀을 비스듬히 세웠다. 불꽃을 뿜으며 밤하늘로 쏘아 올린다.": "A slanted rack of fire arrows sits on a two-wheeled cart. It shoots them into the night sky in a burst of sparks.",
+  "첨성대 별지기": "Cheomseongdae Stargazer",
+  "돌을 쌓은 병 모양 몸에 창문 눈이 하나. 꼭대기 우물정 머리로 밤하늘 별을 센다.": "A bottle-shaped body of stacked stone with one window eye. Its well-frame head counts the stars at night.",
+  "마을 장승": "Village Jangseung",
+  "마을 어귀를 지키는 키다리 장승. 큰 눈, 높은 관, 두 팔을 벌려 길을 지킨다.": "A tall totem guarding the village entrance. With big eyes, a high hat and open arms, it watches the road.",
+  "불화살 백 개를 한꺼번에 쏘아 올려 밤하늘을 대낮처럼 밝혔어": "fired a hundred fire arrows at once and lit the night sky like day",
+  "밤새 별을 하나하나 세며 하늘의 길을 그렸어": "counted the stars one by one all night and mapped the roads of the sky",
+  "마을 어귀에 우뚝 서서 나쁜 기운이 못 들어오게 막았어": "stood tall at the village entrance and kept bad spirits out",
   "{c} 조각 {n}개가 모이자 온몸이 {c}으로 반짝였어.": "{n} pieces gathered, and the whole body glowed {c}.",
   "초록빛": "green",
   "파란빛": "blue",
