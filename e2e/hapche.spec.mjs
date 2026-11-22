@@ -248,3 +248,20 @@ test('유물 합체: 오늘의 합체 미션 — 조건 맞춘 합체 영상을 
   await expect(page.getByTestId('mission-win')).toBeVisible();
   await expect(page.getByText(/상으로 귀한 조각 「.+」을\(를\) 받았어요/)).toBeVisible();
 });
+
+test('유물 합체: 박물관 현장 QR — 입구(?c=)는 한정을 열고, 진열장(?no=)은 그 유물 조각을 준다', async ({ page }) => {
+  const pass = async (url, sel) => {
+    await page.goto(url);
+    for (let i = 0; i < 40 && !(await sel.isVisible().catch(() => false)); i += 1) {
+      const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+      if (await agree.count()) await agree.first().click().catch(() => {});
+      else await page.waitForTimeout(250);
+    }
+  };
+  const welcome = page.getByTestId('museum-welcome');
+  await pass('/?c=GYEONGJU', welcome);
+  await expect(welcome).toContainText('경주');
+  const found = page.getByText(/진짜 유물을 찾았어요!/);
+  await pass('/?no=' + encodeURIComponent('덕수1496'), found);
+  await expect(found).toBeVisible();
+});

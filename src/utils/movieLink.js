@@ -76,3 +76,18 @@ export function readGiftParam() {
     return null;
   }
 }
+
+// 박물관 현장 QR — 입구의 「?c=GYEONGJU」(그곳 한정 조각 열기), 진열장 설명판의 「?no=덕수1496」(그 유물 조각 바로 받기)
+export function readMuseumParam() {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const c = (q.get('c') || '').slice(0, 20);
+    const no = (q.get('no') || '').slice(0, 30);
+    return c || no ? { museum: c, no } : null;
+  } catch (e) {
+    return null;
+  }
+}
+export const museumUrl = (c) => `${SITE_URL}?c=${encodeURIComponent(c)}`;
+export const exhibitUrl = (no) => `${SITE_URL}?no=${encodeURIComponent(no)}`;

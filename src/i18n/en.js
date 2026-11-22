@@ -4,6 +4,7 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "「{a}」에 오신 걸 환영해요! 이곳 한정 조각이 열렸고, 이 고장 유물이 보따리에 더 잘 나와요.": "Welcome to {a}! Pieces only found here are unlocked, and local artifacts show up more often in bundles.",
   "흙": "Earth",
   "쇠": "Iron",
   "돌": "Stone",

@@ -92,9 +92,9 @@ export default function PackScreen({ navigation, route }) {
   const [codeMsg, setCodeMsg] = useState('');
   const [no, setNo] = useState('');
   const [noMsg, setNoMsg] = useState('');
-  const scan = async () => {
+  const scan = async (q) => {
     await loadPieces();
-    const ks = findByNo(no);
+    const ks = findByNo(typeof q === 'string' ? q : no);
     if (!ks.length) {
       setNoMsg(t('그 번호의 조각은 아직 잇결에 없어요. 번호를 다시 확인해 주세요.'));
       return;
@@ -109,6 +109,18 @@ export default function PackScreen({ navigation, route }) {
     setNoMsg('');
     setOpened({ keys: ks, fresh, starter: false, scan: true });
   };
+  // 박물관 현장 QR로 들어왔을 때 — 입구 QR은 암호를 넣어 주고, 진열장 QR은 그 유물 조각을 바로 준다
+  const qr = route.params || {};
+  useEffect(() => {
+    if (qr.museum) {
+      const c = enterCode(qr.museum);
+      if (c) setCodeMsg(t('「{a}」에 오신 걸 환영해요! 이곳 한정 조각이 열렸고, 이 고장 유물이 보따리에 더 잘 나와요.', { a: t(c) }));
+    }
+    if (qr.no) {
+      setNo(qr.no);
+      scan(qr.no);
+    }
+  }, []);
   const shake = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
@@ -165,6 +177,11 @@ export default function PackScreen({ navigation, route }) {
         <ScreenHeader title={t('조각 보따리')} sub={t('놀이를 마치면 실제 유물 조각을 받아요')} onBack={() => navigation.goBack()} />
         {!opened ? (
           <View style={st.center}>
+            {qr.museum && codeMsg ? (
+              <Text style={[st.lead, { color: '#2c7a64' }]} testID="museum-welcome">
+                {codeMsg}
+              </Text>
+            ) : null}
             <Text style={st.lead}>
               {gift
                 ? from
