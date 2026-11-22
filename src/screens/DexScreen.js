@@ -11,6 +11,7 @@ import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
 import { pieceStory } from '../utils/pieceStory';
+import { MEANING, MOTIF } from '../data/pieceMeaning';
 import { PIECE_COLORS } from '../utils/pieceColors';
 import { usePieces, removeWork, giveAway, currentSeries, dailyState } from '../utils/pieceStore';
 import { giftUrl } from '../utils/movieLink';
@@ -85,7 +86,40 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
                   {p.size ? `   ·   ${t('크기')}: ${p.size}cm` : ''}
                 </Text>
                 {p.from ? <Text style={st.fact}>{t('나온 곳')}: {p.from}</Text> : null}
-                {!!p.desc && <Text style={st.desc}>{p.desc}</Text>}
+                {(() => {
+                  const m = MEANING[p.k];
+                  if (!m) return p.desc ? <Text style={st.desc}>{p.desc}</Text> : null;
+                  return (
+                    <View testID="piece-meaning">
+                      {m.d ? (
+                        <View style={st.mBox}>
+                          <Text style={st.mHead}>{m.dk === 'tr' ? t('박물관 설명 (우리말로 옮김)') : t('박물관 설명')}</Text>
+                          <Text style={st.mText}>{m.d}</Text>
+                          <Text style={st.mSrc}>{t('출처')}: {m.ds}</Text>
+                        </View>
+                      ) : null}
+                      {(m.w || []).length ? (
+                        <View style={[st.mBox, st.mWish]}>
+                          <Text style={st.mHead}>{t('유물에 담긴 뜻')}</Text>
+                          {m.w.map((id) => {
+                            const f = MOTIF[id];
+                            if (!f) return null;
+                            return (
+                              <Text key={id} style={st.mText}>
+                                <Text style={{ fontWeight: '800' }}>{f.n}</Text>
+                                {' — '}
+                                {f.m}
+                                <Text style={[st.mSrcIn, f.u ? st.mLink : null]} onPress={f.u ? () => Linking.openURL(f.u) : undefined}>
+                                  {'  ' + f.s + (f.u ? ' ↗' : '')}
+                                </Text>
+                              </Text>
+                            );
+                          })}
+                        </View>
+                      ) : null}
+                    </View>
+                  );
+                })()}
                 <View style={st.story} testID="piece-story">
                   <Text style={st.storyWho}>{t('풍이의 설명')}</Text>
                   {pieceStory(p).map((l, i) => (
@@ -545,6 +579,13 @@ const st = StyleSheet.create({
   fact: { fontSize: 13, color: colors.ink, marginTop: 4, lineHeight: 19 },
   desc: { fontSize: 13, color: colors.ink, marginTop: 8, lineHeight: 20 },
   lic: { fontSize: 11, color: colors.muted, marginTop: 10 },
+  mBox: { marginTop: 10, backgroundColor: '#f4f1ea', borderRadius: 12, padding: 12, gap: 5 },
+  mWish: { backgroundColor: '#eef4ee', borderLeftWidth: 4, borderLeftColor: '#3f7a52' },
+  mHead: { fontSize: 13, fontWeight: '800', color: '#3b3127' },
+  mText: { fontSize: 14, color: '#1b2227', lineHeight: 22 },
+  mSrc: { fontSize: 11, color: colors.muted },
+  mSrcIn: { fontSize: 11, color: colors.muted },
+  mLink: { textDecorationLine: 'underline', color: '#3f7a52' },
   giftBox: { flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#f6f2ea', borderRadius: 12, padding: 8 },
   work: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.paper, borderRadius: 14, padding: 10, marginTop: 10, borderWidth: 1, borderColor: colors.borderSoft },
   workImgs: { flexDirection: 'row', width: 120, flexWrap: 'wrap' },

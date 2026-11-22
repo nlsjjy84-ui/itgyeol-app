@@ -71,6 +71,11 @@ test('유물: 도감 조각을 열면 풍이가 쓰임·크기·있는 곳을 �
   await expect(page.getByText('조선 사람들이 썼어.')).toBeVisible();
   await expect(page.getByText('길이는 7.3cm — 어른 손바닥만 해.')).toBeVisible();
   await expect(page.getByText('진짜는 국립중앙박물관에 있어. 가서 직접 찾아봐!')).toBeVisible();
+  // 유물에 담긴 뜻 — 종류(연적)와 모양(복숭아)의 뜻이 출처와 함께 나온다
+  await expect(page.getByTestId('piece-meaning')).toBeVisible();
+  await expect(page.getByText('유물에 담긴 뜻')).toBeVisible();
+  await expect(page.getByText(/서왕모의 천도복숭아처럼 오래 살기/)).toBeVisible();
+  await expect(page.getByText(/문화포털 전통문양 「복숭아문」/)).toBeVisible();
 });
 
 test('유물: 유물 수수께끼를 풀면 조각을 얻거나 정답을 알려 준다', async ({ page }) => {
