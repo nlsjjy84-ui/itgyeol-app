@@ -19,6 +19,7 @@ import { canExport, exportMovie, downloadBlob, srtOf, paperKit, posterPng } from
 import { movieUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
 import { useNarrate, setNarrate, canNarrate } from '../utils/narrate';
+import { useBigSubs, setBigSubs } from '../utils/subSize';
 
 // 이 작품으로 만들 수 있는 물건 — 앱은 "제시"까지, 실제 제작은 박물관·업체가 맡는다
 const GOODS = [
@@ -84,6 +85,7 @@ export default function MovieScreen({ navigation, route }) {
   const parts = [...new Set(tl.events.map((e) => e.k))].map((k) => ({ k, p: PIECE_BY_K[k], slots: [...new Set(tl.events.filter((e) => e.k === k).map((e) => e.slot).filter(Boolean))] }));
 
   const narr = useNarrate();
+  const bigSubs = useBigSubs();
   // 함께 이야기해 봐요 — 보호자·선생님이 아이와 나눌 질문(앱 속 대화 질문은 함께 읽기를 돕는다)
   const talk = useMemo(() => {
     const q = [];
@@ -234,6 +236,7 @@ export default function MovieScreen({ navigation, route }) {
           </View>
         </View>
 
+        <SealButton small variant="paper" testID="bigsubs" label={bigSubs ? t('큰 자막: 켬') : t('큰 자막: 끔')} onPress={() => setBigSubs(!bigSubs)} style={{ marginTop: 10 }} />
         {canNarrate() ? (
           <SealButton small variant="paper" label={narr ? t('소리 내어 읽어 주기: 켬') : t('소리 내어 읽어 주기: 끔')} onPress={() => setNarrate(!narr)} style={{ marginTop: 10 }} />
         ) : null}

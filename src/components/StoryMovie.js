@@ -2,6 +2,7 @@
 // 배경이 천천히 움직이고(카메라), 풍이·결이가 말할 때 튀어나오고, 판과 이어진 실제 유물이 떠다니고, 자막이 흐른다.
 // 고르는 장면에서는 영상이 잠깐 멈추고 선택지가 뜬다(가만히 있으면 그것도 대답으로 받아 이어진다) — 선택형 영상.
 import { say, hush, speaking, useNarrate, setNarrate, canNarrate } from '../utils/narrate';
+import { useBigSubs, setBigSubs } from '../utils/subSize';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Image, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import Text from '../ui/Text';
@@ -148,6 +149,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
   };
   // 소리 내어 읽어 주기 — 줄이 바뀔 때 읽고, 다 읽을 때까지 다음 줄로 넘어가지 않는다
   const narr = useNarrate();
+  const bigSubs = useBigSubs();
   useEffect(() => {
     if (narr && cur && !paused) say(curText, cur.who);
   }, [pi, stage.kind, stage.i, narr]);
@@ -229,7 +231,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
         {cur ? (
           <View style={st.sub}>
             <Text style={[st.who, { color: COLOR[speaker] || '#fff' }]}>{t(NAME[speaker] || '')}</Text>
-            <Text style={[st.subTxt, { fontSize: Math.max(14, W * 0.036) }]}>{typed}</Text>
+            <Text style={[st.subTxt, { fontSize: Math.max(14, W * 0.036) * (bigSubs ? 1.45 : 1), lineHeight: Math.max(14, W * 0.036) * (bigSubs ? 1.45 : 1) * 1.45 }]}>{typed}</Text>
           </View>
         ) : null}
         {/* 선택 — 영상이 잠깐 멈춘다 */}
@@ -258,6 +260,9 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
       <View style={st.ctrl}>
         <Pressable onPress={() => setPaused(!paused)} style={st.btn} accessibilityLabel={paused ? t('재생') : t('일시정지')}>
           <Text style={st.btnTxt}>{paused ? t('▶ 재생') : t('❚❚ 일시정지')}</Text>
+        </Pressable>
+        <Pressable onPress={() => setBigSubs(!bigSubs)} style={st.btn} accessibilityLabel={t('큰 자막')}>
+          <Text style={st.btnTxt}>{bigSubs ? t('큰 자막 켬') : t('큰 자막 끔')}</Text>
         </Pressable>
         {canNarrate() ? (
           <Pressable onPress={() => setNarrate(!narr)} style={st.btn} accessibilityLabel={t('소리 내어 읽어 주기')}>
@@ -289,7 +294,7 @@ const st = StyleSheet.create({
   barWrap: { position: 'absolute', top: 8, left: 10, right: 10, flexDirection: 'row', gap: 4 },
   barCell: { flex: 1, height: 3, backgroundColor: '#ffffff40', borderRadius: 2, overflow: 'hidden' },
   barFill: { height: 3, backgroundColor: '#fff' },
-  ctrl: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  ctrl: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 10 },
   btn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, borderWidth: 1, borderColor: '#c4cdca', backgroundColor: '#fcfdfc' },
   btnTxt: { fontSize: 13, color: '#1b2227' },
 });

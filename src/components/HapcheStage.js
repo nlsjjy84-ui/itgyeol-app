@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
 import { say, hush, useNarrate } from '../utils/narrate';
+import { useBigSubs } from '../utils/subSize';
 import { bgmOf, sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { play, stop } from '../utils/sound';
@@ -109,6 +110,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
   const shake = time >= tl.lockT && time < tl.lockT + 0.35 ? Math.sin(time * 90) * 6 : 0;
   const sub = showSubs ? subAt(tl, time) : null;
   const narr = useNarrate();
+  const bigSubs = useBigSubs();
   const subKey = sub ? sub.t0 : -1;
   useEffect(() => {
     if (narr && sound && playing && sub) say(sub.text, sub.who);
@@ -240,7 +242,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
       {sub && (
         <View style={st.subBox} pointerEvents="none">
           <Text style={[st.who, { color: WHO_COLOR[sub.who] || '#fff' }]}>{t(sub.who)}</Text>
-          <Text style={[st.sub, { fontSize: Math.max(13, size * 0.04) }]}>{sub.text}</Text>
+          <Text style={[st.sub, { fontSize: Math.max(13, size * 0.04) * (bigSubs ? 1.45 : 1), lineHeight: Math.max(13, size * 0.04) * (bigSubs ? 1.45 : 1) * 1.4 }]}>{sub.text}</Text>
         </View>
       )}
       {overlay || null}

@@ -4,6 +4,11 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "큰 자막": "Large subtitles",
+  "큰 자막 켬": "Large subs: on",
+  "큰 자막 끔": "Large subs: off",
+  "큰 자막: 켬": "Large subtitles: on",
+  "큰 자막: 끔": "Large subtitles: off",
   "잇결 · 유물 합체": "Itgyeol · Artifact Combine",
   "{a}의 합체 앨범": "{a}'s combine album",
   "나의 합체 앨범": "My combine album",

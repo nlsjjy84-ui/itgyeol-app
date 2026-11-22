@@ -221,6 +221,8 @@ test('유물 합체: 작품 사진(PNG)을 저장하면 출동 장면이 담긴 
     else await page.waitForTimeout(250);
   }
   await expect(page.getByTestId('jangdan')).toHaveText(/배경 장단: 중모리/);
+  await page.getByText('큰 자막: 끔').click();
+  await expect(page.getByText('큰 자막: 켬')).toBeVisible();
   const [dl] = await Promise.all([page.waitForEvent('download'), btn.click()]);
   expect(dl.suggestedFilename()).toMatch(/^itgyeol_photo_.*\d{8}-\d{6}\.png$/);
   const path = await dl.path();
