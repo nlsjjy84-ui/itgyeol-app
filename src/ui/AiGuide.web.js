@@ -236,6 +236,11 @@ const CSS = `
 .aig-light .aig-menu-q,.aig-light .aig-menu .aig-menu-quiet{color:#2a1f1a}
 .aig-light .aig-menu button small,.aig-light .aig-menu .aig-menu-later{color:#5b4c42}
 .aig-light .aig-launch:hover,.aig-light .aig-menu button:hover{color:#2c62c9}
+/* 2026-11-22: 메뉴 글자가 화면 내용에 겹쳐 묻히지 않게 진한 판 위에 */
+.aig-menu,.aig-light .aig-menu{pointer-events:auto;background:rgba(22,18,15,.94);padding:14px 18px;border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.25);text-shadow:none}
+.aig-light .aig-menu-q,.aig-light .aig-menu .aig-menu-quiet,.aig-menu-q{color:#fff}
+.aig-light .aig-menu button,.aig-menu button{color:#f2c230;text-shadow:none}
+.aig-light .aig-menu button small,.aig-light .aig-menu .aig-menu-later{color:#e6dccd}
 @media (prefers-reduced-motion:reduce){.aig-launch{animation:none}}
 /* 휴대폰: 위쪽은 언어 단추·3분 둘러보기 같은 내용이 꽉 차서 글자가 겹친다. 오른쪽 가장자리의 작은 탭(✦)으로 옮기고,
    메뉴는 탭 바로 위에 불투명한 판으로 연다(왼쪽 가장자리의 「← 포트폴리오로」와 마주 보는 자리). */

@@ -33,7 +33,7 @@ function StreakRow() {
         {ds.ready && ds.useCharms ? ' · ' + t('빠진 날을 부적이 지켜 줄 거예요') : ''}
         {ds.ready && ds.lost ? ' · ' + t('이어 오던 {n}일이 끊겼어요. 오늘부터 다시!', { n: ds.lost }) : ''}
       </Text>
-      <Text style={st.streakSub}>{left ? t('{n}일 더 오면 「아주 귀함」 조각과 쉼표 부적', { n: left }) : t('오늘 오면 「아주 귀함」 조각과 쉼표 부적')}</Text>
+      <Text style={st.streakSub}>{left ? t('{n}일 더 오면 「아주 귀함」 유물과 쉼표 부적', { n: left }) : t('오늘 오면 「아주 귀함」 유물과 쉼표 부적')}</Text>
     </View>
   );
 }
@@ -47,7 +47,7 @@ export default function RelicHome({ navigation }) {
       <Text style={st.title}>{t('놀이로 모은 진짜 유물 {m}점', { m: owned })}</Text>
       <Text style={st.desc}>{t('판을 깨면 국립중앙박물관 등 박물관의 진짜 유물 사진을 받아 도감에 모아요. 모은 유물은 곧 오늘 쓰는 물건으로 변형할 수 있어요.')}</Text>
       <View style={st.btns}>
-        {owned ? <StreakRow /> : null}
+        {owned && (dailyState().streak > 0 || dailyState().days.length > 0) ? <StreakRow /> : null}
         {owned && dailyState().ready ? (
           <SealButton label={t('오늘의 보따리 받기 — {n}일째', { n: dailyState().nextStreak })} onPress={() => navigation.navigate('Pack', { daily: true })} />
         ) : owned ? (

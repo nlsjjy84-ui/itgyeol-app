@@ -3,13 +3,10 @@ import { View, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import Text from '../ui/Text';
 import Frame from '../ui/Frame';
 import { colors, fonts } from '../theme';
-import { MOCK_WORKS } from '../data/mockWorks';
-import { ARCHIVE } from '../data/archive';
+import { PIECES } from '../data/pieces';
 import { PLAY_GAMES } from '../data/playGames';
-import { CATALOG } from './obj3d/catalog';
 import { LANGS, t } from '../i18n';
 import { play } from '../utils/sound';
-import { countWorks } from '../utils/works';
 
 // 홈 첫 화면 맨 위 — 글보다 숫자를 먼저 보여 준다.
 // 숫자는 모두 앱 안의 실제 자료에서 센다(손으로 적은 숫자가 아님).
@@ -18,22 +15,14 @@ const SCENES = ['jinbeop', 'print', 'tbd', 'hangul', 'talchum', 'dancheong'];
 const BAR_COLORS = [colors.accent, colors.cheong, colors.hwang, colors.green, colors.gold];
 
 export default function HomeNumbers({ attempts = [], exhibit = [], onGallery, onResult, onHall }) {
-  const works = useMemo(() => countWorks(MOCK_WORKS), []);
   const { width } = useWindowDimensions();
   const basis = width >= 700 ? '22%' : '46%'; // 넓은 화면은 한 줄에 넷
-  const rows = useMemo(() => {
-    const label = Object.fromEntries(CATALOG.map((g) => [g.id, g.label]));
-    return Object.entries(works.byGroup)
-      .sort((a, b) => b[1] - a[1])
-      .map(([id, n], i) => ({ id, n, label: label[id] || id, color: BAR_COLORS[i % BAR_COLORS.length] }));
-  }, [works]);
-  const max = rows.length ? rows[0].n : 1;
   const solved = SCENES.filter((id) => attempts.some((a) => a.sceneId === id)).length;
 
   const tiles = [
     { big: t('3~5분'), small: t('한 판에 걸리는 시간') },
-    { big: t('{n}가지', { n: BOARD_COUNT + PLAY_GAMES.length }), small: t('놀이 (판 {b} + 전래놀이 {g})', { b: BOARD_COUNT, g: PLAY_GAMES.length }) },
-    { big: t('{n}점', { n: ARCHIVE.length }), small: t('전통 자료') },
+    { big: t('{n}판', { n: SCENES.length }), small: t('놀이 판 (전래놀이 판 안에 놀이 {g}가지)', { g: PLAY_GAMES.length }) },
+    { big: t('{n}점', { n: PIECES.length.toLocaleString('ko-KR') }), small: t('놀이로 얻는 진짜 유물 (박물관 4곳)') },
     { big: t('{n}개', { n: LANGS.filter((l) => l.ready).length }), small: t('언어') },
   ];
 
@@ -48,29 +37,7 @@ export default function HomeNumbers({ attempts = [], exhibit = [], onGallery, on
         ))}
       </View>
 
-      <Pressable onPress={() => { play('tap'); if (onGallery) onGallery(); }}>
-        <Frame style={{ marginTop: 12 }}>
-          <View style={styles.headRow}>
-            <Text style={styles.headBig}>{t('예시 작품 {n}점', { n: works.total })}</Text>
-            <Text style={styles.headSame}>{t('똑같은 작품 {n}점', { n: works.same })}</Text>
-          </View>
-          <Text style={styles.headSub}>{t('어떤 물건으로 가져갔나')}</Text>
-          <View style={styles.bars}>
-            {rows.map((r) => (
-              <View key={r.id} style={styles.barRow}>
-                <Text style={styles.barLabel} numberOfLines={1}>{r.label}</Text>
-                <View style={styles.track}>
-                  <View style={[styles.fill, { width: `${Math.max(2, (r.n / max) * 100)}%`, backgroundColor: r.color }]} />
-                </View>
-                <Text style={styles.barNum}>{r.n}</Text>
-              </View>
-            ))}
-          </View>
-          <Text style={styles.note}>{t('놀이 기록이 다르면 모양과 색이 달라져요. 마음에 들면 내 작품도 전시될 수 있어요.')}</Text>
-          <Text style={styles.more}>{t('예시 작품 둘러보기 ›')}</Text>
-        </Frame>
-      </Pressable>
-
+      {/* 예시 작품 통계(옛 예시 450점)는 2026-11-22 새 설계도에 따라 뺐다 — 새 변형 예시로 다시 만든다 */}
       {solved > 0 || exhibit.length > 0 ? (
         <View style={styles.mine}>
           <Text style={styles.mineLabel}>{t('내 기록')}</Text>

@@ -25,15 +25,16 @@ test('이야기 영상을 끝까지 보면 홈의 놀이 판에 닿는다', asyn
   // 2026-11-22: 홈의 이야기 장면은 뺐다 — 홈 맨 위가 놀이 판
 });
 
-test('홈: 판 여섯 개와 숫자(놀이 17가지·자료 345점·4개 언어)가 맞다', async ({ page }) => {
+test('홈: 판 여섯 개와 숫자(6판·진짜 유물 2,903점·4개 언어)가 맞다', async ({ page }) => {
   await openHome(page);
   for (const n of ['진법', '훈민정음 · 인쇄', '전래놀이', '한글 테트리스', '탈춤 · 가면극', '단청 · 전통 문양']) {
     await expect(page.getByText(n, { exact: true }).first()).toBeVisible();
   }
   await expect(page.getByText('손끝으로 만나는 여섯 가지 전통', { exact: false })).toBeVisible();
-  await expect(page.getByText('17가지')).toBeVisible();
-  await expect(page.getByText('345점').first()).toBeVisible();
-  await expect(page.getByText('똑같은 작품 0점')).toBeVisible();
+  await expect(page.getByText('6판')).toBeVisible();
+  await expect(page.getByText('2,903점').first()).toBeVisible();
+  // 옛 예시 작품 통계는 뺐다
+  await expect(page.getByText(/예시 작품 \d+점/)).toHaveCount(0);
   // 판이 여섯인데 예전 숫자(네 개·네 곳)가 남아 있으면 안 된다
   await expect(page.getByText(/네 개의 판|네 가지 전통|판은 네 곳/)).toHaveCount(0);
 });

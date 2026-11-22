@@ -69,6 +69,11 @@
   .aig .hud .meter{width:90px;height:4px;border-radius:9px;background:rgba(255,255,255,.25);overflow:hidden;box-shadow:0 0 6px rgba(0,0,0,.6)}
   .aig .hud .meter b{display:block;height:100%;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .5s}
   .aig .hud button{all:unset;pointer-events:auto;cursor:pointer;color:var(--c1);font-weight:900;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+  /* 2026-11-22: 글자가 화면 내용에 겹쳐 묻히지 않게 — 말풍선·위치 표시를 진한 판 위에 올린다(밝은·어두운 화면 모두) */
+  .aig .say,.aig .say.ink-dark{background:rgba(22,18,15,.93);color:#fff;text-shadow:none;padding:12px 16px 13px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.28);max-width:320px}
+  .aig .say.ink-dark b,.aig .say.ink-dark .k,.aig .say.ink-dark button{color:var(--c1)}
+  .aig .hud{background:rgba(22,18,15,.9);padding:8px 12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+  .aig .hud .row,.aig .hud.ink-dark .row{color:#fff;text-shadow:none}
   @media (prefers-reduced-motion:reduce){.aig .core::after,.aig .say::before,.aig .dot{animation:none}}
   `;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
