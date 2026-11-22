@@ -116,8 +116,8 @@ export const FRAMES = [
     bg: '#183a44',
     slots: [
       { key: 'body', slot: '몸통', x: 500, y: 630, w: 560, axis: 'h', order: 0 },
-      { key: 'oar1', slot: '팔', x: 370, y: 790, w: 230, axis: 'v', rot: -30, order: 1 },
-      { key: 'oar2', slot: '팔', x: 600, y: 790, w: 230, axis: 'v', rot: -30, order: 1 },
+      { key: 'oar1', slot: '팔', x: 370, y: 790, w: 230, axis: 'v', rot: -30, order: 1, oar: true },
+      { key: 'oar2', slot: '팔', x: 600, y: 790, w: 230, axis: 'v', rot: -30, order: 1, oar: true },
       { key: 'sail1', slot: '돛·깃발', x: 420, y: 330, w: 330, axis: 'a', order: 2 },
       { key: 'sail2', slot: '돛·깃발', x: 650, y: 380, w: 240, axis: 'a', order: 2 },
       { key: 'shield', slot: '방패', x: 300, y: 600, w: 130, axis: 'a', order: 3, z: 3 },
@@ -540,6 +540,20 @@ TRANSFORMS.push(
   {
     id: 'wave', name: '너울 물결', kind: '변형', desc: '같은 유물이 오르락내리락 줄지어 물결처럼 넘실댄다.', bg: '#0f2d3b',
     parts: Array.from({ length: 7 }, (_, i) => ({ key: i === 3 ? 'core' : 'w' + i, x: 110 + i * 130, y: 500 + Math.sin(i * 1.1) * 170, w: 200, axis: 'a', rot: Math.cos(i * 1.1) * 25, order: Math.abs(i - 3), flip: i % 2 === 1, z: 7 - Math.abs(i - 3), sway: i * 1.1 })),
+  },
+  {
+    id: 'watermill', name: '물레방아', kind: '변형', desc: '같은 유물 여덟이 바퀴살처럼 둘러서서 물을 받아 천천히 돌아간다.', bg: '#14303a',
+    parts: [
+      { key: 'core', x: 500, y: 500, w: 170, axis: 'a', order: 3, z: 3, spin: true },
+      ...Array.from({ length: 8 }, (_, i) => {
+        const a = (i / 8) * Math.PI * 2;
+        return { key: 'm' + i, x: 500 + Math.cos(a) * 270, y: 500 + Math.sin(a) * 270, w: 200, axis: 'h', rot: (a * 180) / Math.PI, order: 1 + (i % 2), squash: 0.7, spinAll: true };
+      }),
+    ],
+  },
+  {
+    id: 'stepping', name: '징검다리', kind: '변형', desc: '같은 유물이 냇물 위에 징검돌처럼 줄지어 놓이고, 물결 따라 살랑 흔들린다.', bg: '#123040',
+    parts: Array.from({ length: 6 }, (_, i) => ({ key: i === 0 ? 'core' : 's' + i, x: 140 + i * 145, y: 690 + (i % 2 ? 40 : -40), w: 190, axis: 'h', order: i, squash: 0.5, z: 6 - i, sway: i * 0.9 })),
   },
 );
 

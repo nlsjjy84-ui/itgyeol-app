@@ -89,6 +89,8 @@ const MISSION = {
   butterfly: '팔랑팔랑 날아 꽃무늬 유물들을 찾아다녔어',
   star: '반짝반짝 돌며 밤하늘의 새 별자리가 되었어',
   wave: '너울너울 넘실대며 바다 건너 친구 유물을 불렀어',
+  watermill: '빙글빙글 돌며 마을 논에 물을 골고루 나눠 주었어',
+  stepping: '냇물 위에 줄지어 누워 아이들이 신나게 건너가게 해 주었어',
 };
 // 위기 — 박물관이 실제로 유물을 지키려고 싸우는 "보존의 적". 이야기를 보며 유물 보존을 배운다.
 export const VILLAINS = [
@@ -238,6 +240,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
         spin: !!sp.spin, // 바퀴·팽이 — 완성 뒤 제자리에서 빙글빙글
         orbit: !!sp.spinAll, // 별·바람개비 날개 — 완성 뒤 다 함께 가운데를 돈다
         beam: !!sp.beam, // 등대 등불 — 완성 뒤 빛줄기가 빙빙 돈다
+        oar: !!sp.oar, // 바다배 노 — 완성 뒤 다 함께 젓는다
         puff: sp.smoke ? 'smoke' : sp.spout ? 'water' : null, // 기차 굴뚝 연기·고래 물줄기
         sway: typeof sp.sway === 'number' ? sp.sway : null, // 물결 — 완성 뒤 저마다 다른 박자로 오르락내리락
         ghost: !!sp.ghost,
@@ -270,12 +273,20 @@ export function buildTimeline(frameId, assign, opts = {}) {
     if (e.orbit) e.orbitT = lockT;
     if (e.sway != null) e.swayT = lockT;
   });
-  // 다리 — 완성 뒤 번갈아 앞뒤로 흔들며 걷는다(왼쪽·오른쪽이 엇박)
+  // 다리·노 — 완성 뒤 다리는 번갈아, 노는 다 함께 흔든다. 다리는 앞뒤로 흔들며 걷는다(왼쪽·오른쪽이 엇박)
   events
-    .filter((e) => e.slot === '다리')
+    .filter((e) => e.slot === '다리' && !e.oar)
     .forEach((e, i) => {
       e.stepT = lockT + 0.6;
       e.stepPh = i % 2 ? Math.PI : 0;
+      e.stepA = 9;
+    });
+  events
+    .filter((e) => e.oar)
+    .forEach((e) => {
+      e.stepT = lockT + 0.6;
+      e.stepPh = 0;
+      e.stepA = 18;
     });
   // 도는 조각에 이어진 실은 돌기 시작할 때 거둬들인다(실이 제자리에 남아 엇갈리지 않게)
   threads.forEach((th) => {
@@ -382,7 +393,7 @@ export function poseAt(ev, time) {
   // 걷기 — 다리를 번갈아 흔든다
   if (ev.stepT != null && p >= 1 && time > ev.stepT) {
     const d = time - ev.stepT;
-    pose.rot += Math.sin(d * 5.2 + ev.stepPh) * 9 * Math.min(1, d / 0.6);
+    pose.rot += Math.sin(d * (ev.oar ? 3.2 : 5.2) + ev.stepPh) * (ev.stepA || 9) * Math.min(1, d / 0.6);
   }
   // 물결 — 오르락내리락(처음 0.8초 동안 점점 커진다)
   if (ev.swayT != null && p >= 1 && time > ev.swayT) {
@@ -469,7 +480,7 @@ export function threadAt(th, time) {
 
 // 출동 장면 — 합체가 끝나면 박물관 밤 무대가 작품이 떠나는 세상으로 바뀐다(바다·하늘·우주·들판)
 const SCENE = {
-  sea: ['seaship', 'submarine', 'whale', 'sub2', 'wave', 'lighthouse'],
+  sea: ['seaship', 'submarine', 'whale', 'sub2', 'wave', 'lighthouse', 'watermill', 'stepping'],
   sky: ['skyship', 'jet', 'drone', 'kite', 'phoenix', 'bird', 'drone2', 'butterfly', 'dragon', 'snake', 'fan'],
   space: ['station', 'star', 'rocket', 'top', 'cheomseong'],
 };

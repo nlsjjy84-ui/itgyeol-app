@@ -4,6 +4,12 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "빙글빙글 돌며 마을 논에 물을 골고루 나눠 주었어": "turned round and round and shared water evenly with the village rice fields",
+  "냇물 위에 줄지어 누워 아이들이 신나게 건너가게 해 주었어": "lay in a row across the stream so the children could hop across",
+  "물레방아": "Watermill",
+  "같은 유물 여덟이 바퀴살처럼 둘러서서 물을 받아 천천히 돌아간다.": "Eight of the same artifact stand like spokes, catch the water and slowly turn.",
+  "징검다리": "Stepping Stones",
+  "같은 유물이 냇물 위에 징검돌처럼 줄지어 놓이고, 물결 따라 살랑 흔들린다.": "The same artifact lines up like stepping stones over a stream and sways gently with the ripples.",
   "신기전 화차": "Singijeon Fire Cart",
   "두 바퀴 수레 위에 불화살 틀을 비스듬히 세웠다. 불꽃을 뿜으며 밤하늘로 쏘아 올린다.": "A slanted rack of fire arrows sits on a two-wheeled cart. It shoots them into the night sky in a burst of sparks.",
   "첨성대 별지기": "Cheomseongdae Stargazer",
