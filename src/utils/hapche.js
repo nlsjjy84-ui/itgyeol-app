@@ -379,7 +379,7 @@ export function tagsAt(tl, time) {
 }
 
 // 빈 자리를 내가 가진 조각으로 채운다 — 자리 맞음 > 모양 맞음 > 아무거나
-export function autoAssign(frameId, ownedKeys, prefer = {}) {
+export function autoAssign(frameId, ownedKeys, prefer = {}, bonus = null) {
   const frame = FRAME_BY_ID[frameId];
   const pool = ownedKeys.map((k) => PIECE_BY_K[k]).filter(Boolean);
   const out = {};
@@ -401,7 +401,8 @@ export function autoAssign(frameId, ownedKeys, prefer = {}) {
       out[sp.key] = out[twin.key];
       return;
     }
-    const score = (p) => (p.slots[0] === sp.slot ? 3 : p.slots.includes(sp.slot) ? 2 : 0) - (used[p.k] || 0) * 2.5 + shapeFit(p, sp);
+    // bonus — 오늘의 합체 미션처럼 조건에 맞는 조각을 먼저 고르고 싶을 때
+    const score = (p) => (p.slots[0] === sp.slot ? 3 : p.slots.includes(sp.slot) ? 2 : 0) - (used[p.k] || 0) * 2.5 + shapeFit(p, sp) + (bonus && bonus(p) ? 4 : 0);
     const best = [...pool].sort((a, b) => score(b) - score(a))[0];
     out[sp.key] = best.k;
     used[best.k] = (used[best.k] || 0) + 1;

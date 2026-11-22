@@ -15,6 +15,7 @@ import { usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
 import { FRAMES, TRANSFORMS, FRAME_BY_ID, SLOT_INFO } from '../data/frames';
 import { autoAssign, buildTimeline } from '../utils/hapche';
+import { todayMission, matches, countMatch } from '../utils/mission';
 
 function uniqSlots(frame) {
   // 왼쪽·오른쪽처럼 같은 자리가 여럿이면 하나로 묶어 보여 준다(같은 조각을 거울처럼 함께 쓴다)
@@ -31,7 +32,8 @@ export default function WorkshopScreen({ navigation, route }) {
   const store = usePieces();
   const params = route.params || {};
   const [mode, setMode] = useState(params.mode === 'transform' ? 'transform' : params.mode === 'free' ? 'free' : 'hapche');
-  const [frameId, setFrameId] = useState(params.mode === 'transform' ? 'rocket' : 'guardian');
+  const [frameId, setFrameId] = useState(params.mode === 'transform' ? 'rocket' : params.frame && FRAME_BY_ID[params.frame] ? params.frame : 'guardian');
+  const mission = params.mission ? todayMission() : null;
   const [assign, setAssign] = useState({});
   const [picking, setPicking] = useState(null); // 슬롯 key
   const ownedKeys = useMemo(() => (store.order || []).filter((k) => PIECE_BY_K[k]), [store]);
@@ -39,7 +41,7 @@ export default function WorkshopScreen({ navigation, route }) {
   useEffect(() => {
     if (!ownedKeys.length) return;
     if (mode === 'transform') setAssign((a) => autoAssign(frameId, ownedKeys, { core: params.core && PIECE_BY_K[params.core] ? params.core : a.core }));
-    else setAssign(autoAssign(frameId, ownedKeys));
+    else setAssign(autoAssign(frameId, ownedKeys, {}, mission && frameId === mission.frameId ? (p) => matches(mission, p) : null));
   }, [frameId, ownedKeys.length, mode]);
   // 틀을 막 바꾼 순간에는 이전 틀의 자리 배정이 남아 있다 — 이 틀의 자리에 맞는 조각이 하나도 없으면 아직 그리지 않는다(빈 화면 방지)
   const fits = (() => {
@@ -130,6 +132,16 @@ export default function WorkshopScreen({ navigation, route }) {
           ))}
         </ScrollView>
         <Text style={st.desc}>{t(frame.desc)}</Text>
+        {mission && mode === 'hapche' ? (
+          <View style={st.mission} testID="mission-bar">
+            <Text style={st.missionH}>{t('오늘의 합체 미션')}</Text>
+            <Text style={st.missionT}>
+              {frameId === mission.frameId
+                ? t('「{a}」 조각을 {n}자리 이상 넣기 — 지금 {c}자리', { a: t(mission.value), n: mission.need, c: countMatch(mission, frameId, assign) })
+                : t('미션 틀은 「{a}」이에요.', { a: t(mission.frameName) })}
+            </Text>
+          </View>
+        ) : null}
         {tl && <HapcheStage tl={tl} size={stage} autoPlay={false} sound={false} showSubs={false} />}
         <Text style={st.h}>{mode === 'transform' ? t('변형할 조각') : t('자리마다 들어갈 조각 — 눌러서 바꿔요')}</Text>
         <View style={st.slots}>
@@ -157,9 +169,9 @@ export default function WorkshopScreen({ navigation, route }) {
           <SealButton
             label={mode === 'transform' ? t('변형!') : t('합체!')}
             sound="drum"
-            onPress={() => navigation.navigate('Movie', { frameId, assign, seed: Math.floor(Math.random() * 99999) + 1, scene: params.scene || '' })}
+            onPress={() => navigation.navigate('Movie', { frameId, assign, seed: Math.floor(Math.random() * 99999) + 1, scene: params.scene || '', mission: !!mission })}
           />
-          <SealButton label={t('자동으로 다시 채우기')} variant="paper" onPress={() => setAssign(autoAssign(frameId, [...ownedKeys].sort(() => Math.random() - 0.5)))} />
+          <SealButton label={t('자동으로 다시 채우기')} variant="paper" onPress={() => setAssign(autoAssign(frameId, [...ownedKeys].sort(() => Math.random() - 0.5), {}, mission && frameId === mission.frameId ? (p) => matches(mission, p) : null))} />
           <SealButton label={t('조각 더 받기')} variant="ink" onPress={() => navigation.navigate('Pack')} />
         </View>
         </>
@@ -205,6 +217,9 @@ export default function WorkshopScreen({ navigation, route }) {
 }
 
 const st = StyleSheet.create({
+  mission: { backgroundColor: '#20303c', borderRadius: 12, padding: 10, marginTop: 8, gap: 2 },
+  missionH: { color: '#f6c46a', fontSize: 13, fontWeight: '700' },
+  missionT: { color: '#f6e7c4', fontSize: 14 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 16, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },
   modeRow: { flexDirection: 'row', gap: 8, marginTop: 8 },

@@ -229,3 +229,22 @@ test('유물 합체: 작품 사진(PNG)을 저장하면 출동 장면이 담긴 
   expect(buf.slice(1, 4).toString()).toBe('PNG');
   fs.copyFileSync(path, '/tmp/poster_e2e.png');
 });
+
+test('유물 합체: 오늘의 합체 미션 — 조건 맞춘 합체 영상을 만들면 귀한 조각을 받는다', async ({ page }) => {
+  const fs = await import('fs');
+  const keys = [...fs.readFileSync('src/data/pieces.js', 'utf8').matchAll(/"k": "([^"]+)"/g)].map((m) => m[1]).filter((k) => !k.startsWith('gogung'));
+  await page.addInitScript((keys) => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    const owned = {};
+    keys.forEach((k) => (owned[k] = 1));
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned, order: keys, works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  }, keys);
+  await openHome(page);
+  await page.getByText(/오늘의 합체 미션:/).filter({ visible: true }).first().click();
+  await expect(page.getByTestId('mission-bar')).toBeVisible();
+  await expect(page.getByText(/조각을 \d자리 이상 넣기 — 지금 \d+자리/)).toBeVisible();
+  await page.getByText('합체!', { exact: true }).filter({ visible: true }).first().click();
+  await expect(page.getByTestId('mission-win')).toBeVisible();
+  await expect(page.getByText(/상으로 귀한 조각 「.+」을\(를\) 받았어요/)).toBeVisible();
+});

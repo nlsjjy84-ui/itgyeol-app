@@ -1,6 +1,6 @@
 // 합체 영상 — 조각이 날아와 합체하는 짧은 영상과 자동 자막(풍이·결이의 이야기).
 // 영상 아래에는 이야기 전체, 들어간 진짜 유물(박물관 원본 링크), 영상·자막 파일 저장, 이 작품으로 만들 수 있는 물건.
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, SafeAreaView, useWindowDimensions, Image, Pressable, Linking, Platform } from 'react-native';
 import Text from '../ui/Text';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -9,9 +9,10 @@ import HapcheStage from '../components/HapcheStage';
 import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { pieceName } from '../utils/pieceName';
+import { todayMission, countMatch } from '../utils/mission';
 import { buildTimeline, beatsOf, judge, creditOf, josa, sceneKind, JANGDAN_OF } from '../utils/hapche';
 import { play } from '../utils/sound';
-import { saveWork, usePieces } from '../utils/pieceStore';
+import { saveWork, usePieces, missionDone, claimMission } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
 import { SLOT_INFO } from '../data/frames';
 import { canExport, exportMovie, downloadBlob, srtOf, paperKit, posterPng } from '../utils/movieExport';
@@ -31,7 +32,13 @@ const GOODS = [
 export default function MovieScreen({ navigation, route }) {
   const { width } = useWindowDimensions();
   const store = usePieces();
-  const { frameId, assign = {}, seed = 1, scene = '', saved, shared, layout } = route.params || {};
+  const { frameId, assign = {}, seed = 1, scene = '', saved, shared, layout, mission: fromMission } = route.params || {};
+  const [missionWin, setMissionWin] = useState(null);
+  useEffect(() => {
+    if (!fromMission || saved || shared) return;
+    const m = todayMission();
+    if (countMatch(m, frameId, assign) >= m.need && !missionDone(m.day)) setMissionWin(claimMission(m.day));
+  }, []);
   const tl = useMemo(() => buildTimeline(frameId, assign, { seed, scene, layout }), [frameId, assign, seed, scene, layout]);
   const [savedId, setSavedId] = useState(saved || null);
   // 장단 합체 — 조각이 끼워지는 박에 맞춰 톡!
@@ -122,6 +129,14 @@ export default function MovieScreen({ navigation, route }) {
           <View style={st.sharedBox}>
             <Text style={st.sharedTxt}>{t('누군가 보낸 합체 영상이에요. 진짜 박물관 유물 조각으로 만들었어요.')}</Text>
             <SealButton label={t('나도 만들어 보기 — 첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
+          </View>
+        ) : null}
+        {missionWin ? (
+          <View style={st.missionWin} testID="mission-win">
+            <Text style={st.missionWinH}>{t('오늘의 합체 미션 성공!')}</Text>
+            <Text style={st.sharedTxt}>
+              {missionWin.keys.length ? t('상으로 귀한 조각 「{a}」을(를) 받았어요.', { a: pieceName(PIECE_BY_K[missionWin.keys[0]]) }) : t('이미 귀한 조각을 다 모았어요!')}
+            </Text>
           </View>
         ) : null}
         <HapcheStage
@@ -283,6 +298,8 @@ export default function MovieScreen({ navigation, route }) {
 }
 
 const st = StyleSheet.create({
+  missionWin: { backgroundColor: '#2c7a64', borderRadius: 14, padding: 12, marginBottom: 10, gap: 4 },
+  missionWinH: { color: '#fff', fontSize: 17, fontWeight: '800' },
   talk: { backgroundColor: '#f6f2ea', borderRadius: 14, padding: 12, gap: 6 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   wrap: { padding: 12, paddingBottom: 60, maxWidth: 760, width: '100%', alignSelf: 'center' },

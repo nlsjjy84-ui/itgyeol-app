@@ -225,6 +225,22 @@ export function answerRiddle(k, ok) {
   return { fresh };
 }
 
+// 오늘의 합체 미션 달성 — 하루 한 번, 아직 없는 「귀함」 이상 조각 하나
+export function missionDone(day) {
+  return !!(state && state.mission && state.mission.day === day);
+}
+export function claimMission(day, seed = Date.now()) {
+  if (!state) state = { ...EMPTY };
+  if (missionDone(day)) return null;
+  const pool = PIECES.filter((p) => p.rare >= 1 && !p.only && !state.owned[p.k]);
+  const keys = pool.length ? [pool[seed % pool.length].k] : [];
+  const fresh = addPieces(keys);
+  state = { ...state, mission: { day, n: ((state.mission && state.mission.n) || 0) + 1 } };
+  persist();
+  emit();
+  return { keys, fresh };
+}
+
 export function saveWork(work) {
   if (!state) state = { ...EMPTY };
   const w = { ...work, id: work.id || 'W' + Date.now().toString(36), at: Date.now() };

@@ -4,6 +4,23 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "흙": "Earth",
+  "쇠": "Iron",
+  "돌": "Stone",
+  "옥": "Jade",
+  "금": "Gold",
+  "나무": "Wood",
+  "천": "Cloth",
+  "종이": "Paper",
+  "뼈": "Bone",
+  "오늘의 합체 미션": "Today's combine mission",
+  "「{a}」 조각을 {n}자리 이상 넣기 — 지금 {c}자리": "Put '{a}' pieces in {n} or more spots — now {c}",
+  "미션 틀은 「{a}」이에요.": "The mission frame is '{a}'.",
+  "오늘의 합체 미션 성공!": "Today's combine mission complete!",
+  "상으로 귀한 조각 「{a}」을(를) 받았어요.": "You won the rare piece '{a}'.",
+  "이미 귀한 조각을 다 모았어요!": "You already have every rare piece!",
+  "오늘의 합체 미션 완료 — 내일 또!": "Today's mission done — see you tomorrow!",
+  "오늘의 합체 미션: 「{a}」 조각 {n}자리로 「{b}」": "Today's mission: build '{b}' with {n} '{a}' pieces",
   "배경 장단: {a} — 가야금과 장구로 만든 잇결 음악이에요.": "Background rhythm: {a} — Itgyeol music made with gayageum and janggu.",
   "굿거리": "Gutgeori",
   "중모리": "Jungmori",

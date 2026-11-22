@@ -7,6 +7,8 @@ import SealButton from '../ui/SealButton';
 import HapcheStage from './HapcheStage';
 import { colors } from '../theme';
 import { t } from '../i18n';
+import { todayMission } from '../utils/mission';
+import { missionDone } from '../utils/pieceStore';
 import { buildTimeline, autoAssign } from '../utils/hapche';
 import { starterKeys, usePieces, dailyState } from '../utils/pieceStore';
 import { PIECES } from '../data/pieces';
@@ -82,6 +84,18 @@ export default function HapcheHome({ navigation }) {
           <SealButton style={{ flex: 1 }} label={t('합체 작업대')} variant="ink" onPress={() => navigation.navigate('Workshop')} />
           <SealButton style={{ flex: 1 }} label={t('조각 도감')} variant="paper" onPress={() => navigation.navigate('Dex')} />
         </View>
+        {owned ? (() => {
+          const m = todayMission();
+          const done = missionDone(m.day);
+          return (
+            <SealButton
+              small
+              variant={done ? 'paper' : 'ink'}
+              label={done ? t('오늘의 합체 미션 완료 — 내일 또!') : t('오늘의 합체 미션: 「{a}」 조각 {n}자리로 「{b}」', { a: t(m.value), n: m.need, b: t(m.frameName) })}
+              onPress={() => navigation.navigate('Workshop', { frame: m.frameId, mission: true })}
+            />
+          );
+        })() : null}
         {owned ? <SealButton small label={t('유물 수수께끼 — 맞히면 조각을 가져요')} variant="paper" onPress={() => navigation.navigate('Riddle')} /> : null}
         <SealButton small label={t('합체 전시관 (큰 화면)')} variant="paper" onPress={() => navigation.navigate('HapcheWall')} />
       </View>
