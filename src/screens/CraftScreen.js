@@ -17,6 +17,13 @@ import { pieceName } from '../utils/pieceName';
 import { labelLine } from './MuseumScreen';
 
 // 「원래 쓰임」 줄과 겹치지 않게 — 「…이라, 」 앞(원래 쓰임 설명)은 떼고 오늘의 쓰임만 보인다
+// 「원래 쓰임」은 이 물건의 까닭 앞부분(이 유물에 맞는 말)을 먼저 쓰고, 없으면 종류 설명의 첫 문장만 쓴다
+const origPart = (why, typeM) => {
+  const m = String(why).match(/^(.*?)(?:이라|라|여서|해서), /);
+  if (m && m[1].length >= 6) return m[1];
+  const first = String(typeM || '').split(/(?<=요\.)\s/)[0];
+  return first;
+};
 const todayPart = (why) => {
   const m = String(why).match(/^(.*?(?:이라|라|여서|해서)), (.*)$/);
   return m ? m[2] : why;
@@ -70,7 +77,7 @@ export default function CraftScreen({ navigation, route }) {
                 <Text style={st.to}>{t(c.to)}</Text>
                 <View style={st.step}>
                   <Text style={st.tag}>{t('원래 쓰임')}</Text>
-                  <Text style={st.stepTxt}>{r.type ? r.type.m : t('박물관 사진 그대로')}</Text>
+                  <Text style={st.stepTxt}>{r.type ? t(origPart(c.why, r.type.m)) : t('박물관 사진 그대로')}</Text>
                 </View>
                 <View style={st.step}>
                   <Text style={[st.tag, st.tagTo]}>{t('오늘의 물건')}</Text>

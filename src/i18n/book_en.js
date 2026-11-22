@@ -46,7 +46,7 @@ const BOOK = {
     },
     {
       art: 'madang', place: 'The madang',
-      lines: [P('Wooow, the madang!! Every board you play gives you a piece. Sew them together and you get jogakbo, a patchwork cloth 🧶'), G('There are six boards: Jinbeop, the Writing Room, the Play Yard, Hangul Blocks, the Mask Dance and Dancheong! Start wherever you like 🥳')],
+      lines: [P('Wooow, the madang!! Every board you clear opens a bundle — with a real museum relic inside! Collect them and it becomes your own museum 🏛️'), G('There are six boards: Jinbeop, the Writing Room, the Play Yard, Hangul Blocks, the Mask Dance and Dancheong! Start wherever you like 🥳')],
     },
   ],
 

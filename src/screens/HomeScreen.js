@@ -259,6 +259,8 @@ export default function HomeScreen({ navigation, route }) {
       {/* [체험 확장 근거] "다른 방향의 체험도 할 수 있다"는 말만으로는 근거가 안 되므로,
           지금 세 판을 만든 같은 방식(전통 소재 → 공통 설계 질문 → 난이도 단계)을 다음에
           무엇에 적용할지 구체적으로 보여준다. */}
+      {/* 2026-11-22: 준비 중인 판이 없으면(여섯 판 모두 열림) 빈 「다음 체험」 칸을 보이지 않는다 */}
+      {CARDS.some((c) => !c.ready) ? (<>
       <View style={styles.roadmapHeader}>
         <Text style={styles.roadmapTitle}>{t('다음 체험, 준비 중')}</Text>
         <Text style={styles.roadmapHint}>
@@ -282,6 +284,7 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         ))}
       </View>
+      </>) : null}
       </ScrollView>
     </SafeAreaView>
   );
