@@ -4,6 +4,7 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "스미스소니언 국립아시아미술관": "Smithsonian National Museum of Asian Art",
   "큰 자막": "Large subtitles",
   "큰 자막 켬": "Large subs: on",
   "큰 자막 끔": "Large subs: off",

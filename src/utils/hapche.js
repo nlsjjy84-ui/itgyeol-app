@@ -453,5 +453,5 @@ export function judge(beats, taps) {
 
 // 출처 표시 — 박물관마다 이용 조건이 다르다(국내: 공공누리 제1유형, 클리블랜드: CC0)
 export function creditOf(museums) {
-  return museums.map((m) => (m === '클리블랜드 미술관' ? `${t(m)} (CC0)` : `${t(m)} (${t('공공누리 제1유형')})`)).join(' · ');
+  return museums.map((m) => (m === '클리블랜드 미술관' || m === '스미스소니언 국립아시아미술관' ? `${t(m)} (CC0)` : `${t(m)} (${t('공공누리 제1유형')})`)).join(' · ');
 }
