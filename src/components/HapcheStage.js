@@ -71,7 +71,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
     };
     if (time > 0.05) once('bgm', bgmOf(tl.frame.id));
     if (time > 15.9) once('bgm2', bgmOf(tl.frame.id));
-    if (time > 0.15) once('open', tl.isTransform ? 'transform' : 'daegeum');
+    if (time > 0.15) once('open', tl.isTransform || tl.isMorph ? 'transform' : 'daegeum');
     tl.events.forEach((e, i) => {
       if (time >= e.start && i % 2 === 0) once('f' + e.start, 'fly');
       if (time >= e.end) once('c' + e.end, CLANK_OF[(PIECE_BY_K[e.k] || {}).power] || 'clank');

@@ -306,7 +306,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
     return { t0: e.start, t1: e.end + 0.55, key: e.key, text: `${pieceName(p)}${p.era ? ' · ' + t(p.era) : ''}`, slot: t(e.slot || '') };
   });
 
-  return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain };
+  return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain, isMorph: !!opts.morphFrom };
 }
 
 // 시각 t에서 조각 하나의 자세

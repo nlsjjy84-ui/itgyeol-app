@@ -401,7 +401,7 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertic
       paint(Math.min(time, tl.dur));
       if (time > 0.02) playS('bgm', bgmOf(tl.frame.id), 0.45);
       if (time > 16) playS('bgm2', bgmOf(tl.frame.id), 0.45);
-      if (time > 0.15) playS('open', tl.isTransform ? 'transform' : 'daegeum');
+      if (time > 0.15) playS('open', tl.isTransform || tl.isMorph ? 'transform' : 'daegeum');
       tl.events.forEach((e, i) => {
         if (time >= e.start && i % 2 === 0) playS('f' + e.start, 'fly');
         if (time >= e.end) playS('c' + e.end, CLANK_OF[(PIECE_BY_K[e.k] || {}).power] || 'clank');
