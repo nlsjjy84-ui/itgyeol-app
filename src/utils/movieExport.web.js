@@ -218,7 +218,7 @@ export function drawFrame(ctx, S, tl, imgs, time) {
     ctx.stroke();
     ctx.restore();
   });
-  [...tl.events]
+  [...tl.events, ...(tl.exits || [])]
     .sort((a, b) => a.z - b.z)
     .forEach((e) => {
       const p = poseAt(e, time);
@@ -318,7 +318,7 @@ export function drawFrame(ctx, S, tl, imgs, time) {
 export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertical = false } = {}) {
   if (!canExport()) return { ok: false, reason: 'unsupported' };
   const imgs = {};
-  await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
+  await Promise.all([...new Set([...tl.events, ...(tl.exits || [])].map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = vertical ? Math.round((size * 16) / 9) : size;
@@ -462,7 +462,7 @@ export async function paperKit(tl) {
   c.height = H;
   const ctx = c.getContext('2d');
   const imgs = {};
-  await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
+  await Promise.all([...new Set([...tl.events, ...(tl.exits || [])].map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
   ctx.fillStyle = '#fffdf8';
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = '#1b2227';
@@ -684,7 +684,7 @@ export async function exportStory({ part, pages, resolve, art, chars, charAr, fl
 // 작품 사진(포스터) — 합체가 끝나고 출동 장면이 다 펼쳐진 순간을 1080×1080 PNG 한 장으로
 export async function posterPng(tl, { size = 1080 } = {}) {
   const imgs = {};
-  await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
+  await Promise.all([...new Set([...tl.events, ...(tl.exits || [])].map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
   const c = document.createElement('canvas');
   c.width = size;
   c.height = size;
@@ -714,7 +714,7 @@ export async function albumPng(tls, { owner = '' } = {}) {
   for (let i = 0; i < Math.min(6, tls.length); i += 1) {
     const tl = tls[i];
     const imgs = {};
-    await Promise.all([...new Set(tl.events.map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
+    await Promise.all([...new Set([...tl.events, ...(tl.exits || [])].map((e) => e.k))].map(async (k) => (imgs[k] = await loadImg(PIECE_BY_K[k].img))));
     const sq = document.createElement('canvas');
     sq.width = cell;
     sq.height = cell;

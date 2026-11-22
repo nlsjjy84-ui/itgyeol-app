@@ -129,7 +129,9 @@ export function fitPiece(piece, spec) {
   if (spec.axis === 'h' && ar < 0.87) base = 90;
   const long = Math.max(ar, 1); // 긴 변을 1로 둘 때
   // 그림의 원래 크기를 (ar, 1) 비율로 보고, 긴 변이 spec.w가 되게 한다
-  const h = spec.w / long;
+  // 길쭉한 자리(axis h·v)에 동그스름한 조각이 오면 긴 변을 자리 길이만큼 키우면 너무 커진다 — 0.78배로
+  const roundish = (spec.axis === 'h' || spec.axis === 'v') && ar > 0.75 && ar < 1.35;
+  const h = (spec.w * (roundish ? 0.78 : 1)) / long;
   const w = h * ar;
   return { w, h, rot: base + (spec.rot || 0) };
 }
@@ -236,6 +238,14 @@ export function buildTimeline(frameId, assign, opts = {}) {
     });
     cursor += STEP;
   });
+  // 변신에 안 쓰이는 앞 작품 조각 — 제자리에 서 있다가 첫 박에 화면 밖으로 날아간다(그려 주기만, 이야기·박자에는 안 셈)
+  const exits = [];
+  Object.values(morphPool).forEach((list) =>
+    list.forEach((mp, i) => {
+      const out = mp.to.x < 500 ? -360 : 1360;
+      exits.push({ ...mp, key: 'x' + mp.key + i, start: OPEN - 0.2 + i * 0.1, end: OPEN + 0.5 + i * 0.1, from: { ...mp.to, s: 1 }, to: { x: out, y: mp.to.y - 200, rot: mp.to.rot + (out < 0 ? -300 : 300), s: 0.6 }, morph: true, exit: true, head: false, spin: false, fire: false });
+    })
+  );
   // 결 실 — 조각과 조각을 잇는 금빛 실(잇결 = 잇는 결). 조각이 자리에 닿으면 가장 가까운 앞선 조각까지 실이 뻗는다.
   const threads = [];
   if (!isTransform || specs.length > 3)
@@ -306,7 +316,7 @@ export function buildTimeline(frameId, assign, opts = {}) {
     return { t0: e.start, t1: e.end + 0.55, key: e.key, text: `${pieceName(p)}${p.era ? ' · ' + t(p.era) : ''}`, slot: t(e.slot || '') };
   });
 
-  return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain, isMorph: !!opts.morphFrom };
+  return { frame, events, threads, subs, tags, lockT, titleT, dur: endT, title, body, museums, eras, isTransform, villain, isMorph: !!opts.morphFrom, exits };
 }
 
 // 시각 t에서 조각 하나의 자세

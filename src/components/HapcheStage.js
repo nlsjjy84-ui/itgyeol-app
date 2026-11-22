@@ -118,7 +118,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
   useEffect(() => () => hush(), []);
   const tags = showSubs ? tagsAt(tl, time).slice(-2) : [];
   const done = time >= tl.titleT;
-  const sorted = [...tl.events].sort((a, b) => a.z - b.z);
+  const sorted = [...tl.events, ...(tl.exits || [])].sort((a, b) => a.z - b.z);
   // 돌려 보기 — 조각마다 앞뒤 깊이(z)를 주고, 세로축으로 돌리면 가까운 조각이 더 크게 움직여 입체처럼 보인다
   const theta = spin ? ((Date.now() - spin) / 1000) * 0.9 : 0;
   const cosT = Math.cos(theta);
