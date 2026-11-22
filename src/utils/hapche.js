@@ -563,7 +563,8 @@ export function autoAssign(frameId, ownedKeys, prefer = {}, bonus = null) {
       return;
     }
     // bonus — 오늘의 합체 미션처럼 조건에 맞는 조각을 먼저 고르고 싶을 때
-    const score = (p) => (p.slots[0] === sp.slot ? 3 : p.slots.includes(sp.slot) ? 2 : 0) - (used[p.k] || 0) * 2.5 + shapeFit(p, sp) + (bonus && bonus(p) ? 4 : 0);
+    // sp.use — 이 자리에 어울리는 유물 쓰임(예: 화차의 불화살 자리는 화살촉·창). 맞으면 더 먼저 고른다
+    const score = (p) => (p.slots[0] === sp.slot ? 3 : p.slots.includes(sp.slot) ? 2 : 0) - (used[p.k] || 0) * 2.5 + shapeFit(p, sp) + (bonus && bonus(p) ? 4 : 0) + (sp.use && sp.use.includes(p.use) ? 2.5 : 0);
     const best = [...pool].sort((a, b) => score(b) - score(a))[0];
     out[sp.key] = best.k;
     used[best.k] = (used[best.k] || 0) + 1;
@@ -572,6 +573,8 @@ export function autoAssign(frameId, ownedKeys, prefer = {}, bonus = null) {
 }
 function shapeFit(p, sp) {
   const ar = p.ar || 1;
+  // 무기 자리 — 길쭉한(가로든 세로든 3배 이상) 칼·창이 어울린다. 넓적한 돌덩이처럼 보이지 않게
+  if (sp.slot === '무기') return Math.max(ar, 1 / ar) >= 3 ? 1.6 : Math.max(ar, 1 / ar) >= 2 ? 0.8 : -0.5;
   if (sp.slot === '바퀴' || sp.slot === '방패' || sp.slot === '눈') return 1 - Math.min(1, Math.abs(ar - 1) * 1.5) + (p.fill > 0.68 ? 0.5 : 0);
   if (sp.axis === 'v') return ar < 0.8 ? 0.8 : 0;
   if (sp.axis === 'h') return ar > 1.25 ? 0.8 : 0;
