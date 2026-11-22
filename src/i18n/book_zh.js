@@ -125,15 +125,15 @@ const BOOK = {
   // ── 文物合体故事:夜晚的博物馆(5页) ──
   hapche: [
     {
-      art: 'sunset', place: '黄昏 · 博物馆门前',
+      art: 'sunset', tint: 'dusk', place: '黄昏 · 博物馆门前',
       lines: [P('嘘……博物馆要关门了。可是里面传来咔嗒咔嗒的声音 😳'), G('那是展柜里的文物醒来了。听说它们每天晚上都偷偷活动 🌙')],
     },
     {
-      art: 'byeongpung', place: '夜晚 · 展厅',
+      art: 'byeongpung', tint: 'night', place: '夜晚 · 展厅',
       lines: [G('可是今晚,潮湿鬼和锈妖怪溜进来了,想要破坏文物!'), P('每件文物都很小,单独打不赢 😣')],
     },
     {
-      art: 'byeongpung', place: '夜晚 · 展厅',
+      art: 'byeongpung', tint: 'night', place: '夜晚 · 展厅',
       lines: [P('所以碎片们决定合力。新罗耳环、高丽铜镜、朝鲜砚滴合成一个身体!'), G('时代不同,结连在一起就成了一体。这就是 Itgyeol 的「合体」🧵')],
       input: {
         key: 'hapche',

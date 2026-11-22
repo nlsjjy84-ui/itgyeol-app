@@ -150,15 +150,15 @@ const BOOK = {
   // ── 유물 합체 이야기: 밤의 박물관 (5쪽) — 새 장르를 처음 여는 이야기 영상 ──
   hapche: [
     {
-      art: 'sunset', place: '해 질 녘 · 박물관 앞',
+      art: 'sunset', tint: 'dusk', place: '해 질 녘 · 박물관 앞',
       lines: [P('쉿… 박물관 문 닫을 시간이야. 그런데 안에서 달그락 소리가 나 😳'), G('진열장 속 유물들이 깨어나는 소리야. 밤마다 몰래 움직인대 🌙')],
     },
     {
-      art: 'byeongpung', place: '밤 · 전시실',
+      art: 'byeongpung', tint: 'night', place: '밤 · 전시실',
       lines: [G('그런데 오늘 밤엔 습기 귀신이랑 녹 도깨비가 숨어들었어. 유물을 망가뜨리려고!'), P('유물 하나하나는 작아서 혼자서는 못 이겨 😣')],
     },
     {
-      art: 'byeongpung', place: '밤 · 전시실',
+      art: 'byeongpung', tint: 'night', place: '밤 · 전시실',
       lines: [P('그래서 조각들이 힘을 합치기로 했어. 신라 귀걸이, 고려 거울, 조선 연적이 한 몸이 되는 거야!'), G('시대가 달라도 결이 이어지면 하나가 돼. 그게 잇결의 「합체」야 🧵')],
       input: {
         key: 'hapche',

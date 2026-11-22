@@ -180,7 +180,8 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
     <View style={{ alignItems: 'center' }}>
       <Pressable onPress={() => (stage.kind === 'wait' ? (input.options.length === 1 ? pick(input.options[0].id) : null) : next(true))} style={[st.stage, { width: W, height: H }]}>
         <Image source={ART[page.art] || ART.gate} style={{ position: 'absolute', left: panX, top: -H * 0.04, width: artW, height: H * 1.08, transform: [{ scale: zoom }] }} resizeMode="cover" />
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0b1016', opacity: 0.25 }]} />
+        {/* 장면의 시간 — tint: 'night'면 남빛 밤, 'dusk'면 노을빛 */}
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: page.tint === 'night' ? '#0a1430' : page.tint === 'dusk' ? '#5a2a10' : '#0b1016', opacity: page.tint === 'night' ? 0.55 : page.tint === 'dusk' ? 0.3 : 0.25 }]} />
         {/* 떠다니는 빛 */}
         {Array.from({ length: 14 }, (_, i) => (
           <View key={'p' + i} style={[st.mote, { left: (((i * 97) % 100) / 100) * W, top: ((((i * 53) % 100) / 100) * H + now * (14 + (i % 4) * 6)) % H, opacity: 0.25 + 0.5 * Math.abs(Math.sin(now * 1.3 + i)) }]} />

@@ -134,15 +134,15 @@ const BOOK = {
   // ── Artifact Combine story: Museum at Night (5 pages) ──
   hapche: [
     {
-      art: 'sunset', place: 'Sunset · In front of the museum',
+      art: 'sunset', tint: 'dusk', place: 'Sunset · In front of the museum',
       lines: [P('Shh… the museum is closing. But something is clattering inside 😳'), G('That’s the artifacts in the cases waking up. They secretly move every night 🌙')],
     },
     {
-      art: 'byeongpung', place: 'Night · Gallery',
+      art: 'byeongpung', tint: 'night', place: 'Night · Gallery',
       lines: [G('But tonight the Damp Ghost and the Rust Goblin sneaked in. They want to ruin the artifacts!'), P('Each artifact is small. Alone, they can’t win 😣')],
     },
     {
-      art: 'byeongpung', place: 'Night · Gallery',
+      art: 'byeongpung', tint: 'night', place: 'Night · Gallery',
       lines: [P('So the pieces decide to join forces. A Silla earring, a Goryeo mirror and a Joseon water dropper become one body!'), G('Different times, one thread. That’s Itgyeol’s “combine” 🧵')],
       input: {
         key: 'hapche',

@@ -604,7 +604,8 @@ export async function exportStory({ part, pages, resolve, art, chars, charAr, fl
       ctx.drawImage(im, panX, -H * 0.04, artW, H * 1.08);
       ctx.restore();
     }
-    ctx.fillStyle = 'rgba(11,16,22,0.25)';
+    const tint = pages[pi] && pages[pi].tint;
+    ctx.fillStyle = tint === 'night' ? 'rgba(10,20,48,0.55)' : tint === 'dusk' ? 'rgba(90,42,16,0.3)' : 'rgba(11,16,22,0.25)';
     ctx.fillRect(0, 0, W, H);
     (floats[pi] || []).forEach((fim, i) => {
       if (!fim) return;
