@@ -1,0 +1,108 @@
+<!doctype html><html><body style="margin:0"><canvas id=c width=1200 height=1200></canvas>
+<script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+const q=new URLSearchParams(location.search); const S=q.get('s');
+const r=new THREE.WebGLRenderer({canvas:c,antialias:true,preserveDrawingBuffer:true}); r.toneMapping=THREE.ACESFilmicToneMapping; r.outputColorSpace=THREE.SRGBColorSpace; r.toneMappingExposure=0.82;
+r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap;
+const sc=new THREE.Scene(); const TL=new THREE.TextureLoader();
+const pm=new THREE.PMREMGenerator(r); const env=pm.fromEquirectangular(await new HDRLoader().loadAsync('./studio.hdr')).texture; sc.environment=env; sc.environmentIntensity=0.8;
+async function T(p,srgb,rep=1){const t=await TL.loadAsync(p); if(srgb)t.colorSpace=THREE.SRGBColorSpace; t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rep,rep); t.anisotropy=8; return t;}
+async function pbr(n,rep,extra={}){const b=`tex/${n}/${n}_1K-JPG_`; return new THREE.MeshStandardMaterial({map:await T(b+'Color.jpg',1,rep),normalMap:await T(b+'NormalGL.jpg',0,rep),roughnessMap:await T(b+'Roughness.jpg',0,rep),...extra});}
+async function relic(n,f,metal=0,rough=0.85){ const tex=await TL.loadAsync(`r3d/${n}/${f}_2k.jpg`); tex.colorSpace=THREE.SRGBColorSpace;
+  const o=await new OBJLoader().loadAsync(`r3d/${n}/${f}.obj`); let mesh; o.traverse(m=>{if(m.isMesh){m.material=new THREE.MeshStandardMaterial({map:tex,roughness:rough,metalness:metal}); m.castShadow=m.receiveShadow=true; mesh=m;}});
+  mesh.geometry.computeBoundingBox(); const bb=mesh.geometry.boundingBox; const ce=bb.getCenter(new THREE.Vector3()); mesh.geometry.translate(-ce.x,-bb.min.y,-ce.z); mesh.geometry.computeBoundingBox(); return mesh; }
+function sun(x,y,z,i=2.2){const d=new THREE.DirectionalLight(0xfff4e6,i); d.position.set(x,y,z); d.castShadow=true; d.shadow.mapSize.set(4096,4096); const s=d.shadow.camera; s.left=s.bottom=-300; s.right=s.top=300; s.near=1; s.far=3000; d.shadow.bias=-0.0004; d.shadow.radius=6; sc.add(d); return d;}
+const cam=new THREE.PerspectiveCamera(32,1,1,5000);
+
+if(S==='coaster4'||S==='coaster1'){
+  sc.background=new THREE.Color(0xd9d2c7);
+  const table=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000), await pbr('Wood066',12,{roughnessMap:null,roughness:0.62})); table.rotation.x=-Math.PI/2; table.receiveShadow=true; sc.add(table);
+  const brick=await relic('lotus','bon013968-000-30000',0,0.9);
+  const bb=brick.geometry.boundingBox; const w=bb.max.x-bb.min.x, d=bb.max.z-bb.min.z, h=bb.max.y-bb.min.y;
+  const W=100, k=W/Math.max(w,d); const relief=7/h; // 도자 부조 코스터: 두께 7mm
+  const cork=await pbr('Cork001',0.25,{roughness:0.95});
+  function coaster(x,z,rot){ const g=new THREE.Group(); const m=brick.clone(); m.scale.set(k,relief,k); m.position.y=3; g.add(m);
+    const pad=new THREE.Mesh(new THREE.BoxGeometry(w*k-2,3,d*k-2),cork); pad.position.y=1.5; pad.castShadow=pad.receiveShadow=true; g.add(pad);
+    g.position.set(x,0,z); g.rotation.y=rot; sc.add(g); return g; }
+  if(S==='coaster4'){ const s=w*k/2+1.2; coaster(-s,-s,0); coaster(s,-s,Math.PI/2); coaster(s,s,Math.PI); coaster(-s,s,-Math.PI/2);
+    sun(-260,520,180); cam.position.set(170,330,300); cam.lookAt(0,0,10); }
+  else { for(let i=0;i<4;i++){ const g=coaster(-40,-30,0.08*i); g.position.y=i*10.2; }
+    const g=coaster(75,70,-0.35); sun(-260,520,180); cam.position.set(260,230,330); cam.lookAt(10,15,20); }
+}
+
+if(S==='diffuser'){
+  sc.background=new THREE.Color(0xdcd6cc);
+  const table=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000), await pbr('Wood066',12,{roughnessMap:null,roughness:0.62})); table.rotation.x=-Math.PI/2; table.receiveShadow=true; sc.add(table);
+  const m=await relic('monkey','duk000510-000-30000',0,0.35); const bb=m.geometry.boundingBox; const H=bb.max.y-bb.min.y; const k=130/H; m.scale.setScalar(k); sc.add(m);
+  // 꽃 구멍: 가장 높은 꼭짓점들의 평균
+  const p=m.geometry.attributes.position; let sx=0,sz=0,n=0; for(let i=0;i<p.count;i++){ if(p.getY(i)>bb.max.y-6){sx+=p.getX(i);sz+=p.getZ(i);n++;} }
+  const ox=sx/n*k, oz=sz/n*k, oy=(bb.max.y-6)*k;
+  const reedMat=new THREE.MeshStandardMaterial({color:0xcdb994,roughness:0.95});
+  for(let i=0;i<7;i++){ const a=i/7*Math.PI*2+0.3, t=0.16+0.06*Math.sin(i*2.1); const L=230;
+    const g=new THREE.CylinderGeometry(1.5,1.5,L,8); g.translate(0,L/2,0); const rd=new THREE.Mesh(g,reedMat); rd.position.set(ox,oy-25,oz); rd.rotation.set(Math.sin(a)*t,0,Math.cos(a)*t); rd.castShadow=true; sc.add(rd); }
+  sun(-200,420,260); cam.position.set(330,200,560); cam.lookAt(0,150,0); cam.fov=36; cam.updateProjectionMatrix();
+}
+if(S==='bell'){
+  sc.background=new THREE.Color(0xcfc6b8);
+  const table=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000), await pbr('Wood066',12,{roughnessMap:null,roughness:0.7,color:0x8c8070})); table.rotation.x=-Math.PI/2; table.receiveShadow=true; sc.add(table);
+  const stand=new THREE.Mesh(new THREE.CylinderGeometry(62,66,14,96), await pbr('Wood066',0.3,{roughnessMap:null,roughness:0.5})); stand.position.y=7; stand.castShadow=stand.receiveShadow=true; sc.add(stand);
+  const felt=new THREE.Mesh(new THREE.CylinderGeometry(50,50,2,96), new THREE.MeshStandardMaterial({color:0x4a1c1c,roughness:1})); felt.position.y=15; felt.receiveShadow=true; sc.add(felt);
+  const m=await relic('bell','duk002457-000-30000',0.55,0.45); const bb=m.geometry.boundingBox; const k=150/(bb.max.y-bb.min.y); m.scale.setScalar(k); m.position.y=16; sc.add(m);
+  sun(-220,460,220); cam.position.set(230,210,360); cam.lookAt(0,85,0); cam.fov=30; cam.updateProjectionMatrix();
+}
+
+async function wall(col=0xece6dc){ sc.background=new THREE.Color(0xe4ddd2); const w=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000), await pbr('Plaster001',6,{roughness:0.95,color:col})); w.receiveShadow=true; sc.add(w); return w; }
+function flat(m,W,relief){ const bb=m.geometry.boundingBox; const w=bb.max.x-bb.min.x,d=bb.max.z-bb.min.z,h=bb.max.y-bb.min.y; const k=W/Math.max(w,d); m.scale.set(k,relief/h,k); return [w*k,d*k]; }
+if(S==='clock'){
+  await wall(); const m=await relic('lotus','bon013968-000-30000',0,0.9); const [w,d]=flat(m,260,12);
+  const g=new THREE.Group(); g.add(m); g.rotation.x=Math.PI/2; g.position.z=0; sc.add(g); // 앞면이 +z(카메라)쪽
+  const metal=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.6,roughness:0.35});
+  const hand=(L,wd,ang,z)=>{ const geo=new THREE.BoxGeometry(wd,L,1.2); geo.translate(0,L/2-8,0); const h=new THREE.Mesh(geo,metal); h.rotation.z=ang; h.position.set(0,0,z); h.castShadow=true; sc.add(h); };
+  hand(68,5,-0.9,16); hand(96,3.4,2.2,18); const pin=new THREE.Mesh(new THREE.CylinderGeometry(4,4,6,24),metal); pin.rotation.x=Math.PI/2; pin.position.z=19; sc.add(pin);
+  sun(-300,450,500,2.4); cam.position.set(120,60,620); cam.lookAt(0,0,0);
+}
+if(S==='frame'){
+  await wall(); const m=await relic('sansu','bon013972-002-30000',0,0.9); const [w,d]=flat(m,200,8);
+  const g=new THREE.Group(); g.add(m); g.rotation.x=Math.PI/2; g.position.z=14; sc.add(g);
+  const mat=new THREE.Mesh(new THREE.BoxGeometry(w+70,d+70,12),new THREE.MeshStandardMaterial({color:0xf3efe6,roughness:0.95})); mat.position.z=6; mat.castShadow=mat.receiveShadow=true; sc.add(mat);
+  const wood=await pbr('Wood066',0.4,{roughnessMap:null,roughness:0.45,color:0x5a3c28}); const F=22,D=30,W2=w+70+2*F,H2=d+70+2*F;
+  for(const [x,y,ww,hh] of [[0,(H2-F)/2,W2,F],[0,-(H2-F)/2,W2,F],[(W2-F)/2,0,F,H2-2*F],[-(W2-F)/2,0,F,H2-2*F]]){ const b=new THREE.Mesh(new THREE.BoxGeometry(ww,hh,D),wood); b.position.set(x,y,D/2); b.castShadow=b.receiveShadow=true; sc.add(b); }
+  sun(-520,380,260,2.6); cam.position.set(140,40,700); cam.lookAt(0,0,0);
+}
+if(S==='note'){
+  sc.background=new THREE.Color(0xd9d2c7); const table=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000), await pbr('Wood066',12,{roughnessMap:null,roughness:0.62})); table.rotation.x=-Math.PI/2; table.receiveShadow=true; sc.add(table);
+  const book=new THREE.Group(); const pages=new THREE.Mesh(new THREE.BoxGeometry(146,12,206),new THREE.MeshStandardMaterial({color:0xf4efe3,roughness:0.9})); pages.position.y=7; book.add(pages);
+  const cov=new THREE.MeshStandardMaterial({color:0x6b4a35,roughness:0.8}); for(const y of [0.9,13.1]){ const c=new THREE.Mesh(new THREE.BoxGeometry(150,1.8,210),cov); c.position.y=y; c.castShadow=c.receiveShadow=true; book.add(c); }
+  const sp=new THREE.Mesh(new THREE.BoxGeometry(4,14,210),cov); sp.position.set(-75,7,0); book.add(sp);
+  const m=await relic('sansu','bon013972-002-30000',0,0.9); flat(m,118,1.6); m.position.set(2,14,-6); m.rotation.y=Math.PI/2; book.add(m);
+  book.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true;}}); book.rotation.y=0.35; sc.add(book);
+  sun(-260,520,180); cam.position.set(150,330,300); cam.lookAt(0,0,0);
+}
+if(S==='chime'){
+  await wall(0xe8e1d6); const m=await relic('bell','duk002457-000-30000',0.55,0.45); const bb=m.geometry.boundingBox; const H=bb.max.y-bb.min.y; const k=150/H; m.scale.setScalar(k);
+  // 목(가장 가는 곳): 높이 45~75% 사이에서 반지름이 가장 작은 층
+  const p=m.geometry.attributes.position; const bins={}; for(let i=0;i<p.count;i++){ const t=(p.getY(i)-bb.min.y)/H; if(t<0.45||t>0.75) continue; const b=Math.round(t*100); const rr=Math.hypot(p.getX(i),p.getZ(i)); bins[b]=Math.max(bins[b]||0,rr);} let nb=null,nr=1e9; for(const b in bins) if(bins[b]<nr){nr=bins[b];nb=+b;}
+  const neckY=(bb.min.y+nb/100*H)*k, neckR=nr*k;
+  const g=new THREE.Group(); g.add(m); g.position.set(0,-170,60); sc.add(g);
+  const rope=await pbr('Rope001',0.05,{roughness:0.9,color:0x8f2a24});
+  const knot=new THREE.Mesh(new THREE.TorusGeometry(neckR+1.5,2.2,12,48),rope); knot.rotation.x=Math.PI/2; knot.position.set(0,-170+neckY,60); sc.add(knot);
+  const hookY=40; const path=new THREE.CatmullRomCurve3([new THREE.Vector3(-neckR-1,-170+neckY,60),new THREE.Vector3(-6,-60,58),new THREE.Vector3(0,hookY-4,52),new THREE.Vector3(6,-60,58),new THREE.Vector3(neckR+1,-170+neckY,60)]);
+  const tube=new THREE.Mesh(new THREE.TubeGeometry(path,80,2.2,10,false),rope); sc.add(tube);
+  const brass=new THREE.MeshStandardMaterial({color:0xb08d57,metalness:1,roughness:0.3});
+  const plate=new THREE.Mesh(new THREE.CylinderGeometry(14,14,4,40),brass); plate.rotation.x=Math.PI/2; plate.position.set(0,hookY,2); sc.add(plate);
+  const hk=new THREE.Mesh(new THREE.TorusGeometry(10,2.6,12,32,Math.PI),brass); hk.position.set(0,hookY+0,40); hk.rotation.set(Math.PI/2,0,Math.PI); sc.add(hk);
+  const arm=new THREE.Mesh(new THREE.CylinderGeometry(2.6,2.6,40,12),brass); arm.rotation.x=Math.PI/2; arm.position.set(0,hookY+10,22); sc.add(arm);
+  sc.traverse(o=>{if(o.isMesh)o.castShadow=o.receiveShadow=true;});
+  sun(-250,420,420,2.4); cam.position.set(180,-40,520); cam.lookAt(0,-70,40);
+}
+if(S==='weight'){
+  sc.background=new THREE.Color(0xd9d2c7); const table=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000), await pbr('Wood066',12,{roughnessMap:null,roughness:0.62})); table.rotation.x=-Math.PI/2; table.receiveShadow=true; sc.add(table);
+  const paper=new THREE.Mesh(new THREE.BoxGeometry(300,0.6,420), await pbr('Paper004',1.5,{map:null,roughness:0.95,color:0xf3eee2})); paper.position.y=0.3; paper.rotation.y=0.12; paper.receiveShadow=true; sc.add(paper);
+  const m=await relic('monkey','duk000510-000-30000',0,0.35); m.scale.setScalar(1); m.position.set(70,0.6,-110); m.rotation.y=-0.6; sc.add(m);
+  sun(-260,520,180); cam.position.set(190,200,150); cam.lookAt(40,20,-70);
+}
+r.render(sc,cam); document.title='done';
+</script></body></html>

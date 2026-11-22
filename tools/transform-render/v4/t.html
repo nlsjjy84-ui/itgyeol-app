@@ -1,0 +1,20 @@
+<!doctype html><html><body style="margin:0"><canvas id=c width=900 height=900></canvas>
+<script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+const q=new URLSearchParams(location.search); const n=q.get('n'), f=q.get('f');
+const r=new THREE.WebGLRenderer({canvas:c,antialias:true}); r.toneMapping=THREE.ACESFilmicToneMapping; r.outputColorSpace=THREE.SRGBColorSpace;
+const sc=new THREE.Scene(); sc.background=new THREE.Color(0xe9e5de);
+const pm=new THREE.PMREMGenerator(r); sc.environment=pm.fromEquirectangular(await new HDRLoader().loadAsync('./studio.hdr')).texture; sc.environmentIntensity=0.9;
+const tex=await new THREE.TextureLoader().loadAsync(`r3d/${n}/${f}_2k.jpg`); tex.colorSpace=THREE.SRGBColorSpace; tex.flipY=true;
+const o=await new OBJLoader().loadAsync(`r3d/${n}/${f}.obj`);
+o.traverse(m=>{ if(m.isMesh){ m.material=new THREE.MeshStandardMaterial({map:tex,roughness:0.85,metalness:n=='bell'?0.35:0}); }});
+const box=new THREE.Box3().setFromObject(o), s=box.getSize(new THREE.Vector3()), ce=box.getCenter(new THREE.Vector3());
+o.position.sub(ce); const g=new THREE.Group(); g.add(o); const k=1/Math.max(s.x,s.y,s.z); g.scale.setScalar(k); sc.add(g);
+document.title='size '+s.x.toFixed(1)+' '+s.y.toFixed(1)+' '+s.z.toFixed(1);
+const cam=new THREE.PerspectiveCamera(30,1,0.01,100); cam.position.set(0.9,0.6,1.6); cam.lookAt(0,0,0);
+const dl=new THREE.DirectionalLight(0xffffff,1.2); dl.position.set(2,3,2); sc.add(dl);
+r.render(sc,cam); window.__size=[s.x,s.y,s.z]; document.title='done';
+</script></body></html>
