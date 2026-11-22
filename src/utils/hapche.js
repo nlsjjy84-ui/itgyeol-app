@@ -12,6 +12,8 @@ function hasBatchim(word) {
   if (ch >= 0xac00 && ch <= 0xd7a3) return (ch - 0xac00) % 28 !== 0;
   return /[136780lmnr]$/i.test(w);
 }
+// 조각 대표 색 → 이야기에 쓰는 빛깔 말(흔한 갈색은 이야기하지 않는다)
+const COLOR_WORD = { 초록: '초록빛', 파랑: '파란빛', 하양: '하얀빛', 금빛: '금빛', 빨강: '붉은빛', 회색: '잿빛', 검정: '까만빛' };
 export function josa(word, pair) {
   const [a, b] = pair.split('/');
   if (getLang && getLang() !== 'ko') return word;
@@ -292,7 +294,17 @@ export function buildTimeline(frameId, assign, opts = {}) {
       say(firstEnd, mid, '풍이', t('{a} 바다 건너 {b}에서 날아왔어! 오랫동안 고향을 떠나 있던 우리 유물이야.', { a: josa(pieceShort(far), '은/는'), b: t(far.by) }));
       say(mid, headEv.start - 0.05, '결이', t('{n}개의 시대와 먼 나라까지, 모두 한자리에 모여.', { n: Math.max(1, eras.length) }));
     } else if (eras.length > 1) say(firstEnd, headEv.start - 0.05, '풍이', t('{a}부터 {b}까지, {n}개의 시대가 한자리에 모여.', { a: eras[0], b: eras[eras.length - 1], n: eras.length }));
-    else say(firstEnd, headEv.start - 0.05, '풍이', t('조각 {n}개가 하나씩 제자리를 찾아가.', { n: events.length }));
+    else {
+      // 한 시대 조각뿐이면 — 같은 빛깔이 3개 이상 모였을 때 그 빛깔 이야기를 한다(도감 「색으로 찾기」와 같은 값)
+      const cc = {};
+      events.forEach((e) => {
+        const c = (PIECE_BY_K[e.k] || {}).col;
+        if (c && COLOR_WORD[c]) cc[c] = (cc[c] || 0) + 1;
+      });
+      const top = Object.entries(cc).sort((a, b) => b[1] - a[1])[0];
+      if (top && top[1] >= 3) say(firstEnd, headEv.start - 0.05, '풍이', t('{c} 조각 {n}개가 모이자 온몸이 {c}으로 반짝였어.', { c: t(COLOR_WORD[top[0]]).toLowerCase(), n: top[1] }));
+      else say(firstEnd, headEv.start - 0.05, '풍이', t('조각 {n}개가 하나씩 제자리를 찾아가.', { n: events.length }));
+    }
     if (head) say(headEv.start - 0.05, lockT, '결이', t('마지막은 머리! {a}!', { a: headName }));
   }
   say(lockT, titleT + 1.4, '함께', t('합체! {a}', { a: title.full }));

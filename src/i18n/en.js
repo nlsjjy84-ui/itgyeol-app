@@ -4,6 +4,13 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "{c} 조각 {n}개가 모이자 온몸이 {c}으로 반짝였어.": "{n} pieces gathered, and the whole body glowed {c}.",
+  "초록빛": "green",
+  "파란빛": "blue",
+  "하얀빛": "white",
+  "붉은빛": "red",
+  "잿빛": "ash-gray",
+  "까만빛": "black",
   "모든 색": "All colors",
   "이 색 조각은 아직 없어요. 보따리를 더 풀어 봐요!": "No pieces in this color yet. Open more bundles!",
   "이름·시대·쓰임으로 찾기 (예: 호랑이, 신라, 연적)": "Search by name, era or use (e.g. tiger, Silla, water dropper)",
