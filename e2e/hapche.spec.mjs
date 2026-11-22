@@ -204,6 +204,18 @@ test('유물 합체: 유물 수수께끼를 풀면 조각을 얻거나 정답을
   await expect(page.getByTestId('riddle-q')).toBeVisible();
 });
 
+test('유물 합체: 도감에서 이름으로 찾으면 그 조각만 보인다', async ({ page }) => {
+  await openHome(page);
+  await page.getByText('조각 도감', { exact: true }).filter({ visible: true }).first().click();
+  await page.getByTestId('dex-search').fill('호랑이');
+  await expect(page.getByText(/^\d+개 찾았어요$/)).toBeVisible();
+  const n = Number((await page.getByText(/^\d+개 찾았어요$/).textContent()).match(/\d+/)[0]);
+  expect(n).toBeGreaterThan(5);
+  expect(n).toBeLessThan(200);
+  await page.getByLabel('지우기').click();
+  await expect(page.getByText(/^\d+개 찾았어요$/)).toHaveCount(0);
+});
+
 test('유물 합체: 도감의 우리 땅 지도에서 지역을 누르면 그곳 조각만 보인다', async ({ page }) => {
   await openHome(page);
   await page.getByText('조각 도감', { exact: true }).filter({ visible: true }).first().click();

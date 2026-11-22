@@ -2,7 +2,7 @@
 // 자리(머리·날개·바퀴…)·재료·귀한 정도로 골라 보고, 누르면 박물관 기록과 원본 페이지가 나온다.
 // 「내 작품」 칸에는 작업대에서 만든 합체 작품이 쌓인다.
 import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, Pressable, FlatList, Image, SafeAreaView, useWindowDimensions, Modal, ScrollView, Linking, Platform } from 'react-native';
+import { View, StyleSheet, Pressable, FlatList, Image, SafeAreaView, useWindowDimensions, Modal, ScrollView, Linking, Platform, TextInput } from 'react-native';
 import Text from '../ui/Text';
 import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
@@ -150,6 +150,7 @@ export default function DexScreen({ navigation }) {
   const [slot, setSlot] = useState(null);
   const [power, setPower] = useState(null);
   const [col, setCol] = useState(null);
+  const [q, setQ] = useState('');
   const [onlyMine, setOnlyMine] = useState(false);
   const [region, setRegion] = useState(null);
   const [open, setOpen] = useState(null);
@@ -160,11 +161,19 @@ export default function DexScreen({ navigation }) {
     if (slot) l = l.filter((p) => p.slots.includes(slot));
     if (power) l = l.filter((p) => p.power === power);
     if (col) l = l.filter((p) => p.col === col);
+    const qq = q.trim().toLowerCase().replace(/\s+/g, '');
+    if (qq) {
+      l = l.filter((p) =>
+        [p.name, p.en, p.era, p.use, p.no, p.from]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().replace(/\s+/g, '').includes(qq))
+      );
+    }
     if (onlyMine) l = l.filter((p) => owned[p.k]);
     if (region) l = l.filter((p) => regionOf(p) === region);
     // 모은 것 먼저, 그다음 귀한 순
     return [...l].sort((a, b) => (owned[b.k] ? 1 : 0) - (owned[a.k] ? 1 : 0) || b.rare - a.rare);
-  }, [slot, power, col, onlyMine, region, store]);
+  }, [slot, power, col, q, onlyMine, region, store]);
   const cols = width > 700 ? 6 : width > 460 ? 4 : 3;
   const cell = (Math.min(width, 900) - 32) / cols;
   const bySlot = useMemo(() => {
@@ -221,7 +230,7 @@ export default function DexScreen({ navigation }) {
             <View key={g.id} style={[st.goal, done && st.goalDone]}>
               <Text style={[st.goalIc, done && { color: '#fff' }]}>{g.icon}</Text>
               <Text style={[st.goalName, done && { color: '#fff' }]}>{t(g.name)}</Text>
-              <Text style={[st.goalNote, done && { color: '#ffffffcc' }]} numberOfLines={2}>
+              <Text style={[st.goalNote, done && { color: '#ffffffcc' }]} numberOfLines={3}>
                 {g.raw ? g.note : t(g.note)}
               </Text>
               <View style={st.goalBar}>
@@ -277,6 +286,24 @@ export default function DexScreen({ navigation }) {
       ) : null}
       {tab === 'pieces' && (
         <>
+          <View style={st.searchRow}>
+            <Text style={st.searchIcon}>⌕</Text>
+            <TextInput
+              testID="dex-search"
+              value={q}
+              onChangeText={setQ}
+              placeholder={t('이름·시대·쓰임으로 찾기 (예: 호랑이, 신라, 연적)')}
+              placeholderTextColor="#8a8178"
+              style={st.searchInput}
+              accessibilityLabel={t('이름으로 찾기')}
+            />
+            {q ? (
+              <Pressable onPress={() => setQ('')} accessibilityLabel={t('지우기')} hitSlop={10}>
+                <Text style={st.searchIcon}>✕</Text>
+              </Pressable>
+            ) : null}
+          </View>
+          {q.trim() ? <Text style={st.searchCount}>{t('{n}개 찾았어요').replace('{n}', String(list.length))}</Text> : null}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.chips}>
             <Pressable onPress={() => setSlot(null)} style={[st.chip, !slot && st.chipOn]}>
               <Text style={[st.chipTxt, !slot && st.chipTxtOn]}>{t('모든 자리')}</Text>
@@ -420,6 +447,10 @@ export default function DexScreen({ navigation }) {
 }
 
 const st = StyleSheet.create({
+  searchRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, marginHorizontal: 16, paddingHorizontal: 12, borderRadius: 22, backgroundColor: '#fffaf2', borderWidth: 1, borderColor: '#d9cbb6', gap: 8 },
+  searchIcon: { fontSize: 18, color: '#6b5d4f' },
+  searchInput: { flex: 1, fontSize: 16, paddingVertical: 10, color: '#2a221c', outlineStyle: 'none' },
+  searchCount: { marginTop: 6, marginHorizontal: 20, fontSize: 14, color: '#6b5d4f' },
   mapWrap: { marginTop: 12, alignItems: 'center', paddingBottom: 30 },
   mapNote: { fontSize: 13, color: colors.muted, textAlign: 'center', marginBottom: 10 },
   map: { width: 4 * 78, position: 'relative' },
@@ -435,11 +466,11 @@ const st = StyleSheet.create({
   progressFill: { height: 8, backgroundColor: colors.hwang },
   tabs: { flexDirection: 'row', gap: 8, marginTop: 12 },
   goals: { gap: 8, paddingTop: 12 },
-  goal: { width: 128, backgroundColor: colors.paper, borderRadius: 12, padding: 8, borderWidth: 1, borderColor: colors.borderSoft },
+  goal: { width: 136, backgroundColor: colors.paper, borderRadius: 12, padding: 8, borderWidth: 1, borderColor: colors.borderSoft },
   goalDone: { backgroundColor: '#b9781a', borderColor: '#b9781a' },
   goalIc: { fontSize: 18, color: '#b9781a' },
   goalName: { fontSize: 13, fontWeight: '700', color: colors.ink, marginTop: 2 },
-  goalNote: { fontSize: 10.5, color: colors.muted, marginTop: 2, minHeight: 28 },
+  goalNote: { fontSize: 11, lineHeight: 15, color: colors.muted, marginTop: 3, height: 45, overflow: 'hidden' },
   goalBar: { height: 5, borderRadius: 3, backgroundColor: colors.borderSoft, marginTop: 6, overflow: 'hidden' },
   goalFill: { height: 5, backgroundColor: colors.hwang },
   goalNum: { fontSize: 11, color: colors.ink, marginTop: 3 },

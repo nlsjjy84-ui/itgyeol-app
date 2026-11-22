@@ -4,6 +4,9 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "이름·시대·쓰임으로 찾기 (예: 호랑이, 신라, 연적)": "Search by name, era or use (e.g. tiger, Silla, water dropper)",
+  "이름으로 찾기": "Search by name",
+  "{n}개 찾았어요": "Found {n}",
   "색으로 찾기": "By color",
   "초록": "Green",
   "파랑": "Blue",
