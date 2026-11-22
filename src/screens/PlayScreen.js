@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import { PLAY_GAMES, DIFFICULTY_TIERS, scaleGameForTier, applySkillAdjustment, skillLabel } from '../data/playGames';
 import MascotGuide from '../components/MascotGuide';
@@ -285,6 +286,7 @@ export default function PlayScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScreenHeader scene="Play" title={i18nT('전래놀이')} sub={i18nT('손끝으로 즐기는 열두 가지 놀이')} onBack={() => navigation.navigate('Home')} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={i18nT('만든 사람이 10년 넘게 아이들과 해 온 전래놀이를 손끝으로 옮겨, 몸으로 놀던 방법을 익혀요.')} />
       <View style={styles.header}>
         <View style={styles.headerRight}>
           <View style={styles.tierRow}>

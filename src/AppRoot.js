@@ -25,10 +25,8 @@ import ExhibitWallScreen from './screens/ExhibitWallScreen';
 import MaterialScreen from './screens/MaterialScreen';
 import PackScreen from './screens/PackScreen';
 import DexScreen from './screens/DexScreen';
-import WorkshopScreen from './screens/WorkshopScreen';
 import MovieScreen from './screens/MovieScreen';
 import RiddleScreen from './screens/RiddleScreen';
-import HapcheWallScreen from './screens/HapcheWallScreen';
 import MuseumScreen from './screens/MuseumScreen';
 import CraftScreen from './screens/CraftScreen';
 import { readMovieParam, readGiftParam, readMuseumParam } from './utils/movieLink';
@@ -77,7 +75,6 @@ const MakerH = withHanji(MakerScreen);
 const MaterialH = withHanji(MaterialScreen);
 const PackH = withHanji(PackScreen);
 const DexH = withHanji(DexScreen);
-const WorkshopH = withHanji(WorkshopScreen);
 const MovieH = withHanji(MovieScreen);
 const RiddleH = withHanji(RiddleScreen);
 const MuseumH = withHanji(MuseumScreen);
@@ -156,8 +153,6 @@ function Nav() {
         <Stack.Screen name="Riddle" component={RiddleH} />
         <Stack.Screen name="Museum" component={MuseumH} />
         <Stack.Screen name="Craft" component={CraftH} />
-        <Stack.Screen name="Workshop" component={WorkshopH} />
-        <Stack.Screen name="HapcheWall" component={HapcheWallScreen} />
         <Stack.Screen name="Movie" component={MovieH} initialParams={sharedMovie || undefined} />
       </Stack.Navigator>
       <StatusBar style={getThemeMode() === 'dark' ? 'light' : 'dark'} backgroundColor={colors.bg} />

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import { colors } from '../theme';
 import { useJourney } from '../context/JourneyContext';
@@ -30,6 +31,7 @@ export default function GalleryScreen({ navigation }) {
   return (
     <SafeAreaView style={st.safe}>
       <ScreenHeader title="예시 둘러보기" sub={t('가상의 놀이 기록으로 빚은 예시 {n}점', { n: MOCK_WORKS.length })} onBack={() => navigation.goBack()} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={t('놀이 기록으로 어떤 결과물이 나오는지 미리 보는 예시예요.')} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.tabs}>
         {[{ id: 'all', label: t('전체') }, ...(hasMine ? [{ id: 'mine', label: t('내가 떠올린 것') }] : []), ...TASTE_GROUPS.map((g) => ({ id: g.id, label: g.label }))].map((t) => (
           <Pressable key={t.id} style={[st.tab, groupId === t.id && st.tabOn]} onPress={() => { setGroupId(t.id); setKwId(null); }}>

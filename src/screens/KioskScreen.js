@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView, useWindowDimensions, Pressable } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import Frame from '../ui/Frame';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -24,6 +25,7 @@ export default function KioskScreen({ navigation }) {
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.content}>
         <ScreenHeader title="내 폰으로 하기" sub={t('키오스크·입구에 띄우는 안내판')} onBack={() => navigation.goBack()} />
+        <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={t('박물관 입구나 키오스크에 띄워 두면, 줄 서지 않고 QR로 내 폰에서 바로 시작하게 하는 안내판이에요.')} />
         <Frame style={{ marginTop: 10, alignItems: 'center' }}>
           <View style={st.qrBox}>
             <QRCode value={SITE_URL} size={qr} color="#1b2227" backgroundColor="#ffffff" />

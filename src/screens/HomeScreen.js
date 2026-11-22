@@ -19,7 +19,7 @@ import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
 import HomeNumbers from '../components/HomeNumbers';
 import RelicHome from '../components/RelicHome';
-import HapcheHome from '../components/HapcheHome';
+import { SCENE_REASON } from '../utils/pieceStore';
 import { MATERIAL_BY_ID } from '../data/materialTree';
 import { Swatch, matName, MATERIAL_COUNT } from './MaterialScreen';
 
@@ -29,6 +29,8 @@ const SEAL = { jinbeop: ['circle', '진'], print: ['type', '글'], tbd: ['top', 
 const CARDS = [
   {
     id: 'jinbeop',
+    why: '여럿이 한 몸처럼 움직이던 풍물·강강술래의 대형을 직접 짜 보며, 함께 맞추는 힘을 익혀요.',
+    scene: '진법',
     title: '진법',
     eyebrow: '풍물 · 사물놀이',
     accent: '#3f6f8f',
@@ -38,6 +40,8 @@ const CARDS = [
   },
   {
     id: 'print',
+    why: '소리 나는 입 모양을 본뜬 훈민정음의 원리대로 글자를 짓고, 새기고, 찍는 과정을 손으로 해 봐요.',
+    scene: '훈민정음·인쇄',
     title: '훈민정음 · 인쇄',
     eyebrow: '문자 · 기록',
     accent: '#8a6d3f',
@@ -47,6 +51,8 @@ const CARDS = [
   },
   {
     id: 'tbd',
+    why: '만든 사람이 10년 넘게 아이들과 해 온 전래놀이를 손끝으로 옮겨, 몸으로 놀던 방법을 익혀요.',
+    scene: '전래놀이',
     title: '전래놀이',
     eyebrow: '10년 이상 현장 교육 경험',
     accent: '#c1592f',
@@ -56,6 +62,8 @@ const CARDS = [
   },
   {
     id: 'hangul',
+    why: '자음·모음 블록을 쌓아 한 글자가 짜이는 원리를 놀면서 익혀요.',
+    scene: '한글 테트리스',
     title: '한글 테트리스',
     eyebrow: '한글 · 자음 모음',
     accent: '#a23b5c',
@@ -67,6 +75,8 @@ const CARDS = [
   // 탈춤: 봉산탈춤의 장단(굿거리·타령)과 깨끼춤 / 단청: 단청장의 작업 순서(가칠 → 타분 → 오색 → 분선).
   {
     id: 'talchum',
+    why: '장단의 큰 박에 맞춰 춤추며 우리 가락의 박자를 몸으로 익혀요.',
+    scene: '탈춤',
     title: '탈춤 · 가면극',
     eyebrow: '움직임 · 역할',
     accent: '#8a4f8a',
@@ -76,6 +86,8 @@ const CARDS = [
   },
   {
     id: 'dancheong',
+    why: '단청장이 실제로 칠하는 순서를 따라가며 오색에 담긴 뜻을 익혀요.',
+    scene: '단청',
     title: '단청 · 전통 문양',
     eyebrow: '색 · 무늬',
     accent: '#2c7a6b',
@@ -186,6 +198,18 @@ export default function HomeScreen({ navigation, route }) {
                   <Text style={[styles.cardEyebrow, { color: c.accent }]}>{t(c.eyebrow)}</Text>
                   <Text style={styles.cardTitle}>{t(c.title)}</Text>
                   <Text style={styles.cardDesc}>{t(c.desc)}</Text>
+                  {c.why ? (
+                    <Text style={styles.cardWhy}>
+                      <Text style={styles.cardWhyTag}>{t('왜 하나요')} · </Text>
+                      {t(c.why)}
+                    </Text>
+                  ) : null}
+                  {c.scene && SCENE_REASON[c.scene] ? (
+                    <Text style={styles.cardWhy}>
+                      <Text style={styles.cardWhyTag}>{t('받는 유물')} · </Text>
+                      {t(SCENE_REASON[c.scene])}
+                    </Text>
+                  ) : null}
                 </View>
               </View>
             </Frame>
@@ -286,6 +310,8 @@ const styles = StyleSheet.create({
   brand: { fontSize: 13, color: colors.accentDeep, fontWeight: '700', letterSpacing: 1 },
   title: { fontSize: 26, fontWeight: '700', color: colors.ink, marginTop: 4, wordBreak: 'keep-all' },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 8, lineHeight: 19 },
+  cardWhy: { fontSize: 13, color: colors.ink, marginTop: 5, lineHeight: 19 },
+  cardWhyTag: { fontWeight: '800', color: '#8a6a3b' },
   mascotIntro: {
     flexDirection: 'row',
     alignItems: 'center',

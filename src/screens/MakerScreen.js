@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import Frame from '../ui/Frame';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -39,6 +40,7 @@ export default function MakerScreen({ navigation }) {
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.content}>
         <ScreenHeader title="업체 화면 (시연)" sub={t('결제가 끝난 주문이 제작 사양서와 함께 들어와요')} onBack={() => navigation.goBack()} />
+        <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={t('주문이 들어오면 만드는 업체가 보는 화면을 시연한 곳이에요. 내가 고른 물건이 실제 물건으로 만들어지는 흐름을 보여 줘요.')} />
         <Text style={st.h}>{t('만들 주문 {n}건 · 모두 {m}건', { n: waiting, m: list.length })}</Text>
         <Text style={st.meta}>
           {online === true ? t('잇결 서버와 이어져 있어요. 다른 기기에서 들어온 주문도 여기 보여요.') : online === false ? t('서버에 이어지지 않아 이 기기의 주문만 보여요.') : t('서버에 잇는 중…')}

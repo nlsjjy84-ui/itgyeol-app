@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Image, Modal, Linking, useWindowDimensions } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import ScreenHeader from '../ui/ScreenHeader';
 import { ARCHIVE } from '../data/archive';
@@ -118,6 +119,7 @@ export default function ArchiveScreen({ navigation, route }) {
   return (
     <SafeAreaView style={st.safe}>
       <ScreenHeader title="전통 자료실" sub={t('창작의 바탕이 되는 실제 전통 {n}점', { n: ARCHIVE.length })} onBack={() => navigation.goBack()} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={t('놀이와 물건 만들기의 바탕이 된 실제 전통 자료를 출처와 함께 찾아보는 곳이에요. 잇결의 모든 내용이 어디에서 왔는지 확인할 수 있어요.')} />
       <ScrollView contentContainerStyle={st.wrap}>
         {/* 자료실 하나 안에서: 대표 사진 / 재료(재료 갈래 › 재료 › 실물·만드는 곳) / 물건 갈래(폴더 안의 폴더) / 만드는 곳 */}
         <View style={[st.modeRow, { marginBottom: 12 }]}>

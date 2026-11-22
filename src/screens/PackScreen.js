@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, ScrollView, Image, SafeAreaView, useWindowDimensions, Animated, Easing, TextInput } from 'react-native';
 import Text from '../ui/Text';
+import WhyBox from '../ui/WhyBox';
 import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
 import { colors } from '../theme';
@@ -175,7 +176,8 @@ export default function PackScreen({ navigation, route }) {
   return (
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.wrap}>
-        <ScreenHeader title={t('조각 보따리')} sub={t('놀이를 마치면 실제 유물 조각을 받아요')} onBack={() => navigation.goBack()} />
+        <ScreenHeader title={t('유물 보따리')} sub={t('놀이를 마치면 진짜 유물을 받아요')} onBack={() => navigation.goBack()} />
+        <WhyBox style={{ marginTop: 8 }} text={t('놀이를 마친 보상이에요. 방금 논 판과 뜻이 닿는 진짜 박물관 유물이 들어 있어서, 놀이에서 익힌 것을 진짜 유물로 다시 만나요.')} />
         {!opened ? (
           <View style={st.center}>
             {qr.museum && codeMsg ? (

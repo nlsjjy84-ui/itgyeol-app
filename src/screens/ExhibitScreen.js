@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import Frame from '../ui/Frame';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -33,6 +34,7 @@ export default function ExhibitScreen({ navigation }) {
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.content}>
         <ScreenHeader title="잇결 전시관" sub={t('전시해도 된다고 고른 작품만 걸려요')} onBack={() => navigation.goBack()} />
+        <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={t('다른 사람들이 「전시해도 된다」고 고른 작품만 모아 보는 곳이에요. 내가 만든 것도 동의하면 여기에 걸려요.')} />
 
         <Pressable onPress={() => { play('tap'); navigation.navigate('ExhibitWall'); }} style={st.wallBtn}>
           <Text style={st.wallBtnTxt}>{t('박물관 전시 화면 열기 (큰 화면 · 시연) ›')}</Text>

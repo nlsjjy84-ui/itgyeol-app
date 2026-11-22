@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, Image, SafeAreaView, ScrollView, useWindowDimensions } from 'react-native';
 import Text from '../ui/Text';
+import WhyBox from '../ui/WhyBox';
 import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
 import { colors } from '../theme';
@@ -67,6 +68,7 @@ export default function RiddleScreen({ navigation }) {
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.wrap}>
         <ScreenHeader title={t('유물 수수께끼')} sub={t('옛날에 어디에 쓰던 물건일까? 맞히면 그 조각을 가져요.')} onBack={() => navigation.goBack()} />
+        <WhyBox style={{ marginTop: 8 }} text={t('생김새만 보고 옛날 쓰임을 맞혀 보는 곳이에요. 유물을 「예쁜 그림」이 아니라 「누군가 쓰던 물건」으로 보는 눈을 길러요.')} />
         <Text style={st.count}>{t('오늘 남은 문제 {n}개 · 지금까지 맞힌 문제 {m}개', { n: rs.left, m: rs.right || 0 })}</Text>
         {rs.left || picked ? (
           <>

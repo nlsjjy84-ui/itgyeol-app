@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform, TextInput, useWindowDimensions, Image } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
@@ -261,6 +262,7 @@ export default function ResultScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <ScreenHeader title="나만의 결과물" sub="완성한 판이 하나의 작품이 돼요" onBack={() => navigation.navigate('Home')} />
+        <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={t('판을 마치면 내가 논 기록이 하나의 결과물이 돼요. 무엇을 익혔는지 눈으로 확인하고 간직하는 곳이에요.')} />
         <StoryScene
           art="sunset"
           place={t('마당 · 해 질 녘')}

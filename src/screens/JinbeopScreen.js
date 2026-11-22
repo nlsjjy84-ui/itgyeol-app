@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import FormationPreview from '../components/FormationPreview';
 import CompletionEffect from '../components/CompletionEffect';
@@ -179,6 +180,7 @@ export default function JinbeopScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScreenHeader scene="Jinbeop" title={i18nT('진법')} sub={i18nT('풍물 · 강강술래 · 역사 속 대형 만들기')} onBack={() => navigation.navigate('Home')} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={i18nT('여럿이 한 몸처럼 움직이던 풍물·강강술래의 대형을 직접 짜 보며, 함께 맞추는 힘을 익혀요.')} />
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           {/* 성인반/아동반 — 전래놀이와 동일한 반 구분 */}

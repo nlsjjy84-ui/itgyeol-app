@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -71,6 +72,7 @@ export default function HangulScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScreenHeader scene="Hangul" title={i18nT('한글 테트리스')} sub={i18nT('자음·모음 블록을 쌓아 줄을 지워요')} onBack={() => navigation.navigate('Home')} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={i18nT('자음·모음 블록을 쌓아 한 글자가 짜이는 원리를 놀면서 익혀요.')} />
       <View style={styles.header}>
         <OhangPicker />
       </View>

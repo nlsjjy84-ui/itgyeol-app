@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Image, Linking, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import ScreenHeader from '../ui/ScreenHeader';
 import { colors, fonts } from '../theme';
@@ -293,6 +294,7 @@ export default function MaterialScreen({ navigation, route }) {
   return (
     <SafeAreaView style={st.safe}>
       <ScreenHeader title={pick ? '재료 고르기' : '소재 목록'} sub={pick ? t('놀이를 시작하기 전에 실제 전통 재료를 골라요') : t('문화유산 {a} · 박물관 소장품 {b} · 만드는 곳 {c}', { a: (CATALOG_STATS.wd + CATALOG_STATS.kowiki).toLocaleString(), b: CATALOG_STATS.em.toLocaleString(), c: CATALOG_STATS.shops.toLocaleString() })} onBack={() => navigation.goBack()} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={t('창작에 쓸 수 있는 문화유산·박물관 소장품·만드는 곳을 찾아보는 목록이에요. 물건을 만들 때 실제로 어디서 만들 수 있는지까지 이어 줘요.')} />
       {pick ? (
         <View style={st.choiceBar}>
           <View style={st.choiceCell}>

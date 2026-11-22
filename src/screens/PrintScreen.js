@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView, Platform } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import Dot from '../components/Dot';
 import FormationPreview from '../components/FormationPreview';
@@ -518,6 +519,7 @@ export default function PrintScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScreenHeader scene="Print" title={i18nT('훈민정음 · 인쇄')} sub={i18nT('글자를 짓고, 새기고, 찍어내는 판')} onBack={() => navigation.navigate('Home')} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={i18nT('소리 나는 입 모양을 본뜬 훈민정음의 원리대로 글자를 짓고, 새기고, 찍는 과정을 손으로 해 봐요.')} />
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           <View style={styles.tierRow}>

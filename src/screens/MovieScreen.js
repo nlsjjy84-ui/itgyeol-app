@@ -321,7 +321,7 @@ export default function MovieScreen({ navigation, route }) {
         <Text style={st.lic}>{t('실제 제작·판매는 박물관 상품관과 제작 업체가 맡아요. 잇결은 작품과 설계까지 만들어요.')}</Text>
 
         <View style={[st.btns, { marginTop: 18 }]}>
-          <SealButton label={t('다른 틀로 다시 합체')} onPress={() => navigation.navigate('Workshop', { mode: frameId === 'free' ? 'free' : tl.isTransform ? 'transform' : 'hapche' })} />
+          <SealButton label={t('나의 박물관으로')} onPress={() => navigation.navigate('Museum')} />
           <SealButton label={t('조각 도감')} variant="ink" onPress={() => navigation.navigate('Dex')} />
           <SealButton label={t('홈으로')} variant="paper" onPress={() => navigation.navigate('Home')} />
         </View>

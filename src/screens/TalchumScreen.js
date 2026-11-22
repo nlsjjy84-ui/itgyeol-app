@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import { colors } from '../theme';
 import ScreenHeader from '../ui/ScreenHeader';
@@ -69,6 +70,7 @@ export default function TalchumScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScreenHeader scene="Talchum" title={i18nT('탈춤')} sub={i18nT('장단에 맞춰 한삼을 뿌려요')} onBack={() => navigation.navigate('Home')} />
+      <WhyBox style={{ marginTop: 8, marginHorizontal: 0 }} text={i18nT('장단의 큰 박에 맞춰 춤추며 우리 가락의 박자를 몸으로 익혀요.')} />
       <View style={styles.header}>
         <OhangPicker />
       </View>

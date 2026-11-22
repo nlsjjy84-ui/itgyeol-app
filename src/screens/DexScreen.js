@@ -4,6 +4,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, FlatList, Image, SafeAreaView, useWindowDimensions, Modal, ScrollView, Linking, Platform, TextInput } from 'react-native';
 import Text from '../ui/Text';
+import WhyBox from '../ui/WhyBox';
 import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
 import { colors } from '../theme';
@@ -244,6 +245,7 @@ export default function DexScreen({ navigation }) {
   const header = (
     <View>
       <ScreenHeader title={t('유물 도감')} sub={t('실제 유물 {n}점 중 {m}점을 모았어요', { n: PIECES.length, m: ownedN })} onBack={() => navigation.goBack()} />
+        <WhyBox style={{ marginTop: 8 }} text={t('받은 유물을 모두 모아 보는 곳이에요. 유물을 누르면 박물관 설명과 그 유물에 담긴 뜻(출처 링크)이 나오고, 거기서 오늘 쓰는 물건으로 만들 수 있어요.')} />
       <View style={st.progress}>
         <View style={[st.progressFill, { width: `${(ownedN / PIECES.length) * 100}%` }]} />
       </View>
@@ -385,7 +387,7 @@ export default function DexScreen({ navigation }) {
                 <Pressable
                   key={f.id}
                   accessibilityLabel={t(f.name)}
-                  onPress={() => navigation.navigate('Workshop', f.parts ? { mode: 'transform', frame: f.id } : { frame: f.id })}
+                  onPress={() => navigation.navigate('Museum')}
                   style={[st.frameCard, { backgroundColor: f.bg || '#222', width: cols >= 6 ? '23%' : cols >= 4 ? '31%' : '47%' }, made && st.frameMade]}
                 >
                   <Text style={st.frameKind}>{t(f.kind)}</Text>
@@ -420,7 +422,7 @@ export default function DexScreen({ navigation }) {
           {!works.length && (
             <View style={st.empty}>
               <Text style={st.emptyTxt}>{t('아직 만든 작품이 없어요. 작업대에서 조각을 합체해 보세요.')}</Text>
-              <SealButton label={t('작업대로 가기')} onPress={() => navigation.navigate('Workshop')} />
+              <SealButton label={t('나의 박물관으로')} onPress={() => navigation.navigate('Museum')} />
             </View>
           )}
           {works.map((w) => {
