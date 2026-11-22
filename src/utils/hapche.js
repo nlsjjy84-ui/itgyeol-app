@@ -235,6 +235,8 @@ export function buildTimeline(frameId, assign, opts = {}) {
         flipY: !!sp.flipY,
         z: sp.z || (isHead ? 4 : 1),
         fire: !!sp.fire,
+        spin: !!sp.spin, // 바퀴·팽이 — 완성 뒤 제자리에서 빙글빙글
+        orbit: !!sp.spinAll, // 별·바람개비 날개 — 완성 뒤 다 함께 가운데를 돈다
         ghost: !!sp.ghost,
         slot: sp.slot || '',
         head: isHead,
@@ -258,9 +260,16 @@ export function buildTimeline(frameId, assign, opts = {}) {
       const prev = events.filter((o) => o !== e && o.start < e.start - 0.01);
       if (!prev.length) return;
       const near = prev.reduce((a, b) => (Math.hypot(b.to.x - e.to.x, b.to.y - e.to.y) < Math.hypot(a.to.x - e.to.x, a.to.y - e.to.y) ? b : a));
-      threads.push({ a: { x: near.to.x, y: near.to.y }, b: { x: e.to.x, y: e.to.y }, t: e.end - 0.05 });
+      threads.push({ a: { x: near.to.x, y: near.to.y }, b: { x: e.to.x, y: e.to.y }, t: e.end - 0.05, orbit: e.orbit || near.orbit });
     });
   const lockT = cursor + 0.35;
+  events.forEach((e) => {
+    if (e.orbit) e.orbitT = lockT;
+  });
+  // 도는 조각에 이어진 실은 돌기 시작할 때 거둬들인다(실이 제자리에 남아 엇갈리지 않게)
+  threads.forEach((th) => {
+    if (th.orbit) th.until = lockT;
+  });
   const titleT = lockT + 0.6;
   const endT = titleT + 8.6;
 
@@ -340,7 +349,7 @@ export function poseAt(ev, time) {
   const p = Math.min(1, (time - ev.start) / (ev.end - ev.start));
   const e = easeOutBack(p);
   const m = easeOut(p);
-  return {
+  const pose = {
     x: ev.from.x + (ev.to.x - ev.from.x) * m,
     y: ev.from.y + (ev.to.y - ev.from.y) * m,
     rot: ev.from.rot + (ev.to.rot - ev.from.rot) * m,
@@ -348,6 +357,18 @@ export function poseAt(ev, time) {
     landed: p >= 1,
     p,
   };
+  // 다 함께 가운데(500, 500)를 도는 조각 — 처음 1초는 천천히 빨라진다(초당 40도)
+  if (ev.orbitT != null && p >= 1 && time > ev.orbitT) {
+    const d = time - ev.orbitT;
+    const deg = 40 * (d < 1 ? (d * d) / 2 : d - 0.5);
+    const a = (deg * Math.PI) / 180;
+    const dx = pose.x - 500;
+    const dy = pose.y - 500;
+    pose.x = 500 + dx * Math.cos(a) - dy * Math.sin(a);
+    pose.y = 500 + dx * Math.sin(a) + dy * Math.cos(a);
+    pose.rot += deg;
+  }
+  return pose;
 }
 
 // 완성 뒤 살짝 숨 쉬듯 위아래로 — 살아 있는 느낌
@@ -382,6 +403,7 @@ export function villainAt(tl, time) {
 // 시각 t에서 결 실 하나가 얼마나 뻗었는지(0~1)
 export function threadAt(th, time) {
   if (time < th.t) return 0;
+  if (th.until != null && time > th.until) return Math.max(0, 1 - (time - th.until) / 0.4);
   return Math.min(1, (time - th.t) / 0.28);
 }
 
