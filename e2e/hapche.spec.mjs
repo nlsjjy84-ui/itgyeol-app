@@ -313,3 +313,19 @@ test('유물 합체: 변신 영상 공유 링크(&t=1)를 열면 변신 영상�
   await expect(btn).toBeVisible();
   await expect(page.getByText(/수호 장군, 변신할 시간이야!/).first()).toBeAttached();
 });
+
+test('유물 합체: 「밤의 박물관」 이야기 영상을 끝까지 보면 보따리로 이어진다', async ({ page }) => {
+  test.setTimeout(240000);
+  await openHome(page);
+  await page.getByText('이야기 영상부터 보기 — 밤의 박물관').filter({ visible: true }).first().click();
+  await expect(page.getByText('유물 합체 이야기 영상')).toBeVisible();
+  const done = page.getByLabel('보따리 풀기');
+  for (let i = 0; i < 400 && !(await done.isVisible().catch(() => false)); i += 1) {
+    const pick = page.getByText('로봇이다!').filter({ visible: true });
+    if (await pick.count()) await pick.first().click({ timeout: 2000 }).catch(() => {});
+    const next = page.getByText('다음 장면 ›').filter({ visible: true });
+    if (await next.count()) await next.last().click({ timeout: 2000 }).catch(() => {});
+    await page.waitForTimeout(150);
+  }
+  await expect(done).toBeVisible();
+});

@@ -4,6 +4,9 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "이야기 영상부터 보기 — 밤의 박물관": "Watch the story first — Museum at Night",
+  "이야기 영상 다시 보기 — 밤의 박물관": "Watch again — Museum at Night",
+  "유물 합체 이야기 영상": "Artifact Combine story",
   "변신! — 같은 조각으로 「{a}」": "Transform! — same pieces into the {a}",
   "{a}, 변신할 시간이야! 철컥철컥, 몸을 접기 시작했어.": "{a}, time to transform! Clank, clank — it starts to fold itself up.",
   "미션": "Mission",

@@ -76,7 +76,10 @@ export default function HapcheHome({ navigation }) {
         {owned && dailyState().ready ? (
           <SealButton label={t('오늘의 보따리 받기 — {n}일째', { n: dailyState().nextStreak })} onPress={() => navigation.navigate('Pack', { daily: true })} />
         ) : !owned ? (
-          <SealButton label={t('첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
+          <>
+            <SealButton label={t('이야기 영상부터 보기 — 밤의 박물관')} variant="ink" onPress={() => navigation.navigate('Book', { part: 'hapche', then: 'Pack' })} />
+            <SealButton label={t('첫 보따리 받기')} onPress={() => navigation.navigate('Pack')} />
+          </>
         ) : (
           <Text style={st.count}>{t('오늘의 보따리는 받았어요 · {n}일째 이어서', { n: dailyState().streak })}</Text>
         )}
@@ -96,6 +99,7 @@ export default function HapcheHome({ navigation }) {
             />
           );
         })() : null}
+        {owned ? <SealButton small label={t('이야기 영상 다시 보기 — 밤의 박물관')} variant="paper" onPress={() => navigation.navigate('Book', { part: 'hapche', then: 'Home' })} /> : null}
         {owned ? <SealButton small label={t('유물 수수께끼 — 맞히면 조각을 가져요')} variant="paper" onPress={() => navigation.navigate('Riddle')} /> : null}
         <SealButton small label={t('합체 전시관 (큰 화면)')} variant="paper" onPress={() => navigation.navigate('HapcheWall')} />
       </View>

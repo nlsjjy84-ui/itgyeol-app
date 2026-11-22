@@ -28,6 +28,7 @@ const PART_PIECES = {
   hangul: /인장|연적|필통|인$/,
   talchum: /귀면|도깨비|얼굴|짐승얼굴|탈/,
   dancheong: /막새|치미|기와|용머리|단청/,
+  hapche: /귀걸이|거울|연적|토우|용머리|방울|청자|금동/,
 };
 export function piecesFor(part, n, seed) {
   const re = PART_PIECES[part] || PART_PIECES.prologue;

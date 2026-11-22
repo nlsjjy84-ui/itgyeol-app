@@ -37,7 +37,7 @@ export default function BookScreen({ navigation, route }) {
   return (
     <SafeAreaView style={st.safe}>
       <View style={st.top}>
-        <Text style={st.title}>{part === 'prologue' ? t('잇결 이야기 영상') : t('판 입구 이야기 영상')}</Text>
+        <Text style={st.title}>{part === 'prologue' ? t('잇결 이야기 영상') : part === 'hapche' ? t('유물 합체 이야기 영상') : t('판 입구 이야기 영상')}</Text>
         <Pressable onPress={finish} hitSlop={10}>
           <Text style={st.skip}>{t('건너뛰기')}</Text>
         </Pressable>

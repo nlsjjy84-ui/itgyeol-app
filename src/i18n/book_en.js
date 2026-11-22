@@ -130,6 +130,44 @@ const BOOK = {
       lines: [G('Dancheong has an order: base coat → transfer the pattern → fill the colors → draw the lines!'), P('Got your brush? Let’s paint in order 🖌️ Eolssu!')],
     },
   ],
+
+  // ── Artifact Combine story: Museum at Night (5 pages) ──
+  hapche: [
+    {
+      art: 'sunset', place: 'Sunset · In front of the museum',
+      lines: [P('Shh… the museum is closing. But something is clattering inside 😳'), G('That’s the artifacts in the cases waking up. They secretly move every night 🌙')],
+    },
+    {
+      art: 'byeongpung', place: 'Night · Gallery',
+      lines: [G('But tonight the Damp Ghost and the Rust Goblin sneaked in. They want to ruin the artifacts!'), P('Each artifact is small. Alone, they can’t win 😣')],
+    },
+    {
+      art: 'byeongpung', place: 'Night · Gallery',
+      lines: [P('So the pieces decide to join forces. A Silla earring, a Goryeo mirror and a Joseon water dropper become one body!'), G('Different times, one thread. That’s Itgyeol’s “combine” 🧵')],
+      input: {
+        key: 'hapche',
+        options: [
+          { id: 'eolssu', label: 'Eolssu!' },
+          { id: 'robot', label: 'It’s a robot!' },
+          { id: 'silent', label: '(Stay quiet)' },
+        ],
+        silent: 'silent',
+        react: {
+          eolssu: [P('Eolssu! Hear them click into place with the drum beat? 🥁'), G('Your cheer became the combine signal.')],
+          robot: [P('Yes! But this robot is made of real museum artifacts 🤖'), G('Every piece is a photo of the real thing in a real museum.')],
+          silent: [G('Watching quietly — just like someone who guards artifacts 🤫'), P('My heart is already pounding!')],
+        },
+      },
+    },
+    {
+      art: 'madang', place: 'Dawn · Museum yard',
+      lines: [G('Play a game and you get a bundle of artifact pieces. Collect them to fill your Piece Book 📖'), P('Put pieces into the head, body and arm spots and a combine movie makes itself — subtitles and drum rhythm too 🎬')],
+    },
+    {
+      art: 'gate', place: 'Morning · Museum gate',
+      lines: [P('Your finished work heads out to sea, to the sky, to space! Then it invites you to visit the real artifacts 😆'), G('Ready for your first bundle? Your pieces are waiting.')],
+    },
+  ],
 };
 
 const GAME_LINES = {
