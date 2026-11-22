@@ -17,7 +17,7 @@ export function QuickTourStart({ onStart }) {
     >
       <Text style={st.startKicker}>{t('처음이라면')}</Text>
       <Text style={st.startTitle}>{t('3분 둘러보기')} →</Text>
-      <Text style={st.startSub}>{t('이야기 영상을 건너뛰고 놀이 한 판, 예시 작품, 전통 자료실을 차례로 봐요.')}</Text>
+      <Text style={st.startSub}>{t('이야기 영상을 건너뛰고 놀이 한 판, 첫 유물 보따리, 나의 박물관을 차례로 봐요.')}</Text>
     </Pressable>
   );
 }
@@ -25,8 +25,8 @@ export function QuickTourStart({ onStart }) {
 export function QuickTourCard({ navigation, onClose }) {
   const steps = [
     { n: '1', title: t('놀이 한 판'), sub: t('전래놀이 하나를 짧게 해 봐요'), go: () => navigation.navigate('Play') },
-    { n: '2', title: t('예시 작품'), sub: t('가상의 놀이 기록으로 빚은 예시 450점'), go: () => navigation.navigate('Gallery') },
-    { n: '3', title: t('전통 자료실'), sub: t('작품의 바탕이 된 실제 유물 345점'), go: () => navigation.navigate('Archive') },
+    { n: '2', title: t('첫 유물 보따리'), sub: t('처음 주는 보따리를 열어 진짜 박물관 유물을 받아요'), go: () => navigation.navigate('Pack') },
+    { n: '3', title: t('나의 박물관'), sub: t('받은 유물을 전시하고, 그 쓰임과 뜻으로 오늘의 물건을 만들어요'), go: () => navigation.navigate('Museum') },
   ];
   return (
     <View style={st.card}>

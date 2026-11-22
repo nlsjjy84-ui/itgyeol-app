@@ -39,15 +39,15 @@ test('홈: 판 여섯 개와 숫자(6판·진짜 유물 2,903점·4개 언어)�
   await expect(page.getByText(/네 개의 판|네 가지 전통|판은 네 곳/)).toHaveCount(0);
 });
 
-test('3분 둘러보기 ②: 예시 작품 450점으로 바로 간다', async ({ page }) => {
+test('3분 둘러보기 ②: 첫 유물 보따리를 열면 진짜 유물을 받는다', async ({ page }) => {
   await openHome(page);
   await expect(page.getByText('다 보고 나면 아래 여섯 개의 판에서 마음대로 골라 놀아요.')).toBeVisible();
-  await page.getByText('가상의 놀이 기록으로 빚은 예시 450점').filter({ visible: true }).first().click({ timeout: 15000 });
-  await expect(page.getByText('예시 둘러보기', { exact: true }).filter({ visible: true })).toBeVisible();
+  await page.getByText('처음 주는 보따리를 열어 진짜 박물관 유물을 받아요').filter({ visible: true }).first().click({ timeout: 15000 });
+  await expect(page.getByText('유물 보따리', { exact: true }).filter({ visible: true })).toBeVisible();
 });
 
-test('3분 둘러보기 ③: 전통 자료실 345점으로 바로 간다', async ({ page }) => {
+test('3분 둘러보기 ③: 나의 박물관으로 바로 간다', async ({ page }) => {
   await openHome(page);
-  await page.getByText('작품의 바탕이 된 실제 유물 345점').filter({ visible: true }).first().click({ timeout: 15000 });
-  await expect(page.getByText('창작의 바탕이 되는 실제 전통 345점')).toBeVisible();
+  await page.getByText('받은 유물을 전시하고, 그 쓰임과 뜻으로 오늘의 물건을 만들어요').filter({ visible: true }).first().click({ timeout: 15000 });
+  await expect(page.getByText('나의 박물관', { exact: true }).filter({ visible: true })).toBeVisible();
 });
