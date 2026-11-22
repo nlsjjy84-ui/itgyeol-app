@@ -69,16 +69,6 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
             {owned ? (
               <>
                 <Text style={st.detailMeta}>{[t(RARITY[p.rare]), t(p.era), t(p.by), p.no].filter(Boolean).join(' · ')}</Text>
-                <View style={st.rowWrap}>
-                  {p.slots.map((s) => (
-                    <View key={s} style={st.slotBig}>
-                      <Text style={st.slotBigName}>
-                        {(SLOT_INFO[s] || {}).icon} {t(s)}
-                      </Text>
-                      <Text style={st.slotBigSay}>{t((SLOT_INFO[s] || {}).say || '')}</Text>
-                    </View>
-                  ))}
-                </View>
                 <Text style={st.factHead}>{t('박물관 기록')}</Text>
                 <Text style={st.fact}>
                   {t('재료')}: {t(powerTag(p.power))}
@@ -130,10 +120,7 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
                 </View>
                 <Text style={st.lic}>{p.abroad ? t('사진: {a} · CC0(누구나 자유롭게 쓸 수 있음) · 해외에 있는 우리 유물', { a: t(p.by) }) : t('사진: {a} · 공공누리 제1유형(출처 표시)', { a: t(p.by) })}</Text>
                 <View style={{ gap: 8, marginTop: 12 }}>
-                  {onHapche && frameForPiece(p) ? (
-                    <SealButton label={t('이 조각으로 「{a}」 합체하기', { a: t(frameForPiece(p).name) })} variant="ink" onPress={() => onHapche(k, frameForPiece(p).id)} />
-                  ) : null}
-                  {onTransform && <SealButton label={t('이 조각 하나로 변형하기')} onPress={() => onTransform(k)} />}
+                  {onTransform && <SealButton label={t('이 유물로 물건 만들기')} onPress={() => onTransform(k)} />}
                   <SealButton label={t('박물관 원본 페이지 열기')} variant="paper" onPress={() => Linking.openURL(p.page)} />
                   {count > 1 && !gift ? (
                     <SealButton
@@ -236,12 +223,11 @@ export default function DexScreen({ navigation }) {
     const palace = mine.filter((p) => p.by === '국립고궁박물관').length;
     const works = (store.works || []).length;
     return [
-      { id: 'slots', icon: '◎', name: '자리 박사', note: '자리 20가지를 모두 채우기', cur: slotsHave.size, max: 20 },
       { id: 'eras', icon: '⌛', name: '시간 여행자', note: '서로 다른 시대 6곳의 조각 모으기', cur: eras.size, max: 6 },
       { id: 'powers', icon: '✦', name: '재료 장인', note: '흙·쇠·돌·옥·나무·천·종이·금·뼈 9가지 재료 모으기', cur: powers.size, max: 9 },
       { id: 'rare', icon: '★', name: '보물 사냥꾼', note: '「아주 귀함」 조각 3개 모으기', cur: veryRare, max: 3 },
       { id: 'palace', icon: '⛩', name: '궁궐 손님', note: '국립고궁박물관 조각 10개 모으기', cur: palace, max: 10 },
-      { id: 'works', icon: '⚙', name: '합체 장인', note: '합체 작품 5개 만들기', cur: works, max: 5 },
+      { id: 'crafts', icon: '⚙', name: '물건 장인', note: '유물로 오늘의 물건 5개 만들어 담기', cur: (store.crafts || []).length, max: 5 },
       { id: 'hundred', icon: '百', name: '백 조각', note: '조각 100개 모으기', cur: mine.length, max: 100 },
       { id: 'abroad', icon: '✈', name: '먼 길 온 유물', note: '바다 건너 해외 박물관에 있는 우리 유물 조각 5개 모으기', cur: mine.filter((p) => p.abroad).length, max: 5 },
       (() => {
@@ -257,7 +243,7 @@ export default function DexScreen({ navigation }) {
 
   const header = (
     <View>
-      <ScreenHeader title={t('조각 도감')} sub={t('실제 유물 {n}점 중 {m}점을 모았어요', { n: PIECES.length, m: ownedN })} onBack={() => navigation.goBack()} />
+      <ScreenHeader title={t('유물 도감')} sub={t('실제 유물 {n}점 중 {m}점을 모았어요', { n: PIECES.length, m: ownedN })} onBack={() => navigation.goBack()} />
       <View style={st.progress}>
         <View style={[st.progressFill, { width: `${(ownedN / PIECES.length) * 100}%` }]} />
       </View>
@@ -283,9 +269,9 @@ export default function DexScreen({ navigation }) {
         {[
           ['pieces', t('조각')],
           ['map', t('우리 땅 지도')],
-          ['works', t('내 작품 {n}', { n: (store.works || []).length })],
+          ['museum', t('나의 박물관 →')],
         ].map(([id, label]) => (
-          <Pressable key={id} onPress={() => setTab(id)} style={[st.tab, tab === id && st.tabOn]}>
+          <Pressable key={id} onPress={() => (id === 'museum' ? navigation.navigate('Museum') : setTab(id))} style={[st.tab, tab === id && st.tabOn]}>
             <Text style={[st.tabTxt, tab === id && st.tabTxtOn]}>{label}</Text>
           </Pressable>
         ))}
@@ -504,7 +490,7 @@ export default function DexScreen({ navigation }) {
           onClose={() => setOpen(null)}
           onTransform={(k) => {
             setOpen(null);
-            navigation.navigate('Workshop', { mode: 'transform', core: k });
+            navigation.navigate('Craft', { k });
           }}
         />
       )}

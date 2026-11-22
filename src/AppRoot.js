@@ -29,6 +29,8 @@ import WorkshopScreen from './screens/WorkshopScreen';
 import MovieScreen from './screens/MovieScreen';
 import RiddleScreen from './screens/RiddleScreen';
 import HapcheWallScreen from './screens/HapcheWallScreen';
+import MuseumScreen from './screens/MuseumScreen';
+import CraftScreen from './screens/CraftScreen';
 import { readMovieParam, readGiftParam, readMuseumParam } from './utils/movieLink';
 import { JourneyProvider, useJourney } from './context/JourneyContext';
 import { takeTourFlag } from './tourFlag';
@@ -78,6 +80,8 @@ const DexH = withHanji(DexScreen);
 const WorkshopH = withHanji(WorkshopScreen);
 const MovieH = withHanji(MovieScreen);
 const RiddleH = withHanji(RiddleScreen);
+const MuseumH = withHanji(MuseumScreen);
+const CraftH = withHanji(CraftScreen);
 
 // 처음 열면 "전통문화 하면 떠오르는 것" 질문부터, 한 번 답하거나 건너뛰었으면 바로 홈으로.
 function Nav() {
@@ -150,6 +154,8 @@ function Nav() {
         <Stack.Screen name="Pack" component={PackH} initialParams={sharedGift || museumQr || undefined} />
         <Stack.Screen name="Dex" component={DexH} />
         <Stack.Screen name="Riddle" component={RiddleH} />
+        <Stack.Screen name="Museum" component={MuseumH} />
+        <Stack.Screen name="Craft" component={CraftH} />
         <Stack.Screen name="Workshop" component={WorkshopH} />
         <Stack.Screen name="HapcheWall" component={HapcheWallScreen} />
         <Stack.Screen name="Movie" component={MovieH} initialParams={sharedMovie || undefined} />

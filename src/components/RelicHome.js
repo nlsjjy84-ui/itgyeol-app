@@ -45,7 +45,7 @@ export default function RelicHome({ navigation }) {
     <Frame accent="#e0a43a" style={{ marginTop: 18 }}>
       <Text style={st.eyebrow}>{t('내 유물')}</Text>
       <Text style={st.title}>{t('놀이로 모은 진짜 유물 {m}점', { m: owned })}</Text>
-      <Text style={st.desc}>{t('판을 깨면 국립중앙박물관 등 박물관의 진짜 유물 사진을 받아 도감에 모아요. 모은 유물은 곧 오늘 쓰는 물건으로 변형할 수 있어요.')}</Text>
+      <Text style={st.desc}>{t('판을 깨면 국립중앙박물관 등 박물관의 진짜 유물을 받아요. 나의 박물관에 전시하고, 유물의 쓰임과 뜻에서 오늘 쓰는 물건을 만들어요.')}</Text>
       <View style={st.btns}>
         {owned && (dailyState().streak > 0 || dailyState().days.length > 0) ? <StreakRow /> : null}
         {owned && dailyState().ready ? (
@@ -53,6 +53,7 @@ export default function RelicHome({ navigation }) {
         ) : owned ? (
           <Text style={st.count}>{t('오늘의 보따리는 받았어요 · {n}일째 이어서', { n: dailyState().streak })}</Text>
         ) : null}
+        {owned ? <SealButton label={t('나의 박물관 — 전시하고 물건 만들기')} onPress={() => navigation.navigate('Museum')} /> : null}
         <View style={st.row}>
           <SealButton style={{ flex: 1 }} label={t('유물 도감')} variant="ink" onPress={() => navigation.navigate('Dex')} />
           {owned ? <SealButton style={{ flex: 1 }} label={t('유물 수수께끼')} variant="paper" onPress={() => navigation.navigate('Riddle')} /> : null}

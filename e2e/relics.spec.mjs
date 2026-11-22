@@ -147,3 +147,25 @@ test('유물: 판을 마치고 받는 첫 보따리는 그 판의 유물이고, 
   await expect(page.getByTestId('scene-reason')).toHaveText('색과 무늬를 입힌 그릇이 나와요 — 청자·백자·분청');
   await expect(page.getByText('놀이 보따리도 풀기')).toHaveCount(0);
 });
+
+test('나의 박물관: 진열장의 유물을 누르면 쓰임·뜻에서 나온 물건과 그 까닭이 나오고, 담으면 박물관에 남는다', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_4220: 1, nmk_42506: 1 }, order: ['nmk_4220', 'nmk_42506'], works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  });
+  await openHome(page);
+  await page.getByText('나의 박물관 — 전시하고 물건 만들기', { exact: true }).filter({ visible: true }).first().click();
+  await expect(page.getByTestId('museum-grid')).toBeVisible();
+  await expect(page.getByTestId('why-box').first()).toBeVisible();
+  await page.getByTestId('vitrine-nmk_4220').click();
+  await expect(page.getByTestId('craft-ideas')).toBeVisible();
+  await expect(page.getByTestId('craft-ideas').getByText('한 방울 디퓨저', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('craft-ideas').getByText(/먹을 갈 때 물을 한 방울씩 떨어뜨리던 그릇이라/)).toBeVisible();
+  await expect(page.getByTestId('craft-ideas').getByText(/아기 탄생·돌을 축하할 때/).first()).toBeVisible();
+  await page.getByTestId('craft-ideas').getByText('이 물건 내 박물관에 담기', { exact: true }).first().click();
+  await expect(page.getByTestId('craft-ideas').getByText('내 물건에 담았어요', { exact: true }).first()).toBeVisible();
+  await page.getByText('나의 박물관으로', { exact: true }).filter({ visible: true }).click();
+  await expect(page.getByTestId('my-crafts').filter({ visible: true })).toBeVisible();
+  await expect(page.getByTestId('craft-shots').filter({ visible: true })).toBeVisible();
+});

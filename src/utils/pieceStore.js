@@ -276,6 +276,21 @@ export function removeWork(id) {
 
 export { RARITY };
 
+// 물건 만들기 — 유물에서 고른 오늘의 물건 아이디어를 「내 물건」에 담는다.
+export function saveCraft(k, to) {
+  if (!state) state = { ...EMPTY };
+  const list = (state.crafts || []).filter((c) => !(c.k === k && c.to === to));
+  state = { ...state, crafts: [{ k, to, at: Date.now() }, ...list].slice(0, 80) };
+  persist();
+  emit();
+}
+export function removeCraft(k, to) {
+  if (!state) return;
+  state = { ...state, crafts: (state.crafts || []).filter((c) => !(c.k === k && c.to === to)) };
+  persist();
+  emit();
+}
+
 // 겹친 조각을 선물로 내보낸다(하나 남기고)
 export function giveAway(k) {
   if (!state || !state.owned[k] || state.owned[k] < 2) return false;
