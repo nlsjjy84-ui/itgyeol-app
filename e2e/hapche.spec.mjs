@@ -301,3 +301,15 @@ test('유물 합체: 변신 — 수호 장군의 조각 그대로 탈것으로 �
   await expect(page.getByText(/수호 장군, 변신할 시간이야!/).first()).toBeAttached();
   await expect(page.getByText(/^변신! — 같은 조각으로 「수호 장군」/).filter({ visible: true }).first()).toBeVisible();
 });
+
+test('유물 합체: 변신 영상 공유 링크(&t=1)를 열면 변신 영상이 나온다', async ({ page }) => {
+  await page.goto('/?m=' + encodeURIComponent('guardian~5~n42506.n69779.n26363.n7732.n91260.n112600.g367533') + '&t=1');
+  const btn = page.getByText(/^변신! — 같은 조각으로 「수호 장군」/).filter({ visible: true }).first();
+  for (let i = 0; i < 40 && !(await btn.isVisible().catch(() => false)); i += 1) {
+    const agree = page.getByText('동의하고 시작하기').filter({ visible: true });
+    if (await agree.count()) await agree.first().click().catch(() => {});
+    else await page.waitForTimeout(250);
+  }
+  await expect(btn).toBeVisible();
+  await expect(page.getByText(/수호 장군, 변신할 시간이야!/).first()).toBeAttached();
+});

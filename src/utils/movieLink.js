@@ -2,6 +2,7 @@
 // 형식: ?m=<틀id>~<씨앗>~<조각1>.<조각2>...  (조각 순서 = 틀의 자리 순서, 국중박 n12345 · 고궁 g12345)
 import { Platform } from 'react-native';
 import { FRAME_BY_ID } from '../data/frames';
+import { MORPH_TO, morphAssign } from './hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { SITE_URL } from './carry';
 
@@ -46,15 +47,23 @@ export function unpackMovie(code) {
     return null;
   }
 }
+// 변신 영상은 「앞 작품 + &t=1」로 — 받는 쪽에서 같은 규칙(morphAssign)으로 탈것을 다시 짠다
 export function movieUrl(params) {
+  if (params.morphFrom) return `${SITE_URL}?m=${encodeURIComponent(packMovie({ ...params.morphFrom, seed: params.seed }))}&t=1`;
   return `${SITE_URL}?m=${encodeURIComponent(packMovie(params))}`;
 }
 // 웹에서 주소에 ?m= 이 있으면 한 번 읽는다
 export function readMovieParam() {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
   try {
-    const m = new URLSearchParams(window.location.search).get('m');
-    return m ? unpackMovie(m) : null;
+    const q = new URLSearchParams(window.location.search);
+    const m = q.get('m');
+    const mv = m ? unpackMovie(m) : null;
+    if (mv && q.get('t') === '1' && MORPH_TO[mv.frameId] && FRAME_BY_ID[MORPH_TO[mv.frameId]]) {
+      const to = MORPH_TO[mv.frameId];
+      return { frameId: to, assign: morphAssign(mv.frameId, mv.assign, to), seed: mv.seed, shared: true, morphFrom: { frameId: mv.frameId, assign: mv.assign } };
+    }
+    return mv;
   } catch (e) {
     return null;
   }

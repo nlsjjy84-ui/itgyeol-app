@@ -105,7 +105,7 @@ export default function MovieScreen({ navigation, route }) {
     const w = saveWork({ id: savedId || undefined, frameId, assign: frameId === 'free' ? Object.fromEntries((layout || []).map((it, i) => ['p' + i, it.k])) : assign, layout, seed, scene, title: tl.title.full, morphFrom: morphFrom || undefined });
     setSavedId(w.id);
   };
-  const link = movieUrl({ frameId, assign, seed, layout });
+  const link = movieUrl({ frameId, assign, seed, layout, morphFrom });
   const [copied, setCopied] = useState(false);
   const back = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'));
   const onExport = async (vertical) => {
