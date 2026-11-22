@@ -30,7 +30,7 @@ export default function HapcheWallScreen({ navigation }) {
   }, [store]);
   const [i, setI] = useState(0);
   const w = works[i % works.length];
-  const tl = useMemo(() => buildTimeline(w.frameId, w.assign || {}, { seed: w.seed, layout: w.layout, scene: '잇결' }), [i, works]);
+  const tl = useMemo(() => buildTimeline(w.frameId, w.assign || {}, { seed: w.seed, layout: w.layout, scene: '잇결', morphFrom: w.morphFrom }), [i, works]);
   const wide = width > height * 1.1;
   const size = Math.min(wide ? height - 60 : width - 24, wide ? width * 0.62 : 760);
   return (

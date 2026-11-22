@@ -310,7 +310,7 @@ export default function DexScreen({ navigation }) {
               variant="paper"
               style={{ marginTop: 8 }}
               onPress={async () => {
-                const tls = works.slice(0, 6).map((w) => buildTimeline(w.frameId, w.assign, { seed: w.seed, scene: w.scene, layout: w.layout }));
+                const tls = works.slice(0, 6).map((w) => buildTimeline(w.frameId, w.assign, { seed: w.seed, scene: w.scene, layout: w.layout, morphFrom: w.morphFrom }));
                 const url = await albumPng(tls);
                 if (url) downloadBlob(url, '잇결_앨범.png');
               }}
@@ -326,7 +326,7 @@ export default function DexScreen({ navigation }) {
             const f = FRAME_BY_ID[w.frameId];
             const ks = [...new Set(Object.values(w.assign || {}))].slice(0, 6);
             return (
-              <Pressable key={w.id} style={st.work} onPress={() => navigation.navigate('Movie', { frameId: w.frameId, assign: w.assign, layout: w.layout, seed: w.seed, scene: w.scene, saved: w.id })}>
+              <Pressable key={w.id} style={st.work} onPress={() => navigation.navigate('Movie', { frameId: w.frameId, assign: w.assign, layout: w.layout, seed: w.seed, scene: w.scene, saved: w.id, morphFrom: w.morphFrom })}>
                 <View style={st.workImgs}>
                   {ks.map((k) => (PIECE_BY_K[k] ? <Image key={k} source={PIECE_BY_K[k].img} style={st.workImg} resizeMode="contain" /> : null))}
                 </View>

@@ -102,7 +102,7 @@ export default function MovieScreen({ navigation, route }) {
   }, [tl]);
 
   const onSave = () => {
-    const w = saveWork({ id: savedId || undefined, frameId, assign: frameId === 'free' ? Object.fromEntries((layout || []).map((it, i) => ['p' + i, it.k])) : assign, layout, seed, scene, title: tl.title.full });
+    const w = saveWork({ id: savedId || undefined, frameId, assign: frameId === 'free' ? Object.fromEntries((layout || []).map((it, i) => ['p' + i, it.k])) : assign, layout, seed, scene, title: tl.title.full, morphFrom: morphFrom || undefined });
     setSavedId(w.id);
   };
   const link = movieUrl({ frameId, assign, seed, layout });
