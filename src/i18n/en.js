@@ -4,6 +4,8 @@
 
 const ui = {
   // 유물 합체(새 장르, 2026-11-21)
+  "모든 색": "All colors",
+  "이 색 조각은 아직 없어요. 보따리를 더 풀어 봐요!": "No pieces in this color yet. Open more bundles!",
   "이름·시대·쓰임으로 찾기 (예: 호랑이, 신라, 연적)": "Search by name, era or use (e.g. tiger, Silla, water dropper)",
   "이름으로 찾기": "Search by name",
   "{n}개 찾았어요": "Found {n}",

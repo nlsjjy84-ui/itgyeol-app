@@ -11,6 +11,7 @@ import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
 import { pieceStory } from '../utils/pieceStory';
+import { PIECE_COLORS } from '../utils/pieceColors';
 import { usePieces, removeWork, giveAway, currentSeries, dailyState } from '../utils/pieceStore';
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
@@ -20,17 +21,6 @@ import { powerTag, buildTimeline } from '../utils/hapche';
 import { albumPng, downloadBlob } from '../utils/movieExport';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
-// 색으로 찾기 — 조각 사진의 대표 색(사진에서 자동으로 뽑음)
-const COLORS = [
-  ['초록', '#5f8f6a'],
-  ['파랑', '#2f5d9a'],
-  ['하양', '#f2efe8'],
-  ['금빛', '#c9a23a'],
-  ['빨강', '#b3322b'],
-  ['갈색', '#8a5a3a'],
-  ['회색', '#8d8f8f'],
-  ['검정', '#22262a'],
-];
 const POWERS = ['흙', '쇠', '돌', '옥', '나무', '천', '종이', '금', '뼈'];
 // 우리 땅 지도 — 유물이 땅속에서 나온 곳(출토지)을 시·도 칸으로. 실제 위치를 어림한 칸 지도(타일 지도).
 const REGIONS = [
@@ -328,7 +318,7 @@ export default function DexScreen({ navigation }) {
           </ScrollView>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.chips}>
             <Text style={[st.chipTxt, { alignSelf: 'center', marginRight: 2 }]}>{t('색으로 찾기')}</Text>
-            {COLORS.map(([c, hex]) => (
+            {PIECE_COLORS.map(([c, hex]) => (
               <Pressable key={c} accessibilityLabel={t(c)} onPress={() => setCol(col === c ? null : c)} style={[st.chip, col === c && st.chipOn, { flexDirection: 'row', alignItems: 'center', gap: 5 }]}>
                 <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: hex, borderWidth: 1, borderColor: '#00000033' }} />
                 <Text style={[st.chipTxt, col === c && st.chipTxtOn]}>{t(c)}</Text>

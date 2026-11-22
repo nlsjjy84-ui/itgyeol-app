@@ -265,6 +265,26 @@ test('유물 합체: 오늘의 합체 미션 — 조건 맞춘 합체 영상을 
   await expect(page.getByText(/상으로 귀한 조각 「.+」을\(를\) 받았어요/)).toBeVisible();
 });
 
+test('유물 합체: 작업대 조각 고르기에서 색으로 좁힌다', async ({ page }) => {
+  const fs = await import('fs');
+  const keys = [...fs.readFileSync('src/data/pieces.js', 'utf8').matchAll(/"k": "([^"]+)"/g)].map((m) => m[1]).slice(0, 400);
+  await page.addInitScript((keys) => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    const owned = {};
+    keys.forEach((k) => (owned[k] = 1));
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned, order: keys, works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  }, keys);
+  await openHome(page);
+  await page.getByText('합체 작업대', { exact: true }).filter({ visible: true }).first().click();
+  await page.locator('[data-testid^="slot-"]').filter({ visible: true }).first().click();
+  await expect(page.getByText(/자리에 넣을 조각/)).toBeVisible();
+  await page.getByLabel('금빛').click();
+  await expect(page.getByText('모든 색', { exact: true })).toBeVisible();
+  await page.getByText('모든 색', { exact: true }).click();
+  await expect(page.getByText('색으로 찾기', { exact: true })).toBeVisible();
+});
+
 test('유물 합체: 박물관 현장 QR — 입구(?c=)는 한정을 열고, 진열장(?no=)은 그 유물 조각을 준다', async ({ page }) => {
   const pass = async (url, sel) => {
     await page.goto(url);

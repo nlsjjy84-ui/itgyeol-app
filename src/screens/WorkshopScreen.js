@@ -16,6 +16,7 @@ import { PIECE_BY_K } from '../data/pieces';
 import { FRAMES, TRANSFORMS, FRAME_BY_ID, SLOT_INFO } from '../data/frames';
 import { autoAssign, buildTimeline } from '../utils/hapche';
 import { todayMission, matches, countMatch } from '../utils/mission';
+import { PIECE_COLORS } from '../utils/pieceColors';
 
 function uniqSlots(frame) {
   // 왼쪽·오른쪽처럼 같은 자리가 여럿이면 하나로 묶어 보여 준다(같은 조각을 거울처럼 함께 쓴다)
@@ -36,6 +37,7 @@ export default function WorkshopScreen({ navigation, route }) {
   const mission = params.mission ? todayMission() : null;
   const [assign, setAssign] = useState({});
   const [picking, setPicking] = useState(null); // 슬롯 key
+  const [pickCol, setPickCol] = useState(null); // 조각 고르기 — 색으로 좁히기
   const ownedKeys = useMemo(() => (store.order || []).filter((k) => PIECE_BY_K[k]), [store]);
   const frame = FRAME_BY_ID[frameId];
   useEffect(() => {
@@ -78,7 +80,7 @@ export default function WorkshopScreen({ navigation, route }) {
 
   const pickSpec = picking ? (mode === 'transform' ? { slot: '몸통' } : frame.slots.find((s) => s.key === picking)) : null;
   const pickList = pickSpec
-    ? [...ownedKeys].sort((a, b) => {
+    ? [...ownedKeys].filter((k) => !pickCol || PIECE_BY_K[k].col === pickCol).sort((a, b) => {
         const pa = PIECE_BY_K[a];
         const pb = PIECE_BY_K[b];
         // 미션 중이면 조건에 맞는 조각을 먼저
@@ -152,7 +154,7 @@ export default function WorkshopScreen({ navigation, route }) {
             const p = PIECE_BY_K[k];
             const twin = mode !== 'transform' && frame.slots.filter((o) => o.slot === sp.slot).length > 1;
             return (
-              <Pressable key={sp.key} style={st.slot} onPress={() => setPicking(sp.key)}>
+              <Pressable key={sp.key} testID={'slot-' + sp.key} style={st.slot} onPress={() => setPicking(sp.key)}>
                 {p ? <Image source={p.img} style={st.slotImg} resizeMode="contain" /> : <View style={st.slotImg} />}
                 <View style={{ flex: 1 }}>
                   <Text style={st.slotName}>
@@ -184,6 +186,24 @@ export default function WorkshopScreen({ navigation, route }) {
           <Pressable style={st.dim} onPress={() => setPicking(null)}>
             <Pressable style={st.sheet} onPress={() => {}}>
               <Text style={st.sheetH}>{t('{a} 자리에 넣을 조각', { a: t(pickSpec.slot) })}</Text>
+              <View style={st.colRow}>
+                {PIECE_COLORS.map(([c, hex]) => (
+                  <Pressable
+                    key={c}
+                    accessibilityLabel={t(c)}
+                    onPress={() => setPickCol(pickCol === c ? null : c)}
+                    style={[st.colDot, { backgroundColor: hex }, pickCol === c && st.colDotOn]}
+                  />
+                ))}
+                {pickCol ? (
+                  <Pressable onPress={() => setPickCol(null)} hitSlop={8}>
+                    <Text style={st.colAll}>{t('모든 색')}</Text>
+                  </Pressable>
+                ) : (
+                  <Text style={st.colAll}>{t('색으로 찾기')}</Text>
+                )}
+              </View>
+              {pickList.length === 0 ? <Text style={st.colNone}>{t('이 색 조각은 아직 없어요. 보따리를 더 풀어 봐요!')}</Text> : null}
               <FlatList
                 data={pickList}
                 numColumns={cols}
@@ -248,6 +268,11 @@ const st = StyleSheet.create({
   emptyTxt: { color: colors.ink, fontSize: 15, textAlign: 'center' },
   dim: { flex: 1, backgroundColor: '#000000aa', justifyContent: 'center', padding: 12 },
   sheet: { backgroundColor: colors.paper, borderRadius: 18, maxHeight: '85%', width: '100%', maxWidth: 620, alignSelf: 'center', padding: 12 },
+  colRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
+  colDot: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: '#00000022' },
+  colDotOn: { borderColor: colors.ink, transform: [{ scale: 1.15 }] },
+  colAll: { fontSize: 13, color: colors.muted, marginLeft: 4 },
+  colNone: { fontSize: 14, color: colors.muted, paddingVertical: 16, textAlign: 'center' },
   sheetH: { fontSize: 16, fontWeight: '700', color: colors.ink, marginBottom: 8 },
   pick: { margin: 4, borderWidth: 2, borderRadius: 12, alignItems: 'center', padding: 4, backgroundColor: '#f6f2ea' },
   pickName: { fontSize: 11, color: colors.ink, marginTop: 2 },
