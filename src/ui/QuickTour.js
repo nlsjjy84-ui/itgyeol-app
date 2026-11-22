@@ -17,7 +17,7 @@ export function QuickTourStart({ onStart }) {
     >
       <Text style={st.startKicker}>{t('처음이라면')}</Text>
       <Text style={st.startTitle}>{t('3분 둘러보기')} →</Text>
-      <Text style={st.startSub}>{t('질문과 그림책을 건너뛰고 놀이 한 판, 예시 작품, 전통 자료실을 차례로 봐요.')}</Text>
+      <Text style={st.startSub}>{t('이야기 영상을 건너뛰고 놀이 한 판, 예시 작품, 전통 자료실을 차례로 봐요.')}</Text>
     </Pressable>
   );
 }

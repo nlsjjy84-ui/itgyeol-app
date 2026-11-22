@@ -132,7 +132,6 @@ export default function RiddleScreen({ navigation }) {
         )}
         <View style={{ gap: 8, marginTop: 18 }}>
           <SealButton label={t('조각 도감')} variant="ink" onPress={() => navigation.navigate('Dex')} />
-          <SealButton label={t('합체 작업대')} variant="paper" onPress={() => navigation.navigate('Workshop')} />
         </View>
       </ScrollView>
     </SafeAreaView>

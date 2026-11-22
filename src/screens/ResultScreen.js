@@ -268,7 +268,7 @@ export default function ResultScreen({ navigation }) {
           style={{ marginTop: 4 }}
         />
 
-        {/* 놀이 보상 — 실제 유물 조각 보따리. 받은 조각으로 작업대에서 합체·변형한다(새 장르 「유물 합체」). */}
+        {/* 놀이 보상 — 그 판과 뜻이 닿는 진짜 유물 보따리 (2026-11-22 새 설계도: 합체 빼고 변형으로) */}
         {attempts.length ? (
           <Pressable
             onPress={() => {
@@ -277,8 +277,8 @@ export default function ResultScreen({ navigation }) {
             }}
             style={styles.packBanner}
           >
-            <Text style={styles.packTitle}>{t('놀이 보상 — 유물 조각 보따리 받기')}</Text>
-            <Text style={styles.packDesc}>{t('진짜 박물관 유물 조각 3개가 들어 있어요. 모아서 로봇·하늘배·용으로 합체해 보세요 ›')}</Text>
+            <Text style={styles.packTitle}>{t('놀이 보상 — 진짜 유물 보따리 받기')}</Text>
+            <Text style={styles.packDesc}>{t('방금 논 판과 뜻이 닿는 진짜 박물관 유물이 들어 있어요. 도감에 모아 두면 오늘 쓰는 물건으로 변형할 수 있어요 ›')}</Text>
           </Pressable>
         ) : null}
 

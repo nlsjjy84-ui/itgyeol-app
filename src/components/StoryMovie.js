@@ -8,7 +8,6 @@ import { View, Image, StyleSheet, Pressable, useWindowDimensions } from 'react-n
 import Text from '../ui/Text';
 import { ART } from '../ui/StoryScene';
 import { PIECES } from '../data/pieces';
-import { play } from '../utils/sound';
 import { t } from '../i18n';
 
 export const CHAR = {
@@ -52,6 +51,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
   const W = Math.min(width - 16, 720);
   const H = Math.min(Math.round(W * 1.05), Math.max(380, height - 170));
   const [pi, setPi] = useState(0);
+  const prevPi = useRef(null); // 앞 장면 — 새 장면 처음 0.9초 동안 겹쳐 사라지며 이어진다
   const [stage, setStage] = useState({ kind: 'lines', i: 0 }); // lines | wait | react | done
   const [picked, setPicked] = useState(null);
   const [paused, setPaused] = useState(false);
@@ -95,7 +95,6 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
     setLineStart(0);
     setStage({ kind: 'lines', i: 0 });
     setPicked(null);
-    play(pi === 0 ? 'daegeum' : 'fly');
   }, [pi]);
 
   const cur = stage.kind === 'lines' ? lines[stage.i] : stage.kind === 'react' ? reactLines[stage.i] : null;
@@ -112,7 +111,6 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
       if (stage.i + 1 < lines.length) {
         setStage({ kind: 'lines', i: stage.i + 1 });
         setLineStart(now);
-        play('tap');
       } else if (input) {
         setStage({ kind: 'wait', i: 0 });
         setLineStart(now);
@@ -121,14 +119,15 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
       if (stage.i + 1 < reactLines.length) {
         setStage({ kind: 'react', i: stage.i + 1 });
         setLineStart(now);
-        play('tap');
       } else nextPage();
     }
   };
   const nextPage = () => {
-    if (pi + 1 < pages.length) setPi(pi + 1);
+    if (pi + 1 < pages.length) {
+      prevPi.current = pi;
+      setPi(pi + 1);
+    }
     else {
-      play('shine');
       setStage({ kind: 'done', i: 0 });
       setTimeout(onFinish, 700);
     }
@@ -142,7 +141,6 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
   };
   const pick = (id) => {
     if (stage.kind !== 'wait') return;
-    play('clank');
     setPicked(id);
     onPick(input.key, id);
     setStage({ kind: 'react', i: 0 });
@@ -180,6 +178,9 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
     <View style={{ alignItems: 'center' }}>
       <Pressable onPress={() => (stage.kind === 'wait' ? (input.options.length === 1 ? pick(input.options[0].id) : null) : next(true))} style={[st.stage, { width: W, height: H }]}>
         <Image source={ART[page.art] || ART.gate} style={{ position: 'absolute', left: panX, top: -H * 0.04, width: artW, height: H * 1.08, transform: [{ scale: zoom }] }} resizeMode="cover" />
+        {prevPi.current !== null && now < 0.9 && pages[prevPi.current] ? (
+          <Image source={ART[pages[prevPi.current].art] || ART.gate} style={{ position: 'absolute', left: -(artW - W) * (prevPi.current % 2 ? 0 : 1), top: -H * 0.04, width: artW, height: H * 1.08, opacity: 1 - now / 0.9, transform: [{ scale: 1.12 }] }} resizeMode="cover" />
+        ) : null}
         {/* 장면의 시간 — tint: 'night'면 남빛 밤, 'dusk'면 노을빛 */}
         <View style={[StyleSheet.absoluteFill, { backgroundColor: page.tint === 'night' ? '#0a1430' : page.tint === 'dusk' ? '#5a2a10' : '#0b1016', opacity: page.tint === 'night' ? 0.55 : page.tint === 'dusk' ? 0.3 : 0.25 }]} />
         {/* 떠다니는 빛 */}
@@ -217,7 +218,7 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
               source={CHAR[who]}
               style={{
                 position: 'absolute',
-                bottom: H * 0.21 + hop,
+                bottom: H * 0.04 + hop,
                 left: i === 0 ? W * 0.03 - (1 - enter) * cw : undefined,
                 right: i === 1 ? W * 0.03 - (1 - enter) * cw : undefined,
                 width: cw,
@@ -229,13 +230,6 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
             />
           );
         })}
-        {/* 자막 */}
-        {cur ? (
-          <View style={st.sub}>
-            <Text style={[st.who, { color: COLOR[speaker] || '#fff' }]}>{t(NAME[speaker] || '')}</Text>
-            <Text style={[st.subTxt, { fontSize: Math.max(14, W * 0.036) * (bigSubs ? 1.45 : 1), lineHeight: Math.max(14, W * 0.036) * (bigSubs ? 1.45 : 1) * 1.45 }]}>{typed}</Text>
-          </View>
-        ) : null}
         {/* 선택 — 영상이 잠깐 멈춘다 */}
         {stage.kind === 'wait' && input ? (
           <View style={st.choiceBox}>
@@ -259,6 +253,15 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
           ))}
         </View>
       </Pressable>
+      {/* 자막 띠 — 그림 위에 얹지 않고 그림 바로 아래 진한 띠에 둔다(글자가 그림에 묻히지 않게, 2026-11-22) */}
+      <View style={[st.sub, { width: W }]} testID="story-sub">
+        {cur ? (
+          <>
+            <Text style={[st.who, { color: COLOR[speaker] || '#fff' }]}>{t(NAME[speaker] || '')}</Text>
+            <Text style={[st.subTxt, { fontSize: Math.max(17, W * 0.04) * (bigSubs ? 1.35 : 1), lineHeight: Math.max(17, W * 0.04) * (bigSubs ? 1.35 : 1) * 1.45 }]}>{typed}</Text>
+          </>
+        ) : null}
+      </View>
       <View style={st.ctrl}>
         <Pressable onPress={() => setPaused(!paused)} style={st.btn} accessibilityLabel={paused ? t('재생') : t('일시정지')}>
           <Text style={st.btnTxt}>{paused ? t('▶ 재생') : t('❚❚ 일시정지')}</Text>
@@ -280,13 +283,13 @@ export default function StoryMovie({ part, pages, resolve, onPick, onFinish, cho
 }
 
 const st = StyleSheet.create({
-  stage: { overflow: 'hidden', borderRadius: 18, backgroundColor: '#0b1016' },
+  stage: { overflow: 'hidden', borderTopLeftRadius: 18, borderTopRightRadius: 18, backgroundColor: '#0b1016' },
   mote: { position: 'absolute', width: 4, height: 4, borderRadius: 2, backgroundColor: '#fff3c8' },
   halo: { position: 'absolute', backgroundColor: '#ffe7a8', opacity: 0.22 },
   place: { position: 'absolute', top: 22, left: 16, backgroundColor: '#000000a0', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   placeTxt: { color: '#f6e7c4', fontSize: 16 },
-  sub: { position: 'absolute', left: 12, right: 12, bottom: 12, backgroundColor: '#000000c4', borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, minHeight: 74 },
-  who: { fontSize: 13, fontWeight: '700', marginBottom: 3 },
+  sub: { backgroundColor: '#111111', borderBottomLeftRadius: 18, borderBottomRightRadius: 18, paddingHorizontal: 18, paddingVertical: 12, minHeight: 96 },
+  who: { fontSize: 15, fontWeight: '800', marginBottom: 4 },
   subTxt: { color: '#fff', lineHeight: 23 },
   choiceBox: { position: 'absolute', left: 0, right: 0, top: '34%', alignItems: 'center', gap: 8 },
   choiceRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, paddingHorizontal: 12 },

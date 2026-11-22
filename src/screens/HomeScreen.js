@@ -18,6 +18,7 @@ import { PART_OF_CARD } from '../data/book';
 import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
 import HomeNumbers from '../components/HomeNumbers';
+import RelicHome from '../components/RelicHome';
 import HapcheHome from '../components/HapcheHome';
 import { MATERIAL_BY_ID } from '../data/materialTree';
 import { Swatch, matName, MATERIAL_COUNT } from './MaterialScreen';
@@ -164,34 +165,8 @@ export default function HomeScreen({ navigation, route }) {
         <QuickTourCard navigation={navigation} onClose={() => navigation.setParams({ tour: false })} />
       ) : null}
 
-      {/* 새 장르 「유물 합체」 — 놀이 → 유물 조각 → 합체·변형 → 영상·물건 (2026-11-21) */}
-      <HapcheHome navigation={navigation} />
-
-      <StoryScene scene="prologue" style={{ marginTop: 16 }} />
-
-      <MascotDuo
-        leftValue={pungValue}
-        rightValue={gyeolValue}
-        caption={t('판을 놀수록 우리 둘의 모습이 또렷해져.')}
-        size={52}
-        style={{ marginTop: 14 }}
-      />
-
-      {/* 놀이 전에 실제 전통 재료를 고른다 — 고른 재료가 결과물의 재질이 된다(장난감 수지가 아니라 옻칠·자개·놋쇠·청자…). */}
-      <Pressable onPress={() => { play('tap'); navigation.navigate('Materials', { mode: 'pick', then: 'Home' }); }}>
-        <Frame accent={colors.accent} style={{ marginTop: 16 }}>
-          <View style={styles.matRow}>
-            {mBase ? <Swatch look={mBase.look} size={40} /> : null}
-            {mAccent ? <View style={{ marginLeft: -14 }}><Swatch look={mAccent.look} size={40} /></View> : null}
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={styles.carryTitle}>{mBase ? t('고른 재료') + ': ' + [mBase, mAccent].filter(Boolean).map((m) => matName(m.id, m.name)).join(' + ') : t('먼저 재료를 골라 보세요')}</Text>
-              <Text style={styles.carryText}>{t('옻칠·자개·놋쇠·청자·비단… 실제 전통 재료 {n}가지 중에서 고르면, 놀이로 만든 작품이 그 재료로 나와요 ›', { n: MATERIAL_COUNT })}</Text>
-            </View>
-          </View>
-        </Frame>
-      </Pressable>
-
-      <Text style={styles.sectionLabel}>{t('여섯 개의 판 — 어디부터 가도 돼요')}</Text>
+      {/* 2026-11-22 새 설계: 놀이가 메인 — 판 카드를 맨 위로. 합체·이야기 장면·풍이결이·재료 고르기 칸은 홈에서 뺌. */}
+      <Text style={styles.sectionLabel}>{t('오늘 놀 판 — 판을 깨면 진짜 유물을 얻어요')}</Text>
       <View style={styles.list}>
         {CARDS.filter((c) => c.ready).map((c) => (
           <Pressable
@@ -219,6 +194,8 @@ export default function HomeScreen({ navigation, route }) {
       </View>
 
 
+      <RelicHome navigation={navigation} />
+
       {/* 숫자로 보는 잇결 — 판·자료·언어·예시 작품. 판을 먼저 보여 준 뒤 아래에 둔다(정리 2026-10-26). */}
       <HomeNumbers attempts={attempts} exhibit={exhibit} onGallery={() => navigation.navigate('Gallery')} onResult={() => navigation.navigate('Result')} onHall={() => navigation.navigate('Exhibit')} />
 
@@ -244,14 +221,6 @@ export default function HomeScreen({ navigation, route }) {
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Archive'); }}>
           <SealIcon kind="jar" letter="보" size={48} tilt={false} />
           <Text style={styles.exploreTxt}>{t('전통 자료실')}</Text>
-        </Pressable>
-        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Gallery'); }}>
-          <SealIcon kind="quilt" letter="작" size={48} tilt={false} />
-          <Text style={styles.exploreTxt}>{t('예시 작품 둘러보기')}</Text>
-        </Pressable>
-        <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Taste', { again: true }); }}>
-          <SealIcon kind="idea" letter="고" size={48} tilt={false} />
-          <Text style={styles.exploreTxt}>{t('떠오르는 것 다시 고르기')}</Text>
         </Pressable>
         <Pressable style={styles.exploreBtn} onPress={() => { play('tap'); navigation.navigate('Exhibit'); }}>
           <SealIcon kind="frame" letter="전" size={48} tilt={false} />

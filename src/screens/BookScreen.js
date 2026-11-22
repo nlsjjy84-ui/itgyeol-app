@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import { QuickTourStart } from '../ui/QuickTour';
 import { View, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
 import Text from '../ui/Text';
 import StoryMovie, { CHAR, CHAR_AR, piecesFor } from '../components/StoryMovie';
@@ -43,6 +44,14 @@ export default function BookScreen({ navigation, route }) {
         </Pressable>
       </View>
       <ScrollView contentContainerStyle={st.body} showsVerticalScrollIndicator={false}>
+        {part === 'prologue' ? (
+          <QuickTourStart
+            onStart={() => {
+              markBook({ prologue: true });
+              navigation.replace('Home', { tour: true });
+            }}
+          />
+        ) : null}
         <StoryMovie part={part} pages={pages} resolve={resolve} onPick={onPick} onFinish={finish} />
         {canExport() ? (
           <Pressable

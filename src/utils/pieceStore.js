@@ -83,13 +83,23 @@ export function currentSeries(d = new Date()) {
 // 보따리 하나 뽑기: 보통 70% · 귀함 25% · 아주 귀함 5%.
 // 아직 없는 조각이 조금 더 잘 나오게(도감 채우는 재미), 「궁궐 한정」 조각은 박물관에서 받은 암호가 있어야 나온다.
 // 놀이와 이어진 조각 — 그 놀이를 마치면 관련 유물이 더 잘 나온다(60%)
+// 판마다 그 판과 뜻이 닿는 유물이 나온다 (2026-11-22 새 설계도 「놀이와 유물의 연결」)
 export const SCENE_BIAS = {
-  진법: /칼|검|창|화살|촉|투구|갑|방패|깃발|총통|활|기마|말/,
-  '훈민정음·인쇄': /연적|벼루|먹|붓|인장|인$|필통|도장/,
-  전래놀이: /팽이|구슬|공기|윷|투호|방울|토우|놀이|바둑|주사위/,
-  '한글 테트리스': /인장|연적|필통|인$|벼루/,
-  탈춤: /귀면|도깨비|얼굴|짐승|탈|가면/,
-  단청: /막새|치미|기와|용머리|단청|잡상/,
+  진법: /칼|검|창|화살|촉|투구|갑옷|갑|방패|깃발|총통|활|북|징|기마|말/,
+  '훈민정음·인쇄': /인장|도장|인$|벼루|먹|붓|연적|필통|책|서책|문방/,
+  전래놀이: /토우|팽이|구슬|공기|윷|투호|주사위|바둑|장기|놀이|인형|방울/,
+  '한글 테트리스': /기와|막새|전돌|벽돌|치미|와당|망새/,
+  탈춤: /탈|가면|귀면|노리개|비녀|떨잠|귀걸이|귀고리|장신구|방울/,
+  단청: /청자|백자|분청|매병|항아리|병$|병 |사발|대접|접시|주자|잔/,
+};
+// 왜 이 판에서 이 유물이 나오는지 — 보따리를 풀 때 한 줄로 보여 준다
+export const SCENE_REASON = {
+  진법: '대형을 짠 장수에게 어울리는 물건이 나와요 — 칼·창·투구·북',
+  '훈민정음·인쇄': '글자를 짓고 찍는 사람의 도구가 나와요 — 도장·벼루·먹·연적',
+  전래놀이: '옛사람들이 놀던 물건이 나와요 — 흙 인형·주사위·놀잇감',
+  '한글 테트리스': '블록을 쌓듯 집을 쌓던 조각이 나와요 — 기와·막새·전돌',
+  탈춤: '춤추는 사람이 쓰고 달던 것이 나와요 — 탈·노리개·비녀',
+  단청: '색과 무늬를 입힌 그릇이 나와요 — 청자·백자·분청',
 };
 export function drawPack(n, seed, owned = {}, codes = [], scene = '') {
   const r = rng(seed);
@@ -107,6 +117,13 @@ export function drawPack(n, seed, owned = {}, codes = [], scene = '') {
       continue;
     }
     const sr = r();
+    // 놀이를 마치고 받는 보따리의 첫 유물은 반드시 그 판의 유물
+    if (i === 0 && bias.length) {
+      const c0 = bias.filter((p) => !owned[p.k]);
+      const from0 = c0.length ? c0 : bias;
+      out.push(from0[Math.floor(r() * from0.length)].k);
+      continue;
+    }
     pool = local.length > 2 && sr < 0.4 ? local : bias.length > 6 && sr < 0.7 ? bias : series.pool.length > 6 && sr < 0.85 ? series.pool : all;
     const roll = r();
     const tier = roll < 0.05 ? 2 : roll < 0.3 ? 1 : 0;
@@ -162,10 +179,11 @@ export function markClaimed(claim) {
   emit();
 }
 
-export function takeStarter() {
+export function takeStarter(scene = '') {
   if (!state) state = { ...EMPTY };
   if (state.starter) return [];
-  const keys = starterKeys();
+  // 놀이를 마치고 처음 받는 보따리는 그 판의 유물로 (합체용 「자리마다 하나씩」은 2026-11-22에 뺌)
+  const keys = scene && SCENE_BIAS[scene] ? drawPack(4, Date.now() % 1000003, state.owned || {}, state.codes || [], scene) : starterKeys();
   addPieces(keys);
   state = { ...state, starter: true };
   persist();

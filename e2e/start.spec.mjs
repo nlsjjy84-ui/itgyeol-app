@@ -1,45 +1,28 @@
-// 처음 온 사람의 길: 동의 → 질문 → 그림책 → 홈, 그리고 「3분 둘러보기」
+// 처음 온 사람의 길: 동의 → 이야기 영상 → 홈, 그리고 「3분 둘러보기」
 import { test, expect, openHome } from './helpers.mjs';
 
 test('동의 전에는 체험이 시작되지 않고, 개인 정보를 모으지 않는다고 알린다', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('이름이나 연락처 같은 개인 정보는 모으지 않아요.', { exact: false })).toBeVisible();
-  await expect(page.getByText('여섯 개의 판 — 어디부터 가도 돼요')).toHaveCount(0);
+  await expect(page.getByText('오늘 놀 판 — 판을 깨면 진짜 유물을 얻어요')).toHaveCount(0);
   await page.getByText('동의하고 시작하기').click();
-  await expect(page.getByText('대한민국 전통문화, 하면 뭐가 떠오르세요?')).toBeVisible();
+  // 2026-11-22: 시작 전 질문(떠오르는 것)은 뺐다 — 동의하면 바로 이야기 영상
+  await expect(page.getByText('대한민국 전통문화, 하면 뭐가 떠오르세요?')).toHaveCount(0);
 });
 
-test('시작 전 질문: 고른 것과 닿아 있는 예시를 보여 주고, 점수·순위는 없다', async ({ page }) => {
-  await page.goto('/');
-  await page.getByText('동의하고 시작하기').click();
-  await page.getByText('농악·풍물', { exact: true }).click();
-  await page.getByText('한글·훈민정음', { exact: true }).click();
-  // 아래에 붙은 단추는 고를 때마다 글자가 바뀌며 움직여서, 멈춘 뒤 누른다
-  const go = page.getByText('2개 떠올랐어요 · 예시 보기');
-  await expect(go).toBeVisible();
-  await go.click({ force: true });
-  await expect(page.getByText('이런 작품이 놓일 수 있어요')).toBeVisible();
-  await expect(page.getByText('예시는 가상의 놀이 기록으로 빚은 모양이에요.', { exact: false })).toBeVisible();
-  await expect(page.getByText(/순위|랭킹|점수/)).toHaveCount(0);
-});
-
-test('그림책 프롤로그를 끝까지 넘기면 홈의 여섯 개 판에 닿는다', async ({ page }) => {
+test('이야기 영상을 끝까지 보면 홈의 놀이 판에 닿는다', async ({ page }) => {
   test.setTimeout(300000); // 이야기 영상을 끝까지 본다
   await page.goto('/');
   await page.getByText('동의하고 시작하기').click();
-  await page.getByText('떠오르는 게 없어요 · 예시 보기').click();
-  await page.getByText('놀이하러 가기').click();
-  // 놀이 전에 재료 고르기 — 이번에는 나중에 고른다
-  await page.getByText('나중에 고를게요 ›').click();
   // 톡 · 고르기 · 가만히 있기만으로 넘어간다
   for (let i = 0; i < 700; i += 1) {
-    if (await page.getByText('여섯 개의 판 — 어디부터 가도 돼요').isVisible().catch(() => false)) break;
+    if (await page.getByText('오늘 놀 판 — 판을 깨면 진짜 유물을 얻어요').isVisible().catch(() => false)) break;
     const next = page.getByText(/^\s*(다음 장면 ›|\(가만히 있는다\))\s*$/).last();
     if (await next.isVisible().catch(() => false)) await next.click({ timeout: 2000 }).catch(() => {});
     await page.waitForTimeout(150);
   }
-  await expect(page.getByText('여섯 개의 판 — 어디부터 가도 돼요')).toBeVisible();
-  await expect(page.getByText('판은 여섯 곳이야', { exact: false }).first()).toBeVisible();
+  await expect(page.getByText('오늘 놀 판 — 판을 깨면 진짜 유물을 얻어요')).toBeVisible();
+  // 2026-11-22: 홈의 이야기 장면은 뺐다 — 홈 맨 위가 놀이 판
 });
 
 test('홈: 판 여섯 개와 숫자(놀이 17가지·자료 345점·4개 언어)가 맞다', async ({ page }) => {

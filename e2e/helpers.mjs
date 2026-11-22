@@ -33,7 +33,7 @@ export const FOLK_GAMES = ['줄넘기', '줄다리기', '상모돌리기', '구�
  */
 export async function openHome(page, path = '/') {
   await page.goto(path);
-  const homeMark = page.getByText('여섯 개의 판 — 어디부터 가도 돼요');
+  const homeMark = page.getByText('오늘 놀 판 — 판을 깨면 진짜 유물을 얻어요');
   for (let i = 0; i < 40; i += 1) {
     if (await homeMark.isVisible().catch(() => false)) break;
     const agree = page.getByText('동의하고 시작하기').filter({ visible: true });

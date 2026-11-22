@@ -119,7 +119,7 @@ function Nav() {
   // 처음이면 질문 → 그림책 프롤로그 → 홈. 질문만 끝낸 사람은 바로 프롤로그부터.
   // QR로 집에서 이어서 여는 사람은 질문·그림책을 건너뛰고 바로 홈(가져온 작품)으로.
   // 토스 결제창에서 돌아왔으면 결과 화면(주문 진행)으로 바로 간다.
-  const first = payBack ? 'Result' : sharedMovie ? 'Movie' : sharedGift || museumQr ? 'Pack' : carried || tour ? 'Home' : !taste.done ? 'Taste' : !book.prologue ? 'Book' : 'Home';
+  const first = payBack ? 'Result' : sharedMovie ? 'Movie' : sharedGift || museumQr ? 'Pack' : carried || tour ? 'Home' : !book.prologue ? 'Book' : 'Home';
   return (
     <NavigationContainer
       ref={navRef}

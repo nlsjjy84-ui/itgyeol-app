@@ -9,7 +9,7 @@ import { colors } from '../theme';
 import { play } from '../utils/sound';
 import { t } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, findByNo, giveAway, dailyState, takeDaily, currentSeries } from '../utils/pieceStore';
+import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, findByNo, giveAway, dailyState, takeDaily, currentSeries, SCENE_REASON } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
 import { giftUrl } from '../utils/movieLink';
 import QRCode from 'react-native-qrcode-svg';
@@ -155,7 +155,8 @@ export default function PackScreen({ navigation, route }) {
       return;
     }
     if (!s.starter) {
-      const keys = takeStarter();
+      const keys = takeStarter(scene);
+      if (scene && claim) markClaimed(claim);
       setOpened({ keys, fresh: keys, starter: true });
       return;
     }
@@ -257,10 +258,13 @@ export default function PackScreen({ navigation, route }) {
                 ? t('진짜 유물을 찾았어요! 눈앞의 그 유물이 조각이 되어 도감에 들어갔어요.')
                 : opened.gift
                 ? t('선물 받은 조각이에요! 도감에 들어갔어요.')
+                : opened.starter && scene
+                ? t('첫 보따리! {a} 놀이에서 진짜 유물 {n}점을 받았어요.', { a: t(scene), n: opened.keys.length })
                 : opened.starter
                 ? t('첫 보따리! 자리마다 하나씩, 조각 {n}개를 받았어요.', { n: opened.keys.length })
                 : t('조각 {n}개를 받았어요. 새 조각 {m}개!', { n: opened.keys.length, m: opened.fresh.length })}
             </Text>
+            {scene && SCENE_REASON[scene] && !opened.already ? <Text style={st.reason} testID="scene-reason">{t(SCENE_REASON[scene])}</Text> : null}
             <View style={st.grid}>
               {opened.keys.map((k, i) => (
                 <Card key={k + i} k={k} delay={250 + i * 380} fresh={opened.fresh.includes(k)} size={cardW} secret={!!currentSeries().secret && currentSeries().secret.k === k} />
@@ -269,9 +273,7 @@ export default function PackScreen({ navigation, route }) {
             {opened.gift && swap && !opened.already ? <SwapBack got={opened.keys[0]} owned={store.owned || {}} from={from} /> : null}
             <Text style={st.small}>{t('지금 모은 조각 {n}개', { n: ownedN })}</Text>
             <View style={st.btns}>
-              <SealButton label={t('작업대에서 합체하기')} onPress={() => navigation.navigate('Workshop')} />
               <SealButton label={t('조각 도감 보기')} variant="ink" onPress={() => navigation.navigate('Dex')} />
-              {opened.starter && claim ? <SealButton label={t('놀이 보따리도 풀기')} variant="paper" onPress={() => setOpened(null)} /> : null}
             </View>
           </View>
         )}
@@ -327,6 +329,7 @@ function SwapBack({ got, owned, from }) {
 }
 
 const st = StyleSheet.create({
+  reason: { fontSize: 15, fontWeight: '700', color: '#7a4b12', textAlign: 'center', marginTop: 6, marginBottom: 4, backgroundColor: '#fbf1dc', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
   mile: { height: 220, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   mileDot: { position: 'absolute', width: 16, height: 16, borderRadius: 8, borderWidth: 1, borderColor: '#1b2227' },
   mileRing: { width: 130, height: 130, borderRadius: 65, borderWidth: 8, borderColor: '#c8982b', backgroundColor: '#b3322b', alignItems: 'center', justifyContent: 'center' },

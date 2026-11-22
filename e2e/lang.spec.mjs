@@ -14,6 +14,6 @@ for (const c of CASES) {
     await expect(page.getByText(c.tagline, { exact: false })).toBeVisible();
     // 홈 첫머리 문장에 한국어가 남지 않아야 한다
     await expect(page.getByText('손끝으로 만나는', { exact: false })).toHaveCount(0);
-    await expect(page.getByText('여섯 개의 판 — 어디부터 가도 돼요')).toHaveCount(0);
+    await expect(page.getByText('오늘 놀 판 — 판을 깨면 진짜 유물을 얻어요')).toHaveCount(0);
   });
 }

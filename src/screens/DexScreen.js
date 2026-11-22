@@ -216,7 +216,6 @@ export default function DexScreen({ navigation }) {
       })(),
       { id: 'scan', icon: '⌕', name: '진짜 유물 탐정', note: '박물관에서 소장품번호로 진짜 유물 3개 찾기', cur: (store.claimed || []).filter((c) => String(c).startsWith('scan:')).length, max: 3 },
       { id: 'streak', icon: '◔', name: '이어 오기', note: '오늘의 보따리를 7일 이어 받기', cur: dailyState().streak, max: 7 },
-      { id: 'frames', icon: '◇', name: '틀 탐험가', note: '서로 다른 틀 10가지로 작품 만들기', cur: madeFrames.size, max: 10 },
       { id: 'colors', icon: '◐', name: '빛깔 모으기', note: '초록·파랑·하양·금빛·빨강·회색·검정 7가지 빛깔 조각 모으기', cur: new Set(mine.map((p) => p.col).filter((c) => c && c !== '갈색')).size, max: 7 },
       { id: 'places', icon: '⛰', name: '나들이꾼', note: '서로 다른 고장에서 나온 조각 5곳 모으기', cur: new Set(mine.filter((p) => p.from).map((p) => p.from.split(' - ')[0])).size, max: 5 },
     ];
@@ -251,7 +250,6 @@ export default function DexScreen({ navigation }) {
           ['pieces', t('조각')],
           ['map', t('우리 땅 지도')],
           ['works', t('내 작품 {n}', { n: (store.works || []).length })],
-          ['frames', t('틀 모음 {a}/{b}', { a: madeFrames.size, b: FRAMES.length + TRANSFORMS.length })],
         ].map(([id, label]) => (
           <Pressable key={id} onPress={() => setTab(id)} style={[st.tab, tab === id && st.tabOn]}>
             <Text style={[st.tabTxt, tab === id && st.tabTxtOn]}>{label}</Text>
@@ -387,7 +385,6 @@ export default function DexScreen({ navigation }) {
       <SafeAreaView style={st.safe}>
         <ScrollView contentContainerStyle={st.wrap}>
           {header}
-          <SealButton label={t('합체 전시관 화면 띄우기 (큰 화면·키오스크)')} variant="ink" onPress={() => navigation.navigate('HapcheWall')} style={{ marginTop: 10 }} />
           {Platform.OS === 'web' && works.length ? (
             <SealButton
               label={t('내 작품 앨범 저장 (A4 한 장, 최근 6개)')}
@@ -474,10 +471,6 @@ export default function DexScreen({ navigation }) {
           onTransform={(k) => {
             setOpen(null);
             navigation.navigate('Workshop', { mode: 'transform', core: k });
-          }}
-          onHapche={(k, frame) => {
-            setOpen(null);
-            navigation.navigate('Workshop', { frame, lead: k });
           }}
         />
       )}
