@@ -30,7 +30,10 @@ const FILES = {
   shine: require('../../assets/sfx/shine.wav'), // 완성 팡파르
   transform: require('../../assets/sfx/transform.wav'), // 변신 기계음
   unwrap: require('../../assets/sfx/unwrap.wav'), // 보따리 풀기
-  bgm: require('../../assets/sfx/bgm_hapche.wav'),
+  bgm: require('../../assets/sfx/bgm_hapche.wav'), // 굿거리(들판)
+  bgmSea: require('../../assets/sfx/bgm_sea.wav'), // 중모리(바다)
+  bgmSky: require('../../assets/sfx/bgm_sky.wav'), // 자진모리(하늘)
+  bgmSpace: require('../../assets/sfx/bgm_space.wav'), // 세마치(우주)
   clankMetal: require('../../assets/sfx/clank_metal.wav'), // 쇠 — 쨍
   clankClay: require('../../assets/sfx/clank_clay.wav'), // 흙·도자기 — 탁
   clankStone: require('../../assets/sfx/clank_stone.wav'), // 돌·옥 — 딱

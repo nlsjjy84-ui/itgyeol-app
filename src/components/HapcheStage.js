@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Text from '../ui/Text';
 import { say, hush, useNarrate } from '../utils/narrate';
-import { sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
+import { bgmOf, sceneKind, sceneAt, poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt } from '../utils/hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { play, stop } from '../utils/sound';
 import { t } from '../i18n';
@@ -68,8 +68,8 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
       fired.current.add(id);
       play(name);
     };
-    if (time > 0.05) once('bgm', 'bgm');
-    if (time > 15.9) once('bgm2', 'bgm');
+    if (time > 0.05) once('bgm', bgmOf(tl.frame.id));
+    if (time > 15.9) once('bgm2', bgmOf(tl.frame.id));
     if (time > 0.15) once('open', tl.isTransform ? 'transform' : 'daegeum');
     tl.events.forEach((e, i) => {
       if (time >= e.start && i % 2 === 0) once('f' + e.start, 'fly');
@@ -79,7 +79,8 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
     if (time >= tl.titleT) once('shine', 'shine');
   }, [time]);
 
-  useEffect(() => () => stop('bgm'), []);
+  const stopBgm = () => ['bgm', 'bgmSea', 'bgmSky', 'bgmSpace'].forEach(stop);
+  useEffect(() => () => stopBgm(), []);
   useEffect(() => {
     if (!spin) return undefined;
     let raf;
@@ -100,7 +101,7 @@ export default function HapcheStage({ tl, size = 340, autoPlay = true, onEnd, lo
     return () => cancelAnimationFrame(raf);
   }, [spin]);
   useEffect(() => {
-    if (!playing) stop('bgm');
+    if (!playing) stopBgm();
   }, [playing]);
   const k = size / 1000;
   const bob = idleBob(tl, time);

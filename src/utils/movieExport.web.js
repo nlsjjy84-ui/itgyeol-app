@@ -1,7 +1,7 @@
 // 웹: 합체 영상을 실제 영상 파일(mp4 또는 webm)로 저장한다.
 // 앱 화면과 같은 대본(hapche.js)을 캔버스에 다시 그리고, 효과음까지 섞어 녹화한다. 자막은 영상 안에 새긴다.
 import { Asset } from 'expo-asset';
-import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf, sceneKind, sceneAt } from './hapche';
+import { poseAt, subAt, tagsAt, idleBob, threadAt, camAt, villainAt, creditOf, sceneKind, sceneAt, bgmOf } from './hapche';
 import { PIECE_BY_K } from '../data/pieces';
 import { t } from '../i18n';
 
@@ -13,6 +13,9 @@ const SFX = {
   transform: require('../../assets/sfx/transform.wav'),
   daegeum: require('../../assets/sfx/daegeum_start.wav'),
   bgm: require('../../assets/sfx/bgm_hapche.wav'),
+  bgmSea: require('../../assets/sfx/bgm_sea.wav'),
+  bgmSky: require('../../assets/sfx/bgm_sky.wav'),
+  bgmSpace: require('../../assets/sfx/bgm_space.wav'),
   clankMetal: require('../../assets/sfx/clank_metal.wav'),
   clankClay: require('../../assets/sfx/clank_clay.wav'),
   clankStone: require('../../assets/sfx/clank_stone.wav'),
@@ -396,8 +399,8 @@ export async function exportMovie(tl, { size = 720, fps = 30, onProgress, vertic
     const step = () => {
       const time = (performance.now() - t0) / 1000;
       paint(Math.min(time, tl.dur));
-      if (time > 0.02) playS('bgm', 'bgm', 0.45);
-      if (time > 16) playS('bgm2', 'bgm', 0.45);
+      if (time > 0.02) playS('bgm', bgmOf(tl.frame.id), 0.45);
+      if (time > 16) playS('bgm2', bgmOf(tl.frame.id), 0.45);
       if (time > 0.15) playS('open', tl.isTransform ? 'transform' : 'daegeum');
       tl.events.forEach((e, i) => {
         if (time >= e.start && i % 2 === 0) playS('f' + e.start, 'fly');

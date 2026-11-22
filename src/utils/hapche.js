@@ -357,6 +357,10 @@ const SCENE = {
 export function sceneKind(frameId) {
   return Object.keys(SCENE).find((k) => SCENE[k].includes(frameId)) || 'land';
 }
+// 장면마다 다른 장단 배경음악 — 들판 굿거리, 바다 중모리, 하늘 자진모리, 우주 세마치(모두 96bpm)
+export const BGM_OF = { land: 'bgm', sea: 'bgmSea', sky: 'bgmSky', space: 'bgmSpace' };
+export const JANGDAN_OF = { land: '굿거리', sea: '중모리', sky: '자진모리', space: '세마치' };
+export const bgmOf = (frameId) => BGM_OF[sceneKind(frameId)];
 // 0~1 — 제목이 뜬 뒤 1.2초 동안 바깥 세상으로 넘어간다
 export function sceneAt(tl, time) {
   return Math.max(0, Math.min(1, (time - tl.titleT) / 1.2));

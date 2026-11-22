@@ -9,7 +9,7 @@ import HapcheStage from '../components/HapcheStage';
 import { colors } from '../theme';
 import { t, getLang } from '../i18n';
 import { pieceName } from '../utils/pieceName';
-import { buildTimeline, beatsOf, judge, creditOf, josa } from '../utils/hapche';
+import { buildTimeline, beatsOf, judge, creditOf, josa, sceneKind, JANGDAN_OF } from '../utils/hapche';
 import { play } from '../utils/sound';
 import { saveWork, usePieces } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
@@ -258,6 +258,9 @@ export default function MovieScreen({ navigation, route }) {
             <Text style={st.link}>{t('원본 ↗')}</Text>
           </Pressable>
         ))}
+        <Text style={st.lic} testID="jangdan">
+          {t('배경 장단: {a} — 가야금과 장구로 만든 잇결 음악이에요.', { a: t(JANGDAN_OF[sceneKind(tl.frame.id)]) })}
+        </Text>
         <Text style={st.lic}>{t('유물 사진') + ': ' + creditOf(tl.museums) + ' — ' + t('배경만 지우고 모양은 그대로 썼어요.')}</Text>
 
         <Text style={st.h}>{t('이 작품으로 만들 수 있는 것')}</Text>
