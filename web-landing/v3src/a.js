@@ -5,7 +5,7 @@ import { mountRelic, pinProgress, progressOf, countUp } from './relic3d.js';
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let lenis = null;
 if (!reduce) {
-  lenis = new Lenis({ duration: 1.25, easing: (t) => 1 - Math.pow(1 - t, 4), smoothWheel: true, wheelMultiplier: 0.9 });
+  lenis = new Lenis({ duration: 1.25, easing: (t) => 1 - Math.pow(1 - t, 4), smoothWheel: true, wheelMultiplier: 1.05 });
   const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
   requestAnimationFrame(raf);
   // 같은 쪽 안의 #링크도 미끄러지듯

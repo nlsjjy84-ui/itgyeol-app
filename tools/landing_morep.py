@@ -27,7 +27,7 @@ BLOCK=f'''<!--morep-->
 <!--/morep-->
 '''
 BASE='''/*morep*/
-.morep{margin:12vh 0 4vh}
+.morep{margin:8vh 0 3vh}
 .morep .mh{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-bottom:26px}
 .morep .mh b{font-size:clamp(22px,2.4vw,30px)}
 .morep .mh span{font-size:14px;opacity:.78;max-width:46em}
