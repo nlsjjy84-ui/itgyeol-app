@@ -582,5 +582,6 @@ export default {
 "북엔드 한 쌍": "Pair of bookends",
 "방패는 지키는 물건이라, 양쪽에 세운 방패 두 개가 책을 지키는 북엔드가 돼요.": "A shield is something that protects, so two shields standing on either side become bookends that guard your books.",
 "물건 장인": "Object Maker",
-"유물로 오늘의 물건 5개 만들어 담기": "Make and keep 5 of today's objects from artifacts"
+"유물로 오늘의 물건 5개 만들어 담기": "Make and keep 5 of today's objects from artifacts",
+  "다른 놀이 하기": "Play another game"
 };

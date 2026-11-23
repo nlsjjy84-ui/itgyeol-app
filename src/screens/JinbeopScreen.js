@@ -368,7 +368,6 @@ export default function JinbeopScreen({ navigation }) {
               {i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(resultComment)}
             </Text>
             {completed && <Text style={styles.modalScore}>{skillLabel(rating)}</Text>}
-            <TraceReward sceneId="jinbeop" success={completed} />
             <View style={styles.modalActions}>
               <Pressable
                 style={styles.modalClose}
@@ -398,8 +397,12 @@ export default function JinbeopScreen({ navigation }) {
                   </Pressable>
                 </>
               )}
+              <Pressable style={styles.modalSecondary} onPress={() => { setResultVisible(false); navigation.navigate('Home'); }}><Text style={styles.modalSecondaryText}>{i18nT('다른 놀이 하기')}</Text></Pressable>
             </View>
-            {completed && <OtherScenes current="Jinbeop" navigation={navigation} onGo={() => setResultVisible(false)} />}
+            <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 6 }}>
+              <TraceReward sceneId="jinbeop" success={completed} />
+              {completed && <OtherScenes current="Jinbeop" navigation={navigation} onGo={() => setResultVisible(false)} />}
+            </ScrollView>
           </View>
         </View>
       )}
@@ -548,6 +551,8 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
+    maxWidth: 460,
+    maxHeight: '92%',
     backgroundColor: colors.paper,
     borderRadius: 20,
     padding: 20,
@@ -562,8 +567,10 @@ const styles = StyleSheet.create({
   modalComment: { fontSize: 12, color: colors.accentDeep, fontWeight: '600' },
   modalScore: { fontSize: 12, color: colors.ink, fontWeight: '700', marginTop: 6 },
   modalActions: {
-    marginTop: 16,
+    marginTop: 12,
+    marginBottom: 6,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     flexWrap: 'wrap',
     justifyContent: 'flex-end',
     gap: 10,

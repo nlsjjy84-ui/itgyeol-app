@@ -99,15 +99,18 @@ export default function DancheongScreen({ navigation }) {
           <View style={styles.card}>
             <Text style={styles.title}>{i18nT('단청 ·')} {i18nT(stage.name)}</Text>
             <Text style={styles.comment}>{i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(comment)}</Text>
-            <TraceReward sceneId="dancheong" success={completed} />
             <View style={styles.actions}>
               <Pressable style={styles.closeBtn} onPress={() => setVisible(false)}><Text style={styles.closeTxt}>{i18nT('닫기')}</Text></Pressable>
               {idx < DANCHEONG_STAGES.length - 1 ? (
                 <Pressable style={styles.primary} onPress={() => choose(idx + 1)}><Text style={styles.primaryTxt}>{i18nT('다음 단계 도전!')}</Text></Pressable>
               ) : null}
               <Pressable style={styles.secondary} onPress={() => { setVisible(false); navigation.navigate('Result'); }}><Text style={styles.secondaryTxt}>{i18nT('결과물 보기')}</Text></Pressable>
+              <Pressable style={styles.secondary} onPress={() => { setVisible(false); navigation.navigate('Home'); }}><Text style={styles.secondaryTxt}>{i18nT('다른 놀이 하기')}</Text></Pressable>
             </View>
-            <OtherScenes current="Dancheong" navigation={navigation} onGo={() => setVisible(false)} />
+            <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 6 }}>
+              <TraceReward sceneId="dancheong" success={completed} />
+              <OtherScenes current="Dancheong" navigation={navigation} onGo={() => setVisible(false)} />
+            </ScrollView>
           </View>
         </View>
       ) : null}

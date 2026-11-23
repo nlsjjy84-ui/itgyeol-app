@@ -2325,6 +2325,7 @@ const ui = {
 
   "지금": "Now",
   "다른 놀이 고르기": "Pick another game",
+  "다른 놀이 하기": "Play another game",
   "네 개의 판 — 어디부터 가도 돼요": "Four boards — start anywhere",
   "{p0} 단계 · 쓰러뜨린 비석 {p1}/{p2} · 남은 망 {p3}개": "Stage: {p0} · Stones down {p1}/{p2} · Throwing stones left {p3}",
   "{p0}자 날아갔어요!": "It flew {p0} ja!",

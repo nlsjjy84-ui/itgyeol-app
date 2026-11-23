@@ -357,7 +357,6 @@ export default function PlayScreen({ navigation }) {
             <Text style={styles.modalComment}>
               {i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(resultComment)}
             </Text>
-            <TraceReward sceneId="tbd" success={completed} gameId={rawGame.id} gameName={rawGame.name} />
             <View style={styles.modalActions}>
               <Pressable style={styles.modalClose} onPress={() => setResultVisible(false)}>
                 <Text style={styles.modalCloseText}>{i18nT('닫기')}</Text>
@@ -373,8 +372,12 @@ export default function PlayScreen({ navigation }) {
                   <Text style={styles.modalPrimaryText}>{i18nT('결과물 보기')}</Text>
                 </Pressable>
               )}
+              <Pressable style={styles.modalSecondary} onPress={() => { setResultVisible(false); setPicking(true); }}><Text style={styles.modalSecondaryText}>{i18nT('다른 놀이 고르기')}</Text></Pressable>
             </View>
-            {completed && <OtherScenes current="Play" navigation={navigation} onGo={() => setResultVisible(false)} />}
+            <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 6 }}>
+              <TraceReward sceneId="tbd" success={completed} gameId={rawGame.id} gameName={rawGame.name} />
+              {completed && <OtherScenes current="Play" navigation={navigation} onGo={() => setResultVisible(false)} />}
+            </ScrollView>
           </View>
         </View>
       )}
@@ -503,6 +506,8 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
+    maxWidth: 460,
+    maxHeight: '92%',
     backgroundColor: colors.paper,
     borderRadius: 20,
     padding: 20,
@@ -510,8 +515,10 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: '700', color: colors.ink, marginBottom: 10 },
   modalComment: { fontSize: 12, color: colors.accentDeep, fontWeight: '600', lineHeight: 18 },
   modalActions: {
-    marginTop: 16,
+    marginTop: 12,
+    marginBottom: 6,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'flex-end',
     gap: 10,
   },
@@ -529,4 +536,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   modalPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  modalSecondary: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: colors.paper,
+    borderWidth: 1.5,
+    borderColor: colors.accent,
+    borderRadius: 12,
+  },
+  modalSecondaryText: { color: colors.accent, fontWeight: '700', fontSize: 12 },
 });
