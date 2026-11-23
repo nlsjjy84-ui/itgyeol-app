@@ -16,7 +16,7 @@ RES = opt('--res', 1600)
 OUT = opt('--out', os.path.join(HERE, '결과'))
 FORCE_CPU = '--cpu' in argv
 if FORCE_CPU: argv.remove('--cpu')
-ALL = ['diffuser', 'weight', 'coaster4', 'coaster1', 'clock', 'frame', 'bell', 'shield_keys', 'shield_bookends', 'duck_water', 'duck_rest', 'pom_tea', 'pom_vase', 'grape_decanter', 'grape_bowl', 'kirin_incense', 'kirin_trophy', 'mandarin_ring', 'mandarin_incense', 'lotus_trivet', 'duck_pen', 'probe']
+ALL = ['diffuser', 'weight', 'coaster4', 'coaster1', 'clock', 'frame', 'bell', 'shield_keys', 'shield_bookends', 'duck_water', 'duck_rest', 'pom_tea', 'pom_vase', 'grape_decanter', 'grape_bowl', 'kirin_incense', 'kirin_trophy', 'mandarin_ring', 'mandarin_incense', 'lotus_trivet', 'duck_pen']
 SCENES = [a for a in argv if a in ALL] or ALL
 os.makedirs(OUT, exist_ok=True)
 LOG = open(os.path.join(OUT, '렌더_기록.txt'), 'a', encoding='utf-8')
