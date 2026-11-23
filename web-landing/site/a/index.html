@@ -10,7 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0d0c0a;--ink:#efe7da;--dim:#a79c8c;--gold:#d6aa5c;--red:#c4553f;--line:rgba(239,231,218,.14)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}
+*{box-sizing:border-box}
+html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}.lenis.lenis-stopped{overflow:hidden}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;word-break:keep-all;line-height:1.7;overflow-x:hidden}
 a{color:inherit}
 .serif{font-family:'Nanum Myeongjo',serif}
@@ -28,8 +29,8 @@ a{color:inherit}
 .eyebrow{font-size:13px;letter-spacing:.28em;color:var(--gold)}
 h1{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:clamp(34px,5.4vw,72px);line-height:1.22;margin:.4em 0 .5em}
 .lead{font-size:clamp(16px,1.35vw,19px);color:var(--dim);max-width:30em}
-.btn{display:inline-flex;gap:.6em;align-items:center;margin-top:28px;font-weight:700;font-size:17px;color:var(--bg);background:var(--gold);padding:14px 26px;border-radius:999px;text-decoration:none;transition:transform .25s}
-.btn:hover{transform:translateY(-2px)}
+.btn{display:inline-flex;gap:.6em;align-items:center;margin-top:28px;font-weight:700;font-size:17px;color:var(--bg);background:var(--gold);padding:14px 26px;border-radius:999px;text-decoration:none;transition:transform .5s cubic-bezier(.16,1,.3,1),box-shadow .5s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(214,170,92,.25)}
 .label{position:absolute;right:6vw;bottom:6svh;text-align:right;font-size:13px;color:var(--dim);z-index:2}
 .label b{display:block;color:var(--ink);font-family:'Nanum Myeongjo',serif;font-size:17px}
 .label a{color:var(--gold)}
@@ -38,8 +39,8 @@ h1{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:clamp(34px,5.4vw
 .scrollhint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:12px;letter-spacing:.3em;color:var(--dim);animation:bob 2.2s ease-in-out infinite}
 @keyframes bob{50%{transform:translate(-50%,6px)}}
 /* 들어오는 글 */
-[data-in]{opacity:0;transform:translateY(40px);transition:opacity 1s ease,transform 1s cubic-bezier(.2,.7,.2,1)}
-[data-in].on{opacity:1;transform:none}
+[data-in]{opacity:0;transform:translateY(34px);filter:blur(6px);transition:opacity 1.3s cubic-bezier(.16,1,.3,1),transform 1.5s cubic-bezier(.16,1,.3,1),filter 1.3s cubic-bezier(.16,1,.3,1)}
+[data-in].on{opacity:1;transform:none;filter:none}
 section{position:relative}
 h2{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:clamp(28px,3.8vw,52px);line-height:1.3;margin:0 0 .6em}
 .sec{padding:22vh 0}
@@ -47,10 +48,11 @@ h2{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:clamp(28px,3.8vw
 .steps{height:420vh}
 .steps .stick{position:sticky;top:0;height:100svh;display:grid;grid-template-columns:1fr 1fr;align-items:center;overflow:hidden}
 .stepnum{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:clamp(90px,15vw,210px);line-height:1;color:rgba(214,170,92,.16);position:relative;height:1.1em}
-.stepnum span{position:absolute;left:0;top:0;transition:opacity .6s,transform .8s}
+.stepnum span{position:absolute;left:0;top:0;transition:opacity .5s ease,transform .9s cubic-bezier(.16,1,.3,1),filter .5s}
+.stepnum span.out{opacity:0;transform:translateY(-24px);filter:blur(8px)}
 .steplist{position:relative;height:60svh}
-.step{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(60px);transition:opacity .7s,transform .9s cubic-bezier(.2,.7,.2,1)}
-.step.on{opacity:1;transform:none}
+.step{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(46px);filter:blur(6px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform 1.2s cubic-bezier(.16,1,.3,1),filter .9s}
+.step.on{opacity:1;transform:none;filter:none;transition-delay:.18s}
 .step h3{font-family:'Nanum Myeongjo',serif;font-size:clamp(30px,3.6vw,48px);margin:0 0 .3em}
 .step p{color:var(--dim);font-size:17px;max-width:26em;margin:0}
 .bar{position:absolute;left:6vw;right:6vw;bottom:8svh;height:1px;background:var(--line)}
@@ -94,7 +96,7 @@ h2{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:clamp(28px,3.8vw
 /* 6. 물건 만들기 */
 .make{display:grid;grid-template-columns:1fr 1fr;gap:4vw;align-items:center}
 .photos{position:relative;aspect-ratio:1/1}
-.photos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0;transform:scale(1.06);transition:opacity 1.2s,transform 6s linear}
+.photos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0;transform:scale(1.05);transition:opacity 1.8s ease-in-out,transform 7s cubic-bezier(.2,.6,.2,1)}
 .photos img.on{opacity:1;transform:scale(1)}
 .chain{margin:26px 0 0;padding:0;list-style:none}
 .chain li{display:grid;grid-template-columns:110px 1fr;gap:14px;padding:12px 0;border-top:1px solid var(--line);font-size:15.5px}
@@ -142,7 +144,7 @@ footer a{color:var(--dim)}
 .morep .mh{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-bottom:26px}
 .morep .mh b{font-size:clamp(22px,2.4vw,30px)}
 .morep .mh span{font-size:14px;opacity:.78;max-width:46em}
-.morep .rail{display:flex;gap:56px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 0 20px;scrollbar-width:thin}
+.morep .rail{display:flex;gap:56px;overflow-x:auto;scroll-snap-type:x proximity;scroll-padding-left:2px;padding:6px 0 20px;scrollbar-width:thin}
 .morep .grp{flex:none;scroll-snap-align:start}
 .morep .gh{margin-bottom:14px;max-width:620px;position:relative}
 .morep .gh .no{font-style:normal}
@@ -156,7 +158,7 @@ footer a{color:var(--dim)}
 .morep .arrow:after{content:"";position:absolute;right:0;top:-4px;border:5px solid transparent;border-left:8px solid currentColor;border-right:0}
 .morep .orig+.arrow{background:currentColor;opacity:.55}
 .morep .gi>.arrow:first-child{display:none}
-.morep figure{margin:0;flex:none;width:clamp(170px,21vw,250px)}
+.morep figure{margin:0;flex:none;scroll-snap-align:start;width:clamp(170px,21vw,250px)}
 .morep figure img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 .morep figcaption{font-size:13px;line-height:1.45;margin-top:9px;opacity:.88}
 .morep figcaption b{display:block;font-size:15px}
@@ -170,6 +172,8 @@ footer a{color:var(--dim)}
 .morep .orig{background:radial-gradient(closest-side,rgba(214,170,92,.28),transparent 78%);padding:18px 0}
 .morep figure img{border-radius:2px;box-shadow:0 18px 40px rgba(0,0,0,.55)}
 .morep .arrow{color:var(--gold)}
+.morep .rail{cursor:grab;user-select:none;-webkit-user-select:none}.morep .rail.drag{cursor:grabbing;scroll-snap-type:none}.morep .rail img{-webkit-user-drag:none;pointer-events:none}
+.morep figure img{transition:transform .8s cubic-bezier(.16,1,.3,1)}.morep figure:hover img{transform:translateY(-6px)}
 /*/morep*/
 </style>
 </head>

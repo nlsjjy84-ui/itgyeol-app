@@ -130,7 +130,7 @@ footer{padding:30px 5vw 50px;font-family:'Noto Sans KR',sans-serif;font-size:12.
 .morep .mh{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-bottom:26px}
 .morep .mh b{font-size:clamp(22px,2.4vw,30px)}
 .morep .mh span{font-size:14px;opacity:.78;max-width:46em}
-.morep .rail{display:flex;gap:56px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 0 20px;scrollbar-width:thin}
+.morep .rail{display:flex;gap:56px;overflow-x:auto;scroll-snap-type:x proximity;scroll-padding-left:2px;padding:6px 0 20px;scrollbar-width:thin}
 .morep .grp{flex:none;scroll-snap-align:start}
 .morep .gh{margin-bottom:14px;max-width:620px;position:relative}
 .morep .gh .no{font-style:normal}
@@ -144,7 +144,7 @@ footer{padding:30px 5vw 50px;font-family:'Noto Sans KR',sans-serif;font-size:12.
 .morep .arrow:after{content:"";position:absolute;right:0;top:-4px;border:5px solid transparent;border-left:8px solid currentColor;border-right:0}
 .morep .orig+.arrow{background:currentColor;opacity:.55}
 .morep .gi>.arrow:first-child{display:none}
-.morep figure{margin:0;flex:none;width:clamp(170px,21vw,250px)}
+.morep figure{margin:0;flex:none;scroll-snap-align:start;width:clamp(170px,21vw,250px)}
 .morep figure img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 .morep figcaption{font-size:13px;line-height:1.45;margin-top:9px;opacity:.88}
 .morep figcaption b{display:block;font-size:15px}
