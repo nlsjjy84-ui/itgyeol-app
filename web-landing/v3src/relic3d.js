@@ -72,7 +72,11 @@ export async function mountRelic(canvas, opts) {
   size(); window.addEventListener('resize', size);
   let last = performance.now();
   const spin = opts.spin ?? 0.35;
+  // 화면 밖에 있을 때는 그리지 않는다(휴대폰 배터리·버벅임 줄이기)
+  let visible = true;
+  new IntersectionObserver((es) => { visible = es[0].isIntersecting; }, { rootMargin: '200px 0px' }).observe(canvas);
   function frame(now) {
+    if (!visible || document.hidden) { last = now; requestAnimationFrame(frame); return; }
     const dt = Math.min(0.05, (now - last) / 1000); last = now; state.t += dt;
     if (state.onFrame) state.onFrame(state, dt);
     else { root.rotation.y += spin * dt; root.rotation.x = Math.sin(state.t * 0.6) * 0.12; }

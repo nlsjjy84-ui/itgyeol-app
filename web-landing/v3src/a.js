@@ -92,3 +92,90 @@ if (rail) {
   rail.addEventListener('click', (e) => { if (moved > 6) e.preventDefault(); }, true);
   rail.setAttribute('data-lenis-prevent-horizontal', '');
 }
+
+// ── (c에서) 여섯 판: 고정 무대에서 판마다 오방색 조명·유물·설명이 바뀐다
+const B = [
+  { t: '진법', s: '풍물·강강술래·역사 속 대형을 짜는 판', w: '여럿이 한 몸처럼 움직이던 대형을 직접 짜 보며 함께 맞추는 힘을 익힙니다.', g: '칼·창·투구·북', i: 'gogung_366574', c: '#2f6fd0' },
+  { t: '훈민정음 · 인쇄', s: '글자를 짓고, 새기고, 찍는 판', w: '소리 나는 입 모양을 본뜬 훈민정음의 원리대로 글자를 만들어 봅니다.', g: '도장·벼루·먹·연적', i: 'nmk_112600', c: '#e2b23a' },
+  { t: '전래놀이', s: '줄넘기·상모돌리기·구슬치기 등 열두 가지', w: '만든 사람이 10년 넘게 아이들과 해 온 놀이를 손끝으로 옮겼습니다.', g: '흙 인형·주사위·놀잇감', i: 'nmk_45001', c: '#d9452b' },
+  { t: '한글 테트리스', s: '자음·모음 블록을 쌓아 줄을 지우는 판', w: '한 글자가 짜이는 원리를 놀면서 익힙니다.', g: '기와·막새·전돌', i: 'nmk_3036', c: '#1f9a6c' },
+  { t: '탈춤', s: '굿거리·타령 장단에 맞춰 한삼을 뿌리는 판', w: '장단의 큰 박에 맞춰 우리 가락의 박자를 몸으로 익힙니다.', g: '탈·노리개·비녀', i: 'gogung_364686', c: '#8a7f73' },
+  { t: '단청', s: '가칠 → 타분 → 오색 → 분선, 칠하는 순서대로', w: '단청장의 실제 작업 순서를 따라가며 오색에 담긴 뜻을 익힙니다.', g: '청자·백자·분청', i: 'nmk_6993', c: '#efe7da' },
+];
+const NUM6 = ['하나', '둘', '셋', '넷', '다섯', '여섯'];
+const bsec = document.getElementById('boards');
+const bstage = document.getElementById('bstage');
+const $id = (x) => document.getElementById(x);
+const bp = [...document.querySelectorAll('#bpips i')];
+B.forEach((b) => { const im = new Image(); im.src = '../m/' + b.i + '.webp'; });
+let bcur = -1; let bt = 0;
+function setBoard(i) {
+  bcur = i; const b = B[i];
+  bstage.style.setProperty('--bc', b.c); bstage.style.setProperty('--bc2', b.c === '#efe7da' ? '#d6aa5c' : b.c);
+  bstage.classList.add('swap'); clearTimeout(bt);
+  bt = setTimeout(() => {
+    $id('bn').textContent = NUM6[i]; $id('bt').textContent = b.t; $id('bs').textContent = b.s; $id('bw').textContent = b.w; $id('bg').textContent = b.g;
+    $id('bi').src = '../m/' + b.i + '.webp'; $id('bi').alt = b.g;
+    bstage.classList.remove('swap');
+  }, 380);
+  bp.forEach((el, k) => { el.classList.toggle('on', k === i); el.classList.toggle('done', k <= i); el.style.setProperty('--pc', B[k].c === '#efe7da' ? '#d6aa5c' : B[k].c); });
+}
+function boardTick() {
+  const p = pinProgress(bsec);
+  const i = Math.min(5, Math.floor(p * 6 * 0.999));
+  if (i !== bcur) setBoard(i);
+  requestAnimationFrame(boardTick);
+}
+requestAnimationFrame(boardTick);
+
+// ── (b에서) 연화문 벽돌 네 장이 날아와 모서리끼리 맞붙어 꽃 하나가 된다
+const ease3 = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const lot = document.getElementById('lot');
+const lphase = document.getElementById('lphase');
+const GRID = [[-0.5, 0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, -0.5]];
+const FROM = [[-2.4, 1.8], [2.6, 1.6], [-2.2, -1.9], [2.5, -1.7]];
+let la = 0;
+mountRelic(document.getElementById('lotus'), { bin: '../m/lotus.bin', tex: '../m/lotus.jpg', rot: [Math.PI / 2, 0, 0], light: 'warm', copies: 4, dist: 2.7, rough: 0.85 }).then((s) => {
+  let last = '';
+  s.onFrame = (st, dt) => {
+    const target = ease3(clamp01((pinProgress(lot) - 0.1) / 0.62));
+    la = follow(la, target, Math.min(1, dt * 4));
+    const a = la; const idle = 1 - a;
+    st.items.forEach((g, i) => {
+      if (i === 0) g.position.set(GRID[0][0] * a, GRID[0][1] * a, 0);
+      else g.position.set(FROM[i][0] + (GRID[i][0] - FROM[i][0]) * a, FROM[i][1] + (GRID[i][1] - FROM[i][1]) * a, -1.5 * (1 - a));
+      g.visible = i === 0 || a > 0.02;
+      g.rotation.set(0, 0, 0);
+    });
+    st.root.rotation.y = idle * Math.sin(st.t * 0.4) * 0.9;
+    st.root.rotation.x = idle * (Math.sin(st.t * 0.28) * 0.25 - 0.15);
+    st.root.rotation.z = a * Math.sin(st.t * 0.22) * 0.03;
+    st.cam.position.z = 2.7 + a * 2.3;
+    const ph = a < 0.05 ? '벽돌 한 장 — 가운데 큰 연꽃' : a < 0.97 ? '네 장이 모입니다…' : '네 모서리가 만나 — 꽃이 하나 더 피었습니다';
+    if (ph !== last) { last = ph; lphase.style.opacity = 0; setTimeout(() => { lphase.textContent = ph; lphase.style.opacity = 1; }, 250); }
+  };
+}).catch(() => {});
+
+// ── (c에서) 끝 화면 금강령: 늘 천천히 돌고, 스크롤 속도만큼 흔들린다
+let lastY = window.scrollY; let swing = 0;
+mountRelic(document.getElementById('bell3d'), { bin: '../m/bell.bin', tex: '../m/bell.jpg', light: 'warm', dist: 2.5, metal: 0.55, rough: 0.38 }).then((s) => {
+  s.onFrame = (st, dt) => {
+    const y = window.scrollY; const v = y - lastY; lastY = y;
+    swing += v * 0.003; swing *= 0.94;
+    st.root.rotation.y += dt * 0.4;
+    st.root.rotation.z = Math.sin(st.t * 3) * Math.min(0.45, Math.abs(swing)) + Math.sin(st.t * 0.7) * 0.04;
+    st.root.position.y = Math.sin(st.t * 1.0) * 0.02;
+  };
+}).catch(() => {});
+
+// ── (c에서) 뜻 카드: 누르면 뒤집혀 뜻이 보인다 — 화면에 들어오면 하나씩 한 번 뒤집어 보여 준다
+const minis = [...document.querySelectorAll('.mini')];
+minis.forEach((c) => c.addEventListener('click', () => c.classList.toggle('open')));
+if (minis.length) {
+  const mio = new IntersectionObserver((es) => {
+    if (!es[0].isIntersecting) return; mio.disconnect();
+    minis.forEach((c, k) => { setTimeout(() => c.classList.add('open'), 1200 + k * 600); setTimeout(() => c.classList.remove('open'), 4400 + k * 600); });
+  }, { threshold: 0.5 });
+  mio.observe(minis[0].parentElement);
+}
