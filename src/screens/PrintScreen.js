@@ -24,6 +24,7 @@ import { buildAttemptResult } from '../utils/resultSeed';
 // [전체 판 공통화] 전래놀이에서 먼저 만든 반(tier) 목록과 숙련도 문구를 그대로 가져다 쓴다.
 import { DIFFICULTY_TIERS, skillLabel } from '../data/playGames';
 import { t as i18nT } from '../i18n';
+import { useDemoWin } from '../utils/demoHook';
 
 const MATCH_THRESHOLD = 34; // px
 
@@ -140,6 +141,7 @@ export default function PrintScreen({ navigation }) {
   const [resultVisible, setResultVisible] = useState(false);
   const [resultComment, setResultComment] = useState('');
   const [completed, setCompleted] = useState(false);
+  useDemoWin(() => completeSuccess({ targets: [0], mistakes: 0 }));
   // [점수제 폐지] streak는 화면에 표시하는 점수/기록이 아니라 난이도 조절용 내부 값이다.
   const [streak, setStreak] = useState(0);
   const [timeLimitMs, setTimeLimitMs] = useState(0);

@@ -18,6 +18,7 @@ import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 import { t as i18nT } from '../i18n';
+import { useDemoWin } from '../utils/demoHook';
 
 function speedComment(score) {
   if (score && score.variety >= 4) return i18nT('춤사위 네 가지를 고루 섞어 신명 나게 놀았어요.');
@@ -68,6 +69,8 @@ export default function TalchumScreen({ navigation }) {
     );
     setVisible(true);
   };
+  useDemoWin(() => onDone({ score: { variety: 4, good: 10, ok: 2, moves: { left: 4, right: 4, kkaekki: 3, turn: 2 } }, elapsedMs: 48000 }));
+
 
   return (
     <SafeAreaView style={styles.safe}>

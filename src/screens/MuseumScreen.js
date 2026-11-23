@@ -15,6 +15,7 @@ import { useJourney } from '../context/JourneyContext';
 import { MEANING, MOTIF } from '../data/pieceMeaning';
 import { CRAFT_SHOTS, relicPage } from '../data/craftShots';
 import { pieceName } from '../utils/pieceName';
+import { bundleClaim, bundleParams } from '../utils/bundle';
 
 // 이름표 한 줄 — 무늬·모양의 뜻이 있으면 그것을, 없으면 종류의 뜻
 export function labelLine(k) {
@@ -101,13 +102,11 @@ export default function MuseumScreen({ navigation, route }) {
         <ScreenHeader title={t('나의 박물관')} sub={t('박물관 완성도 {p}% · 열린 전시실 {a} / 6 · 진짜 유물 {n}점', { p: total, a: opened, n: keys.length })} onBack={() => navigation.goBack()} />
         {/* 가져온 놀이 기록(박물관 키오스크 등)으로 아직 받지 않은 보따리 */}
         {(() => {
-          const last = attempts.length ? attempts[attempts.length - 1] : null;
-          if (!last) return null;
-          const claim = `${last.sceneId}:${attempts.length}:${last.at || last.code || ''}`;
-          if (isClaimed(claim)) return null;
-          const LABEL = { jinbeop: '진법', print: '훈민정음·인쇄', tbd: '전래놀이', hangul: '한글 테트리스', talchum: '탈춤', dancheong: '단청' };
+          // 놀이 기록은 있는데 아직 풀지 않은 판 보따리 — 판을 깬 자리에서 안 풀었거나, 박물관 키오스크 기록을 가져온 경우
+          const sid = HALLS.map((h) => h.id).find((id) => attempts.some((a) => a.sceneId === id) && !isClaimed(bundleClaim(attempts, id)));
+          if (!sid) return null;
           return (
-            <Pressable testID="museum-pack" style={st.packBanner} onPress={() => navigation.navigate('Pack', { scene: LABEL[last.sceneId] || '', claim })}>
+            <Pressable testID="museum-pack" style={st.packBanner} onPress={() => navigation.navigate('Pack', bundleParams(sid, attempts, playLog))}>
               <Text style={st.packTitle}>{t('놀이 보상 — 진짜 유물 보따리 받기')}</Text>
               <Text style={st.packDesc}>{t('방금 논 판과 뜻이 닿는 진짜 박물관 유물이 들어 있어요. 도감에 모아 두면 오늘 쓰는 물건으로 변형할 수 있어요 ›')}</Text>
             </Pressable>

@@ -18,6 +18,7 @@ import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 import { t as i18nT } from '../i18n';
+import { useDemoWin } from '../utils/demoHook';
 
 function speedComment(ms, rescues) {
   const sec = ms / 1000;
@@ -70,6 +71,8 @@ export default function HangulScreen({ navigation }) {
     );
     setVisible(true);
   };
+  useDemoWin(() => onDone({ mistakes: 0, elapsedMs: 52000, rescues: 0 }));
+
 
   return (
     <SafeAreaView style={styles.safe}>

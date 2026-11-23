@@ -18,6 +18,7 @@ import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
 import { buildAttemptResult } from '../utils/resultSeed';
 import { t as i18nT } from '../i18n';
+import { useDemoWin } from '../utils/demoHook';
 
 function speedComment(mistakes) {
   if (!mistakes) return i18nT('한 칸도 틀리지 않고 맡은 색을 찾아 칠했어요.');
@@ -68,6 +69,8 @@ export default function DancheongScreen({ navigation }) {
     );
     setVisible(true);
   };
+  useDemoWin(() => onDone({ mistakes: 0, elapsedMs: 61000 }));
+
 
   return (
     <SafeAreaView style={styles.safe}>

@@ -28,6 +28,7 @@ import { buildAttemptResult } from '../utils/resultSeed';
 // 그대로 가져다 쓴다 — 반(tier) 목록과 라벨 문구는 하나로 통일해서 관리한다.
 import { DIFFICULTY_TIERS, skillLabel } from '../data/playGames';
 import { t as i18nT } from '../i18n';
+import { useDemoWin } from '../utils/demoHook';
 
 function speedComment(ms) {
   const sec = ms / 1000;
@@ -69,6 +70,7 @@ export default function JinbeopScreen({ navigation }) {
   const [resultVisible, setResultVisible] = useState(false);
   const [resultComment, setResultComment] = useState('');
   const [completed, setCompleted] = useState(false);
+  useDemoWin(() => completeSuccessSpecial(42000));
   // [점수제 폐지] streak는 화면에 표시하는 점수/기록이 아니라 난이도 조절용 내부 값이다.
   const [streak, setStreak] = useState(0);
   const [burstNonce, setBurstNonce] = useState(0);
@@ -171,6 +173,7 @@ export default function JinbeopScreen({ navigation }) {
   }
 
   function failSpecial(message) {
+
     play('geomungo');
     setStreak(0);
     setCompleted(false);

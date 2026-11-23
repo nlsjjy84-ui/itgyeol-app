@@ -36,6 +36,7 @@ import { StoneFlickGame, HoopSpeedGame } from '../components/minigames/FolkGames
 import { TopChaseGame, DdakjiFanGame, TuhoDialGame, JachigiSwipeGame } from '../components/minigames/FolkGamesD';
 import { YeongchaGame, TuhoPullGame, GomuJumpGame } from '../components/minigames/FolkGamesE';
 import { t as i18nT } from '../i18n';
+import { useDemoWin } from '../utils/demoHook';
 
 function speedComment(ms) {
   const sec = ms / 1000;
@@ -146,6 +147,8 @@ export default function PlayScreen({ navigation }) {
     }
     setResultVisible(true);
   };
+  useDemoWin(() => handleComplete({ success: true, score: 3, elapsedMs: 38000 }));
+
 
   const renderGame = () => {
     const common = { key: gameKey, color: ohang.color, onComplete: handleComplete };
