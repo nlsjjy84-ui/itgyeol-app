@@ -28,6 +28,7 @@ import JachigiGame from '../components/minigames/JachigiGame';
 import DdakjiSlamGame from '../components/minigames/DdakjiSlamGame';
 import RhythmJumpGame from '../components/minigames/RhythmJumpGame';
 import KiteFlyGame from '../components/minigames/KiteFlyGame';
+import { GomuStepGame, RopeEnterGame, HoopPathGame, TugCallGame } from '../components/minigames/FolkGamesF';
 import { SangmoGame, MarbleGame, TopGame } from '../components/minigames/FolkGamesA';
 import { TuhoGame, GomuGame, KiteSteerGame } from '../components/minigames/FolkGamesB';
 import { StoneFlickGame, HoopSpeedGame } from '../components/minigames/FolkGamesC';
@@ -68,6 +69,10 @@ const CONTROL_HINTS = {
   yeongcha: '"영~" 할 때 숨을 고르고 "차!" 할 때 톡 눌러 당겨요. 놓쳐도 다음 "차!"에 다시 하면 돼요. (스페이스바도 돼요)',
   tuhoPull: '화면을 누른 채 뒤로 당겼다가 놓으면 화살이 날아가요. 점선이 날아갈 길이에요.',
   gomuJump: '"하나·둘·셋" 하고 "폴짝!" 할 때 톡 눌러 뛰어넘어요. 걸려도 다음 "폴짝!"에 다시 하면 돼요. (스페이스바도 돼요)',
+  gomuStep: '노래가 먼저 「밖·걸고·안·밟고」를 불러 줘요. 「너 차례!」가 뜨면 같은 순서를 박에 맞춰 아래 네 칸으로 밟아요. (키보드: ← ↓ ↑ →)',
+  ropeEnter: '줄이 머리 위로 올라갈 때 오른쪽으로 쓸어 들어가요. 「콩」은 톡, 「쌩쌩이」는 위로 크게 쓸어 뛰고, 다 뛰면 다시 오른쪽으로 쓸어 나와요. (키보드: → · 스페이스 · ↑)',
+  hoopPath: '손가락이 막대 끝이에요. 굴렁쇠 바로 아래에 대고 밀고, 막대를 옆으로 옮겨 방향을 틀어요. 세게 밀면 휘청여요. (키보드: ↑ 밀기 · ← → 방향)',
+  tugCall: '「영~」에는 화면을 꾹 누르고 버티고, 「차!」에 아래로 확 쓸어 당겨요. 상대편 「차!」에는 당기지 마요. (키보드: 스페이스 꾹 · ↓ 당기기)',
   hoopSpeed: '화면을 꾹 누르면 빨라지고 떼면 느려져요. 오르내리는 초록 칸 안에 속도를 맞추면 굴렁쇠가 쓰러지지 않아요. (스페이스바 꾹)',
   kiteFly: '바람 게이지가 계속 움직여요. "쎈 바람" 구간일 때만 버튼(스페이스바·Z/X 키)을 탭해서 얼레를 감아요. 타이밍이 안 맞으면 연이 오히려 내려와요.',
 };
@@ -278,6 +283,14 @@ export default function PlayScreen({ navigation }) {
         return <TuhoPullGame {...common} need={game.need} zoneDeg={game.zoneDeg} />;
       case 'gomuJump':
         return <GomuJumpGame {...common} beatMs={game.beatMs} perLevel={game.perLevel} />;
+      case 'gomuStep':
+        return <GomuStepGame {...common} />;
+      case 'ropeEnter':
+        return <RopeEnterGame {...common} jumps={game.jumps} cycleMs={game.cycleMs} />;
+      case 'hoopPath':
+        return <HoopPathGame {...common} goal={game.goal} />;
+      case 'tugCall':
+        return <TugCallGame {...common} beatMs={game.beatMs} />;
       case 'hoopSpeed':
         return <HoopSpeedGame {...common} targetSec={game.targetSec} lives={game.lives} />;
       default:
