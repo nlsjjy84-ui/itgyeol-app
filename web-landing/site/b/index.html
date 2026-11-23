@@ -124,6 +124,44 @@ footer{padding:30px 5vw 50px;font-family:'Noto Sans KR',sans-serif;font-size:12.
   .panel .v{font-size:32px;height:220px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}[data-in]{opacity:1;transform:none}}
+
+/*morep*/
+.morep{margin:12vh 0 4vh}
+.morep .mh{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-bottom:26px}
+.morep .mh b{font-size:clamp(22px,2.4vw,30px)}
+.morep .mh span{font-size:14px;opacity:.78;max-width:46em}
+.morep .rail{display:flex;gap:56px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 0 20px;scrollbar-width:thin}
+.morep .grp{flex:none;scroll-snap-align:start}
+.morep .gh{margin-bottom:14px;max-width:620px;position:relative}
+.morep .gh .no{font-style:normal}
+.morep .gh b{display:block;font-size:19px}
+.morep .gh span{display:block;font-size:13px;opacity:.75}
+.morep .gh em{display:block;font-style:normal;font-size:13px;margin-top:2px}
+.morep .gi{display:flex;gap:16px;align-items:flex-end}
+.morep .orig{width:120px;flex:none;align-self:center;text-align:center}
+.morep .orig img{max-width:110px;max-height:150px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))}
+.morep .arrow{flex:none;width:34px;align-self:center;height:2px;position:relative}
+.morep .arrow:after{content:"";position:absolute;right:0;top:-4px;border:5px solid transparent;border-left:8px solid currentColor;border-right:0}
+.morep .orig+.arrow{background:currentColor;opacity:.55}
+.morep .gi>.arrow:first-child{display:none}
+.morep figure{margin:0;flex:none;width:clamp(170px,21vw,250px)}
+.morep figure img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.morep figcaption{font-size:13px;line-height:1.45;margin-top:9px;opacity:.88}
+.morep figcaption b{display:block;font-size:15px}
+.morep .mfoot{font-size:13px;opacity:.72;margin-top:16px;max-width:52em}
+@media(max-width:700px){.morep .rail{gap:36px}.morep .gh{max-width:88vw}.morep .gi{gap:10px}.morep figure{width:160px}.morep .orig{width:80px}.morep .orig img{max-width:76px}.morep .arrow{width:20px}}
+.morep .mh b{font-family:'Noto Serif KR',serif;font-weight:900}
+.morep .grp{display:flex;gap:18px;align-items:flex-start}
+.morep .gh{writing-mode:vertical-rl;max-width:none;max-height:420px;margin:0;padding:0 0 0 4px;border-left:1px solid var(--line)}
+.morep .gh .no{display:inline-block;writing-mode:horizontal-tb;background:var(--seal);color:#f5ead6;font-size:12px;font-weight:700;padding:5px 4px;margin-bottom:10px;border-radius:2px}
+.morep .gh b{font-family:'Noto Serif KR',serif;font-weight:900;font-size:20px;letter-spacing:.06em}
+.morep .gh span,.morep .gh em{font-size:12.5px;margin-left:4px}
+.morep .gh em{color:var(--seal)}
+.morep figure img{border-radius:0;box-shadow:0 1px 0 var(--line),0 12px 24px rgba(31,26,20,.18)}
+.morep figcaption b{font-family:'Noto Serif KR',serif}
+.morep .arrow{color:var(--seal)}
+.morep .orig img{filter:drop-shadow(0 8px 10px rgba(31,26,20,.3))}
+/*/morep*/
 </style>
 </head>
 <body>
@@ -233,6 +271,14 @@ footer{padding:30px 5vw 50px;font-family:'Noto Sans KR',sans-serif;font-size:12.
       <figure data-in><img src="../m/monkey_weight.webp" alt=""><figcaption><b>문진</b>먹과 붓 곁에 있던 연적, 실제 크기 그대로 종이를 눌러</figcaption></figure>
     </div>
     <p class="why" data-in><b>사진은 무엇인가요?</b>국립중앙박물관이 공개한 3D 스캔을 실제 재질과 조명 속에 놓은 시제품 렌더입니다. 연화문·산수무늬 벽돌은 보물이라 실물 복제품은 박물관 허가가 따로 필요합니다.</p>
+
+<!--morep-->
+<div class="morep">
+  <div class="mh" data-in><b>유물 하나에, 물건 여럿</b><span>사람마다 취향이 다르니까 — 원래 쓰임과 담긴 뜻을 따라 유물 하나를 여러 물건으로 바꿨습니다 · 시제품 20가지 · 옆으로 넘겨 보세요 →</span></div>
+  <div class="rail"><div class="grp" data-in><div class="gh"><i class="no">하나</i><b>청자 오리 모양 연적</b><span>고려 · 물을 한 방울씩 따르던 연적</span><em>오리는 부부 금실, 연꽃과 함께면 장원 급제</em></div><div class="gi"><div class="orig"><img loading="lazy" src="../m/r_6952.webp" alt="청자 오리 모양 연적"></div><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/duck_water.webp" alt="다육식물 물주개 시제품 렌더"><figcaption><b>다육식물 물주개</b>한 방울씩 따르던 구조 그대로</figcaption></figure><figure><img loading="lazy" src="../m/duck_rest.webp" alt="한 쌍 수저받침 시제품 렌더"><figcaption><b>한 쌍 수저받침</b>마주 보는 두 마리 — 신혼 선물</figcaption></figure><figure><img loading="lazy" src="../m/duck_pen.webp" alt="합격 기원 펜꽂이 시제품 렌더"><figcaption><b>합격 기원 펜꽂이</b>연잎 위 오리 = 장원 급제</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">둘</i><b>청자 석류 모양 주전자</b><span>고려 · 술과 차를 따르던 주전자</span><em>씨 많은 석류는 자손 번창</em></div><div class="gi"><div class="orig"><img loading="lazy" src="../m/r_1124.webp" alt="청자 석류 모양 주전자"></div><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/pom_tea.webp" alt="티포트 · 찻잔 세트 시제품 렌더"><figcaption><b>티포트 · 찻잔 세트</b>따르던 쓰임 그대로</figcaption></figure><figure><img loading="lazy" src="../m/pom_vase.webp" alt="출산 축하 꽃병 시제품 렌더"><figcaption><b>출산 축하 꽃병</b>자손을 비는 석류에 꽃을</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">셋</i><b>포도·동자 무늬 조롱박 주전자와 받침</b><span>고려 · 주전자와 그 받침</span><em>포도와 아이는 자손이, 조롱박은 복이 가득하길</em></div><div class="gi"><div class="orig"><img loading="lazy" src="../m/r_957.webp" alt="포도·동자 무늬 조롱박 주전자와 받침"></div><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/grape_decanter.webp" alt="와인 디캔터와 받침 시제품 렌더"><figcaption><b>와인 디캔터와 받침</b>포도 무늬에 포도주를</figcaption></figure><figure><img loading="lazy" src="../m/grape_bowl.webp" alt="과일 그릇 시제품 렌더"><figcaption><b>과일 그릇</b>받침 속 포도 무늬 위에 진짜 포도</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">넷</i><b>청자 기린 장식 향로</b><span>고려 · 향을 피우던 세 발 그릇</span><em>기린은 뛰어난 사람(기린아)</em></div><div class="gi"><div class="orig"><img loading="lazy" src="../m/r_1233.webp" alt="청자 기린 장식 향로"></div><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/kirin_incense.webp" alt="캔들 홀더 시제품 렌더"><figcaption><b>캔들 홀더</b>향 대신 초를</figcaption></figure><figure><img loading="lazy" src="../m/kirin_trophy.webp" alt="졸업 · 승진 기념패 시제품 렌더"><figcaption><b>졸업 · 승진 기념패</b>기린아의 뜻을 이름판에</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">다섯</i><b>청자 원앙 모양 향로 뚜껑</b><span>고려 · 향 연기가 부리로 나오던 뚜껑</span><em>원앙은 평생 짝을 지키는 금실</em></div><div class="gi"><div class="orig"><img loading="lazy" src="../m/r_4219.webp" alt="청자 원앙 모양 향로 뚜껑"></div><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/mandarin_ring.webp" alt="결혼반지 받침 한 쌍 시제품 렌더"><figcaption><b>결혼반지 받침 한 쌍</b>마주 보는 원앙 앞에 반지 둘</figcaption></figure><figure><img loading="lazy" src="../m/mandarin_incense.webp" alt="혼례 자리 이름표 꽂이 시제품 렌더"><figcaption><b>혼례 자리 이름표 꽂이</b>상견례 · 결혼식 식탁에</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">여섯</i><b>방패형 동기</b><span>초기철기 · 끈으로 매달아 쓰던 의기</span><em>방패는 지킴</em></div><div class="gi"><div class="orig"><img loading="lazy" src="../m/r_1997.webp" alt="방패형 동기"></div><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/shield_keys.webp" alt="현관 열쇠걸이 시제품 렌더"><figcaption><b>현관 열쇠걸이</b>다시 벽에 걸어 집을 지키는</figcaption></figure><figure><img loading="lazy" src="../m/shield_bookends.webp" alt="북엔드 한 쌍 시제품 렌더"><figcaption><b>북엔드 한 쌍</b>양쪽에서 책을 지키는</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">일곱</i><b>연화문 벽돌</b><span>백제 · 보물 · 넷을 이어 깔면 꽃 하나가 되던 벽돌</span><em>연꽃은 맑음과 생명의 번성</em></div><div class="gi"><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/lotus_coaster.webp" alt="코스터 4장 시제품 렌더"><figcaption><b>코스터 4장</b>넷이 둘러앉아 꽃 하나</figcaption></figure><figure><img loading="lazy" src="../m/lotus_clock.webp" alt="벽시계 시제품 렌더"><figcaption><b>벽시계</b>벽에 깔던 벽돌을 다시 벽으로</figcaption></figure><figure><img loading="lazy" src="../m/lotus_trivet.webp" alt="냄비 받침 시제품 렌더"><figcaption><b>냄비 받침</b>구운 흙이라 뜨거워도 끄떡없이</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">여덟</i><b>청자 석류 모양 연적</b><span>고려 · 원숭이 입으로 물을 따르던 연적</span><em>석류는 자손 번창</em></div><div class="gi"><div class="orig"><img loading="lazy" src="../m/nmk_4220.webp" alt="청자 석류 모양 연적"></div><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/monkey_diffuser.webp" alt="한 방울 디퓨저 시제품 렌더"><figcaption><b>한 방울 디퓨저</b>같은 구멍에 리드를</figcaption></figure><figure><img loading="lazy" src="../m/monkey_weight.webp" alt="문진 시제품 렌더"><figcaption><b>문진</b>먹과 붓 곁 그대로</figcaption></figure></div></div><div class="grp" data-in><div class="gh"><i class="no">아홉</i><b>산수무늬 벽돌 · 청동 금강령</b><span>백제 · 보물 / 고려 · 산수를 새긴 벽돌 · 의식에 울리던 방울</span></div><div class="gi"><span class="arrow" aria-hidden="true"></span><figure><img loading="lazy" src="../m/sansu_frame.webp" alt="부조 액자 시제품 렌더"><figcaption><b>부조 액자</b>산수화처럼 벽에</figcaption></figure><figure><img loading="lazy" src="../m/bell_meditation.webp" alt="탁상 명상벨 시제품 렌더"><figcaption><b>탁상 명상벨</b>마음을 모을 때 울리는 종</figcaption></figure></div></div></div>
+  <p class="mfoot" data-in>불상처럼 지금도 모시는 유물, 뼈를 담던 그릇일 수 있는 유물은 3D 스캔이 있어도 물건으로 바꾸지 않았습니다. 보물은 실물 복제에 박물관 허가가 따로 필요합니다.</p>
+</div>
+<!--/morep-->
     <p class="tally" data-in>유물 2,903점 가운데 <b class="cnt" data-n="2578">0</b>점은 오늘의 물건 아이디어가, <b class="cnt" data-n="293">0</b>점은 전시 엽서가 있고, <b class="cnt" data-n="32">0</b>점은 누군가를 모시던 유물이라 물건으로 바꾸지 않고 그대로 바라봅니다.</p>
   </div>
 </section>
