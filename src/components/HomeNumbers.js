@@ -42,11 +42,11 @@ export default function HomeNumbers({ attempts = [], exhibit = [], onGallery, on
         <View style={styles.mine}>
           <Text style={styles.mineLabel}>{t('내 기록')}</Text>
           <Text style={styles.mineText}>
-            {t('완성한 판 {s} / {n}', { s: solved, n: SCENES.length })}  ·  {t('전시 신청 {e}점', { e: exhibit.length })}
+            {t('열린 전시실 {s} / {n}', { s: solved, n: SCENES.length })}  ·  {t('전시 신청 {e}점', { e: exhibit.length })}
           </Text>
           {solved > 0 && onResult ? (
             <Pressable onPress={() => { play('tap'); onResult(); }} hitSlop={8}>
-              <Text style={styles.more}>{t('내 결과물 보기 ›')}</Text>
+              <Text style={styles.more}>{t('나의 박물관 ›')}</Text>
             </Pressable>
           ) : null}
           {exhibit.length > 0 && onHall ? (

@@ -16,6 +16,7 @@ import GamePicker from '../ui/GamePicker';
 import OtherScenes from '../components/OtherScenes';
 import PrintPlay from '../components/PrintPlay';
 import TraceReward from '../components/TraceReward';
+import { useOpenBundle } from '../utils/bundle';
 import { printMission } from '../data/missions';
 import { play } from '../utils/sound';
 import { useJourney } from '../context/JourneyContext';
@@ -130,6 +131,7 @@ function pickDecoyGlyphs(exclude, n) {
 // 진법과 다른 점: 조각마다 "정해진 자리"가 있어서 아무 자리에나 들어가면 안 되고
 // 자기 자리(같은 인덱스)로 돌아가야 글자가 올바르게 완성된다.
 export default function PrintScreen({ navigation }) {
+  const openBundle = useOpenBundle('print', navigation);
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const [typeIdx, setTypeIdx] = useState(0);
   const [positions, setPositions] = useState([]);
@@ -703,29 +705,29 @@ export default function PrintScreen({ navigation }) {
               {completed && (
                 <>
                   <Pressable
-                    style={styles.modalPrimary}
+                    style={styles.modalSecondary}
                     onPress={() => {
                       setResultVisible(false);
                       advanceRound();
                     }}
                   >
-                    <Text style={styles.modalPrimaryText}>{i18nT('다음 글자 도전!')}</Text>
+                    <Text style={styles.modalSecondaryText}>{i18nT('다음 글자 도전!')}</Text>
                   </Pressable>
                   <Pressable
-                    style={styles.modalSecondary}
+                    style={styles.modalPrimary}
                     onPress={() => {
                       setResultVisible(false);
-                      navigation.navigate('Result');
+                      openBundle();
                     }}
                   >
-                    <Text style={styles.modalSecondaryText}>{i18nT('결과물 보기')}</Text>
+                    <Text style={styles.modalPrimaryText}>{i18nT('보따리 풀기')}</Text>
                   </Pressable>
                 </>
               )}
               <Pressable style={styles.modalSecondary} onPress={() => { setResultVisible(false); navigation.navigate('Home'); }}><Text style={styles.modalSecondaryText}>{i18nT('다른 놀이 하기')}</Text></Pressable>
             </View>
             <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 6 }}>
-              <TraceReward sceneId="print" success={completed} />
+              <TraceReward onLeave={() => setResultVisible(false)} onOpen={() => { setResultVisible(false); openBundle(); }} sceneId="print" success={completed} />
               {completed && <OtherScenes current="Print" navigation={navigation} onGo={() => setResultVisible(false)} />}
             </ScrollView>
           </View>

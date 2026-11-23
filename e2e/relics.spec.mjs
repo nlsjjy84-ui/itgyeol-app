@@ -140,7 +140,8 @@ test('유물: 홈에는 합체 칸이 없고, 놀이 판이 맨 위에 있다', 
 
 test('유물: 판을 마치고 받는 첫 보따리는 그 판의 유물이고, 왜 나왔는지 한 줄로 알려 준다', async ({ page }) => {
   await openHome(page, carryPath(['dancheong']));
-  await page.getByText('박물관에서 만든 작품을 가져왔어요').click();
+  await page.getByText('박물관에서 모은 기록을 가져왔어요').click();
+  await page.getByText('놀이 기록으로 굿즈 주문 · 전시 신청 ›').click();
   await page.getByText('놀이 보상 — 진짜 유물 보따리 받기').click();
   await page.getByLabel('보따리 풀기').click();
   await expect(page.getByText(/첫 보따리! 단청 놀이에서 진짜 유물 \d점을 받았어요./)).toBeVisible();
@@ -159,6 +160,8 @@ test('나의 박물관: 진열장의 유물을 누르면 쓰임·뜻에서 나�
   await expect(page.getByTestId('museum-grid')).toBeVisible();
   await expect(page.getByTestId('why-box').first()).toBeVisible();
   await page.getByTestId('vitrine-nmk_4220').click();
+  await expect(page.getByTestId('lightbox')).toBeVisible();
+  await page.getByTestId('lightbox').getByText('이 유물로 오늘의 물건 만들기', { exact: true }).click();
   await expect(page.getByTestId('craft-ideas')).toBeVisible();
   await expect(page.getByTestId('craft-ideas').getByText('한 방울 디퓨저', { exact: true })).toBeVisible();
   await expect(page.getByTestId('craft-ideas').getByText(/같은 구멍으로 향을 조금씩 올려 보내는 디퓨저/)).toBeVisible();

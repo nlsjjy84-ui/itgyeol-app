@@ -3,7 +3,8 @@ import { test, expect, carryPath, openHome } from './helpers.mjs';
 
 async function openResult(page) {
   await openHome(page, carryPath(['jinbeop', 'tbd']));
-  await page.getByText('박물관에서 만든 작품을 가져왔어요').click();
+  await page.getByText('박물관에서 모은 기록을 가져왔어요').click();
+  await page.getByText('놀이 기록으로 굿즈 주문 · 전시 신청 ›').click();
   await expect(page.getByText('무료로 가져가기 · 이미지 저장').filter({ visible: true })).toBeVisible();
 }
 

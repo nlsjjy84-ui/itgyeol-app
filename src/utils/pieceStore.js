@@ -101,7 +101,9 @@ export const SCENE_REASON = {
   탈춤: '춤추는 사람이 쓰고 달던 것이 나와요 — 탈·노리개·비녀',
   단청: '색과 무늬를 입힌 그릇이 나와요 — 청자·백자·분청',
 };
-export function drawPack(n, seed, owned = {}, codes = [], scene = '') {
+// lv: 그 판 전시실의 단계(1 작은 진열장 · 2 상설전 · 3 특별전) — 높을수록 귀한 유물이 더 잘 나온다
+const TIER = [[0.05, 0.3], [0.05, 0.3], [0.1, 0.45], [0.15, 0.55]];
+export function drawPack(n, seed, owned = {}, codes = [], scene = '', lv = 0) {
   const r = rng(seed);
   const all = PIECES.filter((p) => !p.only || codes.includes(p.only));
   const bias = SCENE_BIAS[scene] ? all.filter((p) => SCENE_BIAS[scene].test(p.name)) : [];
@@ -126,7 +128,8 @@ export function drawPack(n, seed, owned = {}, codes = [], scene = '') {
     }
     pool = local.length > 2 && sr < 0.4 ? local : bias.length > 6 && sr < 0.7 ? bias : series.pool.length > 6 && sr < 0.85 ? series.pool : all;
     const roll = r();
-    const tier = roll < 0.05 ? 2 : roll < 0.3 ? 1 : 0;
+    const [c2, c1] = TIER[Math.max(0, Math.min(3, lv | 0))];
+    const tier = roll < c2 ? 2 : roll < c1 ? 1 : 0;
     let cand = pool.filter((p) => p.rare === tier && !out.includes(p.k));
     if (!cand.length) cand = pool.filter((p) => !out.includes(p.k));
     const fresh = cand.filter((p) => !owned[p.k]);

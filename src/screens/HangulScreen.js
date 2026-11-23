@@ -9,6 +9,7 @@ import GamePicker from '../ui/GamePicker';
 import OhangPicker from '../components/OhangPicker';
 import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
+import { useOpenBundle } from '../utils/bundle';
 import HangulTetris from '../components/HangulTetris';
 import MascotGuide from '../components/MascotGuide';
 import { HANGUL_STAGES, hangulMission } from '../data/hangulGames';
@@ -27,6 +28,7 @@ function speedComment(ms, rescues) {
 }
 
 export default function HangulScreen({ navigation }) {
+  const openBundle = useOpenBundle('hangul', navigation);
   const [idx, setIdx] = useState(0);
   const [key, setKey] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -103,14 +105,14 @@ export default function HangulScreen({ navigation }) {
             <Text style={styles.comment}>{i18nT('오늘의 기운:')} {i18nT(ohang.label)} ({i18nT(ohang.hint)} {i18nT('느낌) —')} {i18nT(comment)}</Text>
             <View style={styles.actions}>
               <Pressable style={styles.closeBtn} onPress={() => setVisible(false)}><Text style={styles.closeTxt}>{i18nT('닫기')}</Text></Pressable>
+              {completed ? <Pressable style={styles.primary} onPress={() => { setVisible(false); openBundle(); }}><Text style={styles.primaryTxt}>{i18nT('보따리 풀기')}</Text></Pressable> : null}
               {idx < HANGUL_STAGES.length - 1 ? (
-                <Pressable style={styles.primary} onPress={() => choose(idx + 1)}><Text style={styles.primaryTxt}>{i18nT('다음 단계 도전!')}</Text></Pressable>
+                <Pressable style={styles.secondary} onPress={() => choose(idx + 1)}><Text style={styles.secondaryTxt}>{i18nT('다음 단계 도전!')}</Text></Pressable>
               ) : null}
-              <Pressable style={styles.secondary} onPress={() => { setVisible(false); navigation.navigate('Result'); }}><Text style={styles.secondaryTxt}>{i18nT('결과물 보기')}</Text></Pressable>
               <Pressable style={styles.secondary} onPress={() => { setVisible(false); navigation.navigate('Home'); }}><Text style={styles.secondaryTxt}>{i18nT('다른 놀이 하기')}</Text></Pressable>
             </View>
             <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 6 }}>
-              <TraceReward sceneId="hangul" success={completed} />
+              <TraceReward onLeave={() => setVisible(false)} onOpen={() => { setVisible(false); openBundle(); }} sceneId="hangul" success={completed} />
               <OtherScenes current="Hangul" navigation={navigation} onGo={() => setVisible(false)} />
             </ScrollView>
           </View>

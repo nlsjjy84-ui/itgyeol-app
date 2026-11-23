@@ -97,7 +97,7 @@ const BOOK = {
     },
     {
       art: 'banner', place: 'Board 3 · Play Yard',
-      lines: [G('No need to play all twelve. Just one gives you your first piece 🧩'), P('Mine is ddakji. I’m VERY serious about it 🃏 Eolssu! Let the games begin!')],
+      lines: [G('No need to play all twelve. Just one gives you a bundle of real artifacts 🎁'), P('Mine is ddakji. I’m VERY serious about it 🃏 Eolssu! Let the games begin!')],
     },
   ],
   hangul: [
@@ -246,11 +246,11 @@ const GAME_LINES = {
 };
 
 const SCENE_WIN = {
-  jinbeop: [P('Huh? Did you just do that?'), G('The formation clicked into place. That spot became a piece 🧩')],
-  print: [G('Bam, it’s stamped! The letters you matched stayed right there 🔖'), P('Wait, it snaps right next to the last piece!')],
-  hangul: [G('The blocks stacked up and a row disappeared! 🧱'), P('This piece is shaped like letter blocks. It joined your jogakbo!')],
-  talchum: [P('Eolssigu! The hansam sleeves went flying 🎭'), G('The dance you just did stayed on the piece as sleeve tails.')],
-  dancheong: [G('You painted it all, in order, from base coat to white lines 🎨'), P('The five-color band joined the bottom of your jogakbo!')],
+  jinbeop: [P('Huh? Did you just do that?'), G('The formation clicked. The Armory doors are open — a general’s gear is in your bundle ⚔️')],
+  print: [G('Bam, it’s stamped! 🔖'), P('Seals and inkstones for the Study Hall are in your bundle!')],
+  hangul: [G('The blocks stacked up and a row disappeared! 🧱'), P('Roof tiles that built old houses are in your bundle. Off to the Tile & Architecture Hall!')],
+  talchum: [P('Eolssigu! The hansam sleeves went flying 🎭'), G('Ornaments that dancers wore are in your bundle. Let’s put them in the Adornment Hall.')],
+  dancheong: [G('You painted it all, in order, from base coat to white lines 🎨'), P('Colored ceramics are in your bundle! The Ceramics Hall is waiting.')],
 };
 
 const SCENE_LOSE = {
@@ -273,7 +273,7 @@ const EPI_BY_COUNT = {
 };
 
 const T = {
-  firstPiece: () => G('Your first piece! Let’s give it a round of applause 👏'),
+  firstPiece: () => G('Your first bundle! The first artifact goes into your museum 👏'),
   sceneNth: (n) => P(`This board, already round ${n}! Official regular 😎`),
   topGame: (name) => G(`You play ${name} a lot lately! Your favorite, maybe? 👀`),
   epiZero: [G('Play one board and your artwork plus its “Story of this piece” will show up here 📖'), P('Jinbeop, Writing Room, Play Yard, Hangul Blocks, Mask Dance, Dancheong — where to first? 🚪')],

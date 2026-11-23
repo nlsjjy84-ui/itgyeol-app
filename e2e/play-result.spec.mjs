@@ -1,39 +1,44 @@
 // 한 판을 끝까지 놀고 결과물까지, 그리고 여러 판 기록으로 결과 화면이 맞게 바뀌는지
 import { test, expect, openHome, enterBoard, carryPath, paintDancheongStage1 } from './helpers.mjs';
 
-test('단청 1단계를 끝까지 칠하면 조각이 생기고(1/6), 결과물 화면으로 이어진다', async ({ page }) => {
+test('단청 1단계를 끝까지 칠하면 도자실이 20% 차고, 그 자리에서 보따리를 풀어 도자실에 전시한다', async ({ page }) => {
   test.setTimeout(240_000);
   await openHome(page);
   await enterBoard(page, '단청 · 전통 문양');
   await paintDancheongStage1(page);
   await expect(page.getByText('다 칠했어요! 단청 한 부재가 완성됐어요.')).toBeVisible();
-  await expect(page.getByText('이어진 조각보 · 1/6')).toBeVisible();
-  await expect(page.getByText('첫 조각이야! 오늘은 이걸로 박수 한 번 👏')).toBeVisible();
-  await page.getByText('결과물 보기', { exact: true }).click();
-  await expect(page.getByText('무료로 가져가기 · 이미지 저장').filter({ visible: true })).toBeVisible();
-  await expect(page.getByText('첫 조각이야! 다음 판이 이 옆에 이어 붙을 거야 🧩')).toBeVisible();
+  await expect(page.getByText('보따리에 진짜 유물 3점이 들었어요')).toBeVisible();
+  await expect(page.getByTestId('hall-percent')).toContainText('20%');
+  await expect(page.getByText('첫 보따리야! 나의 박물관에 첫 유물이 들어가 👏')).toBeVisible();
+  await expect(page.getByText(/조각보/)).toHaveCount(0);
+  await page.getByTestId('open-bundle').click();
+  await expect(page.getByTestId('hall-odds')).toContainText('도자실 · 작은 진열장');
+  await page.getByLabel('보따리 풀기').click();
+  await expect(page.getByText(/첫 보따리! 단청 놀이에서 진짜 유물 \d점을 받았어요./)).toBeVisible();
+  await page.getByText('도자실에 전시하기', { exact: true }).click();
+  await expect(page.getByTestId('hall-head')).toContainText('도자실 · 작은 진열장');
+  await expect(page.getByTestId('hall-head')).toContainText('완성도 20%');
 });
 
-/** QR 주소로 기록을 가져와 결과 화면을 연다 */
+/** QR 주소로 기록을 가져와 나의 박물관을 연다 */
 async function openResultWith(page, scenes) {
   await openHome(page, carryPath(scenes));
-  await expect(page.getByText(`완성한 판 ${scenes.length} / 6`, { exact: false })).toBeVisible();
-  await page.getByText('박물관에서 만든 작품을 가져왔어요').click();
+  await expect(page.getByText(`열린 전시실 ${scenes.length} / 6`, { exact: false })).toBeVisible();
+  await page.getByText('박물관에서 모은 기록을 가져왔어요').click();
 }
 
-test('여섯 판을 다 한 기록이면 에필로그가 「여섯 판이 다 모였다」로 맺는다', async ({ page }) => {
+test('여섯 판을 다 한 기록이면 전시실 여섯 곳이 모두 열린다', async ({ page }) => {
   await openResultWith(page, ['jinbeop', 'print', 'tbd', 'hangul', 'talchum', 'dancheong']);
-  await expect(page.getByText('여섯 판이 다 모였다!! 조각보가 꽉 찼어 🎉')).toBeVisible();
-  await expect(page.getByText('여섯 판을 다 돌았어!', { exact: false })).toBeVisible();
-  // 이미 있는 판을 "열릴지 몰라"라고 하면 안 된다
-  await expect(page.getByText(/열릴지 몰라/)).toHaveCount(0);
+  await expect(page.getByText(/박물관 완성도 \d+% · 열린 전시실 6 \/ 6/)).toBeVisible();
+  for (const id of ['jinbeop', 'print', 'tbd', 'hangul', 'talchum', 'dancheong']) await expect(page.getByTestId('hall-' + id)).toContainText('20%');
 });
 
-test('네 판까지 한 기록이면 「꽉 찼어」가 아니라 아직 안 가 본 판을 안내한다', async ({ page }) => {
+test('네 판까지 한 기록이면 탈춤·단청 전시실은 아직 닫혀 있고, 누르면 그 판으로 가는 길을 알려 준다', async ({ page }) => {
   await openResultWith(page, ['jinbeop', 'print', 'tbd', 'hangul']);
-  await expect(page.getByText('네 판의 흔적이 모였어! 조각보가 제법 넓어졌어 🧶')).toBeVisible();
-  await expect(page.getByText('아직 안 가 본 판도 있어. 마당은 언제든 열려 있어 🚪')).toBeVisible();
-  await expect(page.getByText(/꽉 찼어/)).toHaveCount(0);
+  await expect(page.getByText(/박물관 완성도 \d+% · 열린 전시실 4 \/ 6/)).toBeVisible();
+  await page.getByTestId('hall-dancheong').click();
+  await expect(page.getByText('아직 문이 닫혀 있어요.')).toBeVisible();
+  await expect(page.getByText('단청 판을 깨면 문이 열려요 — 하러 가기')).toBeVisible();
 });
 
 test('결과 화면: 같은 기록이면 같은 작품 번호, 다른 기록이면 다른 번호', async ({ browser }) => {
@@ -42,6 +47,7 @@ test('결과 화면: 같은 기록이면 같은 작품 번호, 다른 기록이�
     const page = await ctx.newPage();
     await page.route('https://itgyeol-gift.vercel.app/**', (r) => r.abort());
     await openResultWith(page, scenes);
+    await page.getByText('놀이 기록으로 굿즈 주문 · 전시 신청 ›').click();
     const txt = await page.locator('body').innerText();
     await ctx.close();
     return (txt.match(/ITG[-A-Z0-9]{4,}/) || [''])[0];

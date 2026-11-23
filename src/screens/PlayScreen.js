@@ -12,6 +12,7 @@ import MissionGate from '../ui/Mission';
 import GamePicker from '../ui/GamePicker';
 import OtherScenes from '../components/OtherScenes';
 import TraceReward from '../components/TraceReward';
+import { useOpenBundle } from '../utils/bundle';
 import { getGameLines } from '../data/book';
 import { playMission } from '../data/missions';
 import { play } from '../utils/sound';
@@ -74,6 +75,7 @@ const CONTROL_HINTS = {
 // 전래놀이를 화면 터치/키보드로 즐기는 미니게임 모음 장면.
 // 놀이마다 생김새와 진행 방식이 다르지만, 실제로는 5가지 조작 엔진(mash/race/rhythm/throw/whip)을 재사용한다.
 export default function PlayScreen({ navigation }) {
+  const openBundle = useOpenBundle('tbd', navigation);
   const [gameIdx, setGameIdx] = useState(0);
   const [resultVisible, setResultVisible] = useState(false);
   const [resultComment, setResultComment] = useState('');
@@ -366,16 +368,16 @@ export default function PlayScreen({ navigation }) {
                   style={styles.modalPrimary}
                   onPress={() => {
                     setResultVisible(false);
-                    navigation.navigate('Result');
+                    openBundle();
                   }}
                 >
-                  <Text style={styles.modalPrimaryText}>{i18nT('결과물 보기')}</Text>
+                  <Text style={styles.modalPrimaryText}>{i18nT('보따리 풀기')}</Text>
                 </Pressable>
               )}
               <Pressable style={styles.modalSecondary} onPress={() => { setResultVisible(false); setPicking(true); }}><Text style={styles.modalSecondaryText}>{i18nT('다른 놀이 고르기')}</Text></Pressable>
             </View>
             <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingBottom: 6 }}>
-              <TraceReward sceneId="tbd" success={completed} gameId={rawGame.id} gameName={rawGame.name} />
+              <TraceReward onLeave={() => setResultVisible(false)} onOpen={() => { setResultVisible(false); openBundle(); }} sceneId="tbd" success={completed} gameId={rawGame.id} gameName={rawGame.name} />
               {completed && <OtherScenes current="Play" navigation={navigation} onGo={() => setResultVisible(false)} />}
             </ScrollView>
           </View>

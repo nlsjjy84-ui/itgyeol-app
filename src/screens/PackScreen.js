@@ -14,6 +14,7 @@ import { pieceName } from '../utils/pieceName';
 import { usePieces, drawPack, addPieces, takeStarter, getPieces, loadPieces, isClaimed, markClaimed, enterCode, findByNo, giveAway, dailyState, takeDaily, currentSeries, SCENE_REASON } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
 import { giftUrl } from '../utils/movieLink';
+import { HALL_BY_SCENE, HALL_LEVEL, HALL_ODDS, hallIdOf, HALL_BY_ID } from '../data/halls';
 import QRCode from 'react-native-qrcode-svg';
 
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
@@ -86,6 +87,8 @@ export default function PackScreen({ navigation, route }) {
   const daily = !!(route.params && route.params.daily);
   const from = (route.params && route.params.from) || '';
   const swap = !!(route.params && route.params.swap);
+  const lv = (route.params && route.params.lv) || 0;
+  const hall = HALL_BY_SCENE[scene] || null;
   const [opened, setOpened] = useState(null); // {keys, fresh, starter}
   const [code, setCode] = useState('');
   const [codeMsg, setCodeMsg] = useState('');
@@ -163,7 +166,7 @@ export default function PackScreen({ navigation, route }) {
       setOpened({ keys: [], fresh: [], starter: false, already: true });
       return;
     }
-    const keys = drawPack(count, Date.now() % 1000003, s.owned, s.codes, scene);
+    const keys = drawPack(count, Date.now() % 1000003, s.owned, s.codes, scene, lv);
     const fresh = addPieces(keys);
     markClaimed(claim);
     setOpened({ keys, fresh, starter: false });
@@ -192,6 +195,11 @@ export default function PackScreen({ navigation, route }) {
                 ? t('{a} 놀이를 마쳤어요! 보따리 안에 무엇이 들었을까요?', { a: t(scene) })
                 : t('보따리 안에 무엇이 들었을까요?')}
             </Text>
+            {hall && lv ? (
+              <Text style={[st.reason, { color: hall.color }]} testID="hall-odds">
+                {t('{a} · {b} — 유물 {n}점, 귀함 이상 {p}%', { a: t(hall.name), b: t(HALL_LEVEL[lv]), n: HALL_ODDS[lv].n, p: HALL_ODDS[lv].up })}
+              </Text>
+            ) : null}
             <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={t('보따리 풀기')}>
               <Animated.View style={[st.bundle, { transform: [{ rotate: shake.interpolate({ inputRange: [-1, 1], outputRange: ['-6deg', '6deg'] }) }] }]}>
                 <View style={st.knot} />
@@ -273,7 +281,17 @@ export default function PackScreen({ navigation, route }) {
             {opened.gift && swap && !opened.already ? <SwapBack got={opened.keys[0]} owned={store.owned || {}} from={from} /> : null}
             <Text style={st.small}>{t('지금 모은 유물 {n}점', { n: ownedN })}</Text>
             <View style={st.btns}>
-              <SealButton label={t('나의 박물관에 전시하기')} onPress={() => navigation.navigate('Museum')} />
+              {(() => {
+                const first = opened.keys.length ? hallIdOf(opened.keys[0]) : null;
+                const h = (hall && hall.id) || first;
+                const name = h && HALL_BY_ID[h] ? t(HALL_BY_ID[h].name) : null;
+                return (
+                  <SealButton
+                    label={name ? t('{a}에 전시하기', { a: name }) : t('나의 박물관에 전시하기')}
+                    onPress={() => navigation.navigate('Museum', { hall: h || undefined, fresh: opened.keys })}
+                  />
+                );
+              })()}
               <SealButton label={t('유물 도감 보기')} variant="paper" style={{ marginTop: 8 }} onPress={() => navigation.navigate('Dex')} />
             </View>
           </View>

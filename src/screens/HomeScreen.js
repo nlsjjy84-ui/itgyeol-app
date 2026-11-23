@@ -19,6 +19,7 @@ import { t } from '../i18n';
 import LangToggle from '../ui/LangToggle';
 import HomeNumbers from '../components/HomeNumbers';
 import RelicHome from '../components/RelicHome';
+import { HALL_BY_ID, hallPercent, clearsOf } from '../data/halls';
 import { SCENE_REASON } from '../utils/pieceStore';
 import { MATERIAL_BY_ID } from '../data/materialTree';
 import { Swatch, matName, MATERIAL_COUNT } from './MaterialScreen';
@@ -98,7 +99,7 @@ const CARDS = [
 ];
 
 export default function HomeScreen({ navigation, route }) {
-  const { skills, book, attempts, exhibit, carried, materials } = useJourney();
+  const { skills, book, attempts, exhibit, carried, materials, playLog } = useJourney();
   const mBase = materials && materials.base ? MATERIAL_BY_ID[materials.base] : null;
   const mAccent = materials && materials.accent ? MATERIAL_BY_ID[materials.accent] : null;
   const { width: winW } = useWindowDimensions();
@@ -151,10 +152,10 @@ export default function HomeScreen({ navigation, route }) {
         {t('손끝으로 만나는 여섯 가지 전통 — 보고 끝나지 않고, 직접 만들어봅니다.')}
       </Text>
       {carried ? (
-        <Pressable onPress={() => { play('stamp'); navigation.navigate('Result'); }}>
+        <Pressable onPress={() => { play('stamp'); navigation.navigate('Museum'); }}>
           <Frame accent={colors.green} style={{ marginTop: 14 }}>
-            <Text style={styles.carryTitle}>{t('박물관에서 만든 작품을 가져왔어요')}</Text>
-            <Text style={styles.carryText}>{t('집에서도 판을 더 놀면 작품이 계속 자라요. 눌러서 내 결과물을 보세요 ›')}</Text>
+            <Text style={styles.carryTitle}>{t('박물관에서 모은 기록을 가져왔어요')}</Text>
+            <Text style={styles.carryText}>{t('집에서도 판을 더 놀면 전시실이 계속 자라요. 눌러서 나의 박물관을 보세요 ›')}</Text>
           </Frame>
         </Pressable>
       ) : null}
@@ -210,6 +211,15 @@ export default function HomeScreen({ navigation, route }) {
                       {t(SCENE_REASON[c.scene])}
                     </Text>
                   ) : null}
+                  {HALL_BY_ID[c.id] ? (() => {
+                    const pc = hallPercent(clearsOf(playLog, attempts, c.id));
+                    return (
+                      <View style={styles.hallRow} testID={'card-hall-' + c.id}>
+                        <Text style={[styles.hallTag, { color: HALL_BY_ID[c.id].color }]}>{t(HALL_BY_ID[c.id].name)} {pc}%</Text>
+                        <View style={styles.hallBar}><View style={[styles.hallBarIn, { width: pc + '%', backgroundColor: HALL_BY_ID[c.id].color }]} /></View>
+                      </View>
+                    );
+                  })() : null}
                 </View>
               </View>
             </Frame>
@@ -221,7 +231,7 @@ export default function HomeScreen({ navigation, route }) {
       <RelicHome navigation={navigation} />
 
       {/* 숫자로 보는 잇결 — 판·자료·언어·예시 작품. 판을 먼저 보여 준 뒤 아래에 둔다(정리 2026-10-26). */}
-      <HomeNumbers attempts={attempts} exhibit={exhibit} onGallery={() => navigation.navigate('Gallery')} onResult={() => navigation.navigate('Result')} onHall={() => navigation.navigate('Exhibit')} />
+      <HomeNumbers attempts={attempts} exhibit={exhibit} onGallery={() => navigation.navigate('Gallery')} onResult={() => navigation.navigate('Museum')} onHall={() => navigation.navigate('Exhibit')} />
 
       {/* 이 앱이 왜 만들어졌는지 — 마스코트의 말이 아니라 만든 사람의 실제 이력으로
           직접 말한다. 국악(사물놀이·풍물) 전공, 인천에서 10년 넘게 운영한 국악연구소,
@@ -315,6 +325,10 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 8, lineHeight: 19 },
   cardWhy: { fontSize: 13, color: colors.ink, marginTop: 5, lineHeight: 19 },
   cardWhyTag: { fontWeight: '800', color: '#8a6a3b' },
+  hallRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  hallTag: { fontSize: 12, fontWeight: '800', minWidth: 96 },
+  hallBar: { flex: 1, height: 6, borderRadius: 3, backgroundColor: '#e6dccb', overflow: 'hidden' },
+  hallBarIn: { height: 6, borderRadius: 3 },
   mascotIntro: {
     flexDirection: 'row',
     alignItems: 'center',
