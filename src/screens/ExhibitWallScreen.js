@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, Image, useWindowDimensions, ScrollView } from 'react-native';
 import Text from '../ui/Text';
-import Jogakbo from '../components/Jogakbo';
+import ExhibitArt, { parseRelicCode } from '../components/ExhibitArt';
+import { pieceName } from '../utils/pieceName';
 import { workTitle, WorkImage } from '../components/MockWorks';
 import { MOCK_WORKS, MOCK_IMAGES } from '../data/mockWorks';
 import { useJourney } from '../context/JourneyContext';
@@ -58,7 +59,7 @@ export default function ExhibitWallScreen({ navigation }) {
           {waiting.length === 0 ? <Text style={st.staffTxt}>{t('대기 중인 작품이 없어요.')}</Text> : null}
           {(exhibit || []).map((e) => (
             <View key={e.code} style={st.staffRow}>
-              <View style={st.staffArt}>{e.attempts && e.attempts.length ? <Jogakbo attempts={e.attempts} size={72} /> : null}</View>
+              <View style={st.staffArt}><ExhibitArt entry={e} size={72} /></View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={st.staffNick}>{e.nick || t('손님')} · {t(e.country || '그 밖의 나라')}</Text>
                 <Text style={st.staffTxt}>{e.status === 'showing' ? t('전시 중') : t('전시 대기')}</Text>
@@ -79,13 +80,13 @@ export default function ExhibitWallScreen({ navigation }) {
         <View style={st.stage}>
           <View style={[st.frame, { width: art + 28, height: art + 28 }]}>
             {cur.kind === 'visitor' ? (
-              <Jogakbo attempts={cur.entry.attempts || []} size={art} />
+              <ExhibitArt entry={cur.entry} size={art} />
             ) : (
               <WorkImage work={cur.work} size={art} />
             )}
           </View>
           <Text style={st.title}>{cur.kind === 'visitor' ? `${cur.entry.nick || t('손님')} · ${t(cur.entry.country || '그 밖의 나라')}` : workTitle(cur.work)}</Text>
-          <Text style={st.sub}>{cur.kind === 'visitor' ? CAPTION.join('  ·  ') : t('예시 작품 · 가상의 놀이 기록으로 만든 모양')}</Text>
+          <Text style={st.sub}>{cur.kind === 'visitor' ? (parseRelicCode(cur.entry.code) ? `${pieceName(parseRelicCode(cur.entry.code).p)} → ${t(parseRelicCode(cur.entry.code).to)}  ·  ` : '') + CAPTION.join('  ·  ') : t('예시 작품 · 가상의 놀이 기록으로 만든 모양')}</Text>
           <View style={st.dots}>
             {queue.map((q, k) => (
               <View key={q.key} style={[st.dot, k === i % queue.length && st.dotOn]} />

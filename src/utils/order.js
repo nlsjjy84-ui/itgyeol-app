@@ -12,6 +12,20 @@ export const PRICES = {
 };
 export const ORDER_KEYS = ['photo', 'badge', 'keyring', 'stamp', 'sumak', 'paperweight', 'coaster', 'bookmark', 'model', 'fan', 'towel', 'hanky', 'scarf', 'pouch', 'postcard', 'frame', 'cup', 'spoonrest'];
 
+// 유물로 고른 「오늘의 물건」 → 굿즈숍에서 실제로 만들 수 있는 가장 가까운 물건.
+// 맞는 것이 없으면 그 유물의 3D 모형(박물관 3D 스캔 출력)으로 받는다.
+const CRAFT_GOODS = [
+  [/코스터|받침/, 'coaster'], [/책갈피/, 'bookmark'], [/부채/, 'fan'], [/손수건/, 'hanky'], [/수건/, 'towel'],
+  [/스카프|보자기/, 'scarf'], [/파우치|케이스|주머니/, 'pouch'], [/엽서|포스터/, 'postcard'], [/액자/, 'frame'],
+  [/찻잔|잔|찻사발|밥공기/, 'cup'], [/수저/, 'spoonrest'], [/브로치|배지|패치/, 'badge'], [/키링|가방 장식|열쇠/, 'keyring'],
+  [/도장/, 'stamp'], [/문진|북엔드|선반 오브제/, 'paperweight'], [/기와|수막새/, 'sumak'],
+];
+export function craftProduct(to) {
+  const s = String(to || '');
+  const hit = CRAFT_GOODS.find(([re]) => re.test(s));
+  return hit ? hit[1] : 'model';
+}
+
 // 위에서 고른 물건 → 주문 항목
 export function productKey(groupId, itemId) {
   if (groupId === 'treasure') return 'model';

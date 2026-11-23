@@ -8,7 +8,7 @@ import SealButton from '../ui/SealButton';
 import WhyBox from '../ui/WhyBox';
 import Vitrine from '../components/Vitrine';
 import { t } from '../i18n';
-import { usePieces, removeCraft } from '../utils/pieceStore';
+import { usePieces, removeCraft, isClaimed } from '../utils/pieceStore';
 import { PIECE_BY_K, RARITY } from '../data/pieces';
 import { HALLS, STORAGE, HALL_LEVEL, groupByHall, hallTotals, hallIdOf, hallPercent, hallLevel, clearsOf as clearsFrom } from '../data/halls';
 import { useJourney } from '../context/JourneyContext';
@@ -33,7 +33,7 @@ function useLine(k) {
 const RARE_COLOR = ['#c8c0ae', '#e0a43a', '#c0392b'];
 
 // 유물 크게 보기 — 화면 가득 유물 하나, 이름표와 쓰임·무늬의 뜻을 천천히 읽는다. ‹ › 로 같은 전시실 유물을 넘긴다.
-function Lightbox({ list, at, onAt, onClose, onCraft, color }) {
+function Lightbox({ list, at, onAt, onClose, onCraft, onOrder, color }) {
   const { width, height } = useWindowDimensions();
   const k = list[at];
   const p = PIECE_BY_K[k];
@@ -61,6 +61,7 @@ function Lightbox({ list, at, onAt, onClose, onCraft, color }) {
         </View>
         <View style={st.lbBtns}>
           <SealButton small label={t('이 유물로 오늘의 물건 만들기')} onPress={() => onCraft(k)} />
+          <SealButton small variant="ink" testID="lightbox-order" label={t('굿즈 주문 · 전시 신청')} onPress={() => onOrder(k)} />
           {p.page ? <SealButton small variant="paper" label={t('박물관 원본 ↗')} onPress={() => Linking.openURL(p.page).catch(() => {})} /> : null}
         </View>
       </View>
@@ -98,6 +99,20 @@ export default function MuseumScreen({ navigation, route }) {
     <SafeAreaView style={st.safe}>
       <ScrollView contentContainerStyle={st.wrap}>
         <ScreenHeader title={t('나의 박물관')} sub={t('박물관 완성도 {p}% · 열린 전시실 {a} / 6 · 진짜 유물 {n}점', { p: total, a: opened, n: keys.length })} onBack={() => navigation.goBack()} />
+        {/* 가져온 놀이 기록(박물관 키오스크 등)으로 아직 받지 않은 보따리 */}
+        {(() => {
+          const last = attempts.length ? attempts[attempts.length - 1] : null;
+          if (!last) return null;
+          const claim = `${last.sceneId}:${attempts.length}:${last.at || last.code || ''}`;
+          if (isClaimed(claim)) return null;
+          const LABEL = { jinbeop: '진법', print: '훈민정음·인쇄', tbd: '전래놀이', hangul: '한글 테트리스', talchum: '탈춤', dancheong: '단청' };
+          return (
+            <Pressable testID="museum-pack" style={st.packBanner} onPress={() => navigation.navigate('Pack', { scene: LABEL[last.sceneId] || '', claim })}>
+              <Text style={st.packTitle}>{t('놀이 보상 — 진짜 유물 보따리 받기')}</Text>
+              <Text style={st.packDesc}>{t('방금 논 판과 뜻이 닿는 진짜 박물관 유물이 들어 있어요. 도감에 모아 두면 오늘 쓰는 물건으로 변형할 수 있어요 ›')}</Text>
+            </Pressable>
+          );
+        })()}
         <WhyBox text={t('여섯 놀이 판은 여섯 전시실의 문이에요. 판을 깨면 그 전시실에 놓을 진짜 유물이 보따리에 들고, 전시실 완성도가 20%씩 올라요. 작은 진열장 → 상설전 → 특별전(100%)으로 자랄수록 귀한 유물이 더 잘 나와요.')} />
 
         {/* 박물관 안내도 — 전시실 여섯 곳과 수장고 */}
@@ -197,18 +212,19 @@ export default function MuseumScreen({ navigation, route }) {
             </View>
           ))}
         </View>
-        {attempts.length ? (
-          <SealButton variant="paper" testID="goods-link" label={t('놀이 기록으로 굿즈 주문 · 전시 신청 ›')} onPress={() => navigation.navigate('Result')} />
-        ) : null}
+        <SealButton variant="paper" testID="goods-link" label={t('잇결 전시관 · 내가 신청한 작품 ›')} onPress={() => navigation.navigate('Exhibit')} />
       </ScrollView>
       {box !== null && mine[box] ? (
-        <Lightbox list={mine} at={box} onAt={setBox} onClose={() => setBox(null)} color={hall.color} onCraft={(k) => { setBox(null); navigation.navigate('Craft', { k }); }} />
+        <Lightbox list={mine} at={box} onAt={setBox} onClose={() => setBox(null)} color={hall.color} onCraft={(k) => { setBox(null); navigation.navigate('Craft', { k }); }} onOrder={(k) => { setBox(null); navigation.navigate('Craft', { k, order: true }); }} />
       ) : null}
     </SafeAreaView>
   );
 }
 
 const st = StyleSheet.create({
+  packBanner: { backgroundColor: '#20303c', borderRadius: 14, padding: 14, borderWidth: 2, borderColor: '#e0a43a' },
+  packTitle: { color: '#f6e7c4', fontSize: 16, fontWeight: '700' },
+  packDesc: { color: '#e8eef2', fontSize: 13, marginTop: 4, lineHeight: 19 },
   safe: { flex: 1 },
   map: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tile: { borderWidth: 2, borderRadius: 12, paddingVertical: 8, alignItems: 'center', gap: 2 },

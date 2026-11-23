@@ -184,6 +184,13 @@ const ui = {
   "노래가 먼저 「밖·걸고·안·밟고」를 불러 줘요. 「너 차례!」가 뜨면 같은 순서를 박에 맞춰 아래 네 칸으로 밟아요. (키보드: ← ↓ ↑ →)": "The song first calls “Out · Hook · In · Step on”. When “Your turn!” appears, step the same order on the beat with the four boxes. (Keys: ← ↓ ↑ →)",
   "줄이 머리 위로 올라갈 때 오른쪽으로 쓸어 들어가요. 「콩」은 톡, 「쌩쌩이」는 위로 크게 쓸어 뛰고, 다 뛰면 다시 오른쪽으로 쓸어 나와요. (키보드: → · 스페이스 · ↑)": "Swipe right to run in when the rope is overhead. Tap for “Hop”, big swipe up for “Double-under”, and swipe right to get out when done. (Keys: → · Space · ↑)",
   "「영~」에는 화면을 꾹 누르고 버티고, 「차!」에 아래로 확 쓸어 당겨요. 상대편 「차!」에는 당기지 마요. (키보드: 스페이스 꾹 · ↓ 당기기)": "Press and hold on “Yeong~”, swipe down hard on “Cha!”. Don't pull on their “Cha!”. (Keys: hold Space · ↓ pull)",
+  // 유물로 굿즈 주문·전시 신청 (2026-11-23)
+  '{a} 무늬': '{a} pattern',
+  '「{a}」을 국립중앙박물관 3D 스캔 그대로 높이 약 5cm 실물로 출력해요. 「{b}」로 곁에 두고 써요.': 'We print “{a}” about 5 cm tall, straight from the National Museum of Korea 3D scan. Keep it close as your “{b}”.',
+  '굿즈 주문 · 전시 신청': 'Order goods · Apply to exhibit',
+  '이 유물의 사진과 3D 스캔으로 굿즈숍에서 만들어요. 「전시해도 돼요」를 고르면 잇결 전시관에 이 유물과 오늘의 물건이 걸려요.': 'The goods shop makes it from this relic\'s photo and 3D scan. Choose “OK to exhibit” and this relic and your everyday object hang in the Itgyeol gallery.',
+  '아직 신청한 작품이 없어요. 나의 박물관에서 유물을 누르고 「굿즈 주문 · 전시 신청」에서 "이 작품을 전시해도 돼요"를 고르면 여기 올라와요.': 'No applications yet. In My Museum, tap a relic, open “Order goods · Apply to exhibit” and choose "OK to exhibit this work" — it will show up here.',
+  '잇결 전시관 · 내가 신청한 작품 ›': 'Itgyeol gallery · My applications ›',
   // 전시실 흐름 (2026-11-23)
   "놀이 기록으로 굿즈 주문 · 전시 신청 ›": "Order goods · apply to exhibit from your play record ›",
   "문이 열렸어요. 보따리를 풀면 이 전시실에 유물이 놓여요.": "The door is open. Open a bundle and artifacts will be placed in this hall.",

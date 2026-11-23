@@ -43,7 +43,7 @@ export const COUNTRIES = ['한국', '미국', '중국', '일본', '그 밖의 �
 const DEFAULT_COUNTRY = { ko: '한국', zh: '중국', ja: '일본' };
 
 // entry: 이 작품의 전시 신청(없으면 null). onExhibit(patch) — patch가 null이면 신청 취소.
-export default function TakeHome({ code, shapeLabel, product, printable = true, entry, onExhibit, onHall, spec, onMaker, onSaveFree, freeStatus }) {
+export default function TakeHome({ code, shapeLabel, product, printable = true, entry, onExhibit, onHall, spec, onMaker, onSaveFree, freeStatus, desc }) {
   const exhibitOn = !!entry;
   const [pick, setPick] = useState({});
   const [how, setHow] = useState('shop');
@@ -110,7 +110,7 @@ export default function TakeHome({ code, shapeLabel, product, printable = true, 
         <Rung free onPress={onSaveFree ? () => { play('tap'); onSaveFree(); } : undefined} title={t('이미지·QR 저장')} price={t('무료')} desc={t('누르면 내 작품 그림이 이 기기에 바로 저장돼요. 아무것도 사지 않아도 돼요.')} />
         <Rung on={pick.photo} onPress={() => toggle('photo')} title={t('깜짝 사진 엽서 2장')} price={won(PRICES.photo)} desc={t('놀이 중 찍어 둔 깜짝 선물 사진(없으면 굿즈숍 사진 기계에서 찍은 사진)을 엽서 크기로 뽑아요.')} />
         {product ? (
-          <Rung on={!!pick[product]} onPress={() => toggle(product)} title={NAMES[product]} price={won(PRICES[product])} desc={DESC[product]} />
+          <Rung on={!!pick[product]} onPress={() => toggle(product)} title={NAMES[product]} price={won(PRICES[product])} desc={(desc && desc[product]) || DESC[product]} />
         ) : null}
         {ORDER_KEYS.filter((k) => k !== 'photo' && k !== product && pick[k]).map((k) => (
           <Rung key={k} on onPress={() => toggle(k)} title={NAMES[k]} price={won(PRICES[k])} desc={t('앞에서 담아 둔 물건이에요. 누르면 빠져요.')} />

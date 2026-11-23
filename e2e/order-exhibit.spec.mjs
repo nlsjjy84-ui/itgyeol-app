@@ -1,10 +1,18 @@
 // 주문·전시가 기기 사이에 이어지는지 — 손님 폰과 업체 화면을 두 탭으로 띄우고, 서버는 진짜 서버 코드를 메모리로 돌린다
 import { test, expect, carryPath, openHome } from './helpers.mjs';
 
+// 유물로 굿즈 주문·전시 신청 — 나의 박물관 → 유물 크게 보기 → 「굿즈 주문 · 전시 신청」
 async function openResult(page) {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_4220: 1 }, order: ['nmk_4220'], works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+  });
   await openHome(page, carryPath(['jinbeop', 'tbd']));
   await page.getByText('박물관에서 모은 기록을 가져왔어요').click();
-  await page.getByText('놀이 기록으로 굿즈 주문 · 전시 신청 ›').click();
+  await page.getByTestId('vitrine-nmk_4220').click();
+  await page.getByTestId('lightbox-order').click();
+  await expect(page.getByTestId('relic-order')).toBeVisible();
   await expect(page.getByText('무료로 가져가기 · 이미지 저장').filter({ visible: true })).toBeVisible();
 }
 
@@ -46,18 +54,19 @@ test('주문: 손님이 모의 결제하면 업체 화면에 들어오고, 업�
   expect(after[0].stage).not.toBe(stageBefore);
 });
 
-test('전시 신청: 결과 화면에서 켜면 서버 전시 목록에 별명과 나라만 올라간다', async ({ page, cloud }) => {
+test('전시 신청: 유물 주문 칸에서 켜면 서버 전시 목록에 별명과 나라만 올라간다', async ({ page, cloud }) => {
   await openResult(page);
   await page.getByText('이 작품을 전시해도 돼요').filter({ visible: true }).first().click();
   await expect.poll(() => cloud.calls.includes('POST /api/exhibit')).toBe(true);
   const rows = [...cloud.db.files.values()].filter((f) => f.pathname.startsWith('exhibit/')).map((f) => JSON.parse(f.body));
   expect(rows.length).toBe(1);
+  expect(rows[0].code).toMatch(/^R-nmk_4220-\d+$/);
   const keys = Object.keys(rows[0]);
   expect(keys).not.toContain('name');
   expect(keys).not.toContain('phone');
 });
 
-test('서버에 닿지 않아도(오프라인) 결과 화면과 무료로 가져가기는 그대로 된다', async ({ browser }) => {
+test('서버에 닿지 않아도(오프라인) 유물 주문 칸과 무료로 가져가기는 그대로 된다', async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 420, height: 860 } });
   await ctx.route('https://itgyeol-gift.vercel.app/**', (r) => r.abort('internetdisconnected'));
   const page = await ctx.newPage();

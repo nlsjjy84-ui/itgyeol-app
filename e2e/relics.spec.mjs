@@ -141,8 +141,7 @@ test('유물: 홈에는 합체 칸이 없고, 놀이 판이 맨 위에 있다', 
 test('유물: 판을 마치고 받는 첫 보따리는 그 판의 유물이고, 왜 나왔는지 한 줄로 알려 준다', async ({ page }) => {
   await openHome(page, carryPath(['dancheong']));
   await page.getByText('박물관에서 모은 기록을 가져왔어요').click();
-  await page.getByText('놀이 기록으로 굿즈 주문 · 전시 신청 ›').click();
-  await page.getByText('놀이 보상 — 진짜 유물 보따리 받기').click();
+  await page.getByTestId('museum-pack').click();
   await page.getByLabel('보따리 풀기').click();
   await expect(page.getByText(/첫 보따리! 단청 놀이에서 진짜 유물 \d점을 받았어요./)).toBeVisible();
   await expect(page.getByTestId('scene-reason')).toHaveText('색과 무늬를 입힌 그릇이 나와요 — 청자·백자·분청');

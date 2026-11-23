@@ -4,7 +4,8 @@ import WhyBox from '../ui/WhyBox';
 import Text from '../ui/Text';
 import Frame from '../ui/Frame';
 import ScreenHeader from '../ui/ScreenHeader';
-import Jogakbo from '../components/Jogakbo';
+import ExhibitArt, { parseRelicCode } from '../components/ExhibitArt';
+import { pieceName } from '../utils/pieceName';
 import { MockCard, MockDetail } from '../components/MockWorks';
 import { MOCK_WORKS } from '../data/mockWorks';
 import { useJourney } from '../context/JourneyContext';
@@ -42,12 +43,10 @@ export default function ExhibitScreen({ navigation }) {
         <Text style={st.h}>{t('내가 신청한 작품 {n}점', { n: mine.length })}</Text>
         {mine.length === 0 ? (
           <Frame style={{ marginTop: 8 }}>
-            <Text style={st.emptyTxt}>{t('아직 신청한 작품이 없어요. 결과 화면의 "이 작품을 전시해도 돼요"를 고르면 여기 올라와요.')}</Text>
-            {attempts.length > 0 ? (
-              <Pressable onPress={() => { play('tap'); navigation.navigate('Result'); }} hitSlop={8}>
-                <Text style={st.link}>{t('내 결과물 보기 ›')}</Text>
-              </Pressable>
-            ) : null}
+            <Text style={st.emptyTxt}>{t('아직 신청한 작품이 없어요. 나의 박물관에서 유물을 누르고 「굿즈 주문 · 전시 신청」에서 "이 작품을 전시해도 돼요"를 고르면 여기 올라와요.')}</Text>
+            <Pressable onPress={() => { play('tap'); navigation.navigate('Museum'); }} hitSlop={8}>
+              <Text style={st.link}>{t('나의 박물관 ›')}</Text>
+            </Pressable>
           </Frame>
         ) : (
           <View style={st.mineList}>
@@ -55,11 +54,14 @@ export default function ExhibitScreen({ navigation }) {
               <Frame key={e.code} style={st.mineCard}>
                 <View style={st.mineRow}>
                   <View style={st.mineArt}>
-                    {e.attempts && e.attempts.length ? <Jogakbo attempts={e.attempts} size={104} /> : null}
+                    <ExhibitArt entry={e} size={104} />
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={[st.badge, e.status === 'showing' && st.badgeOn]}>{e.status === 'showing' ? t('전시 중') : t('전시 대기 중')}</Text>
                     <Text style={st.nick} numberOfLines={1}>{e.nick ? e.nick : t('손님')}</Text>
+                    {parseRelicCode(e.code) ? (
+                      <Text style={st.meta} numberOfLines={2}>{pieceName(parseRelicCode(e.code).p)} → {t(parseRelicCode(e.code).to)}</Text>
+                    ) : null}
                     <Text style={st.meta}>{t(e.country || '그 밖의 나라')} · #{String(e.code).slice(-6)}</Text>
                     <Text style={st.meta}>{e.status === 'showing' ? t('박물관 전시 화면에 걸려 있어요.') : t('걸리면 이 화면에서 "전시 중"으로 바뀌어요.')}</Text>
                     <Pressable onPress={() => { play('tap'); setExhibit(e.code, null); }} hitSlop={8}>

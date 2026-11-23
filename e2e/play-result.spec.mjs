@@ -41,20 +41,27 @@ test('네 판까지 한 기록이면 탈춤·단청 전시실은 아직 닫혀 �
   await expect(page.getByText('단청 판을 깨면 문이 열려요 — 하러 가기')).toBeVisible();
 });
 
-test('결과 화면: 같은 기록이면 같은 작품 번호, 다른 기록이면 다른 번호', async ({ browser }) => {
-  const codeOf = async (scenes) => {
+test('유물 굿즈 주문: 같은 유물·같은 물건이면 같은 주문 번호, 다른 물건이면 다른 번호', async ({ browser }) => {
+  const codeOf = async (idx) => {
     const ctx = await browser.newContext({ viewport: { width: 420, height: 860 } });
     const page = await ctx.newPage();
     await page.route('https://itgyeol-gift.vercel.app/**', (r) => r.abort());
-    await openResultWith(page, scenes);
-    await page.getByText('놀이 기록으로 굿즈 주문 · 전시 신청 ›').click();
-    const txt = await page.locator('body').innerText();
+    await page.addInitScript(() => {
+      localStorage.setItem('itgyeol_pieces_v1', JSON.stringify({ owned: { nmk_4220: 1 }, order: ['nmk_4220'], works: [], packs: 1, starter: true, codes: [], claimed: [] }));
+    });
+    await openResultWith(page, ['jinbeop', 'tbd']);
+    await page.getByTestId('vitrine-nmk_4220').click();
+    await page.getByTestId('lightbox').getByText('이 유물로 오늘의 물건 만들기', { exact: true }).click();
+    await page.getByTestId('craft-order-' + idx).click();
+    await page.getByTestId('relic-order').getByText('깜짝 사진 엽서 2장', { exact: true }).click();
+    await page.getByTestId('relic-order').getByText('주문표 만들기').click();
+    const txt = await page.getByTestId('relic-order').innerText();
     await ctx.close();
     return (txt.match(/ITG[-A-Z0-9]{4,}/) || [''])[0];
   };
-  const a = await codeOf(['jinbeop', 'tbd']);
-  const b = await codeOf(['jinbeop', 'tbd']);
-  const c = await codeOf(['print', 'hangul', 'dancheong']);
+  const a = await codeOf(0);
+  const b = await codeOf(0);
+  const c = await codeOf(1);
   expect(a).not.toBe('');
   expect(a).toBe(b);
   expect(c).not.toBe(a);
