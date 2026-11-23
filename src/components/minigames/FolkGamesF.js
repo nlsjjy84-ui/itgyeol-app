@@ -3,7 +3,8 @@ import { View, Platform } from 'react-native';
 import Svg, { G, Path, Circle, Line, Rect, Ellipse, Text as SvgText } from 'react-native-svg';
 import { colors } from '../../theme';
 import { play } from '../../utils/sound';
-import { useRaf, usePad, Shell, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { useRaf, usePad, Shell, Sprite, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { ART } from './gameArt';
 import { t as i18nT } from '../../i18n';
 
 // 2026-11-23 「게임 방식을 바꿔라」 — 탭 한 번·꾹 누르기에서 벗어나, 손짓이 판마다 다른 놀이로 다시 짰다.
@@ -194,24 +195,11 @@ export function GomuStepGame({ color, onComplete, lives: maxLives = 3 }) {
               </G>
             );
           })}
-          {/* 고무줄 두 줄과 아이 */}
-          <Line x1={20} y1={bandY} x2={STAGE_W - 20} y2={bandY} stroke="#b3322b" strokeWidth={3} />
-          <Line x1={20} y1={bandY + 26} x2={STAGE_W - 20} y2={bandY + 26} stroke="#b3322b" strokeWidth={3} />
-          <Label x={30} y={bandY - 6} s={i18nT(lv.name)} size={11} color="#b3322b" weight="700" />
-          {(() => {
-            const s = q.flashT > 0 ? q.flash : -1;
-            const fx = [70, 120, 150, 185][s < 0 ? 2 : s];
-            const fy = s === 0 ? 236 : s === 1 ? bandY : s === 3 ? bandY + 26 : bandY + 13;
-            const hop = q.flashT > 0 ? Math.sin((q.flashT / 0.25) * Math.PI) * 18 : 0;
-            return (
-              <G>
-                <Line x1={fx - 7} y1={fy - hop} x2={150} y2={150 - hop} stroke={INK} strokeWidth={3} />
-                <Line x1={fx + 7} y1={fy - hop} x2={150} y2={150 - hop} stroke={INK} strokeWidth={3} />
-                <Line x1={150} y1={150 - hop} x2={150} y2={118 - hop} stroke={color} strokeWidth={10} strokeLinecap="round" />
-                <Circle cx={150} cy={104 - hop} r={10} fill="#f1d3b3" stroke={INK} strokeWidth={1} />
-              </G>
-            );
-          })()}
+          {/* 땅과 고무줄 — 양쪽 아이 다리에 건 두 줄(뒤쪽 줄은 조금 높고 가늘게) */}
+          <Rect x={0} y={236} width={STAGE_W} height={18} fill="#e6dcc6" />
+          <Line x1={34} y1={bandY - 9} x2={STAGE_W - 34} y2={bandY - 9} stroke="#b3322b" strokeWidth={2} opacity={0.65} />
+          <Line x1={34} y1={bandY} x2={STAGE_W - 34} y2={bandY} stroke="#c0392b" strokeWidth={3.2} />
+          <Label x={STAGE_W / 2 + 92} y={bandY - 14} s={i18nT(lv.name)} size={11} color="#b3322b" weight="700" />
           {/* 밟는 네 칸 */}
           {GOMU_STEPS.map((s, i) => {
             const w = STAGE_W / 4;
@@ -225,6 +213,9 @@ export function GomuStepGame({ color, onComplete, lives: maxLives = 3 }) {
           })}
           {q.note ? <Label x={STAGE_W / 2} y={244} s={q.note} size={12} color={colors.accentDeep || INK} weight="700" /> : null}
         </Svg>
+        <Sprite art={ART.holder} x={30} y={240} h={150} />
+        <Sprite art={ART.holder} x={STAGE_W - 30} y={240} h={150} flip />
+        <Sprite art={ART.step} x={150} y={240 - (q.flashT > 0 ? Math.sin((q.flashT / 0.25) * Math.PI) * 16 : 0)} h={136} />
       </View>
     </Shell>
   );
@@ -319,7 +310,7 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
   const q = g.current;
   const p = ph(q.t);
   // 줄 모양 — 아래(0)·위(0.5) 사이를 돈다. 화면에서는 위아래로 출렁이는 곡선
-  const ropeY = 250 - (1 - Math.cos(p * Math.PI * 2)) * 0.5 * 190;
+  const ropeY = 262 - (1 - Math.cos(p * Math.PI * 2)) * 0.5 * 238;
   const front = p < 0.25 || p > 0.75;
   const hopH = Math.sin((1 - q.hop) * Math.PI) * (q.hop > 0 ? (q.hopBig ? 46 : 22) : 0);
   const cur = q.stage === 'in' ? q.calls[q.n] : null;
@@ -338,22 +329,8 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
               {nxt ? <Label x={STAGE_W - 40} y={40} s={i18nT('다음 {a}', { a: i18nT(nxt.s) })} size={11} color="#9a8f80" weight="700" /> : null}
             </G>
           ) : null}
-          {/* 줄 돌리는 두 사람 */}
-          {[22, STAGE_W - 22].map((x) => (
-            <G key={x}>
-              <Line x1={x} y1={262} x2={x} y2={214} stroke={INK} strokeWidth={4} />
-              <Circle cx={x} cy={204} r={9} fill="#f1d3b3" stroke={INK} />
-            </G>
-          ))}
-          {!front ? <Path d={`M26 222 Q150 ${ropeY * 2 - 222} ${STAGE_W - 26} 222`} stroke="#8a5a2b" strokeWidth={3.5} fill="none" /> : null}
-          {/* 아이 */}
-          <G transform={`translate(${q.x} ${262 - hopH})`}>
-            <Line x1={-6} y1={0} x2={0} y2={-20} stroke={INK} strokeWidth={3} />
-            <Line x1={6} y1={0} x2={0} y2={-20} stroke={INK} strokeWidth={3} />
-            <Line x1={0} y1={-20} x2={0} y2={-42} stroke={color} strokeWidth={10} strokeLinecap="round" />
-            <Circle cx={0} cy={-54} r={9} fill="#f1d3b3" stroke={INK} />
-          </G>
-          {front ? <Path d={`M26 222 Q150 ${ropeY * 2 - 222} ${STAGE_W - 26} 222`} stroke="#8a5a2b" strokeWidth={3.5} fill="none" /> : null}
+          {/* 줄 — 양쪽 아이 손에서 손으로. 발밑(아래)과 머리 위(위) 사이를 돈다 */}
+          <Path d={`M52 172 Q150 ${ropeY * 2 - 172} ${STAGE_W - 52} 172`} stroke="#8a5a2b" strokeWidth={front ? 4 : 2.6} fill="none" opacity={front ? 1 : 0.7} />
           {/* 들어가고 나갈 때 알맞은지 */}
           {q.stage === 'out' || q.stage === 'exit' ? (
             <Rect x={20} y={300} width={STAGE_W - 40} height={14} rx={7} fill={p > 0.3 && p < 0.75 ? '#3f7a52' : '#d8cfbe'} />
@@ -361,92 +338,96 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
           {q.stage === 'out' || q.stage === 'exit' ? <Label x={STAGE_W / 2} y={333} s={p > 0.3 && p < 0.75 ? i18nT('지금! → 쓸기') : i18nT('기다려요')} size={13} /> : null}
           <Label x={STAGE_W / 2} y={q.stage === 'in' ? 300 : 290} s={q.note} size={11.5} color="#5f574c" weight="700" />
         </Svg>
+        <Sprite art={ART.turner} x={30} y={262} h={150} />
+        <Sprite art={ART.turner} x={STAGE_W - 30} y={262} h={150} flip />
+        <Sprite art={ART.jump} x={q.x} y={262 - hopH} h={118} />
+        {front ? (
+          <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H }}>
+            <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
+              <Path d={`M52 172 Q150 ${ropeY * 2 - 172} ${STAGE_W - 52} 172`} stroke="#8a5a2b" strokeWidth={4} fill="none" />
+            </Svg>
+          </View>
+        ) : null}
       </View>
     </Shell>
   );
 }
 
-// ───────────────────────── 굴렁쇠 — 막대로 밀며 골목을 따라간다 ─────────────────────────
-const HOOP_Y = 250;
-function alley(d) {
-  return 150 + Math.sin(d / 140) * 62 + Math.sin(d / 57) * 18;
+// ───────────────────────── 굴렁쇠 — 옆에서 본 골목, 채를 대는 자리로 밀고 누르고 들어 넘긴다 ─────────────────────────
+// 실제 굴렁쇠처럼 채(ㄷ자 끝)를 바퀴 어디에 대느냐가 조종이다.
+//   바퀴 아래 뒤쪽에 대면 → 앞으로 민다(오르막에 필요)
+//   바퀴 위쪽에 대면 → 눌러 늦춘다(내리막에 필요)
+//   돌부리 앞에서는 위로 끌어 「들어 넘긴다」
+const GROUND = 268;
+const HOOP_R = 26;
+const HOOP_X = 178;
+function terrain(d) {
+  // 오르막·내리막이 번갈아 오는 골목 — 기울기(+ 오르막)
+  const seg = Math.floor(d / 260);
+  const kind = [0, 1, 0, -1, 1, 0, -1, -1, 0, 1, 0, -1][seg % 12];
+  return kind;
 }
-export function HoopPathGame({ color, onComplete, goal = 2200, lives: maxLives = 3 }) {
+function groundY(d) {
+  let y = 0;
+  for (let x = 0; x < d; x += 20) y -= terrain(x) * 20 * 0.18;
+  return y;
+}
+export function HoopPathGame({ color, onComplete, goal = 2600, lives: maxLives = 3 }) {
   const [phase, setPhase] = useState('ready');
   const [, force] = useState(0);
   const fresh = () => {
     const stones = [];
-    for (let d = 380; d < goal - 120; d += rand(210, 330)) stones.push({ d, off: rand(-26, 26) });
-    return { t: 0, d: 0, x: 150, v: 0, wob: 0, lean: 0, lives: maxLives, fx: null, fy: null, keys: {}, stones, hit: -1, note: i18nT('굴렁쇠 바로 아래에 손가락을 대고 밀어요'), start: Date.now(), done: false, fall: 0 };
+    for (let d = 420; d < goal - 160; d += rand(260, 420)) stones.push(d);
+    return { t: 0, d: 0, v: 60, c: 0.3, wob: 0, lives: maxLives, stones, hit: -1, lifted: -1, keys: {}, note: i18nT('손가락을 위아래로 움직여 채를 대는 자리를 바꿔요'), start: Date.now(), done: false, fall: 0, spin: 0 };
   };
   const g = useRef(fresh());
-  const pad = usePad({
-    onDown: (x, y) => { g.current.fx = x; g.current.fy = y; },
-    onMove: (x, y) => { g.current.fx = x; g.current.fy = y; },
-    onUp: () => { g.current.fx = null; g.current.fy = null; },
-  });
-  useKeys({
-    ArrowLeft: (d) => { g.current.keys.l = d; },
-    ArrowRight: (d) => { g.current.keys.r = d; },
-    ArrowUp: (d) => { g.current.keys.u = d; },
-  }, phase === 'running');
+  const setC = (y) => {
+    // 손가락 높이 → 채를 대는 자리(0 바퀴 아래 · 1 바퀴 위)
+    g.current.c = clamp((GROUND - y) / (HOOP_R * 2 + 30), 0, 1);
+  };
+  const pad = usePad({ onDown: (x, y) => setC(y), onMove: (x, y) => setC(y) });
+  useKeys({ ArrowUp: (d) => { g.current.keys.u = d; }, ArrowDown: (d) => { g.current.keys.d = d; } }, phase === 'running');
 
   useRaf((dt) => {
     const q = g.current;
     if (q.done) return;
     q.t += dt;
+    if (q.keys.u) q.c = clamp(q.c + dt * 1.6, 0, 1);
+    if (q.keys.d) q.c = clamp(q.c - dt * 1.6, 0, 1);
     if (q.fall > 0) {
       q.fall -= dt;
-      if (q.fall <= 0) { q.wob = 0; q.v = 0; q.x = alley(q.d); q.note = i18nT('다시 일으켜 세웠어요. 살살 밀어요'); }
+      if (q.fall <= 0) { q.wob = 0; q.v = 50; q.note = i18nT('다시 굴려요. 길을 미리 보고 채를 옮겨요'); }
       force((n) => n + 1);
       return;
     }
-    // 막대 끝(손가락)이 굴렁쇠 아래 가까이 있어야 민다 — 너무 멀면 힘이 안 닿고, 바짝 붙여 세게 밀면 휘청인다
-    let push = 0;
-    let steer = 0;
-    if (q.fx != null) {
-      const dy = q.fy - HOOP_Y;
-      const dx = q.fx - q.x;
-      if (dy > 6 && dy < 110 && Math.abs(dx) < 70) {
-        // 바짝 붙일수록 세게 민다 — 알맞은 거리는 굴렁쇠 아래 30~70
-        push = clamp((110 - dy) / 85, 0, 1.25);
-        steer = dx * 3; // 막대를 옆으로 옮기면 굴렁쇠가 그쪽으로 따라간다
-      } else if (dy <= 6) q.note = i18nT('굴렁쇠 위가 아니라 아래에 막대를 대요');
-    }
-    if (q.keys.u) push = 0.75;
-    if (q.keys.l) steer = -60;
-    if (q.keys.r) steer = 60;
-    q.v += (push * 260 - q.v * 0.9) * dt;
-    q.v = Math.max(0, q.v);
-    q.x += steer * dt * (0.3 + q.v / 260);
+    const slope = terrain(q.d + 30);
+    // 채 자리: 아래(0)는 밀기, 위(1)는 누르기. 오르막은 속도를 깎고 내리막은 붙인다
+    const push = (0.5 - q.c) * 2; // +1 민다 · -1 누른다
+    q.v += (push * 120 - slope * 95 - (q.v - 90) * 0.35) * dt;
+    q.v = clamp(q.v, 0, 260);
     q.d += q.v * dt;
-    // 너무 빠르면 휘청, 알맞으면 바로 선다
-    const fast = q.v > 270;
-    const cx = alley(q.d);
-    const out = Math.abs(q.x - cx) > 46;
-    q.wob += ((fast ? 0.55 : 0) + (out ? 0.9 : 0) - (q.v > 40 && !fast && !out ? 0.45 : 0.08)) * dt;
-    // 돌부리
-    q.stones.forEach((s, i) => {
-      if (i !== q.hit && Math.abs(q.d - s.d) < 10 && Math.abs(q.x - (alley(s.d) + s.off)) < 22) {
-        q.hit = i;
-        q.wob += 0.45;
-        q.v *= 0.5;
-        play('clank_stone');
-        q.note = i18nT('돌부리에 걸렸어요!');
+    q.spin += (q.v * dt) / HOOP_R;
+    // 너무 느리면 쓰러지고, 너무 빠르면 튄다
+    const slow = q.v < 45;
+    const fast = q.v > 175;
+    q.wob += ((slow ? 0.7 : 0) + (fast ? 0.6 : 0) - (!slow && !fast ? 0.35 : 0)) * dt;
+    if (slow) q.note = slope > 0 ? i18nT('오르막이에요 — 채를 바퀴 아래에 대고 밀어요') : i18nT('너무 느려요 — 아래쪽을 밀어요');
+    else if (fast) q.note = slope < 0 ? i18nT('내리막이에요 — 채를 바퀴 위에 대고 눌러요') : i18nT('너무 빨라요 — 위쪽을 눌러 늦춰요');
+    else q.note = i18nT('좋아요 — 앞길을 보고 채를 옮겨요');
+    // 돌부리 — 지나가는 순간 채가 위쪽(0.72 이상)이면 들어 넘긴다
+    q.stones.forEach((sd, i) => {
+      if (i !== q.hit && i !== q.lifted && q.d > sd - 6 && q.d < sd + 6) {
+        if (q.c >= 0.72) { q.lifted = i; q.note = i18nT('들어 넘겼어요!'); play('tap'); }
+        else { q.hit = i; q.wob += 0.5; q.v *= 0.55; play('clank_stone'); q.note = i18nT('돌부리에 걸렸어요 — 돌 앞에서는 위로 들어 넘겨요'); }
       }
     });
     q.wob = clamp(q.wob, 0, 1.2);
-    q.lean = Math.sin(q.t * 9) * q.wob * 22;
-    if (fast) q.note = i18nT('너무 세게 밀었어요 — 휘청여요');
-    else if (out) q.note = i18nT('골목 밖이에요 — 길 가운데로');
     if (q.wob >= 1) {
       q.lives -= 1;
       play('fail');
       q.note = i18nT('굴렁쇠가 쓰러졌어요!');
-      if (q.lives <= 0) {
-        q.done = true;
-        setTimeout(() => { setPhase('done'); onComplete({ success: false, score: Math.round(q.d), elapsedMs: Date.now() - q.start }); }, 500);
-      } else q.fall = 0.9;
+      if (q.lives <= 0) { q.done = true; setTimeout(() => { setPhase('done'); onComplete({ success: false, score: Math.round(q.d), elapsedMs: Date.now() - q.start }); }, 500); }
+      else q.fall = 1;
     }
     if (q.d >= goal) {
       q.done = true;
@@ -458,32 +439,51 @@ export function HoopPathGame({ color, onComplete, goal = 2200, lives: maxLives =
 
   const start = () => { g.current = fresh(); setPhase('running'); };
   const q = g.current;
-  // 골목 — 화면 위쪽이 앞(먼 곳)
+  const base = groundY(q.d);
+  const gy = (x) => GROUND + (groundY(q.d + (x - HOOP_X)) - base);
   const pts = [];
-  for (let y = 0; y <= STAGE_H; y += 10) pts.push([y, alley(q.d + (HOOP_Y - y))]);
-  const left = pts.map(([y, x], i) => `${i ? 'L' : 'M'}${x - 50} ${y}`).join(' ');
-  const right = pts.map(([y, x], i) => `${i ? 'L' : 'M'}${x + 50} ${y}`).join(' ');
-  const road = pts.map(([y, x], i) => `${i ? 'L' : 'M'}${x - 50} ${y}`).join(' ') + ' ' + [...pts].reverse().map(([y, x]) => `L${x + 50} ${y}`).join(' ') + ' Z';
+  for (let x = -10; x <= STAGE_W + 10; x += 10) pts.push(`${x} ${gy(x)}`);
+  const ground = `M-10 ${STAGE_H} L${pts.join(' L')} L${STAGE_W + 10} ${STAGE_H} Z`;
+  const hy = gy(HOOP_X) - HOOP_R;
+  // 채가 닿는 자리 — 바퀴 뒤쪽 테두리, 아래(210°)에서 위(120°)까지
+  const ang = ((210 - q.c * 90) * Math.PI) / 180;
+  const cx = HOOP_X + Math.cos(ang) * HOOP_R;
+  const cy = hy - Math.sin(ang) * HOOP_R;
+  const lean = q.fall > 0 ? 70 : Math.sin(q.t * 10) * q.wob * 16;
   const pct = Math.min(100, Math.round((q.d / goal) * 100));
+  const ahead = terrain(q.d + 140);
   return (
     <Shell color={color} phase={phase} onStart={start} hud={i18nT('골목 끝까지 {a}%', { a: pct })} hint="">
-      <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#cfc3a6' }]} testID="hoop-path">
+      <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#efe6d0' }]} testID="hoop-path">
         <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
-          <Path d={road} fill="#efe6d0" />
-          <Path d={left} stroke="#8a7a5c" strokeWidth={3} fill="none" />
-          <Path d={right} stroke="#8a7a5c" strokeWidth={3} fill="none" />
-          {q.stones.map((s, i) => {
-            const y = HOOP_Y - (s.d - q.d);
-            if (y < -20 || y > STAGE_H + 20) return null;
-            return <Ellipse key={i} cx={alley(s.d) + s.off} cy={y} rx={11} ry={7} fill="#7d7468" stroke={INK} strokeWidth={1} />;
+          {/* 돌담 */}
+          {Array.from({ length: 9 }, (_, i) => {
+            const x = ((i * 46 - q.d * 0.5) % 414 + 414) % 414 - 40;
+            return <Rect key={i} x={x} y={150} width={42} height={22} rx={8} fill="#d6cab0" stroke="#b9ab8c" />;
+          })}
+          <Path d={ground} fill="#d9c9a3" stroke="#a8946c" strokeWidth={2} />
+          {q.stones.map((sd, i) => {
+            const x = HOOP_X + (sd - q.d);
+            if (x < -20 || x > STAGE_W + 20) return null;
+            return <Ellipse key={i} cx={x} cy={gy(x) - 5} rx={12} ry={7} fill="#7d7468" stroke={INK} strokeWidth={1} />;
           })}
           {/* 굴렁쇠 */}
-          <G transform={`translate(${q.x} ${HOOP_Y}) rotate(${q.fall > 0 ? 80 : q.lean})`}>
-            <Ellipse cx={0} cy={-24} rx={9} ry={24} fill="none" stroke="#5a4632" strokeWidth={4} />
-            <Line x1={-3} y1={-24 + Math.sin(q.d / 8) * 22} x2={3} y2={-24 - Math.sin(q.d / 8) * 22} stroke="#5a4632" strokeWidth={1.5} />
+          <G transform={`rotate(${lean} ${HOOP_X} ${gy(HOOP_X)})`}>
+            <Circle cx={HOOP_X} cy={hy} r={HOOP_R} fill="none" stroke="#4a3a28" strokeWidth={4.5} />
+            {[0, 1, 2].map((k) => {
+              const a2 = q.spin + (k * Math.PI * 2) / 3;
+              return <Line key={k} x1={HOOP_X} y1={hy} x2={HOOP_X + Math.cos(a2) * (HOOP_R - 3)} y2={hy + Math.sin(a2) * (HOOP_R - 3)} stroke="#4a3a28" strokeWidth={1} opacity={0.35} />;
+            })}
           </G>
-          {/* 막대 — 손가락 위치까지 */}
-          {q.fx != null ? <Line x1={q.fx} y1={q.fy} x2={q.x} y2={HOOP_Y - 6} stroke={color} strokeWidth={4} strokeLinecap="round" /> : null}
+          {/* 채 — 아이 손에서 바퀴 뒤쪽 테두리까지 */}
+          {q.fall > 0 ? null : <Line x1={118} y1={gy(96) - 70} x2={cx} y2={cy} stroke="#7a4b12" strokeWidth={3.5} strokeLinecap="round" />}
+          {/* 앞길 알림 */}
+          <Label x={STAGE_W - 52} y={58} s={ahead > 0 ? i18nT('오르막 ↗') : ahead < 0 ? i18nT('내리막 ↘') : i18nT('평지 →')} size={13} color={ahead > 0 ? '#2b5f8e' : ahead < 0 ? colors.accent : '#5f574c'} />
+          {/* 채 자리 눈금 */}
+          <Rect x={12} y={190} width={8} height={70} rx={4} fill="#e2d6bd" />
+          <Circle cx={16} cy={260 - q.c * 70} r={6} fill={color} />
+          <Label x={30} y={196} s={i18nT('누르기')} size={9} color="#5f574c" weight="700" />
+          <Label x={28} y={262} s={i18nT('밀기')} size={9} color="#5f574c" weight="700" />
           {/* 휘청임 */}
           <Rect x={12} y={12} width={110} height={10} rx={5} fill="#e8e0cf" />
           <Rect x={12} y={12} width={110 * clamp(q.wob, 0, 1)} height={10} rx={5} fill={q.wob > 0.66 ? colors.accent : q.wob > 0.33 ? colors.hwang : '#3f7a52'} />
@@ -491,6 +491,7 @@ export function HoopPathGame({ color, onComplete, goal = 2200, lives: maxLives =
           <Lives n={q.lives} />
           <Label x={STAGE_W / 2} y={STAGE_H - 10} s={q.note} size={11.5} color={INK} weight="700" />
         </Svg>
+        <Sprite art={ART.hoopkid} x={96} y={gy(96) + 2} h={128} rot={-4} />
       </View>
     </Shell>
   );
@@ -604,25 +605,20 @@ export function TugCallGame({ color, onComplete, beatMs = 720 }) {
           ))}
           <Line x1={40} y1={170} x2={40} y2={260} stroke="#3f7a52" strokeWidth={2} strokeDasharray="4 4" />
           <Line x1={STAGE_W - 40} y1={170} x2={STAGE_W - 40} y2={260} stroke="#2b5f8e" strokeWidth={2} strokeDasharray="4 4" />
-          <Line x1={0} y1={215} x2={STAGE_W} y2={215} stroke="#8a5a2b" strokeWidth={6} />
-          <Rect x={ribbon - 7} y={200} width={14} height={30} fill={colors.accent} />
-          {/* 우리 편(왼쪽)·상대편(오른쪽) */}
-          {[0, 1, 2].map((k) => (
-            <G key={k} transform={`translate(${18 + k * 18} 250) rotate(${q.hold ? -18 : -6 - q.flash * 20})`}>
-              <Line x1={0} y1={0} x2={0} y2={-30} stroke={color} strokeWidth={8} strokeLinecap="round" />
-              <Circle cx={0} cy={-40} r={7} fill="#f1d3b3" stroke={INK} />
-            </G>
-          ))}
-          {[0, 1, 2].map((k) => (
-            <G key={k} transform={`translate(${STAGE_W - 18 - k * 18} 250) rotate(12)`}>
-              <Line x1={0} y1={0} x2={0} y2={-30} stroke="#2b5f8e" strokeWidth={8} strokeLinecap="round" />
-              <Circle cx={0} cy={-40} r={7} fill="#f1d3b3" stroke={INK} />
-            </G>
-          ))}
-          <Label x={40} y={282} s={i18nT('우리 편')} size={11} color="#3f7a52" />
-          <Label x={STAGE_W - 40} y={282} s={i18nT('상대편')} size={11} color="#2b5f8e" />
+          <Rect x={0} y={262} width={STAGE_W} height={STAGE_H - 262} fill="#e6dcc6" />
+          <Line x1={0} y1={205} x2={STAGE_W} y2={205} stroke="#8a5a2b" strokeWidth={7} />
+          <Line x1={0} y1={203} x2={STAGE_W} y2={203} stroke="#b07d48" strokeWidth={2} strokeDasharray="6 5" />
+          <Rect x={ribbon - 7} y={190} width={14} height={32} fill={colors.accent} />
+          <Label x={56} y={282} s={i18nT('우리 편')} size={11} color="#3f7a52" />
+          <Label x={STAGE_W - 56} y={282} s={i18nT('상대편')} size={11} color="#2b5f8e" />
           <Label x={STAGE_W / 2} y={316} s={q.note} size={11.5} color={INK} weight="700" />
         </Svg>
+        {[{ x: 34, k: 0 }, { x: 78, k: 1 }].map((m) => (
+          <Sprite key={m.k} art={q.flash > 0.3 ? ART.tug_pull : ART.tug_hold} x={m.x - q.pos * 8} y={262} h={120} flip rot={q.hold ? -8 : -3} />
+        ))}
+        {[{ x: STAGE_W - 34, k: 0 }, { x: STAGE_W - 78, k: 1 }].map((m) => (
+          <Sprite key={m.k} art={ART.tug_opp} x={m.x - q.pos * 8} y={262} h={120} flip rot={6} />
+        ))}
       </View>
     </Shell>
   );

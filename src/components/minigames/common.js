@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Pressable, PanResponder } from 'react-native';
+import { View, StyleSheet, Pressable, PanResponder, Image } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import { t as i18nT } from '../../i18n';
@@ -62,6 +62,28 @@ export function usePad({ onDown, onMove, onUp }) {
     })
   ).current;
   return { ref, handlers: pan.panHandlers };
+}
+
+// 게임 그림(수묵담채 스프라이트) — (x, y)는 발밑 가운데, h는 화면 높이(px). flip이면 좌우 뒤집기, rot은 발밑 기준 회전(도)
+export function Sprite({ art, x, y, h, flip = false, rot = 0, opacity = 1, anchorY = 1 }) {
+  if (!art) return null;
+  const w = (h * art.w) / art.h;
+  return (
+    <Image
+      source={art.src}
+      pointerEvents="none"
+      resizeMode="contain"
+      style={{
+        position: 'absolute',
+        left: x - w / 2,
+        top: y - h * anchorY,
+        width: w,
+        height: h,
+        opacity,
+        transform: [{ translateY: h / 2 }, { rotate: rot + 'deg' }, { translateY: -h / 2 }, { scaleX: flip ? -1 : 1 }],
+      }}
+    />
+  );
 }
 
 export const STAGE_W = 300;

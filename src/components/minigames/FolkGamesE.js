@@ -7,7 +7,8 @@ import Madang from '../../ui/Madang';
 import { TuhoJar, TuhoArrow } from '../../ui/Sprites';
 import { useTapKey } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
-import { useRaf, usePad, Shell, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { useRaf, usePad, Shell, Sprite, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { ART } from './gameArt';
 import { nearestCue, gradeOff, tuhoRange, tuhoLanding } from '../../utils/folkTiming';
 import { t as i18nT } from '../../i18n';
 
@@ -264,11 +265,11 @@ export function TuhoPullGame({ color, onComplete, need = 3, zoneDeg = 11 }) {
         <Madang variant="yard" seed={43} ground={0.72} />
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
-            <Kid x={X0 - 16} y={GY} color={color} face={1} arm="throw" />
             {preview ? preview.map(([x, y], i) => <Circle key={i} cx={x} cy={y} r={2.6} fill={colors.accent} opacity={1 - i * 0.08} />) : null}
             {q.last != null ? <Circle cx={X0 + q.last * RMAX} cy={GY - 2} r={4} fill={colors.accent} /> : null}
             {q.drag ? <Line x1={X0} y1={Y0} x2={arrow.x} y2={arrow.y} stroke={INK} strokeWidth={1} strokeDasharray="2 2" /> : null}
           </Svg>
+          <Sprite art={ART.tuho} x={X0 - 22} y={GY + 4} h={104} />
           <View style={{ position: 'absolute', left: jarX - 20, top: GY - 64 }}><TuhoJar width={40} height={64} /></View>
           <View style={{ position: 'absolute', left: arrow.x - 15, top: arrow.y - 4, transform: [{ rotate: `${arrow.rot}deg` }] }}><TuhoArrow length={30} color={color} /></View>
           <Text style={st.note}>{i18nT(q.note)}</Text>
