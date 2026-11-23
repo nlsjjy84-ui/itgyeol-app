@@ -61,6 +61,8 @@ export function play(name) {
     let p = players[name];
     if (!p) {
       p = createAudioPlayer(FILES[name]);
+      // 귀에 거슬리지 않게 — 효과음은 작게, 배경음악은 더 작게
+      try { p.volume = name.startsWith('bgm') ? 0.35 : 0.55; } catch (e) { /* 볼륨을 못 바꾸는 환경 */ }
       players[name] = p;
     }
     try {
