@@ -19,6 +19,7 @@ a{color:inherit}
 /* 위 고정 줄 */
 .top{position:fixed;inset:0 0 auto 0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:18px 6vw;mix-blend-mode:difference}
 .top b{font-family:'Nanum Myeongjo',serif;font-size:20px;letter-spacing:.08em}
+.top .langs{margin-left:auto;margin-right:22px;display:flex;gap:12px}.top .langs a{border:0;opacity:.55;font-size:13px}.top .langs a.on{opacity:1;border-bottom:1px solid currentColor}
 .top a{font-size:14px;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px}
 /* 1. 첫 화면 — 조명 아래 도는 진짜 유물 */
 .hero{position:relative;height:160vh}
@@ -223,6 +224,8 @@ footer a{color:var(--dim)}
 .morep .rail{cursor:grab;user-select:none;-webkit-user-select:none}.morep .rail.drag{cursor:grabbing;scroll-snap-type:none}.morep .rail img{-webkit-user-drag:none;pointer-events:none}
 .morep figure img{transition:transform .8s cubic-bezier(.16,1,.3,1)}.morep figure:hover img{transform:translateY(-6px)}
 /*/morep*/
+html:lang(zh) body,html:lang(ja) body,html:lang(zh) *,html:lang(ja) *{word-break:normal;line-break:strict}
+@media (max-width:640px){.top{flex-wrap:wrap;row-gap:8px}.top .langs{order:3;width:100%;margin:0;gap:14px}.top .langs a{font-size:12px}}
 </style>
 </head>
 <body>

@@ -18,7 +18,7 @@ import { pieceName } from '../utils/pieceName';
 export function labelLine(k) {
   const w = (MEANING[k] && MEANING[k].w) || [];
   const pick = w.find((id) => !id.startsWith('t_')) || w[0];
-  return pick && MOTIF[pick] ? MOTIF[pick].m : '';
+  return pick && MOTIF[pick] ? t(MOTIF[pick].m) : '';
 }
 
 export default function MuseumScreen({ navigation }) {

@@ -87,9 +87,9 @@ export function PieceDetail({ k, owned, count = 0, onClose, onTransform, onHapch
                             if (!f) return null;
                             return (
                               <Text key={id} style={st.mText}>
-                                <Text style={{ fontWeight: '800' }}>{f.n}</Text>
+                                <Text style={{ fontWeight: '800' }}>{t(f.n)}</Text>
                                 {' — '}
-                                {f.m}
+                                {t(f.m)}
                                 <Text style={[st.mSrcIn, f.u ? st.mLink : null]} onPress={f.u ? () => Linking.openURL(f.u) : undefined}>
                                   {'  ' + f.s + (f.u ? ' ↗' : '')}
                                 </Text>

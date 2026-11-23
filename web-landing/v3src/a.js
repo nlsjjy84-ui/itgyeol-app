@@ -1,3 +1,5 @@
+import { T, applyDom } from './a_i18n.js';
+applyDom();
 import Lenis from 'lenis';
 import { mountRelic, pinProgress, progressOf, countUp } from './relic3d.js';
 
@@ -47,7 +49,7 @@ const steps = document.getElementById('steps');
 const items = [...steps.querySelectorAll('.step')];
 const num = steps.querySelector('.stepnum span');
 const bar = steps.querySelector('.bar i');
-const HAN = ['하나', '둘', '셋', '넷'];
+const HAN = ['하나', '둘', '셋', '넷'].map(T);
 let cur = -1; let barW = 0;
 function setStep(i) {
   cur = i;
@@ -101,8 +103,8 @@ const B = [
   { t: '한글 테트리스', s: '자음·모음 블록을 쌓아 줄을 지우는 판', w: '한 글자가 짜이는 원리를 놀면서 익힙니다.', g: '기와·막새·전돌', i: 'nmk_3036', c: '#1f9a6c' },
   { t: '탈춤', s: '굿거리·타령 장단에 맞춰 한삼을 뿌리는 판', w: '장단의 큰 박에 맞춰 우리 가락의 박자를 몸으로 익힙니다.', g: '탈·노리개·비녀', i: 'gogung_364686', c: '#8a7f73' },
   { t: '단청', s: '가칠 → 타분 → 오색 → 분선, 칠하는 순서대로', w: '단청장의 실제 작업 순서를 따라가며 오색에 담긴 뜻을 익힙니다.', g: '청자·백자·분청', i: 'nmk_6993', c: '#efe7da' },
-];
-const NUM6 = ['하나', '둘', '셋', '넷', '다섯', '여섯'];
+].map((b) => ({ ...b, t: T(b.t), s: T(b.s), w: T(b.w), g: T(b.g) }));
+const NUM6 = ['하나', '둘', '셋', '넷', '다섯', '여섯'].map(T);
 const bsec = document.getElementById('boards');
 const bstage = document.getElementById('bstage');
 const $id = (x) => document.getElementById(x);
@@ -152,7 +154,7 @@ mountRelic(document.getElementById('lotus'), { bin: '../m/lotus.bin', tex: '../m
     st.root.rotation.x = idle * (Math.sin(st.t * 0.28) * 0.25 - 0.15);
     st.root.rotation.z = a * Math.sin(st.t * 0.22) * 0.03;
     st.cam.position.z = 2.7 + a * 2.3;
-    const ph = a < 0.05 ? '벽돌 한 장 — 가운데 큰 연꽃' : a < 0.97 ? '네 장이 모입니다…' : '네 모서리가 만나 — 꽃이 하나 더 피었습니다';
+    const ph = T(a < 0.05 ? '벽돌 한 장 — 가운데 큰 연꽃' : a < 0.97 ? '네 장이 모입니다…' : '네 모서리가 만나 — 꽃이 하나 더 피었습니다');
     if (ph !== last) { last = ph; lphase.style.opacity = 0; setTimeout(() => { lphase.textContent = ph; lphase.style.opacity = 1; }, 250); }
   };
 }).catch(() => {});

@@ -5,6 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import en from './en';
 import zh from './zh';
 import ja from './ja';
+import dataEn from './data_en';
+import dataZh from './data_zh';
+import dataJa from './data_ja';
 
 export const LANGS = [
   { id: 'ko', label: '한국어', ready: true },
@@ -13,6 +16,8 @@ export const LANGS = [
   { id: 'ja', label: '日本語', ready: true },
 ];
 const PACKS = { en, zh, ja };
+// 유물 뜻·물건 만들기 글은 따로 둔 파일을 화면 문장 사전에 더한다(화면 문장이 같으면 화면 쪽이 우선).
+[[en, dataEn], [zh, dataZh], [ja, dataJa]].forEach(([p, d]) => { p.ui = { ...d, ...(p.ui || {}) }; });
 const KEY = 'itgyeol_lang_v1';
 let current = 'ko';
 
@@ -61,6 +66,9 @@ export function setLang(id) {
 
 export async function loadLang() {
   try {
+    // 소개 화면에서 고른 언어(?lang=en)를 먼저 따른다
+    const q = typeof location !== 'undefined' && location.search ? new URLSearchParams(location.search).get('lang') : null;
+    if (q && LANGS.some((l) => l.id === q && l.ready)) { setLang(q); return current; }
     const v = await Promise.race([AsyncStorage.getItem(KEY), new Promise((r) => setTimeout(() => r(null), 1200))]);
     if (v) {
       current = LANGS.some((l) => l.id === v && l.ready) ? v : 'ko';

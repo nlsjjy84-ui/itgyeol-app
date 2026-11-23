@@ -7,7 +7,7 @@ import ScreenHeader from '../ui/ScreenHeader';
 import SealButton from '../ui/SealButton';
 import WhyBox from '../ui/WhyBox';
 import Vitrine from '../components/Vitrine';
-import { t } from '../i18n';
+import { t, getLang } from '../i18n';
 import { usePieces, saveCraft } from '../utils/pieceStore';
 import { PIECE_BY_K } from '../data/pieces';
 import { MEANING, MOTIF } from '../data/pieceMeaning';
@@ -59,7 +59,7 @@ export default function CraftScreen({ navigation, route }) {
             {w.map((id) =>
               MOTIF[id] ? (
                 <Text key={id} style={st.mean}>
-                  <Text style={st.b}>{MOTIF[id].n}</Text> — {MOTIF[id].m}
+                  <Text style={st.b}>{t(MOTIF[id].n)}</Text> — {t(MOTIF[id].m)}
                 </Text>
               ) : null,
             )}
@@ -77,17 +77,17 @@ export default function CraftScreen({ navigation, route }) {
                 <Text style={st.to}>{t(c.to)}</Text>
                 <View style={st.step}>
                   <Text style={st.tag}>{t('원래 쓰임')}</Text>
-                  <Text style={st.stepTxt}>{r.type ? t(origPart(c.why, r.type.m)) : t('박물관 사진 그대로')}</Text>
+                  <Text style={st.stepTxt}>{r.type ? (getLang() === 'ko' ? origPart(c.why, r.type.m) : t(r.type.m)) : t('박물관 사진 그대로')}</Text>
                 </View>
                 <View style={st.step}>
                   <Text style={[st.tag, st.tagTo]}>{t('오늘의 물건')}</Text>
-                  <Text style={st.stepTxt}>{r.type ? todayPart(c.why) : c.why}</Text>
+                  <Text style={st.stepTxt}>{getLang() === 'ko' ? (r.type ? todayPart(c.why) : c.why) : t(c.why)}</Text>
                 </View>
                 {c.gift ? (
                   <View style={st.step}>
                     <Text style={[st.tag, st.tagGift]}>{t('누구에게')}</Text>
                     <Text style={st.stepTxt}>
-                      {t('「{m}」 무늬는 {why} — {who} 주기 좋아요.', { m: c.gift.motif.n, why: t(c.gift.why), who: t(c.gift.who) })}
+                      {t('「{m}」 무늬는 {why} — {who} 주기 좋아요.', { m: t(c.gift.motif.n), why: t(c.gift.why), who: t(c.gift.who) })}
                     </Text>
                   </View>
                 ) : null}
