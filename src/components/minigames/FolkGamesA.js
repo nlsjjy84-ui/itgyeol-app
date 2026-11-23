@@ -3,11 +3,11 @@ import { View, StyleSheet, Image, Pressable } from 'react-native';
 import Text from '../../ui/Text';
 import { colors } from '../../theme';
 import Madang from '../../ui/Madang';
-import { Marble } from '../../ui/Sprites';
 import { useArrowHold } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
 import { t as i18nT } from '../../i18n';
+import { ART } from './gameArt';
 
 const PUNG = require('../../../assets/characters/pung_spin.png');
 
@@ -252,8 +252,14 @@ export function MarbleGame({ color, onComplete, targets = 3, shots = 8 }) {
           <View style={[st.ring, { left: CX - RING, top: CY - 10 - RING, width: RING * 2, height: RING * 2, borderRadius: RING }]} />
           {q.m.map((b, i) =>
             b.out && !b.me ? null : (
-              <View key={i} style={{ position: 'absolute', left: b.x - MR, top: b.y - MR }}>
-                <Marble size={MR * 2} color={b.me ? '#c1592f' : ['#2b5f8e', '#2c7a64', '#7a3f8a', '#c8982b'][i % 4]} />
+              <View key={i} style={{ position: 'absolute', left: b.x - MR, top: b.y - MR, width: MR * 2, height: MR * 2 }}>
+                {/* 유리구슬 그림 — 굴러간 거리만큼 돌아 보인다 */}
+                <Image
+                  source={(b.me ? ART.marble_r : [ART.marble_b, ART.marble_g, ART.marble_p, ART.marble_y][i % 4]).src}
+                  style={{ width: MR * 2, height: MR * 2, transform: [{ rotate: `${((b.x * 7 + b.y * 5) % 360).toFixed(1)}deg` }] }}
+                  resizeMode="contain"
+                />
+                {b.me ? <View style={{ position: 'absolute', left: -3, top: -3, width: MR * 2 + 6, height: MR * 2 + 6, borderRadius: MR + 3, borderWidth: 2, borderColor: '#fff' }} /> : null}
               </View>
             )
           )}

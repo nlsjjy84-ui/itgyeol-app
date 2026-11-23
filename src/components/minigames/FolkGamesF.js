@@ -3,7 +3,7 @@ import { View, Platform } from 'react-native';
 import Svg, { G, Path, Circle, Line, Rect, Ellipse, Text as SvgText } from 'react-native-svg';
 import { colors } from '../../theme';
 import { play } from '../../utils/sound';
-import { useRaf, usePad, Shell, Sprite, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { useRaf, usePad, Shell, Sprite, artPt, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
 import { ART } from './gameArt';
 import { t as i18nT } from '../../i18n';
 
@@ -71,10 +71,10 @@ function Lives({ n, max = 3 }) {
 // ───────────────────────── 고무줄놀이 — 부르면 밟는다 ─────────────────────────
 const GOMU_STEPS = ['밖', '걸고', '안', '밟고'];
 const GOMU_LEVELS = [
-  { name: '발목', len: 3, beat: 720, h: 18 },
-  { name: '무릎', len: 4, beat: 660, h: 44 },
-  { name: '허리', len: 5, beat: 610, h: 74 },
-  { name: '겨드랑이', len: 6, beat: 570, h: 104 },
+  { name: '발목', len: 3, beat: 720, fy: 0.93 },
+  { name: '무릎', len: 4, beat: 660, fy: 0.77 },
+  { name: '허리', len: 5, beat: 610, fy: 0.56 },
+  { name: '겨드랑이', len: 6, beat: 570, fy: 0.42 },
 ];
 export function GomuStepGame({ color, onComplete, lives: maxLives = 3 }) {
   const [phase, setPhase] = useState('ready');
@@ -173,7 +173,10 @@ export function GomuStepGame({ color, onComplete, lives: maxLives = 3 }) {
   const r0 = respAt(q);
   const calling = ci >= 0 && ci < q.seq.length;
   const yourTurn = q.t >= r0 - B * 0.5;
-  const bandY = 238 - lv.h;
+  // 고무줄 높이 — 줄을 건 아이 그림의 발목·무릎·허리·겨드랑이 자리
+  const HOLD_X = 44;
+  const HOLD_H = 140;
+  const bandY = 240 - HOLD_H + lv.fy * HOLD_H;
   return (
     <Shell color={color} phase={phase} onStart={start} hud={i18nT('{a} 높이 · {b}/{c}번째 노래', { a: i18nT(lv.name), b: q.lv + 1, c: GOMU_LEVELS.length })} hint="">
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: PAPER }]} testID="gomu-step">
@@ -197,9 +200,9 @@ export function GomuStepGame({ color, onComplete, lives: maxLives = 3 }) {
           })}
           {/* 땅과 고무줄 — 양쪽 아이 다리에 건 두 줄(뒤쪽 줄은 조금 높고 가늘게) */}
           <Rect x={0} y={236} width={STAGE_W} height={18} fill="#e6dcc6" />
-          <Line x1={34} y1={bandY - 9} x2={STAGE_W - 34} y2={bandY - 9} stroke="#b3322b" strokeWidth={2} opacity={0.65} />
-          <Line x1={34} y1={bandY} x2={STAGE_W - 34} y2={bandY} stroke="#c0392b" strokeWidth={3.2} />
-          <Label x={STAGE_W / 2 + 92} y={bandY - 14} s={i18nT(lv.name)} size={11} color="#b3322b" weight="700" />
+          <Line x1={HOLD_X} y1={bandY - 9} x2={STAGE_W - HOLD_X} y2={bandY - 9} stroke="#b3322b" strokeWidth={2} opacity={0.65} />
+          <Line x1={HOLD_X} y1={bandY} x2={STAGE_W - HOLD_X} y2={bandY} stroke="#c0392b" strokeWidth={3.2} />
+          <Label x={STAGE_W / 2 + 66} y={bandY - 14} s={i18nT(lv.name)} size={11} color="#b3322b" weight="700" />
           {/* 밟는 네 칸 */}
           {GOMU_STEPS.map((s, i) => {
             const w = STAGE_W / 4;
@@ -213,8 +216,8 @@ export function GomuStepGame({ color, onComplete, lives: maxLives = 3 }) {
           })}
           {q.note ? <Label x={STAGE_W / 2} y={244} s={q.note} size={12} color={colors.accentDeep || INK} weight="700" /> : null}
         </Svg>
-        <Sprite art={ART.holder} x={30} y={240} h={150} />
-        <Sprite art={ART.holder} x={STAGE_W - 30} y={240} h={150} flip />
+        <Sprite art={ART.holder} x={HOLD_X} y={240} h={HOLD_H} />
+        <Sprite art={ART.holder} x={STAGE_W - HOLD_X} y={240} h={HOLD_H} flip />
         <Sprite art={ART.step} x={150} y={240 - (q.flashT > 0 ? Math.sin((q.flashT / 0.25) * Math.PI) * 16 : 0)} h={136} />
       </View>
     </Shell>
@@ -230,7 +233,7 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
   const [phase, setPhase] = useState('ready');
   const [, force] = useState(0);
   const mkCalls = () => Array.from({ length: jumps }, (_, i) => (i === 0 ? CALLS[0] : Math.random() < 0.38 ? CALLS[1] : CALLS[0]));
-  const fresh = () => ({ t: 0, stage: 'out', calls: mkCalls(), n: 0, lives: maxLives, hop: 0, hopBig: false, x: 46, note: i18nT('줄이 위로 올라갈 때 오른쪽으로 쓸어 들어가요'), checked: 0, did: -1, start: Date.now(), done: false });
+  const fresh = () => ({ t: 0, stage: 'out', calls: mkCalls(), n: 0, lives: maxLives, hop: 0, hopBig: false, x: 34, note: i18nT('줄이 위로 올라갈 때 오른쪽으로 쓸어 들어가요'), checked: 0, did: -1, start: Date.now(), done: false });
   const g = useRef(fresh());
   // 줄의 각 — 0이면 땅(발밑), 0.5면 머리 위
   const ph = (t) => ((t / cycleMs) % 1 + 1) % 1;
@@ -262,7 +265,7 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
         play('ok');
       } else {
         q.stage = 'gone';
-        q.x = 260;
+        q.x = 266;
         q.done = true;
         play('jing');
         setTimeout(() => { setPhase('done'); onComplete({ success: true, score: q.lives, elapsedMs: Date.now() - q.start }); }, 600);
@@ -312,6 +315,10 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
   // 줄 모양 — 아래(0)·위(0.5) 사이를 돈다. 화면에서는 위아래로 출렁이는 곡선
   const ropeY = 262 - (1 - Math.cos(p * Math.PI * 2)) * 0.5 * 238;
   const front = p < 0.25 || p > 0.75;
+  // 줄은 돌리는 아이 손(그림의 주먹 자리)에서 손으로
+  const [hlx, hly] = artPt(ART.turner, 64, 262, 132, 0.8, 0.27);
+  const hrx = STAGE_W - hlx;
+  const ropeD = `M${hlx} ${hly} Q150 ${ropeY * 2 - hly} ${hrx} ${hly}`;
   const hopH = Math.sin((1 - q.hop) * Math.PI) * (q.hop > 0 ? (q.hopBig ? 46 : 22) : 0);
   const cur = q.stage === 'in' ? q.calls[q.n] : null;
   const nxt = q.stage === 'in' ? q.calls[q.n + 1] : null;
@@ -330,7 +337,7 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
             </G>
           ) : null}
           {/* 줄 — 양쪽 아이 손에서 손으로. 발밑(아래)과 머리 위(위) 사이를 돈다 */}
-          <Path d={`M52 172 Q150 ${ropeY * 2 - 172} ${STAGE_W - 52} 172`} stroke="#8a5a2b" strokeWidth={front ? 4 : 2.6} fill="none" opacity={front ? 1 : 0.7} />
+          <Path d={ropeD} stroke="#8a5a2b" strokeWidth={front ? 4 : 2.6} fill="none" opacity={front ? 1 : 0.7} />
           {/* 들어가고 나갈 때 알맞은지 */}
           {q.stage === 'out' || q.stage === 'exit' ? (
             <Rect x={20} y={300} width={STAGE_W - 40} height={14} rx={7} fill={p > 0.3 && p < 0.75 ? '#3f7a52' : '#d8cfbe'} />
@@ -338,13 +345,13 @@ export function RopeEnterGame({ color, onComplete, jumps = 6, cycleMs = 1100, li
           {q.stage === 'out' || q.stage === 'exit' ? <Label x={STAGE_W / 2} y={333} s={p > 0.3 && p < 0.75 ? i18nT('지금! → 쓸기') : i18nT('기다려요')} size={13} /> : null}
           <Label x={STAGE_W / 2} y={q.stage === 'in' ? 300 : 290} s={q.note} size={11.5} color="#5f574c" weight="700" />
         </Svg>
-        <Sprite art={ART.turner} x={30} y={262} h={150} />
-        <Sprite art={ART.turner} x={STAGE_W - 30} y={262} h={150} flip />
-        <Sprite art={ART.jump} x={q.x} y={262 - hopH} h={118} />
+        <Sprite art={ART.turner} x={64} y={262} h={132} />
+        <Sprite art={ART.turner} x={STAGE_W - 64} y={262} h={132} flip />
+        <Sprite art={ART.jump} x={q.x} y={262 - hopH} h={q.stage === 'in' ? 112 : 100} />
         {front ? (
           <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H }}>
             <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
-              <Path d={`M52 172 Q150 ${ropeY * 2 - 172} ${STAGE_W - 52} 172`} stroke="#8a5a2b" strokeWidth={4} fill="none" />
+              <Path d={ropeD} stroke="#8a5a2b" strokeWidth={4} fill="none" />
             </Svg>
           </View>
         ) : null}
@@ -444,12 +451,23 @@ export function HoopPathGame({ color, onComplete, goal = 2600, lives: maxLives =
   const pts = [];
   for (let x = -10; x <= STAGE_W + 10; x += 10) pts.push(`${x} ${gy(x)}`);
   const ground = `M-10 ${STAGE_H} L${pts.join(' L')} L${STAGE_W + 10} ${STAGE_H} Z`;
-  const hy = gy(HOOP_X) - HOOP_R;
+  const lean = q.fall > 0 ? 70 : Math.sin(q.t * 10) * q.wob * 16;
+  // 바퀴 가운데 — 땅에 닿은 점을 축으로 기운다
+  const la = (lean * Math.PI) / 180;
+  const hx = HOOP_X + Math.sin(la) * HOOP_R;
+  const hy = gy(HOOP_X) - Math.cos(la) * HOOP_R;
   // 채가 닿는 자리 — 바퀴 뒤쪽 테두리, 아래(210°)에서 위(120°)까지
   const ang = ((210 - q.c * 90) * Math.PI) / 180;
-  const cx = HOOP_X + Math.cos(ang) * HOOP_R;
+  const cx = hx + Math.cos(ang) * HOOP_R;
   const cy = hy - Math.sin(ang) * HOOP_R;
-  const lean = q.fall > 0 ? 70 : Math.sin(q.t * 10) * q.wob * 16;
+  // 아이 손(그림의 주먹 자리)
+  const [kx, ky] = artPt(ART.hoopkid, 96, gy(96) + 2, 128, 0.64, 0.62);
+  // 채 끝의 ㄷ자 고리 — 바퀴 테두리를 감싸듯 짧게 꺾는다
+  const sdx = cx - kx;
+  const sdy = cy - ky;
+  const sl = Math.hypot(sdx, sdy) || 1;
+  const nx = -sdy / sl;
+  const ny = sdx / sl;
   const pct = Math.min(100, Math.round((q.d / goal) * 100));
   const ahead = terrain(q.d + 140);
   return (
@@ -462,21 +480,11 @@ export function HoopPathGame({ color, onComplete, goal = 2600, lives: maxLives =
             return <Rect key={i} x={x} y={150} width={42} height={22} rx={8} fill="#d6cab0" stroke="#b9ab8c" />;
           })}
           <Path d={ground} fill="#d9c9a3" stroke="#a8946c" strokeWidth={2} />
-          {q.stones.map((sd, i) => {
-            const x = HOOP_X + (sd - q.d);
-            if (x < -20 || x > STAGE_W + 20) return null;
-            return <Ellipse key={i} cx={x} cy={gy(x) - 5} rx={12} ry={7} fill="#7d7468" stroke={INK} strokeWidth={1} />;
+          {/* 바퀴가 구르는 것이 보이게 — 땅에 찍히는 바퀴 자국 */}
+          {[0, 1, 2, 3, 4, 5].map((k) => {
+            const x = ((k * 60 - q.d) % 360 + 360) % 360 - 30;
+            return x < HOOP_X ? <Line key={k} x1={x} y1={gy(x) + 2} x2={x + 22} y2={gy(x + 22) + 2} stroke="#b9a57c" strokeWidth={2} strokeLinecap="round" /> : null;
           })}
-          {/* 굴렁쇠 */}
-          <G transform={`rotate(${lean} ${HOOP_X} ${gy(HOOP_X)})`}>
-            <Circle cx={HOOP_X} cy={hy} r={HOOP_R} fill="none" stroke="#4a3a28" strokeWidth={4.5} />
-            {[0, 1, 2].map((k) => {
-              const a2 = q.spin + (k * Math.PI * 2) / 3;
-              return <Line key={k} x1={HOOP_X} y1={hy} x2={HOOP_X + Math.cos(a2) * (HOOP_R - 3)} y2={hy + Math.sin(a2) * (HOOP_R - 3)} stroke="#4a3a28" strokeWidth={1} opacity={0.35} />;
-            })}
-          </G>
-          {/* 채 — 아이 손에서 바퀴 뒤쪽 테두리까지 */}
-          {q.fall > 0 ? null : <Line x1={118} y1={gy(96) - 70} x2={cx} y2={cy} stroke="#7a4b12" strokeWidth={3.5} strokeLinecap="round" />}
           {/* 앞길 알림 */}
           <Label x={STAGE_W - 52} y={58} s={ahead > 0 ? i18nT('오르막 ↗') : ahead < 0 ? i18nT('내리막 ↘') : i18nT('평지 →')} size={13} color={ahead > 0 ? '#2b5f8e' : ahead < 0 ? colors.accent : '#5f574c'} />
           {/* 채 자리 눈금 */}
@@ -491,7 +499,24 @@ export function HoopPathGame({ color, onComplete, goal = 2600, lives: maxLives =
           <Lives n={q.lives} />
           <Label x={STAGE_W / 2} y={STAGE_H - 10} s={q.note} size={11.5} color={INK} weight="700" />
         </Svg>
-        <Sprite art={ART.hoopkid} x={96} y={gy(96) + 2} h={128} rot={-4} />
+        {/* 길 위 돌부리 */}
+        {q.stones.map((sd, i) => {
+          const x = HOOP_X + (sd - q.d);
+          if (x < -20 || x > STAGE_W + 20) return null;
+          return <Sprite key={'s' + i} art={ART.stone_flat} x={x} y={gy(x) + 3} h={16} />;
+        })}
+        <Sprite art={ART.hoopkid} x={96} y={gy(96) + 2} h={128} />
+        {/* 굴렁쇠 — 쇠 테(그림) */}
+        <Sprite art={ART.hoop} x={hx} y={hy + HOOP_R} h={HOOP_R * 2} />
+        {/* 채 — 아이 손에서 바퀴 뒤쪽 테두리까지, 끝은 ㄷ자 */}
+        {q.fall > 0 ? null : (
+          <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H }}>
+            <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
+              <Line x1={kx} y1={ky} x2={cx} y2={cy} stroke="#8a5a2b" strokeWidth={3.2} strokeLinecap="round" />
+              <Path d={`M${cx + nx * 6} ${cy + ny * 6} L${cx - nx * 6} ${cy - ny * 6}`} stroke="#6b4416" strokeWidth={3} strokeLinecap="round" />
+            </Svg>
+          </View>
+        )}
       </View>
     </Shell>
   );
@@ -606,18 +631,19 @@ export function TugCallGame({ color, onComplete, beatMs = 720 }) {
           <Line x1={40} y1={170} x2={40} y2={260} stroke="#3f7a52" strokeWidth={2} strokeDasharray="4 4" />
           <Line x1={STAGE_W - 40} y1={170} x2={STAGE_W - 40} y2={260} stroke="#2b5f8e" strokeWidth={2} strokeDasharray="4 4" />
           <Rect x={0} y={262} width={STAGE_W} height={STAGE_H - 262} fill="#e6dcc6" />
-          <Line x1={0} y1={205} x2={STAGE_W} y2={205} stroke="#8a5a2b" strokeWidth={7} />
-          <Line x1={0} y1={203} x2={STAGE_W} y2={203} stroke="#b07d48" strokeWidth={2} strokeDasharray="6 5" />
-          <Rect x={ribbon - 7} y={190} width={14} height={32} fill={colors.accent} />
+          <Line x1={0} y1={203} x2={STAGE_W} y2={203} stroke="#8a5a2b" strokeWidth={7} />
+          <Line x1={0} y1={201} x2={STAGE_W} y2={201} stroke="#b07d48" strokeWidth={2} strokeDasharray="6 5" />
+          <Rect x={ribbon - 7} y={188} width={14} height={32} fill={colors.accent} />
           <Label x={56} y={282} s={i18nT('우리 편')} size={11} color="#3f7a52" />
           <Label x={STAGE_W - 56} y={282} s={i18nT('상대편')} size={11} color="#2b5f8e" />
           <Label x={STAGE_W / 2} y={316} s={q.note} size={11.5} color={INK} weight="700" />
         </Svg>
-        {[{ x: 34, k: 0 }, { x: 78, k: 1 }].map((m) => (
-          <Sprite key={m.k} art={q.flash > 0.3 ? ART.tug_pull : ART.tug_hold} x={m.x - q.pos * 8} y={262} h={120} flip rot={q.hold ? -8 : -3} />
+        {/* 손(그림의 주먹)이 줄 높이(203)에 오게 크기·자리를 맞췄다 */}
+        {[{ x: 54, k: 0 }, { x: 104, k: 1 }].map((m) => (
+          <Sprite key={m.k} art={q.flash > 0.3 ? ART.tug_pull : ART.tug_hold} x={m.x - q.pos * 8} y={262} h={104} flip rot={q.hold ? -4 : -1} />
         ))}
-        {[{ x: STAGE_W - 34, k: 0 }, { x: STAGE_W - 78, k: 1 }].map((m) => (
-          <Sprite key={m.k} art={ART.tug_opp} x={m.x - q.pos * 8} y={262} h={120} flip rot={6} />
+        {[{ x: STAGE_W - 64, k: 0 }, { x: STAGE_W - 122, k: 1 }].map((m) => (
+          <Sprite key={m.k} art={ART.tug_opp} x={m.x - q.pos * 8} y={256} h={96} flip rot={3} />
         ))}
       </View>
     </Shell>

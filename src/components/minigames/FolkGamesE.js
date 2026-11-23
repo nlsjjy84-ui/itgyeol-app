@@ -18,6 +18,7 @@ import { t as i18nT } from '../../i18n';
 //   투호      — 화살을 손가락으로 뒤로 당겼다 놓아 던진다(새총처럼). 점선이 날아갈 길.
 //   고무줄놀이 — "하나·둘·셋·폴짝!" 구령의 「폴짝」에 맞춰 뛰어넘는다. 발목 → 무릎 → 허리로 높아진다.
 
+const artX0 = (x0) => x0 - 0.3 * ((96 * ART.tuho.w) / ART.tuho.h);
 const GY = 245; // 마당 땅 높이(Madang ground 0.72)
 const INK = '#2a2420';
 
@@ -162,7 +163,7 @@ export function TuhoPullGame({ color, onComplete, need = 3, zoneDeg = 11 }) {
   const [phase, setPhase] = useState('ready');
   const [, force] = useState(0);
   const TOL = clamp(zoneDeg / 180, 0.045, 0.09);
-  const X0 = 46;
+  const X0 = 64;
   const Y0 = GY - 44; // 화살을 쥔 손 높이
   const RMAX = STAGE_W - 40 - X0;
   const MOUTH_Y = GY - 60;
@@ -269,7 +270,8 @@ export function TuhoPullGame({ color, onComplete, need = 3, zoneDeg = 11 }) {
             {q.last != null ? <Circle cx={X0 + q.last * RMAX} cy={GY - 2} r={4} fill={colors.accent} /> : null}
             {q.drag ? <Line x1={X0} y1={Y0} x2={arrow.x} y2={arrow.y} stroke={INK} strokeWidth={1} strokeDasharray="2 2" /> : null}
           </Svg>
-          <Sprite art={ART.tuho} x={X0 - 22} y={GY + 4} h={104} />
+          {/* 손(그림의 주먹 자리 0.80, 0.33)이 화살 놓는 자리(X0, Y0)에 오게 */}
+          <Sprite art={ART.tuho} x={artX0(X0)} y={Y0 + 96 * 0.67} h={96} />
           <View style={{ position: 'absolute', left: jarX - 20, top: GY - 64 }}><TuhoJar width={40} height={64} /></View>
           <View style={{ position: 'absolute', left: arrow.x - 15, top: arrow.y - 4, transform: [{ rotate: `${arrow.rot}deg` }] }}><TuhoArrow length={30} color={color} /></View>
           <Text style={st.note}>{i18nT(q.note)}</Text>

@@ -8,6 +8,7 @@ import { useTapKey } from '../../utils/useTapKey';
 import { play } from '../../utils/sound';
 import { useRaf, usePad, Shell, Bar, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
 import { t as i18nT } from '../../i18n';
+import { ART } from './gameArt';
 
 // 놀이마다 "조작 동작"이 전부 달라야 한다는 피드백으로 새로 만든 4개.
 //   팽이치기 — 돌아다니는 팽이를 "찾아서 콕" 눌러 채로 친다 (목표물 누르기)
@@ -112,8 +113,9 @@ export function TopChaseGame({ color, onComplete, targetHits = 14, lives = 3, dr
 // 실제 규칙(넘겨먹기): 바닥에 놓인 상대 딱지를 내 딱지로 내리쳐 뒤집으면 딴다.
 // 높이 들어 칠수록 세지만 손이 흔들려 덜 정확하다. 한가운데를 치면 눌리기만 하고,
 // 가장자리를 쳐야 바람과 반동으로 넘어간다. 양면딱지는 두 번 넘겨야 딴다.
-const DDAKJI_RED = require('../../../assets/sprites/ddakji_red.png');
-const DDAKJI_BLUE = require('../../../assets/sprites/ddakji_blue.png');
+// 접은 종이 딱지 그림(풍이·결이와 같은 수묵담채)
+const DDAKJI_RED = ART.ddakji_red.src;
+const DDAKJI_BLUE = ART.ddakji_blue.src;
 export function DdakjiFanGame({ color, onComplete, rounds = 3, timeSec = 9, doubleSided = false }) {
   const [phase, setPhase] = useState('ready');
   const [, force] = useState(0);

@@ -3,7 +3,7 @@ import { View, Platform } from 'react-native';
 import Svg, { G, Path, Circle, Line, Rect, Ellipse, Polygon, Text as SvgText } from 'react-native-svg';
 import { colors } from '../../theme';
 import { play } from '../../utils/sound';
-import { useRaf, usePad, Shell, Sprite, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
+import { useRaf, usePad, Shell, Sprite, Spin, artPt, STAGE_W, STAGE_H, rand, clamp, styles as S } from './common';
 import { ART } from './gameArt';
 import { t as i18nT } from '../../i18n';
 
@@ -46,7 +46,7 @@ const end = (setPhase, onComplete, q, success, score) => {
 const KID_H = 130;
 const BI_STAGES = [
   { name: '발등', y: -8, dx: 12, k: 0.9 },
-  { name: '무릎', y: -40, dx: 8, k: 1.25 },
+  { name: '무릎', y: -30, dx: 8, k: 1.25 },
   { name: '배', y: -62, dx: 10, k: 1.5 },
   { name: '어깨(훈장)', y: -88, dx: -10, k: 1.85 },
   { name: '머리(떡장수)', y: -128, dx: 0, k: 2.2 },
@@ -55,9 +55,9 @@ export function BiseokCarryGame({ color, onComplete, lives: maxLives = 3 }) {
   const [phase, setPhase] = useState('ready');
   const [, force] = useState(0);
   const newTarget = () => rand(110, 190);
-  const fresh = () => { const tx = newTarget(); return { t: 0, st: 0, kx: tx, ky: 318, sx: tx, th: 0, w: 0, fx: null, tx, walking: true, drop: 0, dropX: 0, fell: 0, lives: maxLives, note: i18nT('비석이 기우는 쪽으로 손가락을 옮겨 받쳐요'), start: Date.now(), done: false, keys: {} }; };
+  const fresh = () => { const tx = newTarget(); return { t: 0, st: 0, kx: tx, ky: 336, sx: tx, th: 0, w: 0, fx: null, tx, walking: true, drop: 0, dropX: 0, fell: 0, lives: maxLives, note: i18nT('비석이 기우는 쪽으로 손가락을 옮겨 받쳐요'), start: Date.now(), done: false, keys: {} }; };
   const g = useRef(fresh());
-  const reset = (q) => { q.ky = 318; q.th = 0; q.w = 0; q.kx = q.tx; q.sx = q.tx; q.walking = true; q.drop = 0; };
+  const reset = (q) => { q.ky = 336; q.th = 0; q.w = 0; q.kx = q.tx; q.sx = q.tx; q.walking = true; q.drop = 0; };
   const fail = (why) => {
     const q = g.current;
     q.lives -= 1;
@@ -104,8 +104,8 @@ export function BiseokCarryGame({ color, onComplete, lives: maxLives = 3 }) {
     q.th = clamp(rel / 22, -1, 1) * 0.62;
     if (Math.abs(rel) > 22) { fail(i18nT('비석이 떨어졌어요! 기우는 쪽으로 몸을 옮겨 받쳐요')); return; }
     if (q.walking) {
-      q.ky -= 34 * dt;
-      if (q.ky <= 200) { q.walking = false; q.note = i18nT('비석 위에 왔어요! 상대 비석 위에서 톡 눌러 떨어뜨려요'); }
+      q.ky -= 26 * dt;
+      if (q.ky <= 252) { q.walking = false; q.note = i18nT('비석 위에 왔어요! 상대 비석 위에서 톡 눌러 떨어뜨려요'); }
     }
     if (q.drop > 0) {
       q.drop -= dt * 2.2;
@@ -141,33 +141,22 @@ export function BiseokCarryGame({ color, onComplete, lives: maxLives = 3 }) {
               <Circle cx={22 + i * 22} cy={18} r={7} fill={i < q.st ? '#3f7a52' : i === q.st ? color : '#d8cfbe'} />
             </G>
           ))}
-          <Line x1={0} y1={160} x2={STAGE_W} y2={160} stroke="#b8a888" strokeWidth={1} strokeDasharray="5 5" />
-          {/* 상대 비석 */}
-          <Rect x={q.tx - 9} y={112} width={18} height={30} rx={3} fill="#8d8476" stroke={INK} strokeWidth={1.2} />
-          <Ellipse cx={q.tx} cy={144} rx={14} ry={3} fill="rgba(0,0,0,0.2)" />
-          {/* 내 비석 */}
-          {q.fell > 0 ? (
-            <Rect x={sx - 12} y={q.ky - 6} width={24} height={9} rx={2} fill="#6f675b" />
-          ) : q.drop > 0 ? (
-            <G transform={`translate(${q.dropX} ${sy + (128 - sy) * (1 - q.drop)}) rotate(${(q.th * 180) / Math.PI * q.drop})`}>
-              <Rect x={-12} y={-5} width={24} height={9} rx={2} fill="#6f675b" stroke={INK} strokeWidth={1} />
-            </G>
-          ) : null}
+          <Line x1={0} y1={122} x2={STAGE_W} y2={122} stroke="#b8a888" strokeWidth={1} strokeDasharray="5 5" />
           {/* 기울기 */}
           <Rect x={STAGE_W / 2 - 60} y={STAGE_H - 22} width={120} height={8} rx={4} fill="#d8cfbe" />
           <Circle cx={STAGE_W / 2 + clamp(q.th / 0.62, -1, 1) * 58} cy={STAGE_H - 18} r={6} fill={Math.abs(q.th) > 0.42 ? colors.accent : '#3f7a52'} />
           <Label x={STAGE_W / 2} y={60} s={q.note} size={11} color={INK} weight="700" />
         </Svg>
+        {/* 상대 비석 — 세워 둔 돌(멀리 있어 작게) */}
+        <Sprite art={ART.stone_up} x={q.tx} y={120} h={36} />
         <Sprite art={ART.carry} x={q.kx} y={q.ky} h={KID_H} />
-        {/* 비석은 아이 앞에 보이게 한 번 더(그림 위) */}
-        {q.fell > 0 || q.drop > 0 ? null : (
-          <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H }}>
-            <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
-              <G transform={`translate(${sx} ${sy}) rotate(${(q.th * 180) / Math.PI})`}>
-                <Rect x={-13} y={-5} width={26} height={9} rx={2} fill="#6f675b" stroke={INK} strokeWidth={1} />
-              </G>
-            </Svg>
-          </View>
+        {/* 내 비석 — 몸에 올린 납작한 돌(아이 앞에 보이게 그림 위에) */}
+        {q.fell > 0 ? (
+          <Sprite art={ART.stone_flat} x={sx} y={q.ky + 2} h={12} rot={8} />
+        ) : q.drop > 0 ? (
+          <Sprite art={ART.stone_flat} x={q.dropX} y={sy + 5 + (94 - sy - 5) * (1 - q.drop)} h={13} rot={(q.th * 180) / Math.PI * q.drop} />
+        ) : (
+          <Sprite art={ART.stone_flat} x={sx} y={sy + 5} h={13} rot={(q.th * 180) / Math.PI} />
         )}
       </View>
     </Shell>
@@ -404,16 +393,18 @@ export function PaengiWhipGame({ color, onComplete, holdSec = 30 }) {
         <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
           {/* 얼음판 */}
           <Ellipse cx={150} cy={190} rx={135} ry={120} fill="#eef3f6" stroke="#c4d0d8" strokeWidth={2} />
-          {/* 팽이 */}
-          <G transform={`translate(${q.cx} ${q.cy}) rotate(${wob})`}>
-            <Ellipse cx={0} cy={20} rx={22} ry={5} fill="rgba(0,0,0,0.18)" />
-            <Circle cx={0} cy={0} r={26} fill="#c99a5b" stroke={INK} strokeWidth={1.5} />
-            <G transform={`rotate(${q.ang})`}>
-              {[0, 60, 120, 180, 240, 300].map((a) => (
-                <Path key={a} d={`M0 0 L${Math.cos((a * Math.PI) / 180) * 26} ${Math.sin((a * Math.PI) / 180) * 26}`} stroke={a % 120 === 0 ? colors.accent : '#2b5f8e'} strokeWidth={4} />
-              ))}
-            </G>
-            <Circle cx={0} cy={0} r={5} fill={INK} />
+          {/* 팽이 그림자 */}
+          <Ellipse cx={q.cx} cy={q.cy + 24} rx={24} ry={5} fill="rgba(0,0,0,0.16)" />
+        </Svg>
+        {/* 팽이 — 위에서 본 나무 팽이 그림, 가운데를 축으로 돈다 */}
+        <Spin art={ART.top} x={q.cx + wob * 0.4} y={q.cy} h={56} rot={q.ang} />
+        <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: STAGE_W, height: STAGE_H }}>
+        <Svg width="100%" height="100%" viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}>
+          {/* 도는 것이 보이게 — 팽이 위 먹선 두 줄이 함께 돈다 */}
+          <G transform={`translate(${q.cx + wob * 0.4} ${q.cy}) rotate(${q.ang})`} opacity={0.55}>
+            <Path d="M6 -2 A8 8 0 0 1 -2 -8" stroke={INK} strokeWidth={1.6} fill="none" />
+            <Path d="M-6 2 A8 8 0 0 1 2 8" stroke={INK} strokeWidth={1.6} fill="none" />
+            <Path d="M17 -10 A20 20 0 0 1 4 -19" stroke="#fff" strokeWidth={2} fill="none" opacity={0.7} />
           </G>
           {/* 도는 방향 화살표 */}
           <Path d={q.dir > 0 ? 'M160 70 A40 18 0 0 1 220 70' : 'M220 70 A40 18 0 0 0 160 70'} stroke={colors.accent} strokeWidth={3} fill="none" />
@@ -426,6 +417,7 @@ export function PaengiWhipGame({ color, onComplete, holdSec = 30 }) {
           <Label x={75} y={44} s={q.spin < 0.45 ? i18nT('휘청 — 지금 쳐요!') : i18nT('도는 힘')} size={10} color={q.spin < 0.45 ? colors.accent : '#5f574c'} weight="700" />
           <Label x={150} y={STAGE_H - 12} s={q.note} size={11.5} color={INK} weight="700" />
         </Svg>
+        </View>
       </View>
     </Shell>
   );
@@ -493,6 +485,8 @@ export function KiteReelGame({ color, onComplete, lives: maxLives = 3 }) {
   const kx = 150 + Math.sin(q.t * 1.3) * 18;
   const ky = 300 - q.alt * 250;
   const gusty = q.gust > 0;
+  // 연줄은 아이가 쥔 얼레에서 나간다
+  const [rlx, rly] = artPt(ART.kitekid, 36, STAGE_H - 4, 96, 0.88, 0.4);
   return (
     <Shell color={color} phase={phase} onStart={start} hud={q.fight ? i18nT('연싸움!') : i18nT('높이 {a}%', { a: Math.round(q.alt * 100) })} hint="">
       <View ref={pad.ref} {...pad.handlers} style={[S.stage, { backgroundColor: '#cfe3ef' }]} testID="kite-reel">
@@ -509,7 +503,7 @@ export function KiteReelGame({ color, onComplete, lives: maxLives = 3 }) {
           {/* 내 연과 줄 — 팽팽할수록 곧게 */}
           {q.snapT > 0 ? null : (
             <G>
-              <Path d={`M52 282 Q${(52 + kx) / 2 + (1 - q.ten) * 40} ${(282 + ky) / 2 + (1 - q.ten) * 60} ${kx} ${ky}`} stroke={q.ten > 0.8 ? colors.accent : '#5f574c'} strokeWidth={q.ten > 0.8 ? 2 : 1.2} fill="none" />
+              <Path d={`M${rlx} ${rly} Q${(rlx + kx) / 2 + (1 - q.ten) * 40} ${(rly + ky) / 2 + (1 - q.ten) * 60} ${kx} ${ky}`} stroke={q.ten > 0.8 ? colors.accent : '#5f574c'} strokeWidth={q.ten > 0.8 ? 2 : 1.2} fill="none" />
             </G>
           )}
 
@@ -521,7 +515,7 @@ export function KiteReelGame({ color, onComplete, lives: maxLives = 3 }) {
         </Svg>
         {q.snapT > 0 ? null : <Sprite art={ART.kite_obj} x={kx} y={ky + 30} h={62} rot={Math.sin(q.t * 2.1) * 6} />}
         {q.fight ? <Sprite art={ART.kite_obj} x={q.ox} y={98} h={46} rot={Math.sin(q.t * 1.7) * 8} opacity={0.9} /> : null}
-        <Sprite art={ART.kitekid} x={34} y={STAGE_H - 4} h={96} />
+        <Sprite art={ART.kitekid} x={36} y={STAGE_H - 4} h={96} />
       </View>
     </Shell>
   );

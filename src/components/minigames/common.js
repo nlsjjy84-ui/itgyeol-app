@@ -86,6 +86,26 @@ export function Sprite({ art, x, y, h, flip = false, rot = 0, opacity = 1, ancho
   );
 }
 
+// 가운데를 축으로 도는 그림(팽이·구슬·딱지처럼 위에서 본 물건)
+export function Spin({ art, x, y, h, rot = 0, opacity = 1, sx = 1 }) {
+  if (!art) return null;
+  const w = (h * art.w) / art.h;
+  return (
+    <Image
+      source={art.src}
+      pointerEvents="none"
+      resizeMode="contain"
+      style={{ position: 'absolute', left: x - w / 2, top: y - h / 2, width: w, height: h, opacity, transform: [{ rotate: rot + 'deg' }, { scaleX: sx }] }}
+    />
+  );
+}
+
+// 그림 안의 한 점(fx, fy: 그림 너비·높이 비율)이 무대에서 어디인지 — 손에 줄·채를 이어 붙일 때 쓴다
+export function artPt(art, x, y, h, fx, fy, flip = false) {
+  const w = (h * art.w) / art.h;
+  return [x + (fx - 0.5) * w * (flip ? -1 : 1), y - h + fy * h];
+}
+
 export const STAGE_W = 300;
 export const STAGE_H = 340;
 

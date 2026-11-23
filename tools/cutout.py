@@ -10,7 +10,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 
-def cutout(src, dst, max_side=900):
+def cutout(src, dst, max_side=900, holes=0):
     im = Image.open(src).convert('RGB')
     a = np.asarray(im).astype(np.int16)
     h, w, _ = a.shape
@@ -37,6 +37,15 @@ def cutout(src, dst, max_side=900):
             if 0 <= ny < h and 0 <= nx < w and cand[ny, nx] and not bg[ny, nx]:
                 bg[ny, nx] = True
                 q.append((ny, nx))
+    if holes:
+        # 굴렁쇠 테 안쪽처럼 가장자리와 이어지지 않은 큰 흰 덩어리도 배경으로 본다
+        from scipy import ndimage
+        lab, n = ndimage.label(cand & ~bg)
+        if n:
+            sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+            for i, sz in enumerate(sizes, 1):
+                if sz >= holes:
+                    bg |= lab == i
     alpha = np.where(bg, 0, 255).astype(np.uint8)
     am = Image.fromarray(alpha).filter(ImageFilter.GaussianBlur(0.9))
     # 경계의 흰 테두리(헤일로)를 줄이려고, 반투명 칸은 색을 조금 어둡게 당긴다
@@ -55,4 +64,4 @@ def cutout(src, dst, max_side=900):
 
 
 if __name__ == '__main__':
-    print(cutout(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 900))
+    print(cutout(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 900, int(sys.argv[4]) if len(sys.argv) > 4 else 0))
